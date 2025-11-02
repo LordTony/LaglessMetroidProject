@@ -1,13 +1,13 @@
 # Lagless Metroid Project
 
-Inspired by the metroid analysis videos done by Displaced Gamers:
+Inspired by the Metroid analysis videos done by Displaced Gamers:
 * https://www.youtube.com/watch?v=3G6vkRz-_0I
 * https://www.youtube.com/watch?v=1oCE-hYT3LY
 
-Code based on the metroid dissassembly archived by nmikstas:
+Code based on the Metroid dissassembly archived by nmikstas:
 * https://github.com/nmikstas/metroid-disassembly
 
-The idea here is to attempt to take the metroid lag as low as possible without adding more rom banks or changing the mapper chip.
+The idea here is to attempt to take the Metroid lag as low as possible without adding more rom banks or changing the mapper chip.
 
 ## Problem Areas
 * The main problem area is the map generation which causes 1 to 3 lag frame spikes while preparing the game
@@ -17,7 +17,7 @@ The idea here is to attempt to take the metroid lag as low as possible without a
 * Collision detection code in general eats lots of cycles as well. 
 
 ## Current Progress
-* The baseline benchmark of Samus standing still in the opening room finishes all frame work in about 82% of the time the standard metroid code does.
+* The baseline benchmark of Samus standing still in the opening room finishes all frame work in about 82% of the time the standard Metroid code does.
 * ChooseRoutine has been reworked to just inline JMP and JSR instructions in maybe 40% of the places saving lots of cycles
 * Most of the Xminus16 and YPlus16 have been inlined in bank07. There are still calls everywhere in Bank00 - Bank07
 
@@ -47,7 +47,9 @@ The idea here is to attempt to take the metroid lag as low as possible without a
 The original dissassembly built each of the banks 1 at a time and glued them all together to get the final rom.
 In this project I have painstakingly reworked it to build with the following Ophis command:
 
+```
 ../Ophis/ophis.exe ./build.asm ../assembled_metroid.nes
+```
 
 That command must be run from within the ./Source_Files folder.
 
