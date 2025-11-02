@@ -6806,16 +6806,16 @@ LEAC9:* rts             ;
 EndOfObjs:
 LEACA:  lda RoomPtr         ;
 LEACC:  sta $00             ;Store room pointer in $0000.
-LEACE:  lda RoomPtr+1           ;
+LEACE:  lda RoomPtr+1       ;
 LEAD0:  sta $01             ;
 LEAD2:  lda #$01            ;Prepare to increment to enemy/door data.
 
 EnemyLoop:
-LEAD4:  jsr AddToPtr00          ;($EF09)Add A to pointer at $0000.
+LEAD4:  jsr AddToPtr00      ;($EF09)Add A to pointer at $0000.
 LEAD7:  ldy #$00            ;
 LEAD9:  lda ($00),y         ;Get first byte of enemy/door data.
 LEADB:  cmp #$FF            ;End of enemy/door data?
-LEADD:  beq EndOfRoom           ;If so, branch to finish room setup.
+LEADD:  beq EndOfRoom       ;If so, branch to finish room setup.
 LEADF:  and #$0F            ;Discard upper four bits of data.
 
 ;Choose Routine
@@ -7309,21 +7309,41 @@ LEDD6:  jsr AddToPtr00          ;($EF09)Add A to pointer at $0000.
 LEDD9:  ldy #$00                ;
 LEDDB:  lda ($00),y             ;Object type
 LEDDD:  and #$0F                ;Object handling routine index stored in 4 LSBs.
-LEDDF:  jsr ChooseRoutine       ;($C27C)Load proper handling routine from table below.
+
+        tax
+        lda ChooseHandlerRoutineTable_LoBytes, x
+        sta CodePtr
+        lda ChooseHandlerRoutineTable_HiBytes, x
+        sta CodePtr + 1
+        jmp (CodePtr)
 
 ;Handler routines jumped to by above code.
 
-LEDE2:  .word ExitSub           ;($C45C)rts.
-LEDE4:  .word SqueeptHandler        ;($EDF8)Some squeepts.
-LEDE6:  .word PowerUpHandler        ;($EDFE)power-ups.
-LEDE8:  .word SpecEnemyHandler      ;($EE63)Special enemies(Mellows, Melias and Memus).
-LEDEA:  .word ElevatorHandler       ;($EEA1)Elevators.
-LEDEC:  .word CannonHandler     ;($EEA6)Mother brain room cannons.
-LEDEE:  .word MotherBrainHandler    ;($EEAE)Mother brain.
-LEDF0:  .word ZeebetiteHandler      ;($EECA)Zeebetites.
-LEDF2:  .word RinkaHandler      ;($EEEE)Rinkas.
-LEDF4:  .word SpecialDoorHandler       ;($EEF4)Some doors.
-LEDF6:  .word PaletteHandler        ;($EEFA)Background palette change.
+ChooseHandlerRoutineTable_HiBytes:
+    .byte >ExitSub           ;($C45C)rts.
+    .byte >SqueeptHandler        ;($EDF8)Some squeepts.
+    .byte >PowerUpHandler        ;($EDFE)power-ups.
+    .byte >SpecEnemyHandler      ;($EE63)Special enemies(Mellows, Melias and Memus).
+    .byte >ElevatorHandler       ;($EEA1)Elevators.
+    .byte >CannonHandler     ;($EEA6)Mother brain room cannons.
+    .byte >MotherBrainHandler    ;($EEAE)Mother brain.
+    .byte >ZeebetiteHandler      ;($EECA)Zeebetites.
+    .byte >RinkaHandler      ;($EEEE)Rinkas.
+    .byte >SpecialDoorHandler       ;($EEF4)Some doors.
+    .byte >PaletteHandler        ;($EEFA)Background palette change.
+
+ChooseHandlerRoutineTable_LoBytes:
+    .byte <ExitSub           ;($C45C)rts.
+    .byte <SqueeptHandler        ;($EDF8)Some squeepts.
+    .byte <PowerUpHandler        ;($EDFE)power-ups.
+    .byte <SpecEnemyHandler      ;($EE63)Special enemies(Mellows, Melias and Memus).
+    .byte <ElevatorHandler       ;($EEA1)Elevators.
+    .byte <CannonHandler     ;($EEA6)Mother brain room cannons.
+    .byte <MotherBrainHandler    ;($EEAE)Mother brain.
+    .byte <ZeebetiteHandler      ;($EECA)Zeebetites.
+    .byte <RinkaHandler      ;($EEEE)Rinkas.
+    .byte <SpecialDoorHandler       ;($EEF4)Some doors.
+    .byte <PaletteHandler        ;($EEFA)Background palette change.
 
 ;---------------------------------------[ Squeept handler ]------------------------------------------
 
@@ -8262,7 +8282,9 @@ LF42D:  ldx PageIndex
     sta $040E,x
     rts
 
-StartUpdateEnemyAnimation_2:  jsr UpdateEnemyAnim
+; This one is called from Bank01 - Bank05
+StartUpdateEnemyAnimation_2:  
+    jsr UpdateEnemyAnim
 LF43B:  jmp Start_Special_Attrs
 
 LF43E:  jsr LF536
@@ -8911,18 +8933,28 @@ LF949:  stx PageIndex
     and #$02
     bne +
     jsr KillObject          ;($FA18)Free enemy data slot.
-*   lda EnStatus,x
+*   ldy EnStatus,x
     beq Exit19
-    jsr ChooseRoutine
+
+    lda UpdateTilesTable_LoBytes - 1, y
+    sta CodePtr
+    lda UpdateTilesTable_HiBytes - 1, y
+    sta CodePtr + 1
+    jmp (CodePtr)
 
 ; Pointer table to code
-
-    .word ExitSub     ;($C45C) rts
-    .word LF96A
-    .word LF991       ; spit dragon's fireball
-    .word ExitSub     ;($C45C) rts
-    .word LFA6B
-    .word LFA91
+LF949_HiBytes:
+    .byte >LF96A
+    .byte >LF991       ; spit dragon's fireball
+    .byte >ExitSub     ;($C45C) rts
+    .byte >LFA6B
+    .byte >LFA91
+LF949_LoBytes:
+    .byte <LF96A
+    .byte <LF991       ; spit dragon's fireball
+    .byte <ExitSub     ;($C45C) rts
+    .byte <LFA6B
+    .byte <LFA91
 
 Exit19: rts
 
@@ -9063,7 +9095,7 @@ LFA7D:  ldx PageIndex
     jmp MakeCartRAMPtr      ;($E96A)Find enemy position in room RAM.
 
 LFA91:  jsr KillObject          ;($FA18)Free enemy data slot.
-    lda $95DC
+    lda $95DC           ;TODO - Link this up symbolically
     jsr DoSomethingToAnimationIndecies
     jmp LF97C
 

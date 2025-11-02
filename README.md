@@ -39,8 +39,8 @@ The idea here is to attempt to take the Metroid lag as low as possible without a
 * Bank05 - Ridley Hideout
 * Bank06 - Graphics
 * Bank07 - Game Engine (This is where a bulk of the optimization would need to happen)
-* Sound_Engine_Common_1 - The start of the sound engine code that is the same in Bank00 - Bank06
-* Sound_Engine_Common_2 - This end of the sound engine code that is the same in Bank00 - Bank06
+* Sound_Engine_Common_1 - The start of the sound engine code that is the same in Bank00 - Bank05
+* Sound_Engine_Common_2 - This end of the sound engine code that is the same in Bank00 - Bank05
 
 ## Building the code
 
@@ -58,7 +58,7 @@ The labels in Bank07 are the source of truth. For areas of code that Bank07 need
 
 I am inlining as much code as I can because a JSR + RTS ends up being 12 extra cycles every time. This seems to be working.
 
-There are a good number of code caves in bank Bank01 - Bank06. The thought its that some of the code from the original Famicom Disk system stuck around and isn't called anywhere. I am using some of those caves to move code out of Bank07 and free up bytes that can used to inline more code and maybe add some tables that might help for some of the math operations.
+There are a good number of code caves in bank Bank01 - Bank05. The thought its that some of the code from the original Famicom Disk system stuck around and isn't called anywhere. I am using some of those caves to move code out of Bank07 and free up bytes that can used to inline more code and maybe add some tables that might help for some of the math operations.
 
 Using these sites a lot:
 * http://www.6502.org/users/obelisk/6502/instructions.html
