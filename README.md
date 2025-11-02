@@ -19,7 +19,7 @@ The idea here is to attempt to take the Metroid lag as low as possible without a
 ## Current Progress
 * The baseline benchmark of Samus standing still in the opening room finishes all frame work in about 82% of the time the standard Metroid code does.
 * ChooseRoutine has been reworked to just inline JMP and JSR instructions in maybe 40% of the places saving lots of cycles
-* Most of the Xminus16 and YPlus16 have been inlined in bank07. There are still calls everywhere in Bank00 - Bank07
+* All of the Xminus16 and YPlus16 have been inlined and the original routines have been removed
 
 ## Folder Structure
 
