@@ -5131,10 +5131,10 @@ LE0C1:  ldy #$00            ;Reset data index.
 LE0C3:  lda SpritePagePos       ;Load current sprite index.
 LE0C5:  pha             ;save sprite page pos.
 LE0C6:  tax             ;
-LE0C7:* lda DataDisplayTbl,y        ;
-LE0CA:  sta SpriteRAM,x       ;Stor contents of DataDisplayTbl in sprite RAM.
-LE0CD:  inx             ;
-LE0CE:  iny             ;
+LE0C7:* lda DataDisplayTbl,y  ;
+LE0CA:  sta SpriteRAM,x       ;Store contents of DataDisplayTbl in sprite RAM.
+LE0CD:  inx                   ;
+LE0CE:  iny                     ;
 LE0CF:  cpy #$28            ;10*4. At end of DataDisplayTbl? If not, loop to
 LE0D1:  bne -               ;load next byte from table.
 
@@ -5160,13 +5160,32 @@ LE0F1:  beq +               ;Don't show missile count if Samus has no missile co
 
 ;Display 3-digit missile count.
 LE0F3:  lda MissileCount        ;
-LE0F6:  jsr HexToDec            ;($E198)Convert missile hex count to decimal cout.
-LE0F9:  lda $02             ;Upper digit.
-LE0FB:  jsr SPRWriteDigit       ;($E173)Display digit on screen.
-LE0FE:  lda $01             ;Middle digit.
-LE100:  jsr SPRWriteDigit       ;($E173)Display digit on screen.
-LE103:  lda $00             ;Lower digit.
-LE105:  jsr SPRWriteDigit       ;($E173)Display digit on screen.
+
+;------------------------------------[ Convert hex to decimal ]--------------------------------------
+;Convert 8-bit value in A to 3 decimal digits. Upper digit put in $02, middle in $01 and lower in $00.
+
+;; TODO - Get some missiles and test this out
+;; I think the password screen is broken
+DisplayHexAsDigits:
+    ldy #100          ;Find upper digit.
+    sty $0A             ;
+    jsr GetDigit        ;($E1AD)Extract hundreds digit.
+    tya
+    jsr SPRWriteDigit       ;($E173)Display digit on screen.
+    ldy #10             ;Find middle digit.
+    sty $0A             ;
+    jsr GetDigit            ;($E1AD)Extract tens digit.
+    sty $01             ;Store middle digit in $01.
+    jsr SPRWriteDigit   ; accumultaor has the low digit at this point
+    lda $01             
+    jsr SPRWriteDigit
+
+;LE0F9:  lda $02             ;Upper digit.
+;LE0FB:  jsr SPRWriteDigit       ;($E173)Display digit on screen.
+;LE0FE:  lda $01             ;Middle digit.
+;LE100:  jsr SPRWriteDigit       ;($E173)Display digit on screen.
+;LE103:  lda $00             ;Lower digit.
+;LE105:  jsr SPRWriteDigit       ;($E173)Display digit on screen.
 LE108:  bne +++             ;Branch always.
 
 ;Samus has no missiles, erase missile sprite.
@@ -5226,7 +5245,25 @@ LE161:  bne AddTanks            ;Branch if at least 1 tank is full.
 LE163:  dey             ;Else switch to "empty energy tank" tile.
 
 AddTanks:
-LE164:  jsr AddOneTank          ;($E17B)Add energy tank to display.
+;----------------------------------[ Add energy tank to display ]------------------------------------
+
+    AddOneTank:
+    LE17B:  lda #$17            ;Y coord-1.
+    LE17D:  sta SpriteRAM,x       ;
+    LE180:  tya                 ;Tile value.
+    LE181:  sta SpriteRAM+1,x     ;
+    LE184:  lda #$01            ;Palette #.
+    LE186:  sta SpriteRAM+2,x     ;
+    LE189:  lda $00             ;X coord.
+    LE18B:  sta SpriteRAM+3,x     ;
+    LE18E:  sec                 ;
+    LE18F:  sbc #$0A            ;Find x coord of next energy tank.
+    LE191:  sta $00             ;
+            inx                  ;
+            inx                  ;
+            inx                  ;Add 4 to value stored in X.
+            inx                  ;
+
 LE167:  dec $01             ;Any more full energy tanks left?
 LE169:  bne +               ;If so, then branch.
 LE16B:  dey             ;Otherwise, switch to "empty energy tank" tile.
@@ -5244,24 +5281,6 @@ LE172:* rts             ;
 SPRWriteDigit:
 LE173:  ora #$A0            ;#$A0 is index into pattern table for numbers.
 LE175:  sta SpriteRAM+1,x     ;Store proper nametable pattern in sprite RAM.
-LE178:  jmp Xplus4          ;Find next sprite pattern table byte.
-
-;----------------------------------[ Add energy tank to display ]------------------------------------
-
-;Add energy tank to Samus' data display.
-
-AddOneTank:
-LE17B:  lda #$17            ;Y coord-1.
-LE17D:  sta SpriteRAM,x       ;
-LE180:  tya             ;Tile value.
-LE181:  sta SpriteRAM+1,x     ;
-LE184:  lda #$01            ;Palette #.
-LE186:  sta SpriteRAM+2,x     ;
-LE189:  lda $00             ;X coord.
-LE18B:  sta SpriteRAM+3,x     ;
-LE18E:  sec             ;
-LE18F:  sbc #$0A            ;Find x coord of next energy tank.
-LE191:  sta $00             ;
 
 ;-----------------------------------------[ Add 4 to x ]---------------------------------------------
 
@@ -5271,22 +5290,6 @@ LE194:  inx             ;
 LE195:  inx             ;Add 4 to value stored in X.
 LE196:  inx             ;
 LE197:  rts             ;
-
-;------------------------------------[ Convert hex to decimal ]--------------------------------------
-
-;Convert 8-bit value in A to 3 decimal digits. Upper digit put in $02, middle in $01 and lower in $00.
-
-HexToDec:
-LE198:  ldy #100            ;Find upper digit.
-LE19A:  sty $0A             ;
-LE19C:  jsr GetDigit            ;($E1AD)Extract hundreds digit.
-LE19F:  sty $02             ;Store upper digit in $02.
-LE1A1:  ldy #10             ;Find middle digit.
-LE1A3:  sty $0A             ;
-LE1A5:  jsr GetDigit            ;($E1AD)Extract tens digit.
-LE1A8:  sty $01             ;Store middle digit in $01.
-LE1AA:  sta $00             ;Store lower digit in $00
-LE1AC:  rts             ;
 
 GetDigit:
 LE1AD:  ldy #$00            ;
