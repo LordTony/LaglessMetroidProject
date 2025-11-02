@@ -1,3 +1,5 @@
 *.nes
 *.deb
 *.bin
+*Mesen*
+.vscode/**/*

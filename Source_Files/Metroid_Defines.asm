@@ -29,8 +29,19 @@
 .alias PPUSrcPtrUB      $03     ;PPU write source pointer, upper byte.
 
 .alias CodePtr          $0C     ;Pointer to an indirect function call.
-.alias CodePtrUB        $0C     ;Pointer to an indirect function call, lower byte.
-.alias CodePtrLB        $0D     ;Pointer to an indirect function call, upper byte.
+.alias CodePtrLB        $0C     ;Pointer to an indirect function call, lower byte.
+.alias CodePtrUB        $0D     ;Pointer to an indirect function call, upper byte.
+
+.alias TempPtr          $CB     ;Used in ChooseRoutine
+.alias TempPtrLB        $CB     
+.alias TempPtrUB        $CC 
+
+.alias ScreenYPos       $10
+.alias ScreenXPos       $0E
+.alias RoomYPos         $0A
+.alias RoomXPos         $0B
+
+.alias MacroTileIndex   $11
 
 .alias Joy1Change       $12     ;Button changes since last frame, pad 1.
 .alias Joy2Change       $13     ;Button changes since last frame, pad 2.
@@ -834,6 +845,28 @@
 .alias IntroSpr7YRise   $6F1D   ;y displacement of sprite movement(rise).
 .alias IntroSpr7XDir    $6F1E   ;MSB set=decrease sprite x pos, else increase sprite  x pos.
 .alias IntroSpr7YDir    $6F1F   ;MSB set=decrease sprite y pos, else increase sprite  y pos.
+
+;---------------------------------- [ Constant Locations in Swap Banks ] -----------------------------
+
+.alias SoundEngineOrg           $B200
+.alias SoundEngineEntryPoint    $B3B4
+.alias ObjectAnimIdxTbl         $8572
+.alias FramePtrTable            $860B
+.alias PlacePtrTable            $86DF
+.alias SamusEnterDoor           $8B13
+.alias GFXMetroidTitle          $8BE0
+.alias PalPntrTbl               $9560
+.alias SpecItmsTblPtr           $9598
+.alias AreaPointers             $9598
+.alias AreaRoutine              $95C3
+.alias EnemyHitPointTbl         $962B
+.alias EnemyInitDelayTbl        $96BB
+.alias DecSpriteYCoord          $988A
+.alias NMIScreenWrite           $9A07
+.alias EndGamePalWrite          $9F54
+.alias SpecItmsTable            $9598
+.alias CopyMap                  $A93E
+.alias DoorHandler              $8B79
 
 ;----------------------------------------------------------------------------------------------------
 
