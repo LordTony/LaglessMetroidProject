@@ -7946,22 +7946,6 @@ LF1D2:
     rts
 ; Y = Y + 16
 
-Yplus16:
-    tya
-    clc
-    adc #$10
-    tay
-    rts
-
-; X = X - 16
-
-Xminus16:
-    txa
-    sec
-    sbc #$10
-    tax
-    rts
-
 LF1FA:  lda #$02
     sta $10
     and ScrollDir
@@ -9568,11 +9552,12 @@ UpdateTiles:
 DoOneTile:
     stx PageIndex
     ldy TileRoutine,x
-    beq UpdateTilesTable  ; UpdateTilesTable[0] is $60 or RTS
-    lda #$FE
-    pha
-    lda UpdateTilesTable,y
-    pha
+    beq Exit28  ; UpdateTilesTable[0] is $60 or RTS
+    lda UpdateTilesTable_LoBytes - 1, y
+    sta CodePtr
+    lda UpdateTilesTable_HiBytes - 1, y
+    sta CodePtr + 1
+    jmp (CodePtr)
 
 ; Replace this table
 ;    .word ExitSub
@@ -9581,10 +9566,11 @@ DoOneTile:
 ;    .word $FE59
 ;    .word $FE54
 ;    .word $FE83
-UpdateTilesTable:
-.byte $60, $3C, $53, $58, $53, $82 ;Using a really dirty trick which requires setting address 1 lower
+UpdateTilesTable_HiBytes:
+    .byte >LFE3D, >LFE54, >LFE59, >LFE54, >LFE83
+UpdateTilesTable_LoBytes:
+    .byte <LFE3D, <LFE54, <LFE59, <LFE54, <LFE83
 
-.advance $FE3D
 LFE3D:  inc TileRoutine,x
     lda #$00
     jsr SetTileAnim
@@ -9611,6 +9597,7 @@ LFE59:  lda FrameCount
     sta $0505,x
     lda #$00
     sta TileAnimDelay,x
+Exit28:
 *   rts
 
 ; Table used for indexing the animations in TileBlastAnim (see below)
