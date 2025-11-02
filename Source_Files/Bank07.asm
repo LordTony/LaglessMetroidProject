@@ -208,7 +208,21 @@ LC0ED:  LDA GameMode            ;
 LC0EF:  BEQ +                   ;Branch if mode=Play.
 LC0F1:  JSR NMIScreenWrite      ;($9A07)Write end message on screen(If appropriate).
 LC0F4:* JSR CheckPalWrite       ;($C1E0)Check if palette data pending.
-LC0F7:  JSR CheckPPUWrite       ;($C2CA)check if data needs to be written to PPU.
+
+CheckPPUWrite:
+LC2CA:  LDA PPUDataPending      ;
+LC2CC:  BEQ AfterCheckPPUWrite  ;If zero no PPU data to write, branch to exit.
+LC2CE:  LDA #$A1                ;           
+LC2D0:  STA $00                 ;Sets up PPU writer to start at address $07A1.
+LC2D2:  LDA #$07                ;
+LC2D4:  STA $01                 ;$0000 = ptr to PPU data string ($07A1).
+LC2D6:  JSR ProcessPPUStr       ;($C30C)write it to PPU.
+LC2D9:  LDA #$00                ;
+LC2DB:  STA PPUStrIndex         ;PPU data string has been written so the data
+LC2DE:  STA PPUDataString       ;stored for the write is now erased.
+LC2E1:  STA PPUDataPending      ;
+
+AfterCheckPPUWrite:
 LC0FA:  JSR WritePPUCtrl        ;($C44D)Update $2000 & $2001.
 LC0FD:  JSR WriteScroll         ;($C29A)Update h/v scroll reg.
 LC100:  JSR ReadJoyPads         ;($C215)Read both joypads.
@@ -416,49 +430,51 @@ LC212:  JMP ProcessPPUStr       ;($C30C)Write data string to PPU.
 ReadJoyPads:
 LC215:  LDX #$00                ;Load x with #$00. Used to read status of joypad 1.
 LC217:  STX $01                 ;
+LC219:  JSR ReadOnePad          ;
+LC21C:  INX                     ;Load x with #$01. Used to read status of joypad 2.
+LC21D:  INC $01                 ;
 
 ReadOnePad:
-     LDY #$01                ;These lines strobe the        
-     STY CPUJoyPad1          ;joystick to enable the 
-     DEY                     ;program to read the 
-     STY CPUJoyPad1          ;buttons pressed.
-     LDY #$08                ;Do 8 buttons.
-    ;loop
-    *   PHA                     ;Store A.
-        LDA CPUJoyPad1,x        ;Read button status. Joypad 1 or 2.
-        STA $00                 ;Store button press at location $00.
-        LSR                     ;Move button push to carry bit.
-        ORA $00                 ;If joystick not connected, 
-        LSR                     ;fills Joy1Status with all 1s.
-        PLA                     ;Restore A.
-        ROL                     ;Add button press status to A.
-        DEY                     ;Loop 8 times to get 
-        BNE -                   ;status of all 8 buttons.
-     LDX $01                 ;Joypad #(0 or 1).
-     LDY Joy1Status,x        ;Get joypad status of previous refresh.
-     STY $00                 ;Store at $00.
-     STA Joy1Status,x        ;Store current joypad status.
-     EOR $00                 ;
-     BEQ +                   ;Branch if no buttons changed.
-     LDA $00                 ;           
-     AND #$BF                ;Remove the previous status of the B button.
-     STA $00                 ;
-     EOR Joy1Status,x        ;
-*    AND Joy1Status,x        ;Save any button changes from the current frame
-     STA Joy1Change,x        ;and the last frame to the joy change addresses.
-     STA Joy1Retrig,x        ;Store any changed buttons in JoyRetrig address.
-     LDY #$20                ;
-     LDA Joy1Status,x        ;Checks to see if same buttons are being
-     CMP $00                 ;pressed this frame as last frame.
-     BNE +                   ;If none, branch.
-     DEC RetrigDelay1,x      ;Decrement RetrigDelay if same buttons pressed.
-     BNE ++                  ;       
-     STA Joy1Retrig,x        ;Once RetrigDelay=#$00, store buttons to retrigger.
-     LDY #$08                ;
-*    STY RetrigDelay1,x      ;Reset retrigger delay to #$20(32 frames)
-*    RTS                     ;or #$08(8 frames) if already retriggering.
-*    INX                     ;Load x with #$01. Used to read status of joypad 2.
-     INC $01                 ;
+LC21F:  LDY #$01                ;These lines strobe the        
+LC221:  STY CPUJoyPad1          ;joystick to enable the 
+LC224:  DEY                     ;program to read the 
+LC225:  STY CPUJoyPad1          ;buttons pressed.
+    
+LC228:  LDY #$08                ;Do 8 buttons.
+LC22A:* PHA                     ;Store A.
+LC22B:  LDA CPUJoyPad1,x        ;Read button status. Joypad 1 or 2.
+LC22E:  STA $00                 ;Store button press at location $00.
+LC230:  LSR                     ;Move button push to carry bit.
+LC231:  ORA $00                 ;If joystick not connected, 
+LC233:  LSR                     ;fills Joy1Status with all 1s.
+LC234:  PLA                     ;Restore A.
+LC235:  ROL                     ;Add button press status to A.
+LC236:  DEY                     ;Loop 8 times to get 
+LC237:  BNE -                   ;status of all 8 buttons.
+
+LC239:  LDX $01                 ;Joypad #(0 or 1).
+LC23B:  LDY Joy1Status,x        ;Get joypad status of previous refresh.
+LC23D:  STY $00                 ;Store at $00.
+LC23F:  STA Joy1Status,x        ;Store current joypad status.
+LC241:  EOR $00                 ;
+LC243:  BEQ +                   ;Branch if no buttons changed.
+LC245:  LDA $00                 ;           
+LC247:  AND #$BF                ;Remove the previous status of the B button.
+LC249:  STA $00                 ;
+LC24B:  EOR Joy1Status,x        ;
+LC24D:* AND Joy1Status,x        ;Save any button changes from the current frame
+LC24F:  STA Joy1Change,x        ;and the last frame to the joy change addresses.
+LC251:  STA Joy1Retrig,x        ;Store any changed buttons in JoyRetrig address.
+LC253:  LDY #$20                ;
+LC255:  LDA Joy1Status,x        ;Checks to see if same buttons are being
+LC257:  CMP $00                 ;pressed this frame as last frame.
+LC259:  BNE +                   ;If none, branch.
+LC25B:  DEC RetrigDelay1,x      ;Decrement RetrigDelay if same buttons pressed.
+LC25D:  BNE ++                  ;       
+LC25F:  STA Joy1Retrig,x        ;Once RetrigDelay=#$00, store buttons to retrigger.
+LC261:  LDY #$08                ;
+LC263:* STY RetrigDelay1,x      ;Reset retrigger delay to #$20(32 frames)
+LC265:* RTS                     ;or #$08(8 frames) if already retriggering.
 
 ;-----------------------------------------[ Choose routine ]-----------------------------------------
 
@@ -483,16 +499,6 @@ ChooseRoutine:
     STA CodePtr+1
     LDY TempY
     JMP (CodePtr)
-
-;--------------------------------------[ Write to scroll registers ]---------------------------------
-
-WriteScroll:
-LC29A:  LDA PPUStatus           ;Reset scroll register flip/flop
-LC29D:  LDA ScrollX             ;
-LC29F:  STA PPUScroll           ;
-LC2A2:  LDA ScrollY             ;X and Y scroll offsets are loaded serially.
-LC2A4:  STA PPUScroll           ;
-LC2A7:  RTS                     ;
 
 ;----------------------------------[ Add y index to stored addresses ]-------------------------------
 
@@ -549,21 +555,6 @@ LC2C9:  RTS                     ;
 ;Checks if any data is waiting to be written to the PPU.
 ;RLE data is one tile that repeats several times in a row.  RLE-Repeat Last Entry
 
-; TODO can be inlined
-CheckPPUWrite:
-LC2CA:  LDA PPUDataPending      ;
-LC2CC:  BEQ +                   ;If zero no PPU data to write, branch to exit.
-LC2CE:  LDA #$A1                ;           
-LC2D0:  STA $00                 ;Sets up PPU writer to start at address $07A1.
-LC2D2:  LDA #$07                ;
-LC2D4:  STA $01                 ;$0000 = ptr to PPU data string ($07A1).
-LC2D6:  JSR ProcessPPUStr       ;($C30C)write it to PPU.
-LC2D9:  LDA #$00                ;
-LC2DB:  STA PPUStrIndex         ;PPU data string has been written so the data
-LC2DE:  STA PPUDataString       ;stored for the write is now erased.
-LC2E1:  STA PPUDataPending      ;
-LC2E3:* RTS                     ;
-
 PPUWrite:
 LC2E4:  STA PPUAddress          ;Set high PPU address.
 LC2E7:  INY                     ;
@@ -610,7 +601,15 @@ ProcessPPUStr:
     LDY #$00                ;
     LDA ($00),y             ;
     BNE PPUWrite            ;If A is non-zero, PPU data string follows,
-    JMP WriteScroll         ;($C29A)Otherwise we're done.
+
+WriteScroll:                ;  Write to scroll registers
+    LDA PPUStatus           ; Reset scroll register flip/flop
+    LDA ScrollX             ;
+    STA PPUScroll           ;
+    LDA ScrollY             ; X and Y scroll offsets are loaded serially.
+    STA PPUScroll           ;
+    RTS                     ;
+
 
 ;Erase blasted tile on nametable.  Each screen is 16 tiles across and 15 tiles down.
 EraseTile:
@@ -901,9 +900,7 @@ LC4B0:  BNE SetMainRoutine      ;Branch always.
 ;-----------------------------------[ PPU mirroring routines ]---------------------------------------
 
 PrepVertMirror:
-LC4B2:  NOP                     ;
-LC4B3:  NOP                     ;Prepare to set PPU for vertical mirroring (again).
-LC4B4:  LDA #$47                ;
+LC4B4:  LDA #$47                ;Prepare to set PPU for vertical mirroring (again).
 
 SetPPUMirror:
 LC4B6:  LSR                     ;
@@ -2121,13 +2118,12 @@ LCC69:  LDA #sa_Jump            ;
 LCC6B:  STA ObjAction           ;Set Samus status as jumping.
 LCC6E:* LDA #$04                ;Prepare to set animation delay to 4 frames.
 LCC70:  JSR SetSamusData        ;($CD6D)Set Samus control data and animation.
-LCC73:  LDA ObjAction           ;
-LCC76:  CMP #sa_Door            ;Is Samus inside a door, dead or pointing up and jumping?
+LCC73:  LDX ObjAction           ;
+LCC76:  CPX #sa_Door            ;Is Samus inside a door, dead or pointing up and jumping?
 
 ;TODO, can this even reach?
 LCC78:  BCS +                   ;If so, branch to exit.
 
-TAX
 LDA SamusStandTable_LoBytes, x    ; Adding the -1 because SamusStand is already taken care of. Doesn't need to be in the list
 STA CodePtr
 LDA SamusStandTable_HiBytes, x
@@ -3759,21 +3755,19 @@ LD7B0:  jmp MakeCartRAMPtr      ;($E96A)Find object position in room RAM.
 UpdateElevator:
     ldx #$20
     stx PageIndex
-    lda ObjAction,x
-    jsr ChooseRoutine
+    ldy ObjAction,x
+    beq Exit7
 
-; Pointer table to elevator handlers
+    LDA UpdateElevatorTable_LoByte - 1, y
+    STA CodePtr
+    LDA UpdateElevatorTable_HiByte - 1, y
+    STA CodePtr + 1
+    JMP (CodePtr)
 
-    .word ExitSub       ;($C45C) rts
-    .word ElevatorIdle
-    .word LD80E
-    .word ElevatorMove
-    .word ElevatorScroll
-    .word LD8A3
-    .word LD8BF
-    .word LD8A3
-    .word ElevatorMove
-    .word ElevatorStop
+UpdateElevatorTable_HiByte:
+    .byte >ElevatorIdle, >LD80E, >ElevatorMove, >ElevatorScroll, >LD8A3, >LD8BF, >LD8A3, >ElevatorMove, >ElevatorStop
+UpdateElevatorTable_LoByte:
+    .byte <ElevatorIdle, <LD80E, <ElevatorMove, <ElevatorScroll, <LD8A3, <LD8BF, <LD8A3, <ElevatorMove, <ElevatorStop
 
     ElevatorIdle:
     lda SamusOnElevator
@@ -4826,8 +4820,54 @@ LDEE0:  jmp DrawSpriteObject        ;($DF19)Start drawing object.
 LDEE3:* jmp ClearObjectCntrl        ;($DF2D)Clear object control byte then exit.
 
 WriteSpriteRAM:
-LDEE6:* ldy $0F             ;Load index for placement data.
-LDEE8:  jsr YDisplacement       ;($DF6B)Get displacement for y direction.
+LDEE6: ldy $0F             ;Load index for placement data.
+
+YDisplacement:
+LDF6B:  lda ($02),y         ;Load placement data byte.
+LDF6D:  tay             ;
+LDF6E:  and #$F0            ;Check to see if this is placement data for the object
+LDF70:  cmp #$80            ;exploding.  If so, branch.
+LDF72:  beq ++              ;
+LDF74:  tya             ;Restore placement data byte to A.
+LDF75:* bit $04             ;
+LDF77:  bpl AfterYNegativeDisplacement    ;Branch if MSB in $04 is set(Flips object).
+
+NegativeYDisplacement:
+    eor #$FF            ;
+    sec             ;NOTE:Setting carry makes solution 1 higher than expected.
+    adc #$F8            ;If flip bit is set in $04, this function flips the
+
+AfterYNegativeDisplacement:
+LDF79:  clc             ;Clear carry before returning.
+LDF7A:  jmp AfterYDisplacement
+
+ExplodeYDisplace:
+LDF7B:* tya             ;Transfer placement byte back into A.
+LDF7C:  and #$0E            ;Discard bits 7,6,5,4 and 0.
+LDF7E:  lsr             ;/2.
+LDF7F:  tay             ;
+LDF80:  lda ExplodeIndexTbl,y       ;Index into ExplodePlacementTbl.
+LDF83:  ldy IsSamus         ;
+LDF85:  bne +               ;Is Samus the object exploding? if so, branch.
+LDF87:  ldy PageIndex           ;Load index to proper enemy data.
+LDF89:  adc EnCounter,y         ;Increment every frame enemy is exploding. Initial=#$01.
+LDF8C:  jmp ++              ;Jump to load explode placement data.
+
+;Special case for Samus exploding.
+LDF8F:* adc ObjectCounter       ;Increments every frame Samus is exploding. Initial=#$01.
+LDF91:* tay             ;
+LDF92:  lda ExplodeIndexTbl+2,y     ;Get data from ExplodePlacementTbl.
+LDF95:  pha             ;Save data on stack.
+LDF96:  lda $0F             ;Load placement data index.
+LDF98:  clc             ;
+LDF99:  adc #$0C            ;Move index forward by 12 bytes. to find y
+LDF9B:  tay             ;placement data.
+LDF9C:  pla             ;Restore A with ExplodePlacementTbl data.
+LDF9D:  clc             ;
+LDF9E:  adc ($02),y         ;Add table displacements with sprite placement data.
+LDFA0:  jmp ----            ;Branch to add y placement values to sprite coords.
+
+AfterYDisplacement:
 LDEEB:  adc $10             ;Add initial Y position.
 LDEED:  sta SpriteRAM,x       ;Store sprite Y coord.
 LDEF0:  dec SpriteRAM,x       ;Because PPU uses Y + 1 as real Y coord.
@@ -4908,45 +4948,6 @@ LDF68:  jmp DrawSpriteObject        ;($DF19)Draw next sprite.
 
 ;----------------------------------[ Sprite placement routines ]-------------------------------------
 
-YDisplacement:
-LDF6B:  lda ($02),y         ;Load placement data byte.
-LDF6D:  tay             ;
-LDF6E:  and #$F0            ;Check to see if this is placement data for the object
-LDF70:  cmp #$80            ;exploding.  If so, branch.
-LDF72:  beq ++              ;
-LDF74:  tya             ;Restore placement data byte to A.
-LDF75:* bit $04             ;
-LDF77:  bmi NegativeDisplacement    ;Branch if MSB in $04 is set(Flips object).
-LDF79:  clc             ;Clear carry before returning.
-LDF7A:  rts             ;
-
-ExplodeYDisplace:
-LDF7B:* tya             ;Transfer placement byte back into A.
-LDF7C:  and #$0E            ;Discard bits 7,6,5,4 and 0.
-LDF7E:  lsr             ;/2.
-LDF7F:  tay             ;
-LDF80:  lda ExplodeIndexTbl,y       ;Index into ExplodePlacementTbl.
-LDF83:  ldy IsSamus         ;
-LDF85:  bne +               ;Is Samus the object exploding? if so, branch.
-LDF87:  ldy PageIndex           ;Load index to proper enemy data.
-LDF89:  adc EnCounter,y         ;Increment every frame enemy is exploding. Initial=#$01.
-LDF8C:  jmp ++              ;Jump to load explode placement data.
-
-
-;Special case for Samus exploding.
-LDF8F:* adc ObjectCounter       ;Increments every frame Samus is exploding. Initial=#$01.
-LDF91:* tay             ;
-LDF92:  lda ExplodeIndexTbl+2,y     ;Get data from ExplodePlacementTbl.
-LDF95:  pha             ;Save data on stack.
-LDF96:  lda $0F             ;Load placement data index.
-LDF98:  clc             ;
-LDF99:  adc #$0C            ;Move index forward by 12 bytes. to find y
-LDF9B:  tay             ;placement data.
-LDF9C:  pla             ;Restore A with ExplodePlacementTbl data.
-LDF9D:  clc             ;
-LDF9E:  adc ($02),y         ;Add table displacements with sprite placement data.
-LDFA0:  jmp ----            ;Branch to add y placement values to sprite coords.
-
 XDisplacement:
 LDFA3:  lda ($02),y         ;Load placement data byte.
 LDFA5:  tay             ;
@@ -4957,7 +4958,7 @@ LDFAC:  tya             ;Restore placement data byte to A.
 LDFAD:* bit $04             ;
 LDFAF:  bvc +               ;Branch if bit 6 cleared, else data is negative displacement.
 
-NegativeDisplacement:
+NegativeXDisplacement:
 LDFB1:  eor #$FF            ;
 LDFB3:  sec             ;NOTE:Setting carry makes solution 1 higher than expected.
 LDFB4:  adc #$F8            ;If flip bit is set in $04, this function flips the
@@ -5953,41 +5954,6 @@ Table01:
     .byte $20           ;Horizontal write. PPU inc = 1, length = 32 tiles.
     .byte $9E           ;Vertical write... PPU inc = 32, length = 30 tiles.
 
-;---------------------------------[Write PPU attribute table data ]----------------------------------
-
-WritePPUAttribTbl:
-LE5E2:  ldx #$C0            ;Low byte of First row of attribute table.
-LE5E4:  lda RoomNumber          ;
-LE5E6:  cmp #$F2            ;Is this the second pass through the routine?
-LE5E8:  beq +               ;If so, branch.
-LE5EA:  ldx #$E0            ;Low byte of second row of attribute table.
-LE5EC:* stx $00             ;$0000=RoomRAM atrrib table starting address.
-LE5EE:  stx $02             ;$0002=PPU attrib table starting address.
-LE5F0:  jsr GetNameAddrs        ;($E564)Get name table addr and corresponding RoomRAM addr.
-LE5F3:  ora #$03            ;#$23 for attrib table 0, #$2F for attrib table 3.
-LE5F5:  sta $03             ;Store results.
-LE5F7:  txa             ;move high byte of RoomRAM to A.
-LE5F8:  ora #$03            ;#$63 for RoomRAMA, #$67 for RoomRAMB(Attrib tables).
-LE5FA:  sta $01             ;Store results.
-LE5FC:  lda #$01            ;
-LE5FE:  sta PPUDataPending      ;Data pending = YES.
-LE600:  ldx PPUStrIndex         ;Load current index into PPU strng to append data.
-LE603:  lda $03             ;Store high byte of starting address(attrib table).
-LE605:  jsr WritePPUByte        ;($C36B)Put data byte into PPUDataString.
-LE608:  lda $02             ;Store low byte of starting address(attrib table).
-LE60A:  jsr WritePPUByte        ;($C36B)Put data byte into PPUDataString.
-LE60D:  lda #$20            ;Length of data to write(1 row of attrib data).
-LE60F:  sta $04             ;
-LE611:  jsr WritePPUByte        ;($C36B)Write control byte. Horizontal write.
-LE614:  ldy #$00            ;Reset index into data string.
-LE616:* lda ($00),y         ;Get data byte.
-LE618:  jsr WritePPUByte        ;($C36B)Put data byte into PPUDataString.
-LE61B:  iny             ;Increment to next attrib data byte.
-LE61C:  dec $04             ;
-LE61E:  bne -               ;Loop until all attrib data loaded into PPU.
-LE620:  stx PPUStrIndex         ;Store updated PPU string index.
-LE623:  jsr EndPPUString        ;($C376)Append end marker(#$00) and exit writing routines.
-
 ;----------------------------------------------------------------------------------------------------
 
 ; attempt to move Samus one pixel left
@@ -6602,6 +6568,41 @@ LE9C2:  tay
 *   clc
 Exit18: rts
 
+;---------------------------------[Write PPU attribute table data ]----------------------------------
+
+WritePPUAttribTbl:
+LE5E2:  ldx #$C0            ;Low byte of First row of attribute table.
+LE5E4:  lda RoomNumber          ;
+LE5E6:  cmp #$F2            ;Is this the second pass through the routine?
+LE5E8:  beq +               ;If so, branch.
+LE5EA:  ldx #$E0            ;Low byte of second row of attribute table.
+LE5EC:* stx $00             ;$0000=RoomRAM atrrib table starting address.
+LE5EE:  stx $02             ;$0002=PPU attrib table starting address.
+LE5F0:  jsr GetNameAddrs        ;($E564)Get name table addr and corresponding RoomRAM addr.
+LE5F3:  ora #$03            ;#$23 for attrib table 0, #$2F for attrib table 3.
+LE5F5:  sta $03             ;Store results.
+LE5F7:  txa             ;move high byte of RoomRAM to A.
+LE5F8:  ora #$03            ;#$63 for RoomRAMA, #$67 for RoomRAMB(Attrib tables).
+LE5FA:  sta $01             ;Store results.
+LE5FC:  lda #$01            ;
+LE5FE:  sta PPUDataPending      ;Data pending = YES.
+LE600:  ldx PPUStrIndex         ;Load current index into PPU strng to append data.
+LE603:  lda $03             ;Store high byte of starting address(attrib table).
+LE605:  jsr WritePPUByte        ;($C36B)Put data byte into PPUDataString.
+LE608:  lda $02             ;Store low byte of starting address(attrib table).
+LE60A:  jsr WritePPUByte        ;($C36B)Put data byte into PPUDataString.
+LE60D:  lda #$20            ;Length of data to write(1 row of attrib data).
+LE60F:  sta $04             ;
+LE611:  jsr WritePPUByte        ;($C36B)Write control byte. Horizontal write.
+LE614:  ldy #$00            ;Reset index into data string.
+LE616:* lda ($00),y         ;Get data byte.
+LE618:  jsr WritePPUByte        ;($C36B)Put data byte into PPUDataString.
+LE61B:  iny             ;Increment to next attrib data byte.
+LE61C:  dec $04             ;
+LE61E:  bne -               ;Loop until all attrib data loaded into PPU.
+LE620:  stx PPUStrIndex         ;Store updated PPU string index.
+LE623:  jsr EndPPUString        ;($C376)Append end marker(#$00) and exit writing routines.
+
 ;------------------------------------------[ Select room RAM ]---------------------------------------
 
 SelectRoomRAM:
@@ -6612,46 +6613,49 @@ LEA0A:  ora #$60            ;A=#$64 for name table 3, A=#$60 for name table 0.
 LEA0C:  sta CartRAMPtrUB        ;
 LEA0E:  lda #$00            ;
 LEA10:  sta CartRAMPtrLB          ;Save two byte pointer to start of proper room RAM.
+SelectRoomRAMExit:
 LEA12:  rts             ;
 
 ;------------------------------------[ write attribute table data ]----------------------------------
 
+; TODO; is this unused?
 AttribTableWrite:
-LEA13:* lda RoomNumber          ;
+LEA13:  lda RoomNumber          ;
+        inc RoomNumber          ;to load from RoomRAM into PPU.
 LEA15:  and #$0F            ;Determine what row of PPU attribute table data, if any,
-LEA17:  inc RoomNumber          ;to load from RoomRAM into PPU.
 
-; rts
+        cmp #$03
+        beq WritePPUAttribTbl
+        bcs RoomFinished
+        cmp #$01
+        beq WritePPUAttribTbl
+        rts
 
-LEA19:  jsr ChooseRoutine;
-
-;The following table is used by the code above to determine when to write to the PPU attribute table.
-
-LEA1c:  .word ExitSub               ;($C45C)Rts.
-LEA1E:  .word WritePPUAttribTbl     ;($E5E2)Write first row of PPU attrib data.
-LEA20:  .word ExitSub               ;($C45C)Rts.
-LEA22:  .word WritePPUAttribTbl     ;($E5E2)Write second row of PPU attrib data.
-LEA24:  .word RoomFinished          ;($EA26)Finished writing attribute table data.
+; Replaced this jump table
+; 
+; LEA1c:  .word ExitSub               ;($C45C)Rts.
+; LEA1E:  .word WritePPUAttribTbl     ;($E5E2)Write first row of PPU attrib data.
+; LEA20:  .word ExitSub               ;($C45C)Rts.
+; LEA22:  .word WritePPUAttribTbl     ;($E5E2)Write second row of PPU attrib data.
+; LEA24:  .word RoomFinished          ;($EA26)Finished writing attribute table data.
 
 ;-----------------------------------[ Finished writing room data ]-----------------------------------
 
 RoomFinished:
 LEA26:  lda #$FF            ;No more tasks to perform on current room.
-LEA28:  sta RoomNumber          ;Set RoomNumber to #$FF.
-
-RoomFinishedExit:
-LEA2A:* rts             ;
+LEA28:  sta RoomNumber      ;Set RoomNumber to #$FF.
+LEA2A:  rts                 ;
 
 ;------------------------------------------[ Setup room ]--------------------------------------------
 
 SetupRoom:
 LEA2B:  lda RoomNumber          ;Room number.
 LEA2D:  cmp #$FF            ;
-LEA2F:  beq -               ;Branch to exit if room is undefined.
+LEA2F:  beq SelectRoomRAMExit  ;Branch to exit if room is undefined.
 LEA31:  cmp #$FE            ;
 LEA33:  beq +               ;Branch if empty place holder byte found in room data.
 LEA35:  cmp #$F0            ;
-LEA37:  bcs --              ;Branch if time to write PPU attribute table data.
+LEA37:  bcs AttribTableWrite ;Branch if time to write PPU attribute table data.
 LEA39:  jsr UpdateRoomSpriteInfo    ;($EC9B)Update which sprite belongs on which name table.
 
 LEA3C:  jsr ScanForItems        ;($ED98)Set up any special items.
@@ -6821,6 +6825,11 @@ LEADF:  and #$0F            ;Discard upper four bits of data.
     LDA EnemyLoopTable_HiBytes, x
     STA CodePtr + 1
     JMP (CodePtr)
+
+EnemyLoopTable_HiBytes:
+    .byte >ExitSub, >LoadEnemy, >LoadDoor, >ExitSub, >LoadElevator, >ExitSub, >LoadStatues, >ZebHole
+EnemyLoopTable_LoBytes:
+    .byte <ExitSub, <LoadEnemy, <LoadDoor, <ExitSub, <LoadElevator, <ExitSub, <LoadStatues, <ZebHole
 
 EndOfRoom:
 LEAF4:  ldx #$F0            ;Prepare for PPU attribute table write.
@@ -9779,13 +9788,6 @@ LFFC9:  STA MMC1Reg1            ;(MSB is set)
 LFFCC:  STA MMC1Reg2            ;
 LFFCF:  STA MMC1Reg3            ;
 LFFD2:  JMP Startup             ;($C01A)Do preliminary housekeeping.
-
-; CUSTOM
-
-EnemyLoopTable_HiBytes:
-    .byte >ExitSub, >LoadEnemy, >LoadDoor, >ExitSub, >LoadElevator, >ExitSub, >LoadStatues, >ZebHole
-EnemyLoopTable_LoBytes:
-    .byte <ExitSub, <LoadEnemy, <LoadDoor, <ExitSub, <LoadElevator, <ExitSub, <LoadStatues, <ZebHole
 
 ; ^^^^^ Everything has been labled out and we can now 
 .advance $FFFA

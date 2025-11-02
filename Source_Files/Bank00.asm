@@ -3060,8 +3060,10 @@ L9A06:  .byte $00               ;End PPU string write.
 
 ;----------------------------------------[ Ending routines ]-----------------------------------------
 
+.checkpc NMIScreenWrite
+.advance NMIScreenWrite
+
 ;The following routine is accessed via the NMI routine every frame.
-_NMIScreenWrite:
 L9A07:  LDA TitleRoutine        ;
 L9A09:  CMP #$1D                ;If titleRoutine not at end game, exit.
 L9A0B:  BCC Exit100             ;
