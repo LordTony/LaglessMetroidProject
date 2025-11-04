@@ -7518,6 +7518,7 @@ LEF09:  clc             ;
     sta $00             ;A is added to the 16 bit address stored in $0000.
     bcc +               ;
     inc $01             ;
+Exit29:
 *   rts             ;
 
 ;----------------------------------[ Draw structure routines ]----------------------------------------
@@ -7544,18 +7545,16 @@ LEF29:  sta $01                 ;$0000 = work pointer.
 
 DrawMacro:
 LEF2B:  lda $01             ;High byte of current location in room RAM.
-;LEF2D:  cmp #$63            ;Check high byte of room RAM address for both room RAMs
-;LEF2F:  beq +               ;to see if the attribute table data for the room RAM has
+LEF2D:  cmp #$63            ;Check high byte of room RAM address for both room RAMs
+LEF2F:  beq +               ;to see if the attribute table data for the room RAM has
 LEF31:  cmp #$67            ;been reached.  If so, branch to check lower byte as well.
 LEF33:  bcc ++              ;If not at end of room RAM, branch to draw macro.
-;LEF35:  bne +               ;
-;LEF37:  rts                 ;Return if have gone past room RAM(should never happen).
+;LEF35:  beq +               ;
+;LEF37:  rts             ;Return if have gone past room RAM(should never happen).
 
 LEF38:* lda $00             ;Low byte of current nametable address.
 LEF3A:  cmp #$A0            ;Reached attrib table?
-LEF3C:  bcc +               ;If not, branch to draw the macro.
-MacroExit:
-LEF3E:  rts             ;Can't draw any more of the structure, exit.
+LEF3C:  bcs Exit29               ;If not, branch to draw the macro.
 
 LEF3F:* inc $10             ;Increase struct data index.
 LEF41:  ldy $10             ;Load struct data index into Y.
@@ -7642,7 +7641,7 @@ DrawStruct:
 LEF8C:  ldy #$00            ;Reset struct index.
 LEF8E:  sty ScreenYPos          ;
 LEF90:  lda (StructPtr),y       ;Load data byte.
-LEF94:  bmi MacroExit               ;If so, branch to exit.
+LEF94:  bmi DrawStructExit      ;If so, branch to exit.
 LEF96:  jmp DrawStructRow       ;($EF13)Draw a row of macros.
 
 IncStructPtrUB:
@@ -7654,10 +7653,9 @@ IncCartRAMWorkPtrUB:
         inc CartRAMWorkPtrUB        ;Increment high byte of pointer if necessary.
         jmp DrawStruct
 
+DrawStructExit:
+    rts
 ;---------------------------------[ Update attribute table bits ]------------------------------------
-UpdateAttribIfChanged:
-    jsr UpdateAttrib
-    jmp AfterUpdateAttr
 
 ;The following routine updates attribute bits for one 2x2 tile section on the screen.
 
