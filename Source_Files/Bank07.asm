@@ -1020,6 +1020,11 @@ LC561:  STA MainRoutine         ;Run InitArea routine next.
 LC563:  STA InArea              ;Start in Brinstar.
 LC565:  STA GamePaused          ;Make sure game is not paused.
 LC567:  JSR ClearRAM_33_DF      ;($C1D4)Clear game engine memory addresses.
+LC56A:  JSR ClearSamusStats     ;($C578)Clear Samus' stats memory addresses.
+LC56D:* LDY #$00                ;
+LC56F:  JSR ROMSwitch           ;($C4EF)Load Brinstar memory page into lower 16Kb memory.
+LC572:  JSR InitBrinstarGFX     ;($C604)Load Brinstar GFX.
+LC575:  JMP NmiOn               ;($C487)Turn on VBlank interrupts.
 
 ClearSamusStats:
 LC578:  LDY #$0F                ;
@@ -1027,11 +1032,7 @@ LC57A:  LDA #$00                ;Clears Samus stats(Health, full tanks, game tim
 LC57C:* STA $0100,y             ;Load $100 thru $10F with #$00.
 LC57F:  DEY                     ;
 LC580:  BPL -                   ;Loop 16 times.
-
-LC56D:* LDY #$00                ;
-LC56F:  JSR ROMSwitch           ;($C4EF)Load Brinstar memory page into lower 16Kb memory.
-LC572:  JSR InitBrinstarGFX     ;($C604)Load Brinstar GFX.
-LC575:  JMP NmiOn               ;($C487)Turn on VBlank interrupts.
+LC582:  RTS
 
 ;Norfair memory page.
 
@@ -5134,7 +5135,7 @@ LE0C6:  tax             ;
 LE0C7:* lda DataDisplayTbl,y  ;
 LE0CA:  sta SpriteRAM,x       ;Store contents of DataDisplayTbl in sprite RAM.
 LE0CD:  inx                   ;
-LE0CE:  iny                     ;
+LE0CE:  iny                   ;
 LE0CF:  cpy #$28            ;10*4. At end of DataDisplayTbl? If not, loop to
 LE0D1:  bne -               ;load next byte from table.
 
