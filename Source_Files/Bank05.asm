@@ -1859,7 +1859,11 @@ Bank05_L95D7:  .byte $19           ;Samus start x coord on world map.
 Bank05_L95D8:  .byte $18           ;Samus start y coord on world map.
 Bank05_L95D9:  .byte $6E           ;Samus start verticle screen position.
 
-Bank05_L95DA:  .byte $06, $00, $03, $58, $44, $4A, $48, $4A, $4A, $36, $25
+Bank05_L95DA:  .byte $06, $00, $03, $58, $44, $4A, $48, $4A, $4A, $36 
+
+.checkpc MemuByte
+.advance MemuByte
+    .byte $25
 
 Bank05_L95E5:  LDA $6B02,X
 Bank05_L95E8:  JSR $8024

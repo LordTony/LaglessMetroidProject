@@ -74,4 +74,4 @@ tax
 Should be even faster than the inlined +16 and -16 calls
 
 ## Bugs
-* Missile display rework is in progress
+* No known bugs

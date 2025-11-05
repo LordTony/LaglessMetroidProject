@@ -1558,7 +1558,7 @@ LC92B:  jsr ScrollDoor          ;($E1F1)Scroll doors, if needed. 2 routine calls
 LC92E:  jsr ScrollDoor          ;($E1F1)twice as fast as 1 routine call.
 
 LC931:  lda NARPASSWORD         ;
-LC934:  beq StartUpdateWorld    ;
+LC934:  beq UpdateWorld         ;
 LC936:  lda #$03                ;The following code is only accessed if 
 LC938:  sta HealthHi            ;NARPASSWORD has been entered at the 
 LC93B:  lda #$FF                ;password screen. Gives you new health,
@@ -1566,8 +1566,54 @@ LC93D:  sta SamusGear           ;missiles and every power-up every frame.
 LC940:  lda #$05                ;
 LC942:  sta MissileCount        ;
 
-StartUpdateWorld:
-LC945:  jsr UpdateWorld         ;($CB29)Update Samus, enemies and room tiles.
+; ===== THE REAL GUTS OF THE GAME ENGINE! =====
+
+UpdateWorld:
+        ldx #$00
+LCB2B:  stx SpritePagePos
+
+LCB2D:  jsr UpdateEnemies       ;($F345)Display of enemies.
+LCB30:  jsr UpdateProjectiles   ;($D4BF)Display of bullets/missiles/bombs.
+
+;--------------------------------------[ Update Samus ]----------------------------------------------
+
+    UpdateSamus:
+        LDX #$00                ;Samus data is located at index #$00.
+        STX PageIndex           ;
+        INX                     ;x=1.
+        STX IsSamus             ;Indicate Samus is the object being updated.
+        JSR GoSamusHandler      ;($CC1A)Find proper Samus handler routine.
+        DEC IsSamus             ;Update of Samus complete.
+
+;-------------------------------------- [ Area Routine ] ----------------------------------------------
+
+LCB36:  jsr AreaRoutine         ;($95C3)Area specific routine.
+LCB39:  jsr UpdateElevator      ;($D7B3)Display of elevators.
+LCB3C:  jsr UpdateStatues       ;($D9D4)Display of Ridley & Kraid statues.
+LCB3F:  jsr UpdateEnemyDestruction      ; destruction of enemies
+LCB42:  jsr UpdateMellowMemu            ; update of Mellow/Memu enemies
+LCB45:  jsr LF93B
+LCB48:  jsr UpdateSpinnerDestruction    ; destruction of green spinners
+LCB4B:  jsr SamusEnterDoor      ;($8B13)Check if Samus entered a door.
+LCB4E:  jsr DoorHandler         ; display of doors
+LCB51:  jsr UpdateTiles         ; tile de/regeneration
+LCB54:  jsr CollisionDetection  ; Samus < enemies crash detection
+LCB57:  jsr DisplayBar          ;($E0C1)Display of status bar.
+        jsr LFAF2
+        jsr CheckMissileToggle
+        jsr UpdateItems             ;($DB37)Display of power-up items.
+        jsr LFDE3
+
+;Clear remaining sprite RAM
+    ldx SpritePagePos
+    lda #$F4
+*   sta SpriteRAM,x
+    inx 
+    inx 
+    inx 
+    inx  
+    bne -
+
 LC948:  lda MiniBossKillDly     ;
 LC94B:  ora PowerUpDelay        ;Check if mini boss was just killed or powerup aquired.
 LC94E:  beq StartDeathCheck     ;If not, branch.
@@ -1582,9 +1628,9 @@ LC95C:  jsr SetTimer            ;($C4AA)Set delay timer and game engine routine.
 StartDeathCheck:
 LC95F:  lda ObjAction           ;Check is Samus is dead.
 LC962:  cmp #sa_Dead2           ;Is Samus dead?
-LC964:  bne Exit25                 ;exit if not.
+LC964:  bne GameEngineExit      ;exit if not.
 LC966:  lda AnimDelay           ;Is Samus still exploding?
-LC969:  bne Exit25                 ;Exit if still exploding.
+LC969:  bne GameEngineExit      ;Exit if still exploding.
 LC96B:  jsr SilenceMusic        ;Turn off music.
 LC96E:  lda MthrBrainStatus     ;
 LC970:  cmp #$0A                ;Is mother brain already dead? If so, branch.
@@ -1595,6 +1641,7 @@ LC978:  jmp SetTimer            ;($C4AA)Set delay timer and run game over routin
 
 StartGameEgine:
 LC97B:  inc MainRoutine         ;Next routine to run is GameOver.
+GameEngineExit:
 LC97D:  rts                     ;
 
 ;----------------------------------------[ Update age ]----------------------------------------------
@@ -1856,57 +1903,6 @@ SavedDataTable:
 LCAEF:  .word ItmeHistory       ;($69B4)Base for save game slot 0.
 LCAF1:  .word ItmeHistory       ;($69B4)Base for save game slot 1.
 LCAF3:  .word ItmeHistory       ;($69B4)Base for save game slot 2.
-
-;----------------------------------------------------------------------------------------------------
-
-; ===== THE REAL GUTS OF THE GAME ENGINE! =====
-
-UpdateWorld:
-LCB29:  ldx #$00                ;Set start of sprite RAM to $0200.
-LCB2B:  stx SpritePagePos       ;
-
-LCB2D:  jsr UpdateEnemies       ;($F345)Display of enemies.
-LCB30:  jsr UpdateProjectiles   ;($D4BF)Display of bullets/missiles/bombs.
-
-;--------------------------------------[ Update Samus ]----------------------------------------------
-
-    UpdateSamus:
-        LDX #$00                ;Samus data is located at index #$00.
-        STX PageIndex           ;
-        INX                     ;x=1.
-        STX IsSamus             ;Indicate Samus is the object being updated.
-        JSR GoSamusHandler      ;($CC1A)Find proper Samus handler routine.
-        DEC IsSamus             ;Update of Samus complete.
-
-;-------------------------------------- [ Area Routine ] ----------------------------------------------
-
-LCB36:  jsr AreaRoutine         ;($95C3)Area specific routine.
-LCB39:  jsr UpdateElevator      ;($D7B3)Display of elevators.
-LCB3C:  jsr UpdateStatues       ;($D9D4)Display of Ridley & Kraid statues.
-LCB3F:  jsr UpdateEnemyDestruction      ; destruction of enemies
-LCB42:  jsr UpdateMellowMemu            ; update of Mellow/Memu enemies
-LCB45:  jsr LF93B
-LCB48:  jsr UpdateSpinnerDestruction    ; destruction of green spinners
-LCB4B:  jsr SamusEnterDoor      ;($8B13)Check if Samus entered a door.
-LCB4E:  jsr DoorHandler         ; display of doors
-LCB51:  jsr UpdateTiles         ; tile de/regeneration
-LCB54:  jsr CollisionDetection  ; Samus < enemies crash detection
-LCB57:  jsr DisplayBar          ;($E0C1)Display of status bar.
-        jsr LFAF2
-        jsr CheckMissileToggle
-        jsr UpdateItems             ;($DB37)Display of power-up items.
-        jsr LFDE3
-
-    ;Clear remaining sprite RAM
-    ldx SpritePagePos
-    lda #$F4
-*   sta SpriteRAM,x
-    inx 
-    inx 
-    inx 
-    inx  
-    bne -
-    rts
 
 ;------------------------------------[ Select Samus palette ]----------------------------------------
 
@@ -4615,6 +4611,7 @@ LDD75:  jsr PowerUpMusic
     bne LDD5B
 
 ; TODO - This kicks off the fat slow
+LDD70:
 SomethingAboutMovement:
     ldx PageIndex
     lda EnAnimFrame,x
@@ -4820,28 +4817,6 @@ LDEE0:  jmp DrawSpriteObject        ;($DF19)Start drawing object.
 
 LDEE3:* jmp ClearObjectCntrl        ;($DF2D)Clear object control byte then exit.
 
-WriteSpriteRAM:
-LDEE6: ldy $0F             ;Load index for placement data.
-
-YDisplacement:
-LDF6B:  lda ($02),y         ;Load placement data byte.
-LDF6D:  tay             ;
-LDF6E:  and #$F0            ;Check to see if this is placement data for the object
-LDF70:  cmp #$80            ;exploding.  If so, branch.
-LDF72:  beq ++              ;
-LDF74:  tya             ;Restore placement data byte to A.
-LDF75:* bit $04             ;
-LDF77:  bpl AfterYNegativeDisplacement    ;Branch if MSB in $04 is set(Flips object).
-
-NegativeYDisplacement:
-    eor #$FF            ;
-    sec             ;NOTE:Setting carry makes solution 1 higher than expected.
-    adc #$F8            ;If flip bit is set in $04, this function flips the
-
-AfterYNegativeDisplacement:
-LDF79:  clc             ;Clear carry before returning.
-LDF7A:  jmp AfterYDisplacement
-
 ExplodeYDisplace:
 LDF7B:* tya             ;Transfer placement byte back into A.
 LDF7C:  and #$0E            ;Discard bits 7,6,5,4 and 0.
@@ -4866,9 +4841,30 @@ LDF9B:  tay             ;placement data.
 LDF9C:  pla             ;Restore A with ExplodePlacementTbl data.
 LDF9D:  clc             ;
 LDF9E:  adc ($02),y         ;Add table displacements with sprite placement data.
-LDFA0:  jmp ----            ;Branch to add y placement values to sprite coords.
+LDFA0:  jmp DoYNegativeDisplacement ;Branch to add y placement values to sprite coords.
 
-AfterYDisplacement:
+WriteSpriteRAM:
+LDEE6: ldy $0F             ;Load index for placement data.
+
+YDisplacement:
+LDF6B:  lda ($02),y                         ;Load placement data byte.
+LDF6D:  tay                                 ;
+LDF6E:  and #$F0                            ;Check to see if this is placement data for the object
+LDF70:  cmp #$80                            ;exploding.  If so, branch.
+LDF72:  beq ExplodeYDisplace
+LDF74:  tya                                 ;Restore placement data byte to A.
+
+DoYNegativeDisplacement:
+LDF75:* bit $04                             ;
+LDF77:  bpl AfterYNegativeDisplacement      ;Branch if MSB in $04 is set(Flips object).
+
+NegativeYDisplacement:
+    eor #$FF            ;
+    sec             ;NOTE:Setting carry makes solution 1 higher than expected.
+    adc #$F8            ;If flip bit is set in $04, this function flips the
+
+AfterYNegativeDisplacement:
+LDF79:  clc             ;Clear carry before returning.
 LDEEB:  adc $10             ;Add initial Y position.
 LDEED:  sta SpriteRAM,x       ;Store sprite Y coord.
 LDEF0:  dec SpriteRAM,x       ;Because PPU uses Y + 1 as real Y coord.
@@ -4884,7 +4880,24 @@ LDF02:  eor $05             ;Use it to override sprite horz mirror bit.
 LDF04:  sta SpriteRAM+2,x     ;Store sprite control byte in sprite RAM.
 LDF07:  inc $11             ;Increment to next byte of frame data.
 LDF09:  ldy $0F             ;Load index for placement data.
-LDF0B:  jsr XDisplacement       ;($DFA3)Get displacement for x direction.
+
+XDisplacement:
+LDFA3:  lda ($02),y         ;Load placement data byte.
+LDFA5:  tay             ;
+LDFA6:  and #$F0            ;Check to see if this is placement data for the object
+LDFA8:  cmp #$80            ;exploding.  If so, branch.
+LDFAA:  beq ExplodeXDisplace  ;
+LDFAC:  tya             ;Restore placement data byte to A.
+LDFAD:  bit $04             ;
+LDFAF:  bvc AfterNegativeXDisplacement   ;Branch if bit 6 cleared, else data is negative displacement.
+
+NegativeXDisplacement:
+LDFB1:  eor #$FF            ;
+LDFB3:  sec             ;NOTE:Setting carry makes solution 1 higher than expected.
+LDFB4:  adc #$F8            ;If flip bit is set in $04, this function flips the
+
+AfterNegativeXDisplacement:
+LDFB6:  clc             ;object by using two compliment minus 8(Each sprite is 8x8 pixels).
 LDF0E:  adc $0E             ;Add initial X pos
 LDF10:  sta SpriteRAM+3,x     ;Store sprite X coord
 LDF13:  inc $0F             ;Increment to next placement data byte.
@@ -4932,7 +4945,7 @@ LDF4C:  sty $11             ;Save index of frame data.
 LDF4E:  jmp GetNextFrameByte        ;($DF1B)Load next frame data byte.
 
 OffsetObjectPosition:
-LDF51:* iny             ;Increment index to next byte of frame data.
+LDF51:  iny             ;Increment index to next byte of frame data.
 LDF52:  lda ($00),y         ;This data byte is used to offset the object from
 LDF54:  clc             ;its current y positon.
 LDF55:  adc $10             ;
@@ -4949,25 +4962,8 @@ LDF68:  jmp DrawSpriteObject        ;($DF19)Draw next sprite.
 
 ;----------------------------------[ Sprite placement routines ]-------------------------------------
 
-XDisplacement:
-LDFA3:  lda ($02),y         ;Load placement data byte.
-LDFA5:  tay             ;
-LDFA6:  and #$F0            ;Check to see if this is placement data for the object
-LDFA8:  cmp #$80            ;exploding.  If so, branch.
-LDFAA:  beq +++             ;
-LDFAC:  tya             ;Restore placement data byte to A.
-LDFAD:* bit $04             ;
-LDFAF:  bvc +               ;Branch if bit 6 cleared, else data is negative displacement.
-
-NegativeXDisplacement:
-LDFB1:  eor #$FF            ;
-LDFB3:  sec             ;NOTE:Setting carry makes solution 1 higher than expected.
-LDFB4:  adc #$F8            ;If flip bit is set in $04, this function flips the
-LDFB6:* clc             ;object by using two compliment minus 8(Each sprite is
-LDFB7:  rts             ;8x8 pixels).
-
 ExplodeXDisplace:
-LDFB8:* ldy PageIndex           ;Load index to proper enemy slot.
+LDFB8:  ldy PageIndex           ;Load index to proper enemy slot.
 LDFBA:  lda EnCounter,y         ;Load counter value.
 LDFBD:  ldy IsSamus         ;Is Samus the one exploding?
 LDFBF:  beq +               ;If not, branch.
@@ -4989,7 +4985,7 @@ LDFD7:  tay             ;placement data.
 LDFD8:  pla             ;Restore A with x displacement data.
 LDFD9:  clc             ;
 LDFDA:  adc ($02),y         ;Add x displacement with sprite placement data.
-LDFDC:  jmp -----           ;Branch to add x placement values to sprite coords.
+LDFDC:  jmp OffsetObjectPosition ;Branch to add x placement values to sprite coords.
 
 ;---------------------------------[ Check if object is on screen ]----------------------------------
 
@@ -5128,33 +5124,36 @@ LE0BF:  bcs ---             ;Branch always.
 ;Displays Samus' status bar components.
 
 DisplayBar:
-LE0C1:  ldy #$00            ;Reset data index.
-LE0C3:  lda SpritePagePos       ;Load current sprite index.
-LE0C5:  pha             ;save sprite page pos.
-LE0C6:  tax             ;
-LE0C7:* lda DataDisplayTbl,y  ;
-LE0CA:  sta SpriteRAM,x       ;Store contents of DataDisplayTbl in sprite RAM.
-LE0CD:  inx                   ;
-LE0CE:  iny                   ;
-LE0CF:  cpy #$28            ;10*4. At end of DataDisplayTbl? If not, loop to
-LE0D1:  bne -               ;load next byte from table.
+LE0C3:  
+    ldx SpritePagePos       ;Load current sprite index.
+    stx TempX
+    ldy #$28                        ; Reset data index.
+    DisplayBarLoop:                 ; Double up to loop to save cycles
+        lda DataDisplayTbl_Reversed-1, y    ;not a full unroll because bytes are precious
+        sta SpriteRAM,x
+        inx
+        dey
+
+        lda DataDisplayTbl_Reversed-1, y
+        sta SpriteRAM,x
+        inx
+        dey
+    bne DisplayBarLoop          ;load next byte from table.
 
 ;Display 2-digit health count.
 LE0D3:  stx SpritePagePos       ;Save new location in sprite RAM.
-LE0D5:  pla             ;Restore initial sprite page pos.
-LE0D6:  tax             ;
+        ldx TempX
 LE0D7:  lda HealthHi            ;
 LE0DA:  and #$0F            ;Extract upper health digit.
 LE0DC:  jsr SPRWriteDigit       ;($E173)Display digit on screen.
 LE0DF:  lda HealthLo            ;
-LE0E2:  
-        lsr                 ; inlined jsr Adiv16
+LE0E2:  lsr                 ; inlined jsr Adiv16
         lsr
         lsr
         lsr
 LE0E5:  jsr SPRWriteDigit       ;($E173)Display digit on screen.
 LE0E8:  ldy EndTimerHi          ;
-LE0EB:  iny             ;Is Samus in escape sequence?
+LE0EB:  iny                 ;Is Samus in escape sequence?
 LE0EC:  bne ++              ;If so, branch.
 LE0EE:  ldy MaxMissiles         ;
 LE0F1:  beq +               ;Don't show missile count if Samus has no missile containers.
@@ -5165,28 +5164,42 @@ LE0F3:  lda MissileCount        ;
 ;------------------------------------[ Convert hex to decimal ]--------------------------------------
 ;Convert 8-bit value in A to 3 decimal digits. Upper digit put in $02, middle in $01 and lower in $00.
 
-;; TODO - Get some missiles and test this out
-;; I think the password screen is broken
+; TODO - Get some missiles and test this out
 DisplayHexAsDigits:
-    ldy #100          ;Find upper digit.
-    sty $0A             ;
-    jsr GetDigit        ;($E1AD)Extract hundreds digit.
-    tya
-    jsr SPRWriteDigit       ;($E173)Display digit on screen.
-    ldy #10             ;Find middle digit.
-    sty $0A             ;
-    jsr GetDigit            ;($E1AD)Extract tens digit.
-    sty $01             ;Store middle digit in $01.
-    jsr SPRWriteDigit   ; accumultaor has the low digit at this point
-    lda $01             
-    jsr SPRWriteDigit
 
-;LE0F9:  lda $02             ;Upper digit.
-;LE0FB:  jsr SPRWriteDigit       ;($E173)Display digit on screen.
-;LE0FE:  lda $01             ;Middle digit.
-;LE100:  jsr SPRWriteDigit       ;($E173)Display digit on screen.
-;LE103:  lda $00             ;Lower digit.
-;LE105:  jsr SPRWriteDigit       ;($E173)Display digit on screen.
+    ;Hundreds digit
+        ldy #$00
+        sec
+    HundredDigitInc:
+        iny
+        sbc #100              ;Loop and subtract value in $0A from A until carry flag
+        bcs HundredDigitInc     ;is not set.  The resulting number of loops is the decimal
+        dey                     ;number extracted and A is the remainder.
+        adc #100
+        sty $02                 ;Store upper digit in $02:
+
+    ;Tens digit
+        ldy #$00
+    TensDigitInc:
+        iny
+        sbc #10                 ;Loop and subtract value in $0A from A until carry flag
+        bcs TensDigitInc        ;is not set.  The resulting number of loops is the decimal
+        dey                     ;number extracted and A is the remainder.
+        adc #10
+        sty $01                 ;Store middle digit in $01:
+
+    ;Ones digit is what is left in A
+        sta $00                 ;Store lower digit in $0:
+
+        lda $02                 ;Upper digit:
+        jsr SPRWriteDigit       ;($E173)Display digit on screen:
+        lda $01                 ;Middle digit:
+        jsr SPRWriteDigit       ;($E173)Display digit on screen:
+        lda $00                 ;Lower digit:
+        ora #$A0                ;#$A0 is index into pattern table for numbers.
+        sta SpriteRAM+1,x       ;Store proper nametable pattern in sprite RAM.
+                                ;Don't need to do x+4 after final digit draw
+
 LE108:  bne +++             ;Branch always.
 
 ;Samus has no missiles, erase missile sprite.
@@ -5292,31 +5305,21 @@ LE195:  inx             ;Add 4 to value stored in X.
 LE196:  inx             ;
 LE197:  rts             ;
 
-GetDigit:
-LE1AD:  ldy #$00            ;
-LE1AF:  sec             ;
-LE1B0:* iny             ;
-LE1B1:  sbc $0A             ;Loop and subtract value in $0A from A until carry flag
-LE1B3:  bcs -               ;is not set.  The resulting number of loops is the decimal
-LE1B5:  dey             ;number extracted and A is the remainder.
-LE1B6:  adc $0A             ;
-LE1B8:  rts             ;
-
 ;-------------------------------------[ Status bar sprite data ]-------------------------------------
 
 ;Sprite data for Samus' data display
 
-DataDisplayTbl:
-LE1B9:  .byte $21,$A0,$01,$30       ;Upper health digit.
-LE1BD:  .byte $21,$A0,$01,$38       ;Lower health digit.
-LE1C1:  .byte $2B,$FF,$01,$28       ;Upper missile digit.
-LE1C5:  .byte $2B,$FF,$01,$30       ;Middle missile digit.
-LE1C9:  .byte $2B,$FF,$01,$38       ;Lower missile digit.
-LE1CD:  .byte $2B,$5E,$00,$18       ;Left half of missile.
-LE1D1:  .byte $2B,$5F,$00,$20       ;Right half of missile.
-LE1D5:  .byte $21,$76,$01,$18       ;E
-LE1D9:  .byte $21,$7F,$01,$20       ;N
-LE1DD:  .byte $21,$3A,$00,$28       ;..
+DataDisplayTbl_Reversed:
+    .byte $28,$00,$3A,$21       ; ..
+    .byte $20,$01,$7F,$21       ; N
+    .byte $18,$01,$76,$21       ; E
+    .byte $20,$00,$5F,$2B       ; Right half of missile.
+    .byte $18,$00,$5E,$2B       ; Left half of missile.
+    .byte $38,$01,$FF,$2B       ; Lower missile digit.
+    .byte $30,$01,$FF,$2B       ; Middle missile digit.
+    .byte $28,$01,$FF,$2B       ; Upper missile digit.
+    .byte $38,$01,$A0,$21       ; Lower health digit.
+    .byte $30,$01,$A0,$21       ; Upper health digit.
 
 ;-------------------------------------------[ Bit scan ]---------------------------------------------
 
@@ -5324,18 +5327,26 @@ LE1DD:  .byte $21,$3A,$00,$28       ;..
 ;Once a set bit is encountered, the function exits and returns the bit number of the set bit.
 ;The returned value is stored in A. 
 
-;TODO - stx $0E nd ldx $0E are most likely not needed
+.scope
 BitScan:
-LE1E1:  stx $0E             ;Save X.
-LE1E3:  ldx #$00            ;First bit is bit 0.
-LE1E5:* lsr             ;Transfer bit to carry flag.
-LE1E6:  bcs +               ;If the shifted bit was 1, Branch out of loop.
-LE1E8:  inx             ;Increment X to keep of # of bits checked.
-LE1E9:  cpx #$08            ;Have all 8 bit been tested?
-LE1EB:  bne -               ;If not, branch to check the next bit.
-LE1ED:* txa             ;Return which bit number was set.
-LE1EE:  ldx $0E             ;Restore X.
-LE1F0:* rts             ;
+    tax
+    beq _zero            ; if A was 0 → return 8 instead of looping 8 times
+    ldx #$00
+    _loop:
+        lsr                  ; C = next bit
+        bcs _found
+        inx
+        bne _loop            ; won’t wrap before we find a 1-bit
+
+    _found:
+        txa                  ; A = index
+        rts
+
+    _zero:
+        LDA #$08
+    BitscanExit:
+        rts
+.scend
 
 ;------------------------------------------[ Scroll door ]-------------------------------------------
 
@@ -5343,7 +5354,7 @@ LE1F0:* rts             ;
 
 ScrollDoor:
 LE1F1:  ldx DoorStatus          ;
-LE1F3:  beq -               ;Exit if Samus isn't in a door.
+LE1F3:  beq BitscanExit         ;Exit if Samus isn't in a door.
 LE1F5:  dex             ;
 LE1F6:  bne +               ;Not in right door. branch to check left door.
 LE1F8:  jsr ScrollRight         ;($E6D2)DoorStatus=1, scroll 1 pixel right.
@@ -7314,12 +7325,12 @@ LEDD9:  ldy #$00                ;
 LEDDB:  lda ($00),y             ;Object type
 LEDDD:  and #$0F                ;Object handling routine index stored in 4 LSBs.
 
-        tax
-        lda ChooseHandlerRoutineTable_LoBytes, x
-        sta CodePtr
-        lda ChooseHandlerRoutineTable_HiBytes, x
-        sta CodePtr + 1
-        jmp (CodePtr)
+    tax
+    lda ChooseHandlerRoutineTable_LoBytes, x
+    sta CodePtr
+    lda ChooseHandlerRoutineTable_HiBytes, x
+    sta CodePtr + 1
+    jmp (CodePtr)
 
 ;Handler routines jumped to by above code.
 
@@ -7428,7 +7439,7 @@ LEE63:  ldx #$18
     sbc #$08
     tax
     bpl -
-    lda $95E4
+    lda MemuByte
     sta $6BE9
     sta $6BEA
     lda #$01
@@ -7514,13 +7525,15 @@ LEF00:  lda ($00),y         ;Is there another item with same Y pos?
     rts             ;off stack and exit.
 
 AddToPtr00:
-LEF09:  clc             ;
+    clc                 ;
     adc $00             ;
-    sta $00             ;A is added to the 16 bit address stored in $0000.
-    bcc +               ;
-    inc $01             ;
+    sta $00             ; A is added to the 16 bit address stored in $0000.
+    bcs IncPtr00HiByte  ;
 Exit29:
-*   rts             ;
+    rts                 ;
+IncPtr00HiByte:
+    inc $01             ;
+    rts;
 
 ;----------------------------------[ Draw structure routines ]----------------------------------------
 
@@ -8938,9 +8951,9 @@ LF949:  stx PageIndex
 *   ldy EnStatus,x
     beq Exit19
 
-    lda UpdateTilesTable_LoBytes - 1, y
+    lda LF949_LoBytes - 1, y
     sta CodePtr
-    lda UpdateTilesTable_HiBytes - 1, y
+    lda LF949_HiBytes - 1, y
     sta CodePtr + 1
     jmp (CodePtr)
 
@@ -9342,7 +9355,7 @@ UpdateMellowMemu:
     ldx #$F0
     stx PageIndex
     lda $6BE9
-    cmp $95E4
+    cmp MemuByte
     bne +++
     lda #$03
     jsr UpdateEnemyAnim
@@ -9351,15 +9364,7 @@ UpdateMellowMemu:
     lda #$18
 *   pha
     tax
-    lda $B0,x
-    beq +
-    cmp #$02
-    beq Near_LFCB1
-    bcs Near_LFCBA
-    jsr LFD84
-    jsr LFD08
-    jsr LFD25
-    jmp SomethingAboutMovement
+    jsr ChooseMemuRoutine
     pla
     tax
     lda $B6,x
@@ -9369,12 +9374,35 @@ UpdateMellowMemu:
     sec
     sbc #$08
     bpl -
+MemuExit:
 *   rts
 
 *  jmp KillObject           ;($FA18)Free enemy data slot.
 
-Near_LFCB1:  
+ChooseMemuRoutine:
+    lda $B0,x
+    beq MemuExit
+    cmp #$02
+    beq LFCB1
+    bcs LFCBA
+
+LFCA5:  
     jsr LFD84
+    jsr LFD08
+    jsr LFD25
+    jmp SomethingAboutMovement
+
+LFCB1:  
+    jsr LFD84
+    jsr LFCC1
+    jmp SomethingAboutMovement
+
+LFCBA:
+    lda #$00
+    sta $B0,x
+    jmp SFX_EnemyHit
+
+LFCC1:
     jsr LFD5F
     lda $B4,x
     cmp #$02
@@ -9409,11 +9437,7 @@ Near_LFCB1:
     bcc +
     lda #$01
     sta $B0,x
-*   jmp SomethingAboutMovement
-
-Near_LFCBA:  lda #$00
-    sta $B0,x
-    jmp SFX_EnemyHit
+*   rts
 
 LFD08:  lda #$00
     sta $B5,x
@@ -9584,6 +9608,7 @@ _loop:
 
 ; Tile degenerate/regenerate
 
+LFE14:
 UpdateTiles:
     ldx #$C0
 *   jsr DoOneTile
@@ -9595,7 +9620,7 @@ UpdateTiles:
 DoOneTile:
     stx PageIndex
     ldy TileRoutine,x
-    beq Exit28  ; UpdateTilesTable[0] is $60 or RTS
+    beq Exit28
     lda UpdateTilesTable_LoBytes - 1, y
     sta CodePtr
     lda UpdateTilesTable_HiBytes - 1, y

@@ -865,6 +865,7 @@
 .alias NMIScreenWrite           $9A07
 .alias EndGamePalWrite          $9F54
 .alias SpecItmsTable            $9598
+.alias MemuByte                 $95E4
 .alias CopyMap                  $A93E
 .alias DoorHandler              $8B79
 
