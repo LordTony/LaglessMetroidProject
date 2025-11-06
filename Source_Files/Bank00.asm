@@ -1527,7 +1527,9 @@ UniqueItemFound:
 L8BB5:  TXA                     ;
 L8BB6:  JSR Adiv8               ;($C2C0)Divide by 8.
 L8BB9:  STA $05                 ;Shifts 5 MSBs to LSBs of item # and saves results in $05.
-L8BBB:  JSR Amul8               ;($C2C6)Multiply by 8.
+L8BBB:  asl
+        asl
+        asl               ;($C2C6)Multiply by 8.
 L8BBE:  STA $02                 ;Restores 5 MSBs of item # and drops 3 LSBs; saves in $02.
 L8BC0:  TXA                     ;
 L8BC1:  SEC                     ;
@@ -1598,7 +1600,9 @@ L8C38:* RTS                     ;
  
 SamusHasItem:
 L8C39:  LDA $05                 ;$05 becomes the upper part of the item offset
-L8C3B:  JSR Amul8               ;while $06 becomes the lower part of the item offset.
+L8C3B:  asl
+        asl
+        asl                     ;while $06 becomes the lower part of the item offset.
 L8C3E:  CLC                     ;
 L8C3F:  ADC $06                 ;
 L8C41:  ASL                     ;* 2. Each item is two bytes in length.
@@ -3332,7 +3336,7 @@ L9C0A:  JSR EraseAllSprites     ;($C1A3)prepares screen for credits.
 L9C0D:  LDA #$0D                ;
 L9C0F:  STA PalDataPending      ;Change to proper palette for credits.
 L9C11:  JSR ScreenOn            ;($C447)Turn screen on.
-L9C14:  JMP WaitNMIPass_        ;($C43F)Wait for NMI to end.
+L9C14:  JMP WaitNMIPass        ;($C43F)Wait for NMI to end.
 L9C17:* LDA CreditPageNumber    ;If first page of credits has not started to
 L9C19:  BNE +                   ;roll, start it now, else branch.
 L9C1B:  INC CreditPageNumber    ;

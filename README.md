@@ -17,7 +17,7 @@ The idea here is to attempt to take the Metroid lag as low as possible without a
 * Collision detection code in general eats lots of cycles as well. 
 
 ## Current Progress
-* The baseline benchmark of Samus standing still in the opening room finishes all frame work in about 82% of the time the standard Metroid code does.
+* The baseline benchmark of Samus standing still in the opening room finishes all frame work in about 80% of the time the standard Metroid code does.
 * ChooseRoutine has been reworked to just inline JMP and JSR instructions in maybe 40% of the places saving lots of cycles
 * All of the Xminus16 and YPlus16 have been inlined and the original routines have been removed
 
@@ -74,4 +74,4 @@ tax
 Should be even faster than the inlined +16 and -16 calls
 
 ## Bugs
-* No known bugs
+* At some point I broke the code that make Samus explode when she dies

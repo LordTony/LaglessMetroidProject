@@ -203,7 +203,7 @@ LC0E1:  STA SPRAddress          ;Sprite RAM address = 0.
 LC0E4:  LDA #$02                ;
 LC0E6:  STA SPRDMAReg           ;Transfer page 2 ($200-$2FF) to Sprite RAM.
 LC0E9:  LDA NMIStatus           ;
-LC0EB:  BNE ++                  ;Skip if the frame couldn't finish in time.
+LC0EB:  BNE GoSoundEngine       ;Skip if the frame couldn't finish in time.
 LC0ED:  LDA GameMode            ;
 LC0EF:  BEQ +                   ;Branch if mode=Play.
 LC0F1:  JSR NMIScreenWrite      ;($9A07)Write end message on screen(If appropriate).
@@ -225,9 +225,95 @@ LC2E1:  STA PPUDataPending      ;
 AfterCheckPPUWrite:
 LC0FA:  JSR WritePPUCtrl        ;($C44D)Update $2000 & $2001.
 LC0FD:  JSR WriteScroll         ;($C29A)Update h/v scroll reg.
-LC100:  JSR ReadJoyPads         ;($C215)Read both joypads.
+
+;----------------------------------------[Read joy pad status ]--------------------------------------
+
+;The following routine reads the status of both joypads
+
+ReadJoyPads:
+LC215:  LDX #$00                ;Load x with #$00. Used to read status of joypad 1.
+LC217:  STX $01                 ;
+
+ReadOnePad:
+LC21F:  LDY #$01                ;These lines strobe the        
+LC221:  STY CPUJoyPad1          ;joystick to enable the 
+LC224:  DEY                     ;program to read the 
+LC225:  STY CPUJoyPad1          ;buttons pressed.
+    
+LC228:  LDY #$08                ;Do 8 buttons.
+LC22A:* PHA                     ;Store A.
+LC22B:  LDA CPUJoyPad1,x        ;Read button status. Joypad 1 or 2.
+LC22E:  STA $00                 ;Store button press at location $00.
+LC230:  LSR                     ;Move button push to carry bit.
+LC231:  ORA $00                 ;If joystick not connected, 
+LC233:  LSR                     ;fills Joy1Status with all 1s.
+LC234:  PLA                     ;Restore A.
+LC235:  ROL                     ;Add button press status to A.
+LC236:  DEY                     ;Loop 8 times to get 
+LC237:  BNE -                   ;status of all 8 buttons.
+
+LC239:  LDX $01                 ;Joypad #(0 or 1).
+LC23B:  LDY Joy1Status,x        ;Get joypad status of previous refresh.
+LC23D:  STY $00                 ;Store at $00.
+LC23F:  STA Joy1Status,x        ;Store current joypad status.
+LC241:  EOR $00                 ;
+LC243:  BEQ +                   ;Branch if no buttons changed.
+LC245:  LDA $00                 ;           
+LC247:  AND #$BF                ;Remove the previous status of the B button.
+LC249:  STA $00                 ;
+LC24B:  EOR Joy1Status,x        ;
+LC24D:* AND Joy1Status,x        ;Save any button changes from the current frame
+LC24F:  STA Joy1Change,x        ;and the last frame to the joy change addresses.
+LC251:  STA Joy1Retrig,x        ;Store any changed buttons in JoyRetrig address.
+LC253:  LDY #$20                ;
+LC255:  LDA Joy1Status,x        ;Checks to see if same buttons are being
+LC257:  CMP $00                 ;pressed this frame as last frame.
+LC259:  BNE +                   ;If none, branch.
+LC25B:  DEC RetrigDelay1,x      ;Decrement RetrigDelay if same buttons pressed.
+LC25D:  BNE EndJoypadLoop       ;       
+LC25F:  STA Joy1Retrig,x        ;Once RetrigDelay=#$00, store buttons to retrigger.
+LC261:  LDY #$08                ;
+LC263:* STY RetrigDelay1,x      ;Reset retrigger delay to #$20(32 frames)
+
+EndJoypadLoop:
+        CPX #01
+        bne GoSoundEngine
+LC21C:  INX                     ;Load x with #$01. Used to read status of joypad 2.
+LC21D:  INC $01                 ;
+        bne ReadOnePad          ; Always jmp (fewer bytes than jmp)
+
+GoSoundEngine:
 LC103:* JSR SoundEngineEntryPoint      ;($B3B4)Update music and SFX.
-LC106:  JSR UpdateAge           ;($C97E)Update Samus' age.
+
+;----------------------------------------[ Update age ]----------------------------------------------
+
+;This is the routine which keeps track of Samus' age. It is called in the
+;NMI. Basically, this routine just increments a 24-bit variable every
+;256th frame. (Except it's not really 24-bit, because the lowest age byte
+;overflows at $D0.)
+
+UpdateAge:
+LC97E:  lda GameMode            ;
+LC980:  bne NMIEnd                  ;Exit if at title/password screen.
+LC982:  lda MainRoutine         ;
+LC984:  cmp #$03                ;Is game engine running?
+LC986:  bne NMIEnd              ;If not, don't update age.
+LC988:  ldx FrameCount          ;Only update age when FrameCount is zero
+LC98A:  bne NMIEnd                  ;(which is approx. every 4.266666666667 seconds).
+LC98C:  inc SamusAgeLo,x        ;Minor Age = Minor Age + 1.
+LC98F:  lda SamusAgeLo          ;
+LC992:  cmp #$D0                ;Has Minor Age reached $D0?
+LC994:  bcc NMIEnd                  ;If not, we're done.
+LC996:  lda #$00                ;Else reset minor age.
+LC998:  sta SamusAgeLo          ;
+LC99B:* cpx #$03                ;
+LC99D:  bcs NMIEnd              ;Loop to update middle age and possibly major age.
+LC99F:  inx                     ;
+LC9A0:  inc SamusAgeLo,x        ;
+LC9A3:  beq -                   ;Branch if middle age overflowed, need to increment
+
+NMIEnd: 
+
 LC109:  LDY #$01                ; NMI = finished.
 LC10B:  STY NMIStatus           ;
 LC10D:  PLA                     ;Restore Y.
@@ -423,59 +509,6 @@ LC20E:  STX $00                 ;Lower byte of pointer to PPU string.
 LC210:  STY $01                 ;Upper byte of pointer to PPU string.
 LC212:  JMP ProcessPPUStr       ;($C30C)Write data string to PPU.
 
-;----------------------------------------[Read joy pad status ]--------------------------------------
-
-;The following routine reads the status of both joypads
-
-ReadJoyPads:
-LC215:  LDX #$00                ;Load x with #$00. Used to read status of joypad 1.
-LC217:  STX $01                 ;
-LC219:  JSR ReadOnePad          ;
-LC21C:  INX                     ;Load x with #$01. Used to read status of joypad 2.
-LC21D:  INC $01                 ;
-
-ReadOnePad:
-LC21F:  LDY #$01                ;These lines strobe the        
-LC221:  STY CPUJoyPad1          ;joystick to enable the 
-LC224:  DEY                     ;program to read the 
-LC225:  STY CPUJoyPad1          ;buttons pressed.
-    
-LC228:  LDY #$08                ;Do 8 buttons.
-LC22A:* PHA                     ;Store A.
-LC22B:  LDA CPUJoyPad1,x        ;Read button status. Joypad 1 or 2.
-LC22E:  STA $00                 ;Store button press at location $00.
-LC230:  LSR                     ;Move button push to carry bit.
-LC231:  ORA $00                 ;If joystick not connected, 
-LC233:  LSR                     ;fills Joy1Status with all 1s.
-LC234:  PLA                     ;Restore A.
-LC235:  ROL                     ;Add button press status to A.
-LC236:  DEY                     ;Loop 8 times to get 
-LC237:  BNE -                   ;status of all 8 buttons.
-
-LC239:  LDX $01                 ;Joypad #(0 or 1).
-LC23B:  LDY Joy1Status,x        ;Get joypad status of previous refresh.
-LC23D:  STY $00                 ;Store at $00.
-LC23F:  STA Joy1Status,x        ;Store current joypad status.
-LC241:  EOR $00                 ;
-LC243:  BEQ +                   ;Branch if no buttons changed.
-LC245:  LDA $00                 ;           
-LC247:  AND #$BF                ;Remove the previous status of the B button.
-LC249:  STA $00                 ;
-LC24B:  EOR Joy1Status,x        ;
-LC24D:* AND Joy1Status,x        ;Save any button changes from the current frame
-LC24F:  STA Joy1Change,x        ;and the last frame to the joy change addresses.
-LC251:  STA Joy1Retrig,x        ;Store any changed buttons in JoyRetrig address.
-LC253:  LDY #$20                ;
-LC255:  LDA Joy1Status,x        ;Checks to see if same buttons are being
-LC257:  CMP $00                 ;pressed this frame as last frame.
-LC259:  BNE +                   ;If none, branch.
-LC25B:  DEC RetrigDelay1,x      ;Decrement RetrigDelay if same buttons pressed.
-LC25D:  BNE ++                  ;       
-LC25F:  STA Joy1Retrig,x        ;Once RetrigDelay=#$00, store buttons to retrigger.
-LC261:  LDY #$08                ;
-LC263:* STY RetrigDelay1,x      ;Reset retrigger delay to #$20(32 frames)
-LC265:* RTS                     ;or #$08(8 frames) if already retriggering.
-
 ;-----------------------------------------[ Choose routine ]-----------------------------------------
 
 ;This is an indirect jump routine. A is used as an index into a code
@@ -509,9 +542,10 @@ LC2A8:  TYA                     ;
 LC2A9:  CLC                     ;Add value stored in Y to lower address
 LC2AA:  ADC $00                 ;byte stored in $00.
 LC2AC:  STA $00                 ;
-LC2AE:  BCC +                   ;Increment $01(upper address byte) if carry
-LC2B0:  INC $01                 ;has occurred.
-LC2B2:* RTS                     ;
+LC2AE:  BCS +                   ;Increment $01(upper address byte) if carry
+        RTS
+LC2B0:* INC $01                 ;has occurred.
+LC2B2:  RTS                     ;
 
 ;Add Y to pointer at $0002
 
@@ -789,36 +823,28 @@ LC42B:  RTS                     ;
 
 ;---------------------------[ NMI and PPU control routines ]--------------------------------
 
-; Wait for the NMI to end.
-
-WaitNMIPass:    
-LC42C:  JSR ClearNMIStat        ;($C434)Indicate currently in NMI.
-LC42F:* LDA NMIStatus           ;
-LC431:  BEQ -                   ;Wait for NMI to end.
-LC433:  RTS                     ;
-
-ClearNMIStat:
-LC434:  LDA #$00                ;Clear NMI byte to indicate the game is
-LC436:  STA NMIStatus           ;currently running NMI routines.
-LC438:  RTS                     ;
-
 ScreenOff:
 LC439:  LDA PPUCNT1ZP           ;
 LC43B:  AND #$E7                ; BG & SPR visibility = off
 
 WriteAndWait:
-LC43D:* STA PPUCNT1ZP           ;Update value to be loaded into PPU control register.
+LC43D: STA PPUCNT1ZP           ;Update value to be loaded into PPU control register.
 
-WaitNMIPass_:
-LC43F:  JSR ClearNMIStat        ;($C434)Indicate currently in NMI.
-LC442:* LDA NMIStatus           ;
-LC444:  BEQ -                   ;Wait for NMI to end before continuing.
+; Wait for the NMI to end.
+
+WaitNMIPass:
+LC434:  LDA #$00                ;Clear NMI byte to indicate the game is
+LC436:  STA NMIStatus           ;currently running NMI routines.
+
+WaitNMIPassLoop:
+LC442:  LDA NMIStatus            ;
+LC444:  BEQ WaitNMIPassLoop     ; Wait for NMI to end before continuing.
 LC446:  RTS                     ;
 
 ScreenOn:
 LC447:  LDA PPUCNT1ZP           ;
 LC449:  ORA #$1E                ;BG & SPR visibility = on
-LC44B:  BNE --                  ;Branch always
+LC44B:  BNE WriteAndWait         ;Branch always
 
 ;Update the actual PPU control registers.
 
@@ -1643,34 +1669,6 @@ StartGameEgine:
 LC97B:  inc MainRoutine         ;Next routine to run is GameOver.
 GameEngineExit:
 LC97D:  rts                     ;
-
-;----------------------------------------[ Update age ]----------------------------------------------
-
-;This is the routine which keeps track of Samus' age. It is called in the
-;NMI. Basically, this routine just increments a 24-bit variable every
-;256th frame. (Except it's not really 24-bit, because the lowest age byte
-;overflows at $D0.)
-
-UpdateAge:
-LC97E:  lda GameMode            ;
-LC980:  bne ++                  ;Exit if at title/password screen.
-LC982:  lda MainRoutine         ;
-LC984:  cmp #$03                ;Is game engine running?
-LC986:  bne ++                  ;If not, don't update age.
-LC988:  ldx FrameCount          ;Only update age when FrameCount is zero
-LC98A:  bne ++                  ;(which is approx. every 4.266666666667 seconds).
-LC98C:  inc SamusAgeLo,x        ;Minor Age = Minor Age + 1.
-LC98F:  lda SamusAgeLo          ;
-LC992:  cmp #$D0                ;Has Minor Age reached $D0?
-LC994:  bcc ++                  ;If not, we're done.
-LC996:  lda #$00                ;Else reset minor age.
-LC998:  sta SamusAgeLo          ;
-LC99B:* cpx #$03                ;
-LC99D:  bcs +                   ;Loop to update middle age and possibly major age.
-LC99F:  inx                     ;
-LC9A0:  inc SamusAgeLo,x        ;
-LC9A3:  beq -                   ;Branch if middle age overflowed, need to increment 
-LC9A5:* rts                     ;major age too. Else exit.
 
 ;-------------------------------------------[ Game over ]--------------------------------------------
 
@@ -3916,7 +3914,7 @@ LD8BF:  lda $030F,x
     bcc +
     lda #$01
 *   sta PalDataPending
-    jsr WaitNMIPass_
+    jsr WaitNMIPass
     jsr SelectSamusPal
     jsr StartMusic          ;($LD92C)Start music.
     jsr ScreenOn
@@ -4704,7 +4702,7 @@ AddToMaxMissiles:
     STA $0405,x
     LDA $08
     BEQ ++
-    JMP LDEDE
+    JMP DoDrawSpriteObject
 
 ;----------------------------------------[ Item drop table ]-----------------------------------------
 
@@ -4812,6 +4810,8 @@ LDED4:  ldx PageIndex           ;Get index to object.
 LDED6:  sta ObjectOnScreen,x        ;Store visibility status of object.
 LDEDB:  tax             ;
 LDEDC:  beq +               ;Branch if object is not within the screen boundaries.
+
+DoDrawSpriteObject:
 LDEDE:  ldx SpritePagePos       ;Load index into next unused sprite RAM segment.
 LDEE0:  jmp DrawSpriteObject        ;($DF19)Start drawing object.
 
@@ -4926,9 +4926,9 @@ LDF2F:  sta ObjectCntrl         ;Clear object control byte.
 LDF31:  rts             ;
 
 SkipPlacementData:
-LDF32:* inc $0F             ;Skip next y and x placement data bytes.
+LDF32:  inc $0F             ;Skip next y and x placement data bytes.
 LDF34:  inc $0F             ;
-LDF36:  inc $11             ;Increment to next data item in frame data.
+LDF36:  inc MacroTileIndex          ;Increment to next data item in frame data.
 LDF38:  jmp DrawSpriteObject        ;($DF19)Draw next sprite.
 
 GetNewControlByte:
@@ -4941,23 +4941,23 @@ LDF45:* lsr ObjectCntrl         ;Restore MSB of ObjectCntrl.
 LDF47:  lda ($00),y         ;
 LDF49:  sta $05             ;Save new sprite control byte.
 LDF4B:* iny             ;Increment past sprite control byte.
-LDF4C:  sty $11             ;Save index of frame data.
+LDF4C:  sty MacroTileIndex             ;Save index of frame data.
 LDF4E:  jmp GetNextFrameByte        ;($DF1B)Load next frame data byte.
 
 OffsetObjectPosition:
 LDF51:  iny             ;Increment index to next byte of frame data.
 LDF52:  lda ($00),y         ;This data byte is used to offset the object from
 LDF54:  clc             ;its current y positon.
-LDF55:  adc $10             ;
-LDF57:  sta $10             ;Add offset amount to object y screen position.
-LDF59:  inc $11             ;
-LDF5B:  inc $11             ;Increment past control byte and y offset byte.
-LDF5D:  ldy $11             ;
+LDF55:  adc ScreenYPos             ;
+LDF57:  sta ScreenYPos             ;Add offset amount to object y screen position.
+LDF59:  inc MacroTileIndex             ;
+LDF5B:  inc MacroTileIndex             ;Increment past control byte and y offset byte.
+LDF5D:  ldy MacroTileIndex             ;
 LDF5F:  lda ($00),y         ;Load x offset data byte.
 LDF61:  clc             ;
-LDF62:  adc $0E             ;Add offset amount to object x screen position.
-LDF64:  sta $0E             ;
-LDF66:  inc $11             ;Increment past x offset byte.
+LDF62:  adc ScreenXPos             ;Add offset amount to object x screen position.
+LDF64:  sta ScreenXPos             ;
+LDF66:  inc MacroTileIndex             ;Increment past x offset byte.
 LDF68:  jmp DrawSpriteObject        ;($DF19)Draw next sprite.
 
 ;----------------------------------[ Sprite placement routines ]-------------------------------------
@@ -7616,7 +7616,6 @@ LEF47:  sta $11             ;Store macro index.
 
     STX $11
 
-; TODO - I mangled this
 ; Update attribute if changed
 LEF9E:  lda ObjectPal           ;Load attribute data of structure.
 LEFA0:  cmp RoomPal           ;Is it the same as the room's default attribute data?
@@ -8134,7 +8133,8 @@ LF306:  lda $95CE
     sta HealthHiChange
 *   rts
 
-LF311:  bcs Exit22
+LF311:  
+    bcs Exit22
     lda #$E0
     sta $010F
     jsr LF338
@@ -8149,14 +8149,20 @@ LF325:  sta HealthLoChange
 LF327:  sta HealthHiChange
 
 Exit22: 
-LF329:  rts             ;Return for routine above and below.
+LF329: 
+    rts             ;Return for routine above and below.
 
-LF32A:  bcs Exit22
+LF32A:  
+    bcs Exit22
     jsr LF279
     jmp LF2BF
 
-LF332:  jsr LF340
-    jmp Amul8       ; * 8
+LF332:  
+    jsr LF340
+    asl
+    asl
+    asl
+    rts       ; * 8
 
 LF338:  lda $10
     asl
@@ -9782,7 +9788,9 @@ LFF3C:  lda $00
     ror $02
     tya
     and #$1F
-    jsr Amul8       ; * 8
+    asl
+    asl
+    asl       ; * 8
     sta $03
     rts
 
