@@ -754,14 +754,12 @@ LC3D6:  CLC                     ;Generate twos compliment of value stored in A.
 LC3D7:  ADC #$01                ;
 LC3D9:  RTS                     ;
 
-; TODO - Free up more bytes to get the Minus 4, Minus16, and Plus16 tables working
-;Minus16Table:
-;    .byte $f0, $f1, $f2, $f3, $f4, $f5, $f6, $f7, $f8, $f9, $fa, $fb, $fc, $fd, $fe, $ff
+; TODO - This might be worse than using these bytes fully unroll hot loops
+; TODO - Need to align the identity table to a memory page for maxium cycle gains
+;        Test out if aligning to #$00 or #$F0 is better. There are way more -16s in the code
+    .byte $f0, $f1, $f2, $f3, $f4, $f5, $f6, $f7, $f8, $f9, $fa, $fb, $fc, $fd, $fe, $ff
 IdentityTable:
-    .byte $00, $01, $02, $03
-Plus4Table: 
-    .byte $04, $05, $06, $07, $08, $09, $0a, $0b, $0c, $0d, $0e, $0f
-Plus16Table:
+    .byte $00, $01, $02, $03, $04, $05, $06, $07, $08, $09, $0a, $0b, $0c, $0d, $0e, $0f
     .byte $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $1a, $1b, $1c, $1d, $1e, $1f
     .byte $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $2a, $2b, $2c, $2d, $2e, $2f
     .byte $30, $31, $32, $33, $34, $35, $36, $37, $38, $39, $3a, $3b, $3c, $3d, $3e, $3f
@@ -777,7 +775,7 @@ Plus16Table:
     .byte $d0, $d1, $d2, $d3, $d4, $d5, $d6, $d7, $d8, $d9, $da, $db, $dc, $dd, $de, $df
     .byte $e0, $e1, $e2, $e3, $e4, $e5, $e6, $e7, $e8, $e9, $ea, $eb, $ec, $ed, $ee, $ef
     .byte $f0, $f1, $f2, $f3, $f4, $f5, $f6, $f7, $f8, $f9, $fa, $fb, $fc, $fd, $fe, $ff
-    .byte $00, $01, $02, $03, $04, $05, $06, $07;, $08, $09, $0a, $0b, $0c, $0d, $0e, $0f
+    .byte $00, $01, $02, $03, $04, $05, $06, $07, $08, $09, $0a, $0b, $0c, $0d, $0e, $0f    ; Overflow a bit so catch +16 past $ff
 
 ;The following two routines add a Binary coded decimal (BCD) number to another BCD number.
 ;A base number is stored in $03 and the number in A is added/subtracted from $03.  $01 and $02 
@@ -2510,30 +2508,31 @@ LCF81:  JSR ClearHorzData       ;($CFB7)Clear all horizontal movement data.
 
 LCF88:  LDA Joy1Status
         AND #$03
-        BEQ +
+        BEQ ApplyGravity
         JSR BitScan             ;($E1E1)
         TAX
         JSR LCCB7
         LDA SamusGravity
-        BMI ++
+        BMI ClearHorzDataExit
         LDA AnimResetIndex
         CMP #an_SamusSalto
-        BEQ ++
+        BEQ ClearHorzDataExit
         STX SamusDir
         LDA Table06+1,x
         JMP SetSamusAnim
-
-      * LDA SamusGravity
-        BMI +
-        BEQ +
+ApplyGravity:
+        LDA SamusGravity
+        BMI ClearHorzDataExit
+        BEQ ClearHorzDataExit
         LDA AnimResetIndex
         CMP #an_SamusJump
-        BNE +
+        BNE ClearHorzDataExit
 
 ClearHorzData:
 LCFB7:  JSR ClearHorzMvmntData  ;($CF4C)Clear horizontal speed and linear counter.
         STY SamusHorzAccel      ;Clear horizontal acceleration data.
-      * RTS                     ;
+ClearHorzDataExit:
+        RTS                     ;
 
 SetSamusJump:
 LCFC3:  LDY #an_SamusJump
@@ -2558,7 +2557,7 @@ AfterSamusJumpSet:
         STA $0686
         JSR SFX_ScrewAttack
 *       JSR SFX_SamusJump
-LCFF3:  LDY #$18                ; gravity (high value -> low jump)
+        LDY #$18                ; gravity (high value -> low jump)
         LDA SamusGear
         AND #gr_HIGHJUMP
         BEQ +                   ; branch if Samus doesn't have High Jump
@@ -2845,9 +2844,7 @@ LD1F7:
     ldy #$D0
 *   lda ObjAction,y
         beq +
-        tya
-        clc
-        adc #$10
+        lda IdentityTable+16, y
         tay
     bne -
     iny
@@ -2971,7 +2968,8 @@ Table09:
     .byte $EC
     .byte $F0
 
-LD2EB:  tya
+LD2EB:
+    tya
     tax
     inc ObjAction,x
     lda #$02
@@ -2989,7 +2987,8 @@ SetProjectileAnimWithoutReset:
     sta AnimDelay,x
 *   rts
 
-LD306:  ldx #$00
+LD306:
+    ldx #$00
     jsr LE8BE
     tya
     tax
@@ -3929,11 +3928,10 @@ LD976:  lda #$00            ;
     bcs +
     jsr LD9BA
     bne +
-D99A:   inc OnFrozenEnemy       ;Samus is standing on a frozen enemy.
+D99A:
+    inc OnFrozenEnemy       ;Samus is standing on a frozen enemy.
     bne ++
-*   txa
-    sec
-    sbc #$10
+*   lda IdentityTable-16, x
     tax
     bpl --
 *   lda ElevatorStatus
@@ -4128,9 +4126,7 @@ LDAEE:  LDY #$08
     LDB0B:  ADC #$08
     LDB0D:  STA TileWRAMLo,x
     LDB10:  
-        txa
-        sec
-        sbc #$10
+        lda IdentityTable-16, x
         tax
     LDB13:  DEY
     LDB14:  BNE _loop
@@ -4837,7 +4833,7 @@ LDFB6:  clc             ;object by using two compliment minus 8(Each sprite is 8
 LDF0E:  adc $0E             ;Add initial X pos
 LDF10:  sta SpriteRAM+3,x     ;Store sprite X coord
 LDF13:  inc $0F             ;Increment to next placement data byte.
-        lda Plus4Table, x
+        lda IdentityTable+4, x
         tax
 
 DrawSpriteObject:
@@ -5702,7 +5698,7 @@ LE457:  lda ObjectY         ;Get Samus' y position in room.
 LE45E:  and #$07            ;Check if result is a multiple of 8. If so, branch to
 LE460:  bne +               ;Only call crash detection every 8th pixel.
 LE462:  jsr CheckMoveUp         ;($E7A2)Check if Samus obstructed UPWARDS.
-    bcc +++++++         ;If so, branch to exit(can't move any further).
+    bcc MoveSamusUpExit     ;If so, branch to exit(can't move any further).
 *   lda ObjAction           ;
     cmp #sa_Elevator        ;Is Samus riding elevator?
     beq +               ;If so, branch.
@@ -5711,7 +5707,7 @@ LE462:  jsr CheckMoveUp         ;($E7A2)Check if Samus obstructed UPWARDS.
     and #$42
     cmp #$42
     clc
-    beq ++++++
+    beq MoveSamusUpExit
 *   lda SamusScrY
     cmp #$66    ; reached up scroll limit?
     bcs +      ; branch if not
@@ -5729,6 +5725,7 @@ LE462:  jsr CheckMoveUp         ;($E7A2)Check if Samus obstructed UPWARDS.
 *   dec ObjectY
     inc SamusJmpDsplcmnt
     sec
+MoveSamusUpExit:
 *   rts
 
 ; attempt to move Samus one pixel down
@@ -6510,9 +6507,7 @@ LE9C2:  tay
     _loop:   
     *   lda TileRoutine,x
         beq +      ; 0 = free slot
-            txa
-            sec
-            sbc #$10
+            lda IdentityTable-16, x
             tax
         bne _loop
     .scend
@@ -7049,9 +7044,7 @@ LEC09:  lda ElevatorStatus
 
 ZebHole:
 LEC57:  ldx #$20
-*   txa
-    sec
-    sbc #$08
+*   lda IdentityTable-8, x
     bmi +
     tax
     ldy $0728,x
@@ -7105,9 +7098,7 @@ LEC9B:
     and #$02
     bne +
     sta EnStatus,x
-*   txa
-    sec
-    sbc #$10
+*   lda IdentityTable-16, x
     tax
     bpl --
     ldx #$18
@@ -7117,9 +7108,7 @@ LEC9B:
     bcs +
     lda #$00
     sta $B0,x
-*   txa
-    sec
-    sbc #$08
+*   lda IdentityTable-8, x
     tax
     bpl --
     jsr LED65
@@ -7134,9 +7123,7 @@ LEC9B:
     and #$04
     bne +
     sta $0500,x
-*   txa
-    sec
-    sbc #$10
+*   lda IdentityTable-16, x
     tax
     cmp #$F0
     bne --
@@ -7204,9 +7191,7 @@ LED65:  ldx #$B0
     lda ObjectOnScreen,x
     bne +
     sta ObjAction,x
-*   txa
-    sec
-    sbc #$10
+*   lda IdentityTable-16, x
     tax
     bmi --
     rts
@@ -7390,9 +7375,7 @@ LEE63:  ldx #$18
     adc FrameCount
     sta $8A
 *   jsr LEE86
-    txa
-    sec
-    sbc #$08
+    lda IdentityTable-8, x
     tax
     bpl -
     lda MemuByte
@@ -7735,14 +7718,10 @@ LF034:  lda #$FF
         bne ++
     *   jsr LF149
         jsr LF32A
-    *   tya
-        clc
-        adc #$10
+    *   lda IdentityTable+16, y
         tay
         bne ---
-*   txa
-    sec
-    sbc #$08        ; each Memu occupies 8 bytes
+*   lda IdentityTable-8, x ; each Memu occupies 8 bytes
     tax
     bpl ------
 
@@ -7755,9 +7734,7 @@ LF034:  lda #$FF
     beq ++
     jsr AreObjectsTouching      ;($DC7F)
     jsr LF277
-*   txa
-    sec
-    sbc #$10
+*   lda IdentityTable-16, x
     tax
     bmi --
 ; enemy < bullet/missile/bomb detection
@@ -7785,9 +7762,7 @@ LF09F:
     ; check if enemy is actually hit
     *   jsr LF140
         jsr LF2CA
-    *   tya
-        clc
-        adc #$10
+    *   lda IdentityTable+16, y
         tay      ; next projectile slot
     bne ---
 *   ldy #$00
@@ -7798,9 +7773,7 @@ LF09F:
     jsr LF140
     jsr LF282
 NextEnemy:
-    txa
-    sec
-    sbc #$10
+    lda IdentityTable-16, x
     tax
     bmi +
     jmp LF09F
@@ -7829,9 +7802,7 @@ DistFromObj0ToEn1:
     jsr LF162
     jsr LF1FA
     jsr LF2ED
-*   tya
-    clc
-    adc #$10
+*   lda IdentityTable+16, y
     tay
     cmp #$C0
     bne --
@@ -7847,9 +7818,7 @@ DistFromObj0ToEn1:
     bne ++
 *   jsr LDC82
     jsr LF311
-*   txa
-    sec
-    sbc #$10
+*   lda IdentityTable-16, x
     tax
     cmp #$C0
     bne ---         
@@ -7990,7 +7959,8 @@ LF256:  sec
     cmp $05
 *   rts
 
-LF262:  lda $0B
+LF262:
+    lda $0B
     sbc $0A
 
 LF266:  sta $01
@@ -8882,9 +8852,7 @@ Exit19:
 LF93B:  ldx #$B0
 *   jsr LF949
     ldx PageIndex
-    txa
-    sec
-    sbc #$10
+    lda IdentityTable-16, x
     tax
     cmp #$60
     bne -
@@ -9293,9 +9261,7 @@ UpdateMellowMemu:
     lda $B6,x
     and #$F8
     sta $B6,x
-    txa
-    sec
-    sbc #$08
+    lda IdentityTable-8, x
     bpl -
 MemuExit:
 *   rts
@@ -9521,9 +9487,7 @@ _loop:
     adc #$3C
     sta $07
     jsr LDC54
-    txa
-    sec
-    sbc #$08
+    lda IdentityTable-8, x
     tax
     bne _Loop
     jmp LDC54
