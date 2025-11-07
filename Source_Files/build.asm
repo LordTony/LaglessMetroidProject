@@ -7,9 +7,10 @@
 ;
 ; ------------------- How to Build (Windows only for now) -------------------
 ;
-; Make sure you are in the Source_Files directory on the command line:
+; Go to the root folder and run:
 ;
-; ../Ophis/ophis.exe ./build.asm ../assembled_metroid.nes
+; build.ps1
+;
 
 .text HEADER 
 .org $0000

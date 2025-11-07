@@ -318,10 +318,10 @@ Bank01_L82B2:  RTS
 
 Bank01_L82B3:  LDA $6B03,X
 Bank01_L82B6:  BPL $82BE
-Bank01_L82B8:  JSR GrowRadius
+Bank01_L82B8:  JSR GrowRadiusY
 Bank01_L82BB:  JMP $82C3
 Bank01_L82BE:  BEQ $82D2
-Bank01_L82C0:  JSR ShrinkRadius
+Bank01_L82C0:  JSR ShrinkRadiusY
 Bank01_L82C3:  LDX PageIndex
 Bank01_L82C5:  BCS $82D2
 Bank01_L82C7:  LDY EnCounter,X
@@ -341,10 +341,10 @@ Bank01_L82E0:  TYA
 Bank01_L82E1:  STA EnCounter,X
 Bank01_L82E4:  LDA $6B03,X
 Bank01_L82E7:  BPL $82EF
-Bank01_L82E9:  JSR GrowRadius
+Bank01_L82E9:  JSR GrowRadiusY
 Bank01_L82EC:  JMP $82F4
 Bank01_L82EF:  BEQ $82FB
-Bank01_L82F1:  JSR ShrinkRadius
+Bank01_L82F1:  JSR ShrinkRadiusY
 Bank01_L82F4:  LDX PageIndex
 Bank01_L82F6:  BCC $82FB
 Bank01_L82F8:  JMP $8258
@@ -470,7 +470,7 @@ Bank01_L83FB:  SBC EnRadY,X
 Bank01_L83FE:  AND #$07
 Bank01_L8400:  SEC 
 Bank01_L8401:  BNE $8406
-Bank01_L8403:  JSR GrowRadius
+Bank01_L8403:  JSR GrowRadiusY
 Bank01_L8406:  LDY #$00
 Bank01_L8408:  STY $00
 Bank01_L840A:  LDX PageIndex
@@ -513,7 +513,7 @@ Bank01_L8451:  ADC EnRadY,X
 Bank01_L8454:  AND #$07
 Bank01_L8456:  SEC 
 Bank01_L8457:  BNE $845C
-Bank01_L8459:  JSR ShrinkRadius
+Bank01_L8459:  JSR ShrinkRadiusY
 Bank01_L845C:  LDY #$00
 Bank01_L845E:  STY $00
 Bank01_L8460:  LDX PageIndex

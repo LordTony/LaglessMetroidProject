@@ -152,7 +152,7 @@ L80DA:  JSR ClearNameTables     ;($C158)Erase name table data.
 
 L80DD:  LDX #$F4                ;Lower address of PPU information.
 L80DF:  LDY #$82                ;Upper address of PPU information.
-L80E1:  JSR PrepPPUProcess_     ;($C20E) Writes background of intro screen to name tables.
+L80E1:  JSR PrepPPUProcess     ;($C20E) Writes background of intro screen to name tables.
 
 L80E4:  LDA #$01                ;
 L80E6:  STA PalDataPending      ;Prepare to load palette data.
@@ -2681,11 +2681,16 @@ L951F:  .byte $06, $85, $06, $A5, $03, $20, $C5, $C2, $05, $02, $85, $07, $60
 
 ;----------------------------------------------------------------------------------------------------
 
-;Unused.
-L952C:  .byte $FF, $FF, $FF, $FF, $00, $00, $00, $00, $00, $00, $00, $00, $FF, $FF, $FF, $FF
-L953C:  .byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $00, $00, $00, $00
-L954C:  .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
-L955C:  .byte $00, $00, $00, $00
+;Add Y to pointer at $0002
+
+AddYToPtr02:
+    TYA                     ;
+    CLC                     ;Add value stored in Y to lower address
+    ADC $02                 ;byte stored in $02.
+    STA $02                 ;
+    BCC +                   ;Increment $01(upper address byte) if carry
+    INC $03                 ;has occurred.
+*   RTS                     ;
 
 ;----------------------------------------------------------------------------------------------------
 
@@ -3081,7 +3086,7 @@ L9A19:  TAY                     ;
 L9A1A:  LDX EndMsgStrngTbl0-2,Y ;Writes the end message on name table 0
 L9A1D:  LDA EndMsgStrngTbl0-1,Y ;
 L9A20:  TAY                     ;
-L9A21:  JSR PrepPPUProcess_     ;($C20E)Prepare to write to PPU.
+L9A21:  JSR PrepPPUProcess     ;($C20E)Prepare to write to PPU.
 L9A24:* LDA HideShowEndMsg      ;
 L9A26:  BEQ Exit100             ;If not time to erase end message, branch
 L9A28:  CMP #$05                ;
@@ -3091,7 +3096,7 @@ L9A2D:  TAY                     ;
 L9A2E:  LDX EndMsgStrngTbl1-2,Y ;Erases the end message on name table 0
 L9A31:  LDA EndMsgStrngTbl1-1,Y ;
 L9A34:  TAY                     ;
-L9A35:  JMP PrepPPUProcess_     ;($C20E)Prepare to write to PPU.
+L9A35:  JMP PrepPPUProcess     ;($C20E)Prepare to write to PPU.
 
 Exit100:
 L9A38:  RTS                     ;Exit from above and below routines.
@@ -3182,7 +3187,7 @@ L9AE7:  ASL                     ;Loads SpritePtrIndex with #$08(suitless).
 L9AE8:  STA SpritePtrIndex      ;
 L9AEA:  LDX #$52                ;Loads the screen where Samus stands on
 L9AEC:  LDY #$A0                ;the surface of the planet in end of game.
-L9AEE:  JSR PrepPPUProcess_     ;($C20E)Prepare to write to PPU.
+L9AEE:  JSR PrepPPUProcess     ;($C20E)Prepare to write to PPU.
 L9AF1:  JSR NmiOn               ;($C487)Turn on non-maskable interrupt.
 L9AF4:  LDA #$20                ;Initiate end game music.
 L9AF6:  STA MultiSFXFlag        ;
@@ -3407,7 +3412,7 @@ L9C73:  TAY                     ;
 L9C74:  LDX CreditsPntrTbl,Y    ;Base is $A291. Lower byte of pointer to PPU string.
 L9C77:  LDA CreditsPntrTbl+1,Y  ;Upper byte of pointer to PPU string.
 L9C7A:  TAY                     ;
-L9C7B:  JMP PrepPPUProcess_     ;($C20E)Prepare to write to PPU.
+L9C7B:  JMP PrepPPUProcess     ;($C20E)Prepare to write to PPU.
 L9C7E:* RTS                     ;
  
 LoadWaveSprites:
@@ -3714,7 +3719,7 @@ L9F65:  TAY                     ;
 L9F66:  LDA EndGmPalPntrTbl-1,Y ;High byte of PPU data pointer.
 L9F69:  LDX EndGmPalPntrTbl-2,Y ;Low byte of PPU data pointer.
 L9F6C:  TAY                     ;
-L9F6D:  JSR PrepPPUProcess_     ;($C20E)Prepare to write data string to PPU.
+L9F6D:  JSR PrepPPUProcess     ;($C20E)Prepare to write data string to PPU.
 L9F70:  LDA #$3F                ;
 L9F72:  STA PPUAddress          ;
 L9F75:  LDA #$00                ;
