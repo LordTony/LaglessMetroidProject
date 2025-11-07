@@ -670,7 +670,7 @@
 
 .alias NARPASSWORD      $69B2   ;0 = invinsible Samus not active, 1 = invinsible Samus active.
 .alias JustInBailey     $69B3   ;0 = Samus has suit, 1 = Samus is without suit.
-.alias ItmeHistory      $69B4   ;Thru $6A73. Unique item history saved game data (not used).
+.alias ItemHistory      $69B4   ;Thru $6A73. Unique item history saved game data (not used).
 
 ;---------------------------------------[ More enemy RAM ]-------------------------------------------
 
