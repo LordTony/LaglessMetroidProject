@@ -487,20 +487,19 @@ _CheckSFXFlag:
 * LDA (SFXPtrE4),Y        ;
   STA $00E0,Y             ;See table above for values loaded into $E0
   INY                     ;thru $E3 during this loop.
-  TYA                     ;
-  CMP #$04                ;Loop repeats four times to load the values.
+  CPY #$04                ;Loop repeats four times to load the values.
   BNE -                   ;
   LDA (SFXPtrE4),Y        ;
   STA ChannelType         ;#$00=SQ1,#$01=SQ2,#$02=Triangle,#$03=Noise
-  LDY #$00                ;Set y to 0 for counting loop ahead.
   LDA CurrentSFXFlags     ;
   PHA                     ;Push current SFX flags on stack.
+  LDY #$08                ;Set y to 0 for counting loop ahead.
 * ASL CurrentSFXFlags     ;
-  BCS +                   ;This portion of the routine loops a maximum of
-  INY                     ;eight times looking for any SFX flags that have
-  INY                     ;been set in the current SFX cycle.  If a flag
-  TYA                     ;is found, Branch to SFXFlagFound for further
-  CMP #$10                ;processing, if no flags are set, continue to
+  BCS _DoubleY            ;This portion of the routine loops a maximum of
+  DEY                     ;eight times looking for any SFX flags that have
+                          ;been set in the current SFX cycle.  If a flag
+                          ;is found, Branch to SFXFlagFound for further
+                          ;processing, if no flags are set, continue to
   BNE -                   ;next SFX cycle.
 
 _RestoreSFXFlags:
@@ -509,6 +508,11 @@ _RestoreSFXFlags:
 
 _NoSound:
   RTS                     ;Exit above routine. Also used when no function present.
+  nop
+
+_DoubleY:
+  lda EightMinusNumberTimesTwoTable, y
+  tay
 
 _SFXFlagFound:                   ;
 * LDA (SFXPtrE0),Y        ;This routine stores the starting address of the

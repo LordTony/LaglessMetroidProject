@@ -2,51 +2,20 @@
 --Press F5 or click the Run button to execute it
 --Type "emu." to show a list of all available API function
 
-function tableToString(t)
-    local s = "{"
-    local first = true
-    for k, v in pairs(t) do
-        if not first then
-            s = s .. ", "
-        end
-        -- Handle different types for keys and values
-        local key_str = tostring(k)
-		local start_idx, end_idx = string.find(k, "cycle", i)
-        -- Add quotes for string keys and values if desired
-        if type(k) == "string" and start_idx then
-            key_str = string.format('"%s"', k)
-        end
-
-		if start_idx then
-        	s = s .. key_str
-        end
-        first = false
-    end
-    s = s .. "}"
-    return s
-end
-
---done = false
-drawMacroCount = 0
-function countHotspots(address)
-	  state = emu.getState()
-	  --if done == false then
-	  --	emu.drawString(5, 5, state["ppu.cycle"], 0xFFFFFF, 0xFF000000, 225, 600)
-	  --	done = true
-	  --end
-	  local col = state["ppu.cycle"]
-	  local line = state["ppu.scanline"]
-	  local lifetime = 60
-	  local visual_start_offset = -100
-	  emu.drawRectangle(col, line + visual_start_offset, 3, 3, 0xAFFFAA90, true, lifetime)
-	  emu.drawRectangle(col, line + visual_start_offset, 3, 3, 0xAFFF0090, false, lifetime)
-	  emu.drawString(5, 15, "0x" .. string.upper(string.format("%x", address)), 0xFFFFFF, 0x0, 0, lifetime)
-	  
-	  drawMacroCount = drawMacroCount + 1
-end
-
-framesToResetOn = 600
+start_addr = 0xC200
+end_addr = 0xFFFF
+how_many_to_show = 50
+framesToResetOn = 300
 timer = 0
+
+function printHex(num)
+	return "0x" .. string.upper(string.format("%x", num))
+end
+
+function round(num)
+	return string.format("%.2f", num)
+end
+
 function onFrame()
 	timer = timer + 1
 	--if drawMacroCount > 0 then
@@ -61,17 +30,29 @@ function onFrame()
     		table.insert(entries, { addr = addr, ct = ct })
 		end
 
-		-- sort descending by count
 		table.sort(entries, function(a, b)
     		return a.ct > b.ct
 		end)
-
-		-- print the top 15 (or fewer if there aren’t that many)
-		local limit = math.min(15, #entries)
+		local limit = math.min(how_many_to_show, #entries)
+		
+		emu.drawString(5, 5, "Top " .. limit .. " Hotspots in range " .. printHex(start_addr) .. "-" .. printHex(end_addr), 0xFFFFFF, 0x0, 0, framesToResetOn)
+		emu.drawString(5, 15, "Avg hit/frame - " .. framesToResetOn .. " frames (~" .. framesToResetOn / 60 .. " sec)", 0xFFFFFF, 0x0, 0, framesToResetOn)
+		
+		-- print the top however many
 		for i = 1, limit do
 			local addr = tostring(entries[i].addr)
 			local avg = entries[i].ct / framesToResetOn
-    		emu.drawString(5, 5 + (i * 10), "0x" .. string.upper(string.format("%x", addr)) .. ": " .. avg, 0xFFFFFF, 0x0, 0, 600)
+			local col = 0xFFFFFF
+			if avg > 15 then
+				col = 0xFFFF00
+			end
+			if avg > 20 then
+				col = 0xFF0000
+			end
+			local cols = 3
+			local x_loc_offset = ((i - 1) % cols) * 80
+			local y_loc_offset = ((i - 1) // cols) * 10
+    		emu.drawString(5 + x_loc_offset, 30 + y_loc_offset, printHex(addr) .. ": " .. round(avg), col, 0x0, 0, framesToResetOn)
 		end
 		timer = 0
 		counts = {}
@@ -89,7 +70,7 @@ function countHotspots(address)
 end
 
 --Register some code (printInfo function) that will be run at the end of each frame
-emu.addMemoryCallback(countHotspots, emu.callbackType.exec, 0xC200, 0xFFFF)
+emu.addMemoryCallback(countHotspots, emu.callbackType.exec, start_addr, end_addr)
 emu.addEventCallback(onFrame, emu.eventType.start)
 
 --Display a startup message

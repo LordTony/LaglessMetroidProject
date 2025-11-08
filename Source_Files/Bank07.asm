@@ -777,6 +777,9 @@ IdentityTable:
     .byte $f0, $f1, $f2, $f3, $f4, $f5, $f6, $f7, $f8, $f9, $fa, $fb, $fc, $fd, $fe, $ff
     .byte $00, $01, $02, $03, $04, $05, $06, $07, $08, $09, $0a, $0b, $0c, $0d, $0e, $0f    ; Overflow a bit so catch +16 past $ff
 
+EightMinusNumberTimesTwoTable:
+    .byte $10, $0E, $0C, $0A, $08, $06, $04, $02, $00
+
 ;The following two routines add a Binary coded decimal (BCD) number to another BCD number.
 ;A base number is stored in $03 and the number in A is added/subtracted from $03.  $01 and $02 
 ;contain the lower and upper digits of the value in A respectively.  If an overflow happens after
@@ -4453,11 +4456,14 @@ LDCF4:  RTS             ;placement data segment.
 
 ;-----------------------------------------------------------------------------------------------------
 
-LDCF5:  JSR ClearObjectCntrl        ;($DF2D)Clear object control byte.
+LDCF5:
+    lda #$00
+    sta ObjectCntrl         ;Clear object control byte.
     PLA
     PLA
     LDX PageIndex
-LDCFC:  LDA InArea
+LDCFC:  
+    LDA InArea
     CMP #$13
     BNE +
     LDA EnDataIndex,x
@@ -4536,7 +4542,9 @@ SomethingAboutMovement:
     lda EnAnimFrame,x
     cmp #$F7
     bne MoveEnemies
-    jmp ClearObjectCntrl        ;($DF2D)Clear object control byte.
+    lda #$00
+    sta ObjectCntrl
+    rts
 
 ; AddToMaxMissiles
 ; ================
@@ -4660,10 +4668,12 @@ DrawFrame:
 LDE4A:  ldx PageIndex           ;Get index to proper object to work with.
 LDE4C:  lda AnimFrame,x         ;
 LDE4F:  cmp #$F7            ;Is the frame valid?
-LDE51:  bne ++              ;Branch if yes.
-LDE53:* jmp ClearObjectCntrl        ;($DF2D)Clear object control byte.
+LDE51:  bne LDE56              ;Branch if yes.
+LDE53:* lda #$00
+        sta ObjectCntrl         ;Clear object control byte.
+        rts                 ;
 LDE56:* cmp #$07            ;Is the animation of Samus facing forward?
-LDE58:  bne +               ;If not, branch.
+LDE58:  bne LDE60               ;If not, branch.
 
 LDE5A:  lda ObjectCntrl         ;Ensure object mirroring bit is clear so Samus'
 LDE5C:  and #$EF            ;sprite appears properly when going up and down
@@ -4688,11 +4698,11 @@ LDE84:  sta $02             ;
 LDE86:  lda PlacePtrTable+1,x       ;Store pointer from PlacePtrTbl in $0002.
 LDE89:  sta $03             ;
 LDE8B:  lda IsSamus         ;Is Samus the object being drawn?
-LDE8D:  beq +               ;If not, branch.
+LDE8D:  beq LDEBC               ;If not, branch.
 
 ;Special case for Samus exploding.
 LDE8F:  cpx #$0E            ;Is Samus exploding?
-LDE91:  bne +               ;If not, branch to skip this section of code.
+LDE91:  bne LDEBC               ;If not, branch to skip this section of code.
 LDE93:  ldx PageIndex           ;X=0.
 LDE95:  inc ObjectCounter       ;Incremented every frame during explode sequence.
 LDE97:  lda ObjectCounter       ;Bottom two bits used for index into ExplodeRotationTbl.
@@ -4705,7 +4715,7 @@ LDEA1:  ora ExplodeRotationTbl,x    ;Use mirror control bytes from table(Base is
 LDEA4:  sta $05             ;Save modified sprite control byte.
 LDEA6:  pla             ;Restore A
 LDEA7:  cmp #$19            ;After 25 frames, Move on to second part of death 
-LDEA9:  bne +               ;handler, else branch to skip the rest of this code.
+LDEA9:  bne LDEBC               ;handler, else branch to skip the rest of this code.
 LDEAB:  ldx PageIndex           ;X=0.
 LDEAD:  lda #sa_Dead2           ;
 LDEAF:  sta ObjAction,x         ;Move to next part of the death handler.
@@ -4713,7 +4723,9 @@ LDEB2:  lda #$28            ;
 LDEB4:  sta AnimDelay,x         ;Set animation delay for 40 frames(.667 seconds).
 LDEB7:  pla             ;Pull last return address off of the stack.
 LDEB8:  pla             ;
-LDEB9:  jmp ClearObjectCntrl        ;($DF2D)Clear object control byte.
+        lda #$00
+        sta ObjectCntrl         ;Clear object control byte.
+        rts             ;
 
 LDEBC:* ldx PageIndex           ;
 LDEBE:  iny             ;Increment to second frame data byte.
@@ -4731,67 +4743,107 @@ LDED3:  txa             ;
 LDED4:  ldx PageIndex           ;Get index to object.
 LDED6:  sta ObjectOnScreen,x        ;Store visibility status of object.
 LDEDB:  tax             ;
-LDEDC:  beq +               ;Branch if object is not within the screen boundaries.
+LDEDC:  beq SetObjectCntrlToA   ;
 
 DoDrawSpriteObject:
 LDEDE:  ldx SpritePagePos       ;Load index into next unused sprite RAM segment.
 LDEE0:  jmp DrawSpriteObject        ;($DF19)Start drawing object.
 
-LDEE3:* jmp ClearObjectCntrl        ;($DF2D)Clear object control byte then exit.
-
-ExplodeYDisplace:
-LDF7B:* tya             ;Transfer placement byte back into A.
-LDF7C:  and #$0E            ;Discard bits 7,6,5,4 and 0.
-LDF7E:  lsr             ;/2.
-LDF7F:  tay             ;
-LDF80:  lda ExplodeIndexTbl,y       ;Index into ExplodePlacementTbl.
-LDF83:  ldy IsSamus         ;
-LDF85:  bne +               ;Is Samus the object exploding? if so, branch.
-LDF87:  ldy PageIndex           ;Load index to proper enemy data.
-LDF89:  adc EnCounter,y         ;Increment every frame enemy is exploding. Initial=#$01.
-LDF8C:  jmp ++              ;Jump to load explode placement data.
+SetObjectCntrlToA:
+    sta ObjectCntrl         ;Clear object control byte.
+    rts 
+;----------------------------------[ Sprite placement routines ]-------------------------------------
 
 ;Special case for Samus exploding.
-LDF8F:* adc ObjectCounter       ;Increments every frame Samus is exploding. Initial=#$01.
-LDF91:* tay             ;
-LDF92:  lda ExplodeIndexTbl+2,y     ;Get data from ExplodePlacementTbl.
-LDF95:  pha             ;Save data on stack.
-LDF96:  lda $0F             ;Load placement data index.
-LDF98:  clc             ;
-LDF99:  adc #$0C            ;Move index forward by 12 bytes. to find y
-LDF9B:  tay             ;placement data.
-LDF9C:  pla             ;Restore A with ExplodePlacementTbl data.
-LDF9D:  clc             ;
-LDF9E:  adc ($02),y         ;Add table displacements with sprite placement data.
-LDFA0:  jmp DoYNegativeDisplacement ;Branch to add y placement values to sprite coords.
+SamusExplodeDisplacement:
+    adc ObjectCounter       ;Increments every frame Samus is exploding. Initial=#$01.
+SamusExplodeDisplacement_2:
+    tay             ;
+    lda ExplodeIndexTbl+2,y     ;Get data from ExplodePlacementTbl.
+    pha             ;Save data on stack.
+    lda $0F             ;Load placement data index.
+    clc             ;
+    adc #$0C            ;Move index forward by 12 bytes. to find y
+    tay             ;placement data.
+    pla             ;Restore A with ExplodePlacementTbl data.
+    clc             ;
+    adc ($02),y         ;Add table displacements with sprite placement data.
+    bit $04             ;
+    bmi NegativeDisplacementY    ;Branch if MSB in $04 is set(Flips object).
+    bpl AfterYDisplacement
+
+; This one is in a weird spot so I can attempt use branches instead of jumps in other places
+
+.scope
+ExplodeXDisplace:
+    ldy PageIndex           ;Load index to proper enemy slot.
+    lda EnCounter,y         ;Load counter value.
+    ldy IsSamus         ;Is Samus the one exploding?
+    beq _Skip1          ;If not, branch.
+    lda ObjectCounter       ;Load object counter if it is Samus who is exploding.
+_Skip1:
+    asl             ;*2. Move sprite in x direction 2 pixels every frame.
+    pha             ;Store value on stack.
+    ldy $0F             ;
+    lda ($02),y         ;Load placement data byte.
+    lsr             ;
+    bcs _Skip2       ;Check if LSB is set. If not, the byte stored on stack
+    pla             ;Will be twos complimented and used to move sprite in
+    eor #$FF            ;the negative x direction.
+    adc #$01            ;
+    pha
+_Skip2:         ;
+    lda $0F             ;Load placement data index.
+    clc             ;
+    adc #$0C            ;Move index forward by 12 bytes. to find x
+    tay             ;placement data.
+    pla             ;Restore A with x displacement data.
+    clc             ;
+    adc ($02),y         ;Add x displacement with sprite placement data.
+    jmp XDisplacementBitCheck ;Branch to add x placement values to sprite coords.
+.scend
 
 WriteSpriteRAM:
 LDEE6: ldy $0F             ;Load index for placement data.
 
+.scope
 YDisplacement:
-LDF6B:  lda ($02),y                         ;Load placement data byte.
-LDF6D:  tay                                 ;
-LDF6E:  and #$F0                            ;Check to see if this is placement data for the object
-LDF70:  cmp #$80                            ;exploding.  If so, branch.
-LDF72:  beq ExplodeYDisplace
-LDF74:  tya                                 ;Restore placement data byte to A.
+    lda ($02),y         ;Load placement data byte.
+    tay             ;
+    and #$F0            ;Check to see if this is placement data for the object
+    cmp #$80            ;exploding.  If so, branch.
+    beq ExplodeYDisplace              ;
+    tya             ;Restore placement data byte to A.
+    bit $04             ;
+    bmi NegativeDisplacementY    ;Branch if MSB in $04 is set(Flips object).
+    bpl _ClearAndExit
 
-DoYNegativeDisplacement:
-LDF75:* bit $04                             ;
-LDF77:  bpl AfterYNegativeDisplacement      ;Branch if MSB in $04 is set(Flips object).
+ExplodeYDisplace:
+    tya             ;Transfer placement byte back into A.
+    and #$0E            ;Discard bits 7,6,5,4 and 0.
+    lsr             ;/2.
+    tay             ;
+    lda ExplodeIndexTbl,y       ;Index into ExplodePlacementTbl.
+    ldy IsSamus         ;
+    bne SamusExplodeDisplacement  ;Is Samus the object exploding? if so, branch.
+    ldy PageIndex           ;Load index to proper enemy data.
+    adc EnCounter,y         ;Increment every frame enemy is exploding. Initial=#$01.
+    jmp SamusExplodeDisplacement_2 ;Jump to load explode placement data.
 
-NegativeYDisplacement:
+NegativeDisplacementY:
     eor #$FF            ;
     sec             ;NOTE:Setting carry makes solution 1 higher than expected.
     adc #$F8            ;If flip bit is set in $04, this function flips the
+_ClearAndExit:
+    clc             ;object by using two compliment minus 8(Each sprite is
+.scend
 
-AfterYNegativeDisplacement:
-LDF79:  clc             ;Clear carry before returning.
-LDEEB:  adc $10             ;Add initial Y position.
+AfterYDisplacement:
+LDEEB:  adc ScreenYPos             ;Add initial Y position.
 LDEED:  sta SpriteRAM,x       ;Store sprite Y coord.
 LDEF0:  dec SpriteRAM,x       ;Because PPU uses Y + 1 as real Y coord.
 LDEF3:  inc $0F             ;Increment index to next byte of placement data.
-LDEF5:  ldy $11             ;Get index to frame data.
+LDEF5:  ldy MacroTileIndex             ;Get index to frame data.
 LDEF7:  lda ($00),y         ;Tile value.
 LDEF9:  sta SpriteRAM+1,x     ;Store tile value in sprite RAM.
 LDEFC:  lda ObjectCntrl         ;
@@ -4800,26 +4852,33 @@ LDEFF:  asl             ;discard all other bits.
 LDF00:  and #$40            ;
 LDF02:  eor $05             ;Use it to override sprite horz mirror bit.
 LDF04:  sta SpriteRAM+2,x     ;Store sprite control byte in sprite RAM.
-LDF07:  inc $11             ;Increment to next byte of frame data.
+LDF07:  inc MacroTileIndex    ;Increment to next byte of frame data.
 LDF09:  ldy $0F             ;Load index for placement data.
 
+.scope
 XDisplacement:
-LDFA3:  lda ($02),y         ;Load placement data byte.
-LDFA5:  tay             ;
-LDFA6:  and #$F0            ;Check to see if this is placement data for the object
-LDFA8:  cmp #$80            ;exploding.  If so, branch.
-LDFAA:  beq ExplodeXDisplace  ;
-LDFAC:  tya             ;Restore placement data byte to A.
-LDFAD:  bit $04             ;
-LDFAF:  bvc AfterNegativeXDisplacement   ;Branch if bit 6 cleared, else data is negative displacement.
+    lda ($02),y         ;Load placement data byte.
+    tay             ;
+    and #$F0            ;Check to see if this is placement data for the object
+    cmp #$80            ;exploding.  If so, branch.
+    beq ExplodeXDisplace ;
+    tya             ;Restore placement data byte to A.
 
-NegativeXDisplacement:
-LDFB1:  eor #$FF            ;
-LDFB3:  sec             ;NOTE:Setting carry makes solution 1 higher than expected.
-LDFB4:  adc #$F8            ;If flip bit is set in $04, this function flips the
+XDisplacementBitCheck:
+    bit $04             ;
+    bvc _ClearAndExit    ;Branch if bit 6 cleared, else data is negative displacement.
 
-AfterNegativeXDisplacement:
-LDFB6:  clc             ;object by using two compliment minus 8(Each sprite is 8x8 pixels).
+NegativeDisplacementX:
+    eor #$FF            ;
+    sec             ;NOTE:Setting carry makes solution 1 higher than expected.
+    adc #$F8            ;If flip bit is set in $04, this function flips the
+
+_ClearAndExit:
+    clc             ;object by using two compliment minus 8(Each sprite is ;8x8 pixels).
+
+.scend
+AfterXDisplacement:
+
 LDF0E:  adc $0E             ;Add initial X pos
 LDF10:  sta SpriteRAM+3,x     ;Store sprite X coord
 LDF13:  inc $0F             ;Increment to next placement data byte.
@@ -4830,17 +4889,15 @@ DrawSpriteObject:
 LDF19:  ldy $11             ;Get index into frame data.
 
 GetNextFrameByte:
-LDF1B:  lda ($00),y         ;Get next frame data byte.
-LDF1D:  cmp #$FC            ;If byte < #$FC, byte is tile data. If >= #$FC, byte is 
-LDF1F:  bcc WriteSpriteRAM      ;frame data control info. Branch to draw sprite.
+LDF1B:  lda ($00),y                 ;Get next frame data byte.
+LDF1D:  cmp #$FC                    ;If byte < #$FC, byte is tile data.
+LDF1F:  bcc WriteSpriteRAM      ;If >= #$FC, byte is frame data control info. Branch to draw sprite.
 LDF21:  beq OffsetObjectPosition    ;#$FC changes object's x and y position.
 LDF23:  cmp #$FD            ;
 LDF25:  beq GetNewControlByte       ;#$FD sets new control byte information for the next sprites.
 LDF27:  cmp #$FE            ;#$FE skips next sprite placement x and y bytes.
 LDF29:  beq SkipPlacementData       ;
 LDF2B:  stx SpritePagePos       ;Keep track of current position in sprite RAM.
-
-ClearObjectCntrl:
 LDF2D:  lda #$00            ;
 LDF2F:  sta ObjectCntrl         ;Clear object control byte.
 LDF31:  rts             ;
@@ -4880,33 +4937,6 @@ LDF5F:  lda ($00),y         ;Load x offset data byte.
 LDF62:  adc ScreenXPos             ;Add offset amount to object x screen position.
 LDF64:  sta ScreenXPos             ;
 LDF68:  jmp DrawSpriteObject        ;($DF19)Draw next sprite.
-
-;----------------------------------[ Sprite placement routines ]-------------------------------------
-
-ExplodeXDisplace:
-LDFB8:  ldy PageIndex           ;Load index to proper enemy slot.
-LDFBA:  lda EnCounter,y         ;Load counter value.
-LDFBD:  ldy IsSamus         ;Is Samus the one exploding?
-LDFBF:  beq +               ;If not, branch.
-LDFC1:  lda ObjectCounter       ;Load object counter if it is Samus who is exploding.
-LDFC3:* asl             ;*2. Move sprite in x direction 2 pixels every frame.
-LDFC4:  pha             ;Store value on stack.
-LDFC5:  ldy $0F             ;
-LDFC7:  lda ($02),y         ;Load placement data byte.
-LDFC9:  lsr             ;
-LDFCA:  bcs +               ;Check if LSB is set. If not, the byte stored on stack
-LDFCC:  pla             ;Will be twos complimented and used to move sprite in
-LDFCD:  eor #$FF            ;the negative x direction.
-LDFCF:  adc #$01            ;
-LDFD1:  pha             ;
-LDFD2:* lda $0F             ;Load placement data index.
-LDFD4:  clc             ;
-LDFD5:  adc #$0C            ;Move index forward by 12 bytes. to find x
-LDFD7:  tay             ;placement data.
-LDFD8:  pla             ;Restore A with x displacement data.
-LDFD9:  clc             ;
-LDFDA:  adc ($02),y         ;Add x displacement with sprite placement data.
-LDFDC:  jmp OffsetObjectPosition ;Branch to add x placement values to sprite coords.
 
 ;---------------------------------[ Check if object is on screen ]----------------------------------
 
@@ -8848,7 +8878,8 @@ LF949:  stx PageIndex
     lda $0405,x
     and #$02
     bne +
-    jsr KillObject          ;($FA18)Free enemy data slot.
+    ; Kill Object
+    sta EnStatus,x          ;Store #$00 as enemy status(enemy slot is open).
 *   ldy EnStatus,x
     beq Exit19
 

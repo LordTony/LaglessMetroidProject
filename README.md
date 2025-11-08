@@ -23,9 +23,9 @@ The idea here is to attempt to take the Metroid lag as low as possible without a
 The baseline benchmark is Samus standing still in the opening room with 2 of the spikey bois both alive and crawing on the walls.
 
   * Metroid finishes all work for the benchmark frames in **137 to 149** scanlines
-  * Lagless Metroid finishes in **101 to 119**
-  * Lagless Metroid finishes in **%73.5 to %80** of the scanlines it takes Metroid
-  * The Current limit might be something like **95** scanlines, so keep pushing
+  * Lagless Metroid finishes in **98 to 117** scanlines
+  * Lagless Metroid finishes in **%71.5 to %78.5** of the scanlines it takes Metroid
+  * The limit might be something like **95** scanlines, so keep pushing
 
 ### Code Progress
 * ChooseRoutine has been removed from bank07 and is now only called from outside
@@ -91,7 +91,7 @@ Using these sites a lot:
 I want to create some tables for the common multiplication operations that happen. Like a mul / div table for 16, and 32 (8 is just 2 shifts and a table lookup would be slower). If I could find the bytes for it, I would also like to try adding an identity table for the XMinus16 and YPlus16 calls so that way I could add numbers with code that looks like this:
 
 ```
-LDA IdentityTable+#$10, X
+LDA IdentityTable+16, X
 tax
 ```
 
@@ -101,5 +101,4 @@ Now that I've gotten the identity table in, I can't help but wonder if those 256
 The "ShowMacroHits" lua script can be run and tweaked to find places in the code that are hit more often. It gives you the frame average of how many times each line of code has been executed every 10 seconds (600 frames). It then prints the top 15 of them on the screen. It helped me get some big wins.
 
 ## Bugs
-* At some point I broke the code that make Samus explode when she dies
-  * It's probably in the offset code somewhere rather than the animation code.
+* No known bugs
