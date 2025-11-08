@@ -102,4 +102,4 @@ The "ShowMacroHits" lua script can be run and tweaked to find places in the code
 
 ## Bugs
 * At some point I broke the code that make Samus explode when she dies
-* Picking up a missile tank (not the enemy drop) gives you an energy tank.
+  * It's probably in the offset code somewhere rather than the animation code.

@@ -660,109 +660,109 @@ Bank05_L8571:  RTS
 .advance ObjectAnimIdxTbl
 
 ;Samus run animation.
-Bank05_L8572:  .byte $03, $04, $05, $FF
+Bank05_L8572:  .byte $03, $04, $05, $00
 
 ;Samus front animation.
-Bank05_L8576:  .byte $07, $FF
+Bank05_L8576:  .byte $07, $00
 
 ;Samus jump out of ball animation.
 Bank05_L8578:  .byte $17
 
 ;Samus Stand animation.
-Bank05_L8579:  .byte $08, $FF
+Bank05_L8579:  .byte $08, $00
 
 ;Samus stand and fire animation.
-Bank05_L857B:  .byte $22, $FF
+Bank05_L857B:  .byte $22, $00
 
 ;Samus stand and jump animation.
 Bank05_L857D:  .byte $04
 
 ;Samus Jump animation.
-Bank05_L857E:  .byte $10, $FF
+Bank05_L857E:  .byte $10, $00
 
 ;Samus summersault animation.
-Bank05_L8580:  .byte $17, $18, $19, $1A, $FF
+Bank05_L8580:  .byte $17, $18, $19, $1A, $00
 
 ;Samus run and jump animation.
-Bank05_L8585:  .byte $03, $17, $FF
+Bank05_L8585:  .byte $03, $17, $00
 
 ;Samus roll animation.
-Bank05_L8588:  .byte $1E, $1D, $1C, $1B, $FF
+Bank05_L8588:  .byte $1E, $1D, $1C, $1B, $00
 
 ;Bullet animation.
-Bank05_L858D:  .byte $28, $FF
+Bank05_L858D:  .byte $28, $00
 
 ;Bullet hit animation.
-Bank05_L858F:  .byte $2A, $F7, $FF
+Bank05_L858F:  .byte $2A, $F7, $00
 
 ;Samus jump and fire animation.
-Bank05_L8592:  .byte $12, $FF
+Bank05_L8592:  .byte $12, $00
 
 ;Samus run and fire animation.
-Bank05_L8594:  .byte $0C, $0D, $0E, $FF
+Bank05_L8594:  .byte $0C, $0D, $0E, $00
 
 ;Samus point up and shoot animation.
 Bank05_L8598:  .byte $30 
 
 ;Samus point up animation.
-Bank05_L8599:  .byte $2B, $FF
+Bank05_L8599:  .byte $2B, $00
 
 ;Door open animation.
-Bank05_L859B:  .byte $31, $31, $33, $F7, $FF
+Bank05_L859B:  .byte $31, $31, $33, $F7, $00
 
 ;Door close animation.
-Bank05_L85A0:  .byte $33, $33, $31, $FF
+Bank05_L85A0:  .byte $33, $33, $31, $00
 
 ;Samus explode animation.
-Bank05_L85A4: .byte $35, $FF
+Bank05_L85A4: .byte $35, $00
 
 ;Samus jump and point up animation.
-Bank05_L85A6: .byte $39, $38, $FF
+Bank05_L85A6: .byte $39, $38, $00
 
 ;Samus run and point up animation.
-Bank05_L85A9:  .byte $40, $41, $42, $FF
+Bank05_L85A9:  .byte $40, $41, $42, $00
 
 ;Samus run, point up and shoot animation 1.
-Bank05_L85AD:  .byte $46, $FF
+Bank05_L85AD:  .byte $46, $00
 
 ;Samus run, point up and shoot animation 2.
-Bank05_L85AF:  .byte $47, $FF
+Bank05_L85AF:  .byte $47, $00
 
 ;Samus run, point up and shoot animation 3.
-Bank05_L85B1:  .byte $48, $FF
+Bank05_L85B1:  .byte $48, $00
 
 ;Samus on elevator animation 1.
-Bank05_L85B3:  .byte $07, $F7, $F7, $07, $F7, $F7, $F7, $07, $F7, $F7, $F7, $F7, $07, $F7, $FF
+Bank05_L85B3:  .byte $07, $F7, $F7, $07, $F7, $F7, $F7, $07, $F7, $F7, $F7, $F7, $07, $F7, $00
 
 ;Samus on elevator animation 2.
-Bank05_L85C2:  .byte $23, $F7, $F7, $23, $F7, $F7, $F7, $23, $F7, $F7, $F7, $F7, $23, $F7, $FF
+Bank05_L85C2:  .byte $23, $F7, $F7, $23, $F7, $F7, $F7, $23, $F7, $F7, $F7, $F7, $23, $F7, $00
 
 ;Samus on elevator animation 3.
-Bank05_L85D1:  .byte $07, $F7, $F7, $F7, $F7, $07, $F7, $F7, $F7, $07, $F7, $F7, $07, $F7, $FF
+Bank05_L85D1:  .byte $07, $F7, $F7, $F7, $F7, $07, $F7, $F7, $F7, $07, $F7, $F7, $07, $F7, $00
 
 ;Samus on elevator animation 4.
-Bank05_L85E0:  .byte $23, $F7, $F7, $F7, $F7, $23, $F7, $F7, $F7, $23, $F7, $F7, $23, $F7, $FF
+Bank05_L85E0:  .byte $23, $F7, $F7, $F7, $F7, $23, $F7, $F7, $F7, $23, $F7, $F7, $23, $F7, $00
 
 ;Wave beam animation.
-Bank05_L85EF:  .byte $4B, $FF
+Bank05_L85EF:  .byte $4B, $00
 
 ;Bomb tick animation.
-Bank05_L85F1:  .byte $4E, $4F, $FF
+Bank05_L85F1:  .byte $4E, $4F, $00
 
 ;Bomb explode animation.
-Bank05_L85F4:  .byte $3C, $4A, $49, $4A, $4D, $4A, $4D, $F7, $FF
+Bank05_L85F4:  .byte $3C, $4A, $49, $4A, $4D, $4A, $4D, $F7, $00
 
 ;Missile left animation.
-Bank05_L85FD:  .byte $26, $FF
+Bank05_L85FD:  .byte $26, $00
 
 ;Missile right animation.
-Bank05_L85FF:  .byte $25, $FF
+Bank05_L85FF:  .byte $25, $00
 
 ;Missile up animation.
-Bank05_L8601:  .byte $27, $FF
+Bank05_L8601:  .byte $27, $00
 
 ;Missile explode animation.
-Bank05_L8603:  .byte $67, $67, $67, $68, $68, $69, $F7, $FF
+Bank05_L8603:  .byte $67, $67, $67, $68, $68, $69, $F7, $00
 
 ;----------------------------[ Sprite drawing pointer tables ]--------------------------------------
 

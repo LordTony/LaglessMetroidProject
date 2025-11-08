@@ -1789,10 +1789,9 @@ LCA13:  .byte $1E,$14,$0B,$04,$FF
 IsEngineRunning:
 LCA18:  ldy MainRoutine         ;If Samus is fading in or the wait timer is
 LCA1A:  cpy #$07                ;active, return from routine.
-LCA1C:  beq +                   ;
+LCA1C:  beq Exit14              ;
 LCA1E:  cpy #$03                ;Is game engine running?
-LCA20:  beq ++                  ;If yes, branch to SwitchBank.
-LCA22:* rts                     ;Exit if can't switch bank.
+LCA20:  bne Exit14              ;If yes, continue to SwitchBank.
 
 ;-----------------------------------------[ Switch bank ]--------------------------------------------
 
@@ -3100,8 +3099,7 @@ CheckDoorDelay:
             bne skip1
                 sta EnStatus,x
             skip1: 
-            txa
-            sbc #$20
+            lda IdentityTable-32, x
             tax
             bpl _loop1
         jsr GetNameTable
@@ -3132,7 +3130,7 @@ CheckDoorDelay:
     lda ItemRmMusicSts
     beq ++
     pha
-    jsr LD92C       ; start music
+    jsr StartMusic       ; start music
     pla
     bpl ++
     lda #$00
@@ -3877,7 +3875,7 @@ LD8BF:  lda $030F,x
     rts
 
 StartMusic:
-LD92C:  lda ElevatorStatus
+    lda ElevatorStatus
     cmp #$06
     bne +
     lda $032F
@@ -3913,7 +3911,8 @@ ElevatorStop:
 *   jmp ElevScrollRoom
 
 SamusOnElevatorOrEnemy:
-LD976:  lda #$00            ;
+LD976:
+    lda #$00            ;
     sta SamusOnElevator     ;Assume Samus is not on an elevator or on a frozen enemy.
     sta OnFrozenEnemy       ;
     tay
@@ -3962,7 +3961,7 @@ Exit8:  rts
 ; UpdateStatues
 ; =============
 
-    UpdateStatues:
+UpdateStatues:
     lda #$60
     sta PageIndex
     ldy $0360
@@ -4214,7 +4213,7 @@ LDBC3:  JSR GetItemXYPos        ;($DC1C)Get proper X and Y coords of item, save 
 LDBC6:* LDA PowerUpType,x       ;Get power-up type byte again.
 LDBC9:  TAY             ;
 LDBCA:  CPY #$08            ;Is power-up item a missile or energy tank?
-LDBCC:  BCS ++++            ;If so, branch.
+LDBCC:  BCS MissileEnergyPickup ;If so, branch.
 LDBCE:  CPY #$06            ;Is item the wave beam or ice beam?
 LDBD0:  BCC MakeBitMask         ;If not, branch.
 LDBD2:  LDA SamusGear           ;Clear status of wave beam and ice beam power ups.
@@ -4248,11 +4247,12 @@ Exit9:
 LDBF6:  RTS             ;Exit for multiple routines above.
 
 MissileEnergyPickup:
-LDBF7:* BEQ +               ;Branch if item is an energy tank.
+LDBF7:* BEQ EnergyTankPickup    ;Branch if item is an energy tank.
 LDBF9:  LDA #$05            ;
 LDBFB:  JSR AddToMaxMissiles        ;($DD97)Increase missile capacity by 5.
 LDBFE:  BNE ---             ;Branch always.
 
+EnergyTankPickup:
 LDC00:* LDA TankCount           ;
 LDC03:  CMP #$06            ;Has Samus got 6 energy tanks?
 LDC05:  BEQ +               ;If so, she can't have any more.
@@ -4377,9 +4377,7 @@ DistFromObj0ToObj1:
     lda ObjRadX,x
     adc ObjRadX,y
     sta $05
-
-LDC88:  
-    JMP LF1FA
+    jmp LF1FA
 
 ;The following table is used to rotate the sprites of both Samus and enemies when they explode.
 
@@ -4394,33 +4392,24 @@ LDC8E:  .byte $40           ;Flip sprite horizontally.
 ; Move to object's next frame of animation
 
 UpdateObjAnim:
-LDC8F:  LDX PageIndex
-        LDY AnimDelay,x
-        BEQ +                  ; is it time to move to the next anim frame?
-        DEC AnimDelay,x     ; nope
-        BNE +++   ; exit if still not zero (don't update animation)
-*       STA AnimDelay,x     ; set initial anim countdown value
-        LDY AnimIndex,x
-*       LDA ObjectAnimIdxTbl,y        ;($8572)Load frame number.
-        CMP #$FF                ; has end of anim been reached?
-        BEQ ++
-        STA AnimFrame,x     ; store frame number
-        INY      ; inc anim index
-        TYA
-         STa AnimIndex,x     ; store anim index
-*       RTS
+LDC8F:  
+    LDX PageIndex
+    LDY AnimDelay,x
+    BEQ +                  ; is it time to move to the next anim frame?
+    DEC AnimDelay,x     ; nope
+    BNE +++   ; exit if still not zero (don't update animation)
+*   STA AnimDelay,x     ; set initial anim countdown value
+    LDY AnimIndex,x
+*   LDA ObjectAnimIdxTbl,y        ;($8572)Load frame number.
+    BEQ ++                        ; has end of anim been reached?
+    STA AnimFrame,x     ; store frame number
+    INY                 ; inc anim index
+    TYA
+    STA AnimIndex,x     ; store anim index
+*   RTS
 
-*       LDY AnimResetIndex,x     ; reset anim frame index
-        JMP ---    ; do first frame of animation
-
-LDCB7:  PHA
-        LDA #$00
-        STA $06
-        PLA
-        BPL +
-        DEC $06
-*       CLC
-        RTS
+*   LDY AnimResetIndex,x     ; reset anim frame index
+    JMP ---    ; do first frame of animation
 
 ;--------------------------------[ Get sprite control byte ]-----------------------------------------
 
@@ -4546,7 +4535,7 @@ SomethingAboutMovement:
     ldx PageIndex
     lda EnAnimFrame,x
     cmp #$F7
-    bne +++
+    bne MoveEnemies
     jmp ClearObjectCntrl        ;($DF2D)Clear object control byte.
 
 ; AddToMaxMissiles
@@ -4569,6 +4558,7 @@ AddToMaxMissiles:
 *   STA MaxMissiles
     RTS
 
+MoveEnemies:
 *   LDA EnYRoomPos,x
     STA $0A  ; Y coord
     LDA EnXRoomPos,x
@@ -4856,8 +4846,9 @@ LDF2F:  sta ObjectCntrl         ;Clear object control byte.
 LDF31:  rts             ;
 
 SkipPlacementData:
-LDF32:  inc $0F             ;Skip next y and x placement data bytes.
-LDF34:  inc $0F             ;
+    lda $0F             ;Skip next y and x placement data bytes.
+    adc #$01
+    sta $0F
 LDF36:  inc MacroTileIndex          ;Increment to next data item in frame data.
 LDF38:  jmp DrawSpriteObject        ;($DF19)Draw next sprite.
 
@@ -4876,18 +4867,18 @@ LDF4E:  jmp GetNextFrameByte        ;($DF1B)Load next frame data byte.
 
 OffsetObjectPosition:
 LDF51:  iny             ;Increment index to next byte of frame data.
-LDF52:  lda ($00),y         ;This data byte is used to offset the object from
-LDF54:  clc             ;its current y positon.
+LDF52:  lda ($00),y         ;This data byte is used to offset the object from its current y position
 LDF55:  adc ScreenYPos             ;
 LDF57:  sta ScreenYPos             ;Add offset amount to object y screen position.
-LDF59:  inc MacroTileIndex             ;
-LDF5B:  inc MacroTileIndex             ;Increment past control byte and y offset byte.
-LDF5D:  ldy MacroTileIndex             ;
+        clc
+        lda MacroTileIndex
+        adc #$03
+        sta MacroTileIndex
+        tay
+        dey
 LDF5F:  lda ($00),y         ;Load x offset data byte.
-LDF61:  clc             ;
 LDF62:  adc ScreenXPos             ;Add offset amount to object x screen position.
 LDF64:  sta ScreenXPos             ;
-LDF66:  inc MacroTileIndex             ;Increment past x offset byte.
 LDF68:  jmp DrawSpriteObject        ;($DF19)Draw next sprite.
 
 ;----------------------------------[ Sprite placement routines ]-------------------------------------
@@ -5115,7 +5106,6 @@ LE0F3:  lda MissileCount        ;
 ;------------------------------------[ Convert hex to decimal ]--------------------------------------
 ;Convert 8-bit value in A to 3 decimal digits. Upper digit put in $02, middle in $01 and lower in $00.
 
-; TODO - Get some missiles and test this out
 DisplayHexAsDigits:
 
     ;Hundreds digit
@@ -5194,6 +5184,7 @@ LE14A:* ldx SpritePagePos       ;Restore initial sprite page pos.
 LE14C:  lda TankCount           ;
 LE14F:  beq ++              ;Branch to exit if Samus has no energy tanks.
 
+AddTanks:
 ;Display full/empty energy tanks.
 LE151:  sta $03             ;Temp store tank count.
 LE153:  lda #$40            ;X coord of right-most energy tank.
@@ -5206,13 +5197,12 @@ LE15C:
         lsr
         lsr
 LE15F:  sta $01             ;Storage of full tanks.
-LE161:  bne AddTanks            ;Branch if at least 1 tank is full.
+LE161:  bne AddOneTank            ;Branch if at least 1 tank is full.
 LE163:  dey             ;Else switch to "empty energy tank" tile.
 
-AddTanks:
 ;----------------------------------[ Add energy tank to display ]------------------------------------
 
-    AddOneTank:
+AddOneTank:
     LE17B:  lda #$17            ;Y coord-1.
     LE17D:  sta SpriteRAM,x       ;
     LE180:  tya                 ;Tile value.
@@ -5224,36 +5214,30 @@ AddTanks:
     LE18E:  sec                 ;
     LE18F:  sbc #$0A            ;Find x coord of next energy tank.
     LE191:  sta $00             ;
-            inx                  ;
-            inx                  ;
-            inx                  ;Add 4 to value stored in X.
-            inx                  ;
+            lda IdentityTable+4, x
+            tax
 
-LE167:  dec $01             ;Any more full energy tanks left?
-LE169:  bne +               ;If so, then branch.
-LE16B:  dey             ;Otherwise, switch to "empty energy tank" tile.
-LE16C:* dec $03             ;done all tanks?
-LE16E:  bne AddTanks            ;if not, loop to do another.
+    LE167:  dec $01             ;Any more full energy tanks left?
+    LE169:  bne +               ;If so, then branch.
+    LE16B:  dey             ;Otherwise, switch to "empty energy tank" tile.
+    LE16C:* dec $03             ;done all tanks?
+    LE16E:  bne AddOneTank            ;if not, loop to do another.
 
-LE170:  stx SpritePagePos       ;Store new sprite page position.
-LE172:* rts             ;
+    LE170:  stx SpritePagePos       ;Store new sprite page position.
+    LE172:* rts             ;
 
 ;----------------------------------------[Sprite write digit ]---------------------------------------
 
 ;A=value in range 0..9. #$A0 is added to A(the number sprites begin at $A0), and the result is stored
 ;as the tile # for the sprite indexed by X.
 
+; TODO - might find something interesting if you try to inline this.
+
 SPRWriteDigit:
 LE173:  ora #$A0            ;#$A0 is index into pattern table for numbers.
 LE175:  sta SpriteRAM+1,x     ;Store proper nametable pattern in sprite RAM.
-
-;-----------------------------------------[ Add 4 to x ]---------------------------------------------
-
-Xplus4:
-LE193:  inx             ;
-LE194:  inx             ;
-LE195:  inx             ;Add 4 to value stored in X.
-LE196:  inx             ;
+        lda IdentityTable+4, x
+        tax
 LE197:  rts             ;
 
 ;-------------------------------------[ Status bar sprite data ]-------------------------------------
@@ -5960,7 +5944,7 @@ LE626:  lda ObjectX
 ; crash with object on the left
 
 ResetDoorData:
-*   lda #$00
+    lda #$00
     sta SamusDoorData
     rts
 
@@ -6644,40 +6628,40 @@ SelectRoomRAM:
 InitTables:
 LEFF8:  lda CartRAMPtrUB        ;#$60 or #$64.
 
+;TODO could use some tlc
+
 .scope
 FillRoomRAM:
-        clc
-        adc #3              ; $01 = CartRAMPtrUB + 3  (=$63 or $67)
-        sta $01
-        ldx #$FC            ; direct, cheaper than deriving via SBC
-        lda #$FF            ; fill room RAM with(#$FF).
-        ldy #$00            ;Lower address byte to start at.
-        sty $00             ;
-        _loop1:
-            sta ($00),y     ;
-            dey             ;
-            sta ($00),y     ;
-            dey             ;
-            sta ($00),y     ;
-            dey             ;
-            sta ($00),y     ;
-            dey             ;
-            bne _loop1      ;
-            dec $01         ;Loop until all the room RAM is filled with #$FF(black).
-            inx             ;
-            bne _loop1      ;
-        ldx $01             ;#$5F or #$63 depening on which room RAM was initialized.
-        txa
-        adc #04
-        tax
-        stx $01             ;Set high byte for attribute table write(#$63 or #$67).
-        ldx RoomPal         ;Index into table below (Lowest 2 bits).
-        lda ATDataTable,x   ;Load attribute table data from table below.
-        ldy #$C0            ;Low byte of start of all attribute tables.
-        _loop2:
-            sta ($00),y         ;Fill attribute table.
-            iny                 ;
-            bne _loop2          ;Loop until entire attribute table is filled.
+    clc
+    adc #3              ; $01 = CartRAMPtrUB + 3  (=$63 or $67)
+    sta $01
+    ldx #$FC            ; direct, cheaper than deriving via SBC
+    lda #$FF            ; fill room RAM with(#$FF).
+    ldy #$00            ;Lower address byte to start at.
+    sty $00             ;
+    _loop1:
+        sta ($00),y     ;
+        dey             ;
+        sta ($00),y     ;
+        dey             ;
+        sta ($00),y     ;
+        dey             ;
+        sta ($00),y     ;
+        dey             ;
+        bne _loop1      ;
+        dec $01         ;Loop until all the room RAM is filled with #$FF(black).
+        inx             ;
+        bne _loop1      ;
+    lda #$04        
+    adc $01             ;#$5F or #$63 depening on which room RAM was initialized.
+    sta $01             ;Set high byte for attribute table write(#$63 or #$67).
+    ldx RoomPal         ;Index into table below (Lowest 2 bits).
+    lda ATDataTable,x   ;Load attribute table data from table below.
+    ldy #$C0            ;Low byte of start of all attribute tables.
+    _loop2:
+        sta ($00),y         ;Fill attribute table.
+        iny                 ;
+        bne _loop2          ;Loop until entire attribute table is filled.
 
 .scend
 ;---------------------------------------[ Draw room object ]-----------------------------------------
@@ -7083,10 +7067,17 @@ UpdateRoomSpriteInfo:
 LEC9B:  
     ldx ScrollDir
     dex
-    ldy #$00
-    jsr UpdateDoorData      ;($ED51)Update name table 0 door data.
-    iny
-    jsr UpdateDoorData      ;($ED51)Update name table 3 door data.
+UpdateDoorData:
+    txa               ;
+    eor #$03          ;
+    tax
+
+    and $006C         ;Moves door info from one name table to the next
+    sta $006C         ;when the room is transferred across name tables.
+    txa               
+    and $006D         ;Moves door info from one name table to the next
+    sta $006D         ;when the room is transferred across name tables.
+
     ldx #$50
     jsr GetNameTable        ;($EB85)
     tay
@@ -7112,7 +7103,14 @@ LEC9B:
     tax
     bpl --
     jsr LED65
-    jsr LED5B
+
+LED5B:  
+    jsr GetNameTable        ;($EB85)
+    eor #$01
+    tay
+    lda #$00
+    sta $006C,y
+
     jsr GetNameTable        ;(EB85)
     asl
     asl
@@ -7171,22 +7169,11 @@ LEC9B:
     jsr LED8C
     ldx #$08
     jsr LED8C
-    jmp $95AE
+    jmp Bank03_L95AE
 
-UpdateDoorData:
-LED51:  txa             ;
-LED52:  eor #$03            ;
-LED54:  and $006C,y         ;Moves door info from one name table to the next
-LED57:* sta $006C,y         ;when the room is transferred across name tables.
-LED5A:  rts             ;
-
-LED5B:  jsr GetNameTable        ;($EB85)
-    eor #$01
-    tay
-    lda #$00
-    beq -
-LED65:  ldx #$B0
-*       lda ObjAction,x
+LED65:  
+    ldx #$B0
+*   lda ObjAction,x
     beq +
     lda ObjectOnScreen,x
     bne +
@@ -7456,7 +7443,8 @@ LEEFA:  lda ScrollDir
     bne LEEC6
 
 AnotherItem:
-LEF00:  lda ($00),y         ;Is there another item with same Y pos?
+LEF00:
+    lda ($00),y         ;Is there another item with same Y pos?
     cmp #$FF            ;If so, A is amount to add to ptr. to find X pos.
     bne AddToPtr00          ;($EF09)
     pla             ;
