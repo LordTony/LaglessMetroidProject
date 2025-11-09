@@ -479,36 +479,36 @@ _IncrementSFXFrame:
 ;10th SFX cycle $E0=#$26,$E1=#$BC,$E2=#$4B,$E3=#$BC.  Base address=$B2B1
 
 _CheckSFXFlag:
-  STA CurrentSFXFlags     ;Store any set flags in $064D.
+  STA CurrentSFXFlags     ;Store any set flags in some space zeropage.
+  STA SpareMemD1          ;Push current SFX flags onto some more spare zeropage
   STX SFXPtrE4LB          ;
   LDY #$B2                ;
   STY SFXPtrE4UB          ;
-  LDY #$00                ;Y=0 for counting loop ahead.
-* LDA (SFXPtrE4),Y        ;
-  STA $00E0,Y             ;See table above for values loaded into $E0
-  INY                     ;thru $E3 during this loop.
-  CPY #$04                ;Loop repeats four times to load the values.
-  BNE -                   ;
+  LDY #$04                ;Y=0 for counting loop ahead.
   LDA (SFXPtrE4),Y        ;
   STA ChannelType         ;#$00=SQ1,#$01=SQ2,#$02=Triangle,#$03=Noise
-  LDA CurrentSFXFlags     ;
-  PHA                     ;Push current SFX flags on stack.
+  DEY
+* LDA (SFXPtrE4),Y        ;
+  STA $00E0,Y             ;See table above for values loaded into $E0
+  DEY                     ;thru $E3 during this loop.
+  BPL -                   ;
+  tya
+  beq _RestoreSFXFlags
   LDY #$08                ;Set y to 0 for counting loop ahead.
 * ASL CurrentSFXFlags     ;
   BCS _DoubleY            ;This portion of the routine loops a maximum of
   DEY                     ;eight times looking for any SFX flags that have
-                          ;been set in the current SFX cycle.  If a flag
-                          ;is found, Branch to SFXFlagFound for further
-                          ;processing, if no flags are set, continue to
+  ASL CurrentSFXFlags     
+  BCS _DoubleY            
+  DEY                     
   BNE -                   ;next SFX cycle.
 
 _RestoreSFXFlags:
-  PLA                     ;
-  STA CurrentSFXFlags     ;Restore original data in CurrentSFXFlags.
+  LDA SpareMemD1                     ;
+  STA CurrentSFXFlags             ;Restore original data in CurrentSFXFlags.
 
 _NoSound:
   RTS                     ;Exit above routine. Also used when no function present.
-  nop
 
 _DoubleY:
   lda EightMinusNumberTimesTwoTable, y
@@ -520,7 +520,9 @@ _SFXFlagFound:                   ;
   INY                     ;found.  The address is stored in registers
   LDA (SFXPtrE0),Y        ;$E2 and $E3.
   STA SFXPtrE2UB          ;
-  JMP _RestoreSFXFlags     ;($B4EA)Restore original data in CurrentSFXFlags.
+  LDA SpareMemD1                     ;
+  STA CurrentSFXFlags             ;Restore original data in CurrentSFXFlags.
+  RTS
 
 ;-----------------------------------[ SFX Handling Routines ]---------------------------------------
 
@@ -1574,7 +1576,6 @@ _FindMusicInitIndex:
 
 _EndMusInit:
   RTS                     ;End init routine.
-
 ;----------------------------------------------------------------------------------------------------
 
 ;The following routine is used to add eight to the music index when looking for music flags

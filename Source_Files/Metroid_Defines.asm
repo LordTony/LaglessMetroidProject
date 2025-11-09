@@ -449,7 +449,7 @@
 
 .alias ThisSoundChannel $064B   ;Least sig. byte of current channel(00,04,08 or 0C)
 
-.alias CurrentSFXFlags  $064D   ;Stores flags of SFX currently being processed.
+.alias CurrentSFXFlags  $D0   ;Stores flags of SFX currently being processed.
 
 .alias NoiseInUse       $0652   ;Noise in use? (Not used)
 .alias SQ1InUse         $0653   ;1=SQ1 channel being used by SFX, 0=not in use

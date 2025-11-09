@@ -17,15 +17,13 @@ The idea here is to attempt to take the Metroid lag as low as possible without a
 * Collision detection code in general eats lots of cycles as well.
 * Ridley is too big for Smash <sub>and 60FPS</sub> 
 
-## Current Progress
-
 ### Benchmark Status
 The baseline benchmark is Samus standing still in the opening room with 2 of the spikey bois both alive and crawing on the walls.
 
   * Metroid finishes all work for the benchmark frames in **137 to 149** scanlines
-  * Lagless Metroid finishes in **98 to 117** scanlines
-  * Lagless Metroid finishes in **%71.5 to %78.5** of the scanlines it takes Metroid
-  * The limit might be something like **95** scanlines, so keep pushing
+  * Lagless Metroid finishes in **93 to 112** scanlines
+  * Lagless Metroid finishes in **%68 to %75** of the scanlines it takes Metroid
+  * The limit might be something like **85** scanlines, so keep pushing
 
 ### Code Progress
 * ChooseRoutine has been removed from bank07 and is now only called from outside
@@ -34,11 +32,13 @@ The baseline benchmark is Samus standing still in the opening room with 2 of the
 * Unused code has been removed from bank07 to make room for the identity table.
 * Most code that can be inlined in bank07 has been inlined. I would say I've probably done about 70% to 90% of the low hanging fruit
 * Heavy loops have been at least partially unrolled wherever possible
-* The biggest win so far has been in the code to erase the ram between frames.
+* A huge win has been adjustments to the code to clear the Vram between frames.
   * Metroid always uses the first avaiable ram spot in order, so you don't have to keep blanking out RAM if you run into a spot that's already been blanked
     * This change alone saves about 5-8 scanlines
 * The map generation code has had so many guard rails removed and it is still slow
   * It looks like sometimes we have prevented dropped frames though, so there are pseudo noticable improvements
+* One function in the sound engine was heavily hammered and I think it ended up dropping like 10-12 scanlines from the full frame.
+  * So far this was the biggest win of the project
 
 ### TODOs
 * Get rid of the rest of ChooseRoutine. Move it into Bank01-Bank05
@@ -74,7 +74,7 @@ The original dissassembly built each of the banks 1 at a time and glued them all
 In this project I have painstakingly reworked it to build with the following command from the project root folder:
 
 ```
-./build.ps1
+./build
 ```
 
 ## General Notes
@@ -98,7 +98,7 @@ tax
 Now that I've gotten the identity table in, I can't help but wonder if those 256 + 32 bytes would be better spent just unrolling loops. Would need to do it and test it, and that might not be that simple of a change.
 
 ### Benchmarking
-The "ShowMacroHits" lua script can be run and tweaked to find places in the code that are hit more often. It gives you the frame average of how many times each line of code has been executed every 10 seconds (600 frames). It then prints the top 15 of them on the screen. It helped me get some big wins.
+The "Visualize Hotspots" lua script can be run and tweaked to find places in the code that are hit more often. It helped me get some big wins.
 
 ## Bugs
 * No known bugs
