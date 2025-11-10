@@ -234,7 +234,15 @@ _LdMultiSFXInitFlags:
   LDX #<_MultiInitDat      ;Lower address byte in ChooseNextSFXRoutineTbl.
   JSR _CheckSFXFlag        ;($B4BD)Checks to see if SFX or music flags set.
   JSR _FindMusicInitIndex  ;($BC53)Find bit containing music init flag.
-  JSR _Add8                ;($BC64)Add 8 to MusicInitIndex.
+
+  ;The following routine is used to add eight to the music index when looking for music flags
+  ;in the MultiSFX address.  
+  _Add8:
+    LDA MusicInitIndex      ;
+    CLC                     ;
+    ADC #$08                ;Add #$08 to MusicInitIndex.
+    STA MusicInitIndex      ;
+
   JMP (SFXPtrE2_)         ;If no flag found, Jump to next SFX cycle,
                                 ;else jump to specific SFX handling subroutine.
 _MultiSFXContFlags:
@@ -331,6 +339,10 @@ _EndGamePaused:
 
 .checkpc SoundEngineEntryPoint
 .advance SoundEngineEntryPoint
+
+    ; TODO: This could be set once when the game starts and it will never change
+    LDY #$B2                ;
+    STY SFXPtrE4UB          ;
 
     LDA #$C0                ;Set APU to 5 frame cycle, disable frame interrupt.
     STA APUCommonCntrl1     ;
@@ -482,8 +494,6 @@ _CheckSFXFlag:
   STA CurrentSFXFlags     ;Store any set flags in some space zeropage.
   STA SpareMemD1          ;Push current SFX flags onto some more spare zeropage
   STX SFXPtrE4LB          ;
-  LDY #$B2                ;
-  STY SFXPtrE4UB          ;
   LDY #$04                ;Y=0 for counting loop ahead.
   LDA (SFXPtrE4),Y        ;
   STA ChannelType         ;#$00=SQ1,#$01=SQ2,#$02=Triangle,#$03=Noise
@@ -491,16 +501,23 @@ _CheckSFXFlag:
 * LDA (SFXPtrE4),Y        ;
   STA $00E0,Y             ;See table above for values loaded into $E0
   DEY                     ;thru $E3 during this loop.
+  LDA (SFXPtrE4),Y        ;
+  STA $00E0,Y             ;See table above for values loaded into $E0
+  DEY                     ;thru $E3 during this loop.
   BPL -                   ;
-  tya
-  beq _RestoreSFXFlags
   LDY #$08                ;Set y to 0 for counting loop ahead.
 * ASL CurrentSFXFlags     ;
   BCS _DoubleY            ;This portion of the routine loops a maximum of
   DEY                     ;eight times looking for any SFX flags that have
   ASL CurrentSFXFlags     
   BCS _DoubleY            
-  DEY                     
+  DEY
+  ASL CurrentSFXFlags
+  BCS _DoubleY
+  DEY
+  ASL CurrentSFXFlags     
+  BCS _DoubleY            
+  DEY                    
   BNE -                   ;next SFX cycle.
 
 _RestoreSFXFlags:
@@ -1515,14 +1532,14 @@ _MultiMusInitTbl:
 
 ;Multi channel continue SFX handling routine addresses:
 _MultiSFXContTbl:
-  .word _NoSound           ;No sound.
-  .word _NoSound           ;No sound.
-  .word _NoSound           ;No sound.
-  .word _NoSound           ;No sound.
-  .word _NoSound           ;No sound.
-  .word $B650             ;Samus hit continue SFX.
-  .word $B5F6             ;Boss hit continue SFX.
-  .word $B6A1             ;Incorrect password continue SFX.
+  .word _NoSound                        ;No sound.
+  .word _NoSound                        ;No sound.
+  .word _NoSound                        ;No sound.
+  .word _NoSound                        ;No sound.
+  .word _NoSound                        ;No sound.
+  .word _SamusHitSFXContinue            ;Samus hit continue SFX.
+  .word _BossHitSFXContinue             ;Boss hit continue SFX.
+  .word _IncorrectPasswordSFXContinue   ;Incorrect password continue SFX.
 
 ;Music handling routine addresses:
 _MusicInitTbl:
@@ -1553,7 +1570,7 @@ _LoadMusicInitFlags:
 
 _ContinueMusic:                  ;11th and last SFX cycle.
   LDA CurrentMusic        ;
-  BEQ _EndAdd8             ;Branch to exit of no music playing.
+  BEQ _EndMusInit             ;Branch to exit of no music playing.
   JMP _LoadCurMusFrameData ;($BAA5)Load info for current frame of music data.
 
 ;----------------------------------------------------------------------------------------------------
@@ -1576,23 +1593,6 @@ _FindMusicInitIndex:
 
 _EndMusInit:
   RTS                     ;End init routine.
-;----------------------------------------------------------------------------------------------------
-
-;The following routine is used to add eight to the music index when looking for music flags
-;in the MultiSFX address.  
-_Add8:
-  LDA MusicInitIndex      ;
-  CLC                     ;
-  ADC #$08                ;Add #$08 to MusicInitIndex.
-  STA MusicInitIndex      ;
-  RTS                     ;
-
-  LDA CurrentMusic        ;
-  ORA #$F0                ;This code does not appear to be used in this page.
-  STA CurrentMusic        ;
-
-_EndAdd8:
-  RTS                     ;End Add8 routine.
 
 ;----------------------------------------------------------------------------------------------------
 

@@ -849,7 +849,7 @@
 ;---------------------------------- [ Constant Locations in Swap Banks ] -----------------------------
 
 .alias SoundEngineOrg           $B200
-.alias SoundEngineEntryPoint    $B3B4
+.alias SoundEngineEntryPoint    $B3BA
 .alias ObjectAnimIdxTbl         $8572
 .alias FramePtrTable            $860B
 .alias PlacePtrTable            $86DF

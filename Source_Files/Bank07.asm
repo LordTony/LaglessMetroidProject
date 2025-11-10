@@ -887,16 +887,6 @@ LC468:  STA PPUCNT0ZP           ;
 LC46A:  STA PPUControl0         ;Actually load PPU register with NMI off value.
 LC46D:  RTS                     ;
 
-;The following routine does not appear to be used.
-
-LC46E:  LDA PPUCNT0ZP           ;Enable VBlank.
-LC470:  ORA #$80                ;
-LC472:  STA PPUCNT0ZP           ;Write PPU control register 0 and PPU status byte.
-LC474:  STA PPUControl0         ;
-LC477:  LDA PPUCNT1ZP           ;Turn sprites and screen on.
-LC479:  ORA #$1E                ;
-LC47B:  BNE --                  ;Branch always.
-
 VBOffAndHorzWr: 
 LC47D:  LDA PPUCNT0ZP           ;
 LC47F:  AND #$7B                ;Horizontal write, disable VBlank. 
@@ -2646,7 +2636,8 @@ Table04:
     .byte $35
     .byte $35
 
-LD09C:  lda Joy1Change
+LD09C:
+    lda Joy1Change
     ora Joy1Retrig
     asl
     bpl SetSamusRollExit      ; exit if FIRE not pressed
@@ -2660,7 +2651,8 @@ LD09C:  lda Joy1Change
     jmp SetSamusAnim
 
 SetSamusRoll:
-LD0B5:  lda SamusGear
+LD0B5:
+    lda SamusGear
     and #gr_MARUMARI
     beq +      ; branch if Samus doesn't have Maru Mari
     lda SamusGravity
@@ -6691,6 +6683,8 @@ FillRoomRAM:
     _loop2:
         sta ($00),y         ;Fill attribute table.
         iny                 ;
+        sta ($00),y         ;Fill attribute table.
+        iny
         bne _loop2          ;Loop until entire attribute table is filled.
 
 .scend
@@ -9428,7 +9422,8 @@ LFD84:  lda $B6,x
     sta $B0,x
 *   rts
 
-Bank07_LFD8F:  lda ScrollDir
+Bank07_LFD8F:
+    lda ScrollDir
     and #$02
     sta $02
     lda $04
@@ -9546,7 +9541,8 @@ UpdateTilesTable_HiBytes:
 UpdateTilesTable_LoBytes:
     .byte <LFE3D, <LFE54, <LFE59, <LFE54, <LFE83
 
-LFE3D:  inc TileRoutine,x
+LFE3D:
+    inc TileRoutine,x
     lda #$00
     jsr SetTileAnim
     lda #$50
@@ -9556,10 +9552,12 @@ LFE3D:  inc TileRoutine,x
     lda TileWRAMHi,x     ; high WRAM addr
     sta $01
 
-LFE54:  lda #$02
+LFE54:
+    lda #$02
     jmp UpdateTileAnim
 
-LFE59:  lda FrameCount
+LFE59:
+    lda FrameCount
     and #$03
     bne +       ; only update tile timer every 4th frame
     dec TileDelay,x
@@ -9567,7 +9565,7 @@ LFE59:  lda FrameCount
     inc TileRoutine,x
     ldy TileType,x
     lda Table19,y
-    SetTileAnim:
+SetTileAnim:
     sta TileAnimIndex,x
     sta $0505,x
     lda #$00

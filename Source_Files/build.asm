@@ -1,15 +1,9 @@
 ; --------------------------------- NOTES -----------------------------------
 ;
-; I have made Bank07 the source of truth in order to build it in one command
-; Everything is linked up with labels so nearly all of Bank 07 can be moved
+; I have made Bank07 the source of truth in order to build  in one command
+; Everything is linked up with labels so all the code in Bank07 can be moved
 ; around and the final assembly addressed won't matter because all the rest
-; of the code references it all by 
-;
-; ------------------- How to Build (Windows only for now) -------------------
-;
-; Go to the root folder and run:
-;
-; build.ps1
+; of the code references it all by labels.
 ;
 
 .text HEADER 

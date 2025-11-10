@@ -2,8 +2,8 @@
 --Press F5 or click the Run button to execute it
 --Type "emu." to show a list of all available API function
 
-start_addr = 0xC200
-end_addr = 0xFFFF
+start_addr = 0xA000
+end_addr = 0xC000
 how_many_to_show = 50
 framesToResetOn = 300
 timer = 0
