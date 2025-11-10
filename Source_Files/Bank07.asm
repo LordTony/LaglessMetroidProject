@@ -777,9 +777,6 @@ IdentityTable:
     .byte $f0, $f1, $f2, $f3, $f4, $f5, $f6, $f7, $f8, $f9, $fa, $fb, $fc, $fd, $fe, $ff
     .byte $00, $01, $02, $03, $04, $05, $06, $07, $08, $09, $0a, $0b, $0c, $0d, $0e, $0f    ; Overflow a bit so catch +16 past $ff
 
-EightMinusNumberTimesTwoTable:
-    .byte $10, $0E, $0C, $0A, $08, $06, $04, $02, $00
-
 ;The following two routines add a Binary coded decimal (BCD) number to another BCD number.
 ;A base number is stored in $03 and the number in A is added/subtracted from $03.  $01 and $02 
 ;contain the lower and upper digits of the value in A respectively.  If an overflow happens after

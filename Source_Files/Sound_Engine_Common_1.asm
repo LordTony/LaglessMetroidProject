@@ -233,14 +233,33 @@ _LdMultiSFXInitFlags:
   LDA MultiSFXFlag        ;Load A with Multi init flags, (3rd SFX cycle).
   LDX #<_MultiInitDat      ;Lower address byte in ChooseNextSFXRoutineTbl.
   JSR _CheckSFXFlag        ;($B4BD)Checks to see if SFX or music flags set.
-  JSR _FindMusicInitIndex  ;($BC53)Find bit containing music init flag.
+;----------------------------------------------------------------------------------------------------
+
+;MusicInitIndex values correspond to the following music:
+;#$00=Ridley area music, #$01=Tourian music, #$02=Item room music, #$03=Kraid area music,
+;#$04=Norfair music, #$05=Escape music, #$06=Mother brain music, #$07=Brinstar music,
+;#$08=Fade in music, #$09=Power up music, #$0A=End game music, #$0B=Intro music.
+
+.scope
+  _FindMusicInitIndex:
+    LDA #$FF                ;Load MusicInitIndex with #$FF.
+    STA MusicInitIndex      ;
+
+    LDA CurrentSFXFlags     ;Branch to exit if no SFX flags set for Multi SFX.
+    BEQ _EndMusInit          ;
+
+  * INC MusicInitIndex      ;Shift left until bit flag is in carry bit.
+    ASL                     ;Loop until SFX flag found.  Store bit
+    BCC -                   ;number of music in MusicInitIndex.
+
+  _EndMusInit:
+.scend
 
   ;The following routine is used to add eight to the music index when looking for music flags
   ;in the MultiSFX address.  
   _Add8:
     LDA MusicInitIndex      ;
-    CLC                     ;
-    ADC #$08                ;Add #$08 to MusicInitIndex.
+    ADC #$07                ;Add #$08 to MusicInitIndex.
     STA MusicInitIndex      ;
 
   JMP (SFXPtrE2_)         ;If no flag found, Jump to next SFX cycle,
@@ -253,6 +272,7 @@ _MultiSFXContFlags:
 _LoadSQ1Flags:
   JSR _SQ1SFXInitFlags     ;($B329)Check for SQ1 init flags.
   RTS                     ;
+  nop
 
 ;----------------------------------------------------------------------------------------------------
 
@@ -288,10 +308,10 @@ _LoadSFXRegisters:
   STA (SFXPtrE0),Y        ;Store A in SFX register.
 
   INY                     ;
-  TYA                     ;The four registers associated with each sound
-  CMP #$04                ;channel are loaded one after the other (the loop
+  CPY #$04                ;channel are loaded one after the other (the loop
   BNE _LoadSFXRegisters    ;repeats four times).
   RTS                     ;
+  nop
 
 ;----------------------------------------------------------------------------------------------------
 
@@ -385,31 +405,32 @@ _CheckMusicFlags:
   BEQ ++                  ;just clear music counters, else clear everything.
 
 _InitSoundAddresses:             ;
-* JSR _ClrMusAndSFXAddrs   ;($B41D)Jumps to all subroutines needed to reset
-  JSR _ClearSounds         ;($B43E)all sound addresses in order to start
-* JSR _ClearSpecialAddrs   ;($B40E)playing music.
-  RTS                     ;
+.scope
+  _ClrMusAndSFXAddrs:              ;
+  *   LDA #$00                ;
+      STA SQ1InUse            ;
+      STA SQ2InUse            ;
+      STA TriangleInUse       ;
+      STA WrtMultiChnDat      ;
+      STA NoiseContSFX        ;Clears any SFX or music 
+      STA SQ1ContSFX          ;currently being played.
+      STA SQ2ContSFX          ;
+      STA TriangleContSFX     ;
+      STA MultiContSFX        ;
+      STA CurrentMusic        ;
+.scend
+  
+JSR _ClearSounds         ;($B43E)all sound addresses in order to start
 
-_ClearSpecialAddrs:
-  LDA #$00                ;   
-  STA TriCounterCntrl     ;Clears addresses used for repeating music,
-  STA SFXPaused           ;pausing music and controlling triangle length.
-  STA CrntMusicRepeat     ;
-  STA MusicRepeat         ;
-  RTS                     ;
+.scope
+  _ClearSpecialAddrs:
+*   LDA #$00                ;   
+    STA TriCounterCntrl     ;Clears addresses used for repeating music,
+    STA SFXPaused           ;pausing music and controlling triangle length.
+    STA CrntMusicRepeat     ;
+    STA MusicRepeat         ;
+.scend
 
-_ClrMusAndSFXAddrs:              ;
-  LDA #$00                ;
-  STA SQ1InUse            ;
-  STA SQ2InUse            ;
-  STA TriangleInUse       ;
-  STA WrtMultiChnDat      ;
-  STA NoiseContSFX        ;Clears any SFX or music 
-  STA SQ1ContSFX          ;currently being played.
-  STA SQ2ContSFX          ;
-  STA TriangleContSFX     ;
-  STA MultiContSFX        ;
-  STA CurrentMusic        ;
   RTS                     ;
 
 _ClearSounds:             ;
@@ -492,53 +513,84 @@ _IncrementSFXFrame:
 
 _CheckSFXFlag:
   STA CurrentSFXFlags     ;Store any set flags in some space zeropage.
-  STA SpareMemD1          ;Push current SFX flags onto some more spare zeropage
   STX SFXPtrE4LB          ;
   LDY #$04                ;Y=0 for counting loop ahead.
   LDA (SFXPtrE4),Y        ;
   STA ChannelType         ;#$00=SQ1,#$01=SQ2,#$02=Triangle,#$03=Noise
   DEY
-* LDA (SFXPtrE4),Y        ;
-  STA $00E0,Y             ;See table above for values loaded into $E0
-  DEY                     ;thru $E3 during this loop.
   LDA (SFXPtrE4),Y        ;
-  STA $00E0,Y             ;See table above for values loaded into $E0
-  DEY                     ;thru $E3 during this loop.
-  BPL -                   ;
-  LDY #$08                ;Set y to 0 for counting loop ahead.
-* ASL CurrentSFXFlags     ;
-  BCS _DoubleY            ;This portion of the routine loops a maximum of
-  DEY                     ;eight times looking for any SFX flags that have
-  ASL CurrentSFXFlags     
-  BCS _DoubleY            
+  STA $E3 
   DEY
-  ASL CurrentSFXFlags
-  BCS _DoubleY
+  LDA (SFXPtrE4),Y
+  STA $E2
   DEY
-  ASL CurrentSFXFlags     
-  BCS _DoubleY            
-  DEY                    
-  BNE -                   ;next SFX cycle.
+  LDA (SFXPtrE4),Y
+  STA $E1
+  DEY
+  LDA (SFXPtrE4),Y
+  STA $E0
 
-_RestoreSFXFlags:
-  LDA SpareMemD1                     ;
-  STA CurrentSFXFlags             ;Restore original data in CurrentSFXFlags.
+  ;Y is now 0
+
+  LDA CurrentSFXFlags
+  ASL
+  BCS _SFXFlagFound
+  INY
+  ASL     
+  BCS _SFXFlagFound            
+  INY
+  ASL
+  BCS _SFXFlagFound
+  INY
+  ASL     
+  BCS _SFXFlagFound            
+  INY
+  ASL                     ;
+  BCS _SFXFlagFound       ;This portion of the routine loops a maximum of
+  INY                     ;eight times looking for any SFX flags that have
+  ASL     
+  BCS _SFXFlagFound            
+  INY
+  ASL
+  BCS _SFXFlagFound
+  INY
+  ASL     
+  BCS _SFXFlagFound
 
 _NoSound:
   RTS                     ;Exit above routine. Also used when no function present.
+  nop
+  nop
+  nop
+  nop
+  nop
+  nop
+  nop
+  nop
+  nop
+  nop
+  nop
+  nop
+  nop
+  nop
+  nop
+  nop
+  nop
+  nop
+  nop
+  nop
+  nop
+  nop
 
-_DoubleY:
-  lda EightMinusNumberTimesTwoTable, y
+_SFXFlagFound:
+  tya
+  asl
   tay
-
-_SFXFlagFound:                   ;
 * LDA (SFXPtrE0),Y        ;This routine stores the starting address of the
   STA SFXPtrE2LB          ;specific SFX handling routine for the SFX flag 
   INY                     ;found.  The address is stored in registers
   LDA (SFXPtrE0),Y        ;$E2 and $E3.
   STA SFXPtrE2UB          ;
-  LDA SpareMemD1                     ;
-  STA CurrentSFXFlags             ;Restore original data in CurrentSFXFlags.
   RTS
 
 ;-----------------------------------[ SFX Handling Routines ]---------------------------------------
@@ -559,7 +611,7 @@ _SptFlmSFXCont:
   BNE +                   ;If more frames to process, branch.
   JMP _EndNoiseSFX         ;($B58F)End SFX.
 * LDY NoiseSFXData        ;
-  LDA $B4FB,Y             ;Load data from table above and store in NoiseCntrl0.
+  LDA _SpitFlamesTbl,Y             ;Load data from table above and store in NoiseCntrl0.
   STA NoiseCntrl0         ;
   INC NoiseSFXData        ;Increment to next entry in data table.
   RTS 
@@ -1204,25 +1256,6 @@ _DivideTriePeriods:
   RTS                     ;
 
 ;--------------------------------------[ End SFX routines ]-------------------------------------
- 
-_SetVolAndDisblSweep:
-  LDA #$7F                ;
-  STA MusicSQ1Sweep       ;Disable sweep generator on SQ1 and SQ2.
-  STA MusicSQ2Sweep       ;
-  STX SQ1DutyEnvelope     ;Store duty cycle and volume data for SQ1 and SQ2.
-  STY SQ2DutyEnvelope     ;
-  RTS                     ;
-
-_ResetVolumeIndex:
-  LDA SQ1MusicFrameCnt    ;If at the beginning of a new SQ1 note, set
-  CMP #$01                ;SQ1VolumeIndex = #$01.
-  BNE +                   ;
-  STA SQ1VolumeIndex      ;
-* LDA SQ2MusicFrameCnt    ;
-  CMP #$01                ;If at the beginning of a new SQ2 note, set
-  BNE +                   ;SQ2VolumeIndex = #$01.
-  STA SQ2VolumeIndex      ;
-* RTS                     ;
 
 _LoadSQ1SQ2Periods:
   LDA WrtMultiChnDat      ;If a Multi channel data does not need to be
@@ -1312,7 +1345,21 @@ _GotoLoadSQ1SQ2Channels:
   RTS                     ;
 
 _LoadCurMusFrameData:
-  JSR _ResetVolumeIndex    ;($B9F3)Reset index if at the beginning of a new note.
+
+.scope
+  _ResetVolumeIndex:
+    LDA SQ1MusicFrameCnt    ;If at the beginning of a new SQ1 note, set
+    CMP #$01                ;SQ1VolumeIndex = #$01.
+    BNE _skip1                   ;
+    STA SQ1VolumeIndex      ;
+  _skip1:
+    LDA SQ2MusicFrameCnt    ;
+    CMP #$01                ;If at the beginning of a new SQ2 note, set
+    BNE _skip2              ;SQ2VolumeIndex = #$01.
+    STA SQ2VolumeIndex      ;
+  _skip2:
+.scend
+
   LDA #$00                ;
   TAX                     ;X = #$00.
   STA ThisSoundChannel    ;(#$00, #$04, #$08 or #$0C).
@@ -1521,10 +1568,10 @@ _InitMusicIndexTbl:
 ;The tables below contain addresses for SFX and music handling routines.
 ;Multi channel Init SFX and music handling routine addresses:
 _MultiMusInitTbl:
-  .word _Music03Start      ;Fade in music.
-  .word _Music01Start      ;Power up music. 
-  .word _Music05Start      ;End game music.
-  .word _Music01Start      ;Intro music.
+  .word _Music03Init      ;Fade in music.
+  .word _Music01Init      ;Power up music. 
+  .word _Music05Init      ;End game music.
+  .word _Music01Init      ;Intro music.
   .word _NoSound           ;No sound.
   .word _SmsHitSFXStart    ;Samus hit init SFX.
   .word _BossHitSFXStart   ;Boss hit init SFX.
@@ -1543,14 +1590,14 @@ _MultiSFXContTbl:
 
 ;Music handling routine addresses:
 _MusicInitTbl:
-  .word _Music04Start      ;Ridley area music.
-  .word _Music00Start      ;Tourian music.
-  .word _Music00Start      ;Item room music.
-  .word _Music00Start      ;Kraid area music.
-  .word _Music03Start      ;Norfair music.
-  .word _Music02Start      ;Escape music.
-  .word _Music00Start      ;Mother brain music.
-  .word _Music03Start      ;Brinstar music.
+  .word _Music04Init      ;Ridley area music.
+  .word _Music00Init      ;Tourian music.
+  .word _Music00Init      ;Item room music.
+  .word _Music00Init      ;Kraid area music.
+  .word _Music03Init      ;Norfair music.
+  .word _Music02Init      ;Escape music.
+  .word _Music00Init      ;Mother brain music.
+  .word _Music03Init      ;Brinstar music.
 
 ;----------------------------------------------------------------------------------------------------
 
@@ -1564,14 +1611,6 @@ _LoadMusicInitFlags:
   LDX #<_TmpInitDat        ;Lower address byte in ChooseNextSFXRoutineTbl.
 
 * JSR _CheckSFXFlag        ;($B4BD)Checks to see if SFX or music flags set.
-  JSR _FindMusicInitIndex  ;($BC53)Find bit containing music init flag.
-  JMP (SFXPtrE2_)         ;If no flag found, Jump to next SFX cycle,
-                                ;else jump to specific SFX handling subroutine.
-
-_ContinueMusic:                  ;11th and last SFX cycle.
-  LDA CurrentMusic        ;
-  BEQ _EndMusInit             ;Branch to exit of no music playing.
-  JMP _LoadCurMusFrameData ;($BAA5)Load info for current frame of music data.
 
 ;----------------------------------------------------------------------------------------------------
 
@@ -1580,39 +1619,32 @@ _ContinueMusic:                  ;11th and last SFX cycle.
 ;#$04=Norfair music, #$05=Escape music, #$06=Mother brain music, #$07=Brinstar music,
 ;#$08=Fade in music, #$09=Power up music, #$0A=End game music, #$0B=Intro music.
 
-_FindMusicInitIndex:
-  LDA #$FF                ;Load MusicInitIndex with #$FF.
-  STA MusicInitIndex      ;
+.scope
+  _FindMusicInitIndex:
+    LDA #$FF                ;Load MusicInitIndex with #$FF.
+    STA MusicInitIndex      ;
 
-  LDA CurrentSFXFlags     ;Branch to exit if no SFX flags set for Multi SFX.
-  BEQ _EndMusInit          ;
+    LDA CurrentSFXFlags     ;Branch to exit if no SFX flags set for Multi SFX.
+    BEQ _EndMusInit          ;
 
-* INC MusicInitIndex      ;Shift left until bit flag is in carry bit.
-  ASL                     ;Loop until SFX flag found.  Store bit
-  BCC -                   ;number of music in MusicInitIndex.
+  * INC MusicInitIndex      ;Shift left until bit flag is in carry bit.
+    ASL                     ;Loop until SFX flag found.  Store bit
+    BCC -                   ;number of music in MusicInitIndex.
 
-_EndMusInit:
-  RTS                     ;End init routine.
+  _EndMusInit:
+.scend
 
+  JMP (SFXPtrE2_)         ;If no flag found, Jump to next SFX cycle,
+                                ;else jump to specific SFX handling subroutine.
+
+_ContinueMusic:                  ;11th and last SFX cycle.
+  LDA CurrentMusic        ;
+  BEQ _SoundEngineExit             ;Branch to exit of no music playing.
+  JMP _LoadCurMusFrameData ;($BAA5)Load info for current frame of music data.
+
+_SoundEngineExit:
+  RTS
 ;----------------------------------------------------------------------------------------------------
-
-_Music00Start:
-  JMP _Music00Init         ;($BCAA)Initialize music 00.
-
-_Music01Start:
-  JMP _Music01Init         ;($BCA4)Initialize music 01.
-
-_Music02Start:
-  JMP _Music02Init         ;($BC9A)Initialize music 02.
-
-_Music03Start:
-  JMP _Music03Init         ;($BC96)Initialize music 03.
-
-_Music04Start:
-  JMP _Music04Init         ;($BC89)Initialize music 04.
-
-_Music05Start:
-  JMP _Music05Init         ;($BC9E)Initialize music 05.
 
 _Music04Init:
   LDA #$B3                ;Duty cycle and volume data for SQ1 and SQ2.
@@ -1622,7 +1654,12 @@ _XYMusicInit:
   TAY                     ;Duty cycle and volume data for SQ2.
 
 _DoMusicInit:
-* JSR _SetVolAndDisblSweep ;($B9E4)Set duty cycle and volume data for SQ1 and SQ2.
+*   LDA #$7F                ;
+    STA MusicSQ1Sweep       ;Disable sweep generator on SQ1 and SQ2.
+    STA MusicSQ2Sweep       ;
+    STX SQ1DutyEnvelope     ;Store duty cycle and volume data for SQ1 and SQ2.
+    STY SQ2DutyEnvelope     ;
+
   JSR _InitializeMusic_Bank00   ;($BF19)Setup music registers.
   JMP _LoadCurMusFrameData ;($BAA5)Load info for current frame of music data.
 
