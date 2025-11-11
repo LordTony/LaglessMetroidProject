@@ -1449,7 +1449,6 @@ LC849:  jsr DestroyEnemies      ;($C8BB)
     stx DoorOnNameTable3        ;Clear data about doors on the name tables.
     stx DoorOnNameTable0        ;
     inx             ;X=1.
-    stx SpareMem30              ;Not accessed by game.
     inx             ;X=2.
 LC854:  stx ScrollDir           ;Set initial scroll direction as left.
 
@@ -1497,7 +1496,6 @@ LC86C:  jsr GetRoomNum          ;($E720)Put room number at current map pos in $5
     stx $91
     inx      ; X = 1
     stx PalDataPending
-    stx SpareMem30          ;Not accessed by game.
     inc MainRoutine         ;SamusInit is next routine to run.
     jmp ScreenOn
 
@@ -2215,23 +2213,25 @@ IsScrewAttackActive:
 LCD9C:  SEC             ;Assume screw attack is not active.
 LCD9D:  LDY ObjAction           ;
 LCDA0:  DEY             ;Is Samus running?
-LCDA1:  BNE ++              ;If not, branch to exit.
+LCDA1:  BNE ScrewAttackExit              ;If not, branch to exit.
 LCDA3:  LDA SamusGear           ;
 LCDA6:  AND #gr_SCREWATTACK     ;Does Samus have screw attack?
-LCDA8:  BEQ ++              ;If not, branch to exit.
+LCDA8:  BEQ ScrewAttackExit              ;If not, branch to exit.
 LCDAA:  LDA AnimResetIndex      ;
 LCDAD:  CMP #an_SamusSalto      ;Is Samus summersaulting?
 LCDAF:  BEQ +               ;If so, branch to clear carry(screw attack active).
 LCDB1:  CMP #an_SamusJump       ;
 LCDB3:  SEC             ;Is Samus jumping?
-LCDB4:  BNE ++              ;If not, branch to exit.
+LCDB4:  BNE ScrewAttackExit              ;If not, branch to exit.
 LCDB6:  BIT ObjVertSpeed        ;If Samus is jumping and still moving upwards, screw 
-LCDB9:  BPL ++              ;attack is active.
+LCDB9:  BPL ScrewAttackExit              ;attack is active.
 LCDBB:* CMP AnimIndex           ;Screw attack will still be active if not spinning, but
-LCDBE:* RTS             ;jumping while running and still moving upwards.
+ScrewAttackExit:
+LCDBE: RTS             ;jumping while running and still moving upwards.
 
 ;----------------------------------------------------------------------------------------------------
 
+; Note - the pla x2 thing makes this tough to inline
 LCDBF:
     lda Joy1Status
     and #$08
@@ -2241,13 +2241,14 @@ LCDBF:
     tax
     lda LCCBE,x
     cmp AnimResetIndex
-    beq -
+    beq ScrewAttackExit
     jsr SetSamusAnim
     pla
     pla
     jmp LCD6B
 
-LCDD7:  jsr FireWeapon          ;($D1EE)Shoot left/right.
+LCDD7:
+    jsr FireWeapon          ;($D1EE)Shoot left/right.
     lda Joy1Status
     and #$08
     bne +
@@ -2616,7 +2617,7 @@ LD055:
     LDA ObjAction
     CMP #sa_PntJump
     BNE +
-    JSR LCF77
+    JSR SetSamusPntUp
     BNE ++
 *   JSR StopHorzMovement
 *   LDA #$03
@@ -5681,7 +5682,8 @@ LE3E5:  lda SamusHorzSpdMax
     sta $00             ;$00 stores temp copy of current horizontal speed.
     rts             ;
 
-LE449:  lda #$00
+LE449:
+    lda #$00
     sec
     sbc $00
     sta $00
@@ -5826,7 +5828,9 @@ LE53F:  stx ScrollY
 *   sec
 *   rts
 
-LE54A:  jsr SetupRoom
+; Entry point for roomload / loadroom / load room / room loading?
+LE54A:
+    jsr SetupRoom
     ldx RoomNumber
     inx
     bne -
@@ -6607,16 +6611,28 @@ LEA2A:  rts                 ;
 
 ;------------------------------------------[ Setup room ]--------------------------------------------
 
+
+;; .scope
+;;     ; My attempt to fix room load lag
+;;     lda SpareMemCD
+;;     EOR #$01
+;;     sta SpareMemCD
+;;     bne _skip
+;;         rts
+;;     _skip:
+;; .scend
+GoDrawRoom:
+    jmp DrawRoom
+
 SetupRoom:
 LEA2B:  lda RoomNumber          ;Room number.
 LEA2D:  cmp #$FF            ;
 LEA2F:  beq RoomFinishedExit  ;Branch to exit if room is undefined.
 LEA31:  cmp #$FE            ;
-LEA33:  beq +               ;Branch if empty place holder byte found in room data.
+LEA33:  beq GoDrawRoom      ;Branch if empty place holder byte found in room data.
 LEA35:  cmp #$F0            ;
 LEA37:  bcs AttribTableWrite ;Branch if time to write PPU attribute table data.
 LEA39:  jsr UpdateRoomSpriteInfo    ;($EC9B)Update which sprite belongs on which name table.
-
 LEA3C:  jsr ScanForItems        ;($ED98)Set up any special items.
 LEA3F:  lda RoomNumber          ;Room number to load.
 LEA41:  asl             ;*2(for loading address of room pointer).
@@ -6631,63 +6647,73 @@ LEA4E:  lda (RoomPtr),y         ;First byte of room data.
 LEA50:  sta RoomPal         ;store initial palette # to fill attrib table with.
 LEA52:  lda #$01            ;
 LEA54:  jsr AddToRoomPtr        ;($EAC0)Increment room data pointer.
+
 ;------------------------------------------[ Select room RAM ]---------------------------------------
 
 SelectRoomRAM:
+    lda #$00            ;
+    sta CartRAMPtrLB          ;Save two byte pointer to start of proper room RAM.
     jsr GetNameTable        ;($EB85)Find name table to draw room on.
     asl             ;
     asl             ;
     ora #$60            ;A=#$64 for name table 3, A=#$60 for name table 0.
     sta CartRAMPtrUB        ;
-    lda #$00            ;
-    sta CartRAMPtrLB          ;Save two byte pointer to start of proper room RAM.
-
 ;------------------------[ Initialize room RAM and associated attribute table ]-----------------------
 
+
 InitTables:
-LEFF8:  lda CartRAMPtrUB        ;#$60 or #$64.
+ldy #$80
+ldx RoomPal         ;Index into table below (Lowest 2 bits).
+cmp #$60
+bne FillRoomRAM_64
 
-;TODO could use some tlc
-
-.scope
-FillRoomRAM:
-    clc
-    adc #3              ; $01 = CartRAMPtrUB + 3  (=$63 or $67)
-    sta $01
-    ldx #$FC            ; direct, cheaper than deriving via SBC
-    lda #$FF            ; fill room RAM with(#$FF).
-    ldy #$00            ;Lower address byte to start at.
-    sty $00             ;
-    _loop1:
-        sta ($00),y     ;
-        dey             ;
-        sta ($00),y     ;
-        dey             ;
-        sta ($00),y     ;
-        dey             ;
-        sta ($00),y     ;
-        dey             ;
-        bne _loop1      ;
-        dec $01         ;Loop until all the room RAM is filled with #$FF(black).
-        inx             ;
-        bne _loop1      ;
-    lda #$04        
-    adc $01             ;#$5F or #$63 depening on which room RAM was initialized.
-    sta $01             ;Set high byte for attribute table write(#$63 or #$67).
-    ldx RoomPal         ;Index into table below (Lowest 2 bits).
-    lda ATDataTable,x   ;Load attribute table data from table below.
-    ldy #$C0            ;Low byte of start of all attribute tables.
-    _loop2:
-        sta ($00),y         ;Fill attribute table.
-        iny                 ;
-        sta ($00),y         ;Fill attribute table.
-        iny
-        bne _loop2          ;Loop until entire attribute table is filled.
-
-.scend
-;---------------------------------------[ Draw room object ]-----------------------------------------
-
-LEA5D:* jmp DrawRoom            ;($EAAA)Load room contents into room RAM.
+FillRoomRAM_60:
+    .scope
+        lda #$FF
+        _loop:
+            sta $5F80,y     ;
+            sta $6000,y     ;
+            sta $6080,y     ;
+            sta $6100,y     ;
+            sta $6180,y     ;
+            sta $6200,y     ;
+            sta $6280,y     ;
+            sta $6300,y     ;
+            iny
+        bne _loop
+        lda ATDataTable,x   ;Load attribute table data from table below.
+        ldy #$E0            ;Low byte of start of all attribute tables.
+        _loop2:
+            sta $62E0,y         ;Fill attribute table.
+            sta $6300,y         ;Fill attribute table.
+            iny
+        bne _loop2
+        beq DrawRoom
+    .scend
+ 
+FillRoomRAM_64:
+    lda #$FF
+    .scope
+        _loop:
+            sta $6380,y     ;
+            sta $6400,y     ;
+            sta $6480,y     ;
+            sta $6500,y     ;
+            sta $6580,y     ;
+            sta $6600,y     ;
+            sta $6680,y     ;
+            sta $6700,y     ;
+            iny
+        bne _loop
+        lda ATDataTable,x   ;Load attribute table data from table below.
+        ldy #$E0            ;Low byte of start of all attribute tables.
+        _loop2:
+            sta $66E0,y         ;Fill attribute table.
+            sta $6700,y         ;Fill attribute table.
+            iny
+        bne _loop2
+        beq DrawRoom            ;($EAAA)Load room contents into room RAM.
+     .scend
 
 ;---------------------------------------[ Draw room object ]-----------------------------------------
 
@@ -6753,23 +6779,8 @@ LEAAA:  ldy #$00            ;Zero index.
 LEAAC:  lda (RoomPtr),y         ;Load byte of room data.
 LEAAE:  cmp #$FF            ;Is it #$FF(end-of-room)?
 LEAB0:  beq EndOfRoom           ;If so, branch to exit.
-;LEAB2:  cmp #$FE            ;Place holder for empty room objects(not used).
-;LEAB4:  beq +               ;
 LEAB6:  cmp #$FD            ;is A=#$FD(end-of-objects)?
 LEAB8:  bne DrawObject          ;If not, branch to draw room object.
-LEABA:  beq EndOfObjs           ;Else branch to set up enemies/doors.
-LEABC:* sta RoomNumber          ;Store #$FE if room object is empty.
-LEABE:  lda #$01            ;Prepare to increment RoomPtr.
-
-;-------------------------------------[ Add A to room pointer ]--------------------------------------
-
-AddToRoomPtr:
-LEAC0:  clc             ;Prepare to add index in A to room pointer.
-LEAC1:  adc RoomPtr         ;
-LEAC3:  sta RoomPtr         ;
-LEAC5:  bcc +               ;Did carry occur? If not branch to exit.
-LEAC7:  inc RoomPtr+1           ;Increment high byte of room pointer if carry occured.
-LEAC9:* rts             ;
 
 ;----------------------------------------------------------------------------------------------------
 
@@ -6801,9 +6812,22 @@ EnemyLoopTable_HiBytes:
 EnemyLoopTable_LoBytes:
     .byte <ExitSub, <LoadEnemy, <LoadDoor, <ExitSub, <LoadElevator, <ExitSub, <LoadStatues, <ZebHole
 
+;-------------------------------------[ Add A to room pointer ]--------------------------------------
+
+AddToRoomPtr:
+LEAC0:  clc             ;Prepare to add index in A to room pointer.
+LEAC1:  adc RoomPtr         ;
+LEAC3:  sta RoomPtr         ;
+LEAC5:  bcc +               ;Did carry occur? If not branch to exit.
+LEAC7:  inc RoomPtr+1           ;Increment high byte of room pointer if carry occured.
+LEAC9:* rts             ;
+
+;---------------------------------------------------------------------------------------------------
+
 EndOfRoom:
 LEAF4:  ldx #$F0            ;Prepare for PPU attribute table write.
     stx RoomNumber          ;
+EndOfRoomWithoutRoomNumberUpdate:
     lda ScrollDir           ;
     sta TempScrollDir       ;Make temp copy of ScrollDir.
     and #$02            ;Check if scrolling left or right.
@@ -7151,11 +7175,24 @@ LED5B:
     lsr
     tay
     ldx #$D0
-    jsr LED7A
-    ldx #$E0
-    jsr LED7A
-    ldx #$F0
-    jsr LED7A
+
+; TODO: Figure out what this does / could be BREAKing Untested
+LED7A:
+    .scope  
+        lda ObjAction,x
+        cmp #$05
+        bcc _afterLoop
+        tya
+        eor ObjectHi,x
+        lsr
+        bcs _afterLoop
+        sta ObjAction,x
+        lda IdentityTable+16, x
+        tax
+        bne LED7A
+        _afterLoop:
+    .scend
+
     tya
     sec
     sbc $032C
@@ -7203,16 +7240,6 @@ LED65:
     tax
     bmi --
     rts
-
-LED7A:  lda ObjAction,x
-    cmp #$05
-    bcc +
-    tya
-    eor ObjectHi,x
-    lsr
-    bcs +
-    sta ObjAction,x
-*   rts
 
 LED8C:  tya
     cmp PowerUpNameTable,x

@@ -70,7 +70,7 @@
 .alias FrameCount       $2D     ;Increments every frame(overflows every 256 frames).
 .alias RandomNumber1    $2E     ;Random numbers used     
 .alias RandomNumber2    $2F     ;throughout the game.
-.alias SpareMem30       $30     ;Written to, but never accessed.
+.alias SpareMem30       $30     ;never accessed / unused.
 .alias GamePaused       $31     ;#$00=Game running, #$01=Game paused.
 
 .alias RoomPtr          $33     ;Room pointer.
