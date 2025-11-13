@@ -1039,7 +1039,7 @@ LC554:  STA GameMode            ;GameMode = play.
 LC556:  JSR ScreenNmiOff        ;($C45D)Disable screen and Vblank.
 LC559:  LDA MainRoutine         ;
 LC55B:  CMP #$03                ;Is game engine running? if so, branch.
-LC55D:  BEQ ++                  ;Else do some housekeeping first.
+LC55D:  BEQ +                   ;Else do some housekeeping first.
 LC55F:  LDA #$00                ;
 LC561:  STA MainRoutine         ;Run InitArea routine next.
 LC563:  STA InArea              ;Start in Brinstar.
@@ -1057,7 +1057,7 @@ LC57A:  LDA #$00                ;Clears Samus stats(Health, full tanks, game tim
 LC57C:* STA $0100,y             ;Load $100 thru $10F with #$00.
 LC57F:  DEY                     ;
 LC580:  BPL -                   ;Loop 16 times.
-LC582:  RTS
+LC582:  RTS                     ;
 
 ;Norfair memory page.
 
@@ -2800,7 +2800,7 @@ SamusPntUp:
     ldx ObjAction
 
  .scope
-        CPX #4
+        CPX #$04
         BCS _Check_6
         _DoJump:
             LDA SamusPntUpTable_LowBytes,x
@@ -2809,7 +2809,7 @@ SamusPntUp:
             STA CodePtr + 1
             JMP (CodePtr)
         _Check_6:
-            CPX #6
+            CPX #$06
             BNE _DoJump
         LDY #an_SamusJmpPntUp
         JMP AfterSamusJumpSet
@@ -6642,7 +6642,6 @@ SelectRoomRAM:
     sta CartRAMPtrUB        ;
 ;------------------------[ Initialize room RAM and associated attribute table ]-----------------------
 
-
 InitTables:
 ldy #$80
 ldx RoomPal         ;Index into table below (Lowest 2 bits).
@@ -6652,7 +6651,7 @@ bne FillRoomRAM_64
 FillRoomRAM_60:
     .scope
         lda #$FF
-        _loop:
+        _loop:              ; Fill $6400 - $63C0 with #$FF
             sta $5F80,y     ;
             sta $6000,y     ;
             sta $6080,y     ;
@@ -6660,14 +6659,14 @@ FillRoomRAM_60:
             sta $6180,y     ;
             sta $6200,y     ;
             sta $6280,y     ;
-            sta $6300,y     ;
+            sta $6300,y     ;   
             iny
         bne _loop
         lda ATDataTable,x   ;Load attribute table data from table below.
         ldy #$E0            ;Low byte of start of all attribute tables.
         _loop2:
-            sta $62E0,y         ;Fill attribute table.
-            sta $6300,y         ;Fill attribute table.
+            sta $62E0,y         ;Fill attribute table.      $63C0 - $63E0
+            sta $6300,y         ;Fill attribute table.      $63E0 - $6400
             iny
         bne _loop2
         beq DrawRoom
@@ -6676,7 +6675,7 @@ FillRoomRAM_60:
 FillRoomRAM_64:
     lda #$FF
     .scope
-        _loop:
+        _loop:              ; Fill $6400 - $6800 with #$FF
             sta $6380,y     ;
             sta $6400,y     ;
             sta $6480,y     ;
@@ -7491,11 +7490,11 @@ IncPtr00HiByte:
 ;A = number of 2x2 tile macros to draw horizontally.
 
 DrawStructRow:
-LEF13:  and #$0F            ;Row length(in macros). Range #$00 thru #$0F.
+;LEF13:  and #$0F            ;Row length(in macros). Range #$00 thru #$0F.
 LEF15:  bne +               ;
 LEF17:  lda #$10            ;#$00 in row length=16.
-LEF19:* sta $0E             ;Store horizontal macro count.
-LEF1B:  lda (StructPtr),y       ;Get length byte again. = $35
+LEF19:* sta ScreenXPos      ;Store horizontal macro count.
+        txa                 ; X register set via "lax (StructPtr),y" from before "DrawStructRow" call
 LEF1D:  ;($C2BF)/16. Upper nibble contains x coord offset(if any).
         asr #$F0
         lsr
@@ -7505,6 +7504,14 @@ LEF21:  adc CartRAMWorkPtrLB      ;Add x coord offset to CartRAMWorkPtr and save
 LEF23:  sta $00                 ;
         lda CartRAMWorkPtrUB
 LEF29:  sta $01                 ;$0000 = work pointer.
+
+        lda ObjectPal           ;Load attribute data of structure. ObjectPal = $67
+        cmp RoomPal             ;Is it the same as the room's default attribute data? RoomPal = $68
+        beq PalNeedsUpdate      ; Y should be 00 before getting here from before the DrawStructRow call
+        PalNotNeedsUpdate:
+            iny
+        PalNeedsUpdate:
+            sty SpareMemD0
 
 DrawMacro:
 LEF2B:  lda $01             ;High byte of current location in room RAM.
@@ -7531,7 +7538,7 @@ LEF46:  asl             ;A=macro number * 4. Each macro is 4 bytes long.
 
     ; upper-left
     TAY
-    LDA (MacroPtr),Y
+    LDA (MacroPtr),Y            ;Get macro number. MacroPtr = $3F Lo $40 Hi
     LDY #$00
     STA ($00),Y
     INX
@@ -7572,7 +7579,7 @@ AfterUpdateAttr:
     ADC #$02     ; 2   (requires C=0)
     STA $00      ; 3
 LEF63:  and #$1F            ;Still room left in current row?
-LEF65:  bne +               ;If yes, branch to do another macro.
+LEF65:  bne DoAnotherMacro           ;If yes, branch to do another macro.
 
 ;End structure row early to prevent it from wrapping on to the next row..
 LEF67:  lda ScreenYPos             ;Struct index.
@@ -7580,6 +7587,7 @@ LEF6A:  adc ScreenXPos  ;Add number of macros remaining in current row.
 LEF6D:  sbc #$00            ;-1 from macros remaining in current row.
 LEF6F:  jmp AdvanceRow          ;($EF78)Move to next row of structure.
 
+DoAnotherMacro:
 LEF72:* dec ScreenXPos             ;Have all macros been drawn on this row?
 LEF74:  bne DrawMacro           ;If not, branch to draw another macro.
 LEF76:  lda ScreenYPos             ;Load struct index.
@@ -7596,19 +7604,9 @@ LEF86:  sta CartRAMWorkPtrLB      ;
 LEF88:  bcs IncCartRAMWorkPtrUB   ;Begin drawing next structure row.
 
 DrawStruct:
-ldy #$00
-lda ObjectPal           ;Load attribute data of structure. ObjectPal = $67
-cmp RoomPal           ;Is it the same as the room's default attribute data? RoomPal = $68
-beq PalNotNeedsUpdate
-PalNeedsUpdate:
-    sty SpareMemD0
-    jmp LEF8E
-PalNotNeedsUpdate:
-    iny
-    sty SpareMemD0
-    dey                     ;Reset struct index.
+        ldy #$00                        ;Reset struct index.
 LEF8E:  sty ScreenYPos          ;
-LEF90:  lda (StructPtr),y       ;Load data byte.
+LEF90:  lax (StructPtr),y       ;Load data byte.
 LEF94:  bmi DrawStructExit      ;If so, branch to exit.
 LEF96:  jmp DrawStructRow       ;($EF13)Draw a row of macros.
 
