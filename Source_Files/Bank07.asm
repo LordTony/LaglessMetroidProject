@@ -294,23 +294,23 @@ LC103:* JSR SoundEngineEntryPoint      ;($B3B4)Update music and SFX.
 
 UpdateAge:
 LC97E:  lda GameMode            ;
-LC980:  bne NMIEnd                  ;Exit if at title/password screen.
+LC980:  bne NMIEnd              ;Exit if at title/password screen.
 LC982:  lda MainRoutine         ;
 LC984:  cmp #$03                ;Is game engine running?
 LC986:  bne NMIEnd              ;If not, don't update age.
 LC988:  ldx FrameCount          ;Only update age when FrameCount is zero
-LC98A:  bne NMIEnd                  ;(which is approx. every 4.266666666667 seconds).
-LC98C:  inc SamusAgeLo,x        ;Minor Age = Minor Age + 1.
+LC98A:  bne NMIEnd              ;(which is approx. every 4.266666666667 seconds).
+LC98C:  inc SamusAgeLo          ; Minor Age = Minor Age + 1.
 LC98F:  lda SamusAgeLo          ;
 LC992:  cmp #$D0                ;Has Minor Age reached $D0?
-LC994:  bcc NMIEnd                  ;If not, we're done.
+LC994:  bcc NMIEnd              ;If not, we're done.
 LC996:  lda #$00                ;Else reset minor age.
 LC998:  sta SamusAgeLo          ;
-LC99B:* cpx #$03                ;
-LC99D:  bcs NMIEnd              ;Loop to update middle age and possibly major age.
-LC99F:  inx                     ;
-LC9A0:  inc SamusAgeLo,x        ;
-LC9A3:  beq -                   ;Branch if middle age overflowed, need to increment
+        inc SamusAgeLo+1        ;
+        bne NMIEnd              ;Loop to update middle age and possibly major age.
+        inc SamusAgeLo+2        ;
+        bne NMIEnd              ;
+        inc SamusAgeLo+3        ;Branch if middle age overflowed, need to increment 
 
 NMIEnd: 
 
@@ -510,32 +510,6 @@ LC20E:  STX $00                 ;Lower byte of pointer to PPU string.
 LC210:  STY $01                 ;Upper byte of pointer to PPU string.
 LC212:  JMP ProcessPPUStr       ;($C30C)Write data string to PPU.
 
-;-----------------------------------------[ Choose routine ]-----------------------------------------
-
-;This is an indirect jump routine. A is used as an index into a code
-;pointer table, and the routine at that position is executed. The programmers
-;always put the pointer table itself directly after the JSR to ChooseRoutine,
-;meaning that its address can be popped from the stack.
-
-; TODO - Get this filth out of here
-
-ChooseRoutine:
-    ASL
-    STY TempY
-    TAY
-    INY
-    PLA
-    STA TempPtr
-    PLA
-    STA TempPtr+1
-    LDA (TempPtr),Y
-    STA CodePtr
-    INY
-    LDA (TempPtr),Y
-    STA CodePtr+1
-    LDY TempY
-    JMP (CodePtr)
-
 ;----------------------------------[ Add y index to stored addresses ]-------------------------------
 
 ;Add Y to pointer at $0000. 
@@ -549,30 +523,6 @@ LC2AE:  BCS +                   ;Increment $01(upper address byte) if carry
         RTS
 LC2B0:* INC $01                 ;has occurred.
 LC2B2:  RTS                     ;
-
-;--------------------------------[ Simple divide and multiply routines ]-----------------------------
-
-Adiv32: 
-LC2BE:  LSR                     ;Divide by 32.
-
-Adiv16: 
-LC2BF:  LSR                     ;Divide by 16.
-
-Adiv8:  
-LC2C0:  LSR                     ;Divide by 8.
-LC2C1:  LSR                     ;
-LC2C2:  LSR                     ;Divide by shifting A right.
-LC2C3:  RTS                     ;
-
-Amul32: 
-LC2C4:  ASL                     ;Multiply by 32.
-
-Amul16: 
-LC2C5:  ASL                     ;Multiply by 16.
-LC2C6:  ASL                     ;Multiply by 8.
-LC2C7:  ASL                     ;
-LC2C8:  ASL                     ;Multiply by shifting A left.
-LC2C9:  RTS                     ;
 
 ;-------------------------------------[ PPU writing routines ]---------------------------------------
 
@@ -645,10 +595,10 @@ LC32F:  AND #$0F                ;
 LC331:  STA $05                 ;# of tiles horizontally.
 LC333:  LDA ($02),y             ;
 LC335:      
-    lsr                 ; inlined jsr Adiv16
     lsr
     lsr
-    lsr             ;($C2BF)/16.
+    lsr
+    lsr
 LC338:  STA $04                 ;# of tiles vertically.
 LC33A:  LDX PPUStrIndex         ;
 LC33D:* LDA $01                 ;
@@ -1045,12 +995,17 @@ LC561:  STA MainRoutine         ;Run InitArea routine next.
 LC563:  STA InArea              ;Start in Brinstar.
 LC565:  STA GamePaused          ;Make sure game is not paused.
 LC567:  JSR ClearRAM_33_DF      ;($C1D4)Clear game engine memory addresses.
-LC56A:  JSR ClearSamusStats     ;($C578)Clear Samus' stats memory addresses.
+        LDY #$0F                ;
+        LDA #$00                ;Clears Samus stats(Health, full tanks, game timer, etc.).
+*       STA $0100,y             ;Load $100 thru $10F with #$00.
+        DEY                     ;
+        BPL -                   ;Loop 16 times.
 LC56D:* LDY #$00                ;
 LC56F:  JSR ROMSwitch           ;($C4EF)Load Brinstar memory page into lower 16Kb memory.
 LC572:  JSR InitBrinstarGFX     ;($C604)Load Brinstar GFX.
 LC575:  JMP NmiOn               ;($C487)Turn on VBlank interrupts.
 
+; TODO - this is now only called in Bank00, so move it there
 ClearSamusStats:
 LC578:  LDY #$0F                ;
 LC57A:  LDA #$00                ;Clears Samus stats(Health, full tanks, game timer, etc.).
@@ -2188,10 +2143,16 @@ LCD7C:  STA ObjectCntrl         ;
 LCD7E:* JSR CheckHealthStatus       ;($CDFA)Check if Samus hit, blinking or Health low.
 LCD81:  JSR LavaAndMoveCheck        ;($E269)Check if Samus is in lava or moving.
 LCD84:  LDA MetroidOnSamus      ;Is a Metroid stuck to Samus?
-LCD86:  BEQ +               ;If not, branch.
-LCD88:  LDA #$A1            ;Metroid on Samus. Turn Samus blue.
+LCD86:  BEQ LCD8C               ;If not, branch.
+LCD88:  LDA #$A1                ;Metroid on Samus. Turn Samus blue.
 LCD8A:  STA ObjectCntrl         ;
-LCD8C:* JSR SetmirrorCntrlBit       ;($CD92)Mirror Samus, if necessary.
+LCD8C:
+        LDA SamusDir
+        BEQ SetSamusDrawFrameCall
+        LDA #$10                ;
+        ORA ObjectCntrl         ;
+        STA ObjectCntrl
+SetSamusDrawFrameCall:
 LCD8F:  JMP DrawFrame           ;($DE4A)Display Samus.
 
 ;---------------------------------[ Set mirror control bit ]-----------------------------------------
@@ -2270,7 +2231,8 @@ Table05:
     .byte $3F
 
 CheckHealthStatus:
-LCDFA:  lda SamusHit            ;
+LCDFA:
+    lda SamusHit            ;
     and #$20            ;Has Samus been hit?
     beq +++             ;If not, branch to check if still blinking from recent hit.
     lda #$32            ;
@@ -2301,7 +2263,7 @@ LCDFA:  lda SamusHit            ;
     ldx DmgPushDir
     inx
     beq +++
-    lsr                 ; inlined jsr Adiv16
+    lsr
     lsr
     lsr
     lsr
@@ -2427,7 +2389,10 @@ LCF0E:  JSR Base10Add           ;($C3DA)Perform base 10 addition.
 LCF11:  STA HealthHi            ;Save results.
 
 LCF14:  LDA TankCount           ;
-LCF17:  JSR Amul16          ;($C2C5)*16. Move tank count to upper 4 bits.
+LCF17:  asl
+        asl
+        asl
+        asl                 ;($C2C5)*16. Move tank count to upper 4 bits.
 LCF1A:  ORA #$0F            ;Set lower 4 bits.
 LCF1C:  CMP HealthHi            ;
 LCF1F:  BCS +               ;Is life less than max? if so, branch.
@@ -4229,7 +4194,10 @@ LDC03:  CMP #$06            ;Has Samus got 6 energy tanks?
 LDC05:  BEQ +               ;If so, she can't have any more.
 LDC07:  INC TankCount           ;Otherwise give her a new tank.
 LDC0A:* LDA TankCount           ;
-LDC0D:  JSR Amul16          ;Get tank count and shift into upper nibble.
+LDC0D:  asl
+        asl
+        asl
+        asl                 ;Get tank count and shift into upper nibble.
 LDC10:  ORA #$09            ;
 LDC12:  STA HealthHi            ;Set new tank count. Upper health digit set to 9.
 LDC15:  LDA #$99            ;Max out low health digit.
@@ -4321,7 +4289,11 @@ LDC66:  RTS             ;
 
 CreateItemID:
 LDC67:  LDA $07             ;Load x map position of item.
-LDC69:  JSR Amul32          ;($C2C$)*32. Move lower 3 bytes to upper 3 bytes.
+LDC69:  asl
+        asl
+        asl
+        asl
+        asl                 ;($C2C$)*32. Move lower 3 bytes to upper 3 bytes.
 LDC6C:  ORA $06             ;combine Y coordinates into data byte.
 LDC6E:  STA $06             ;Lower data byte complete. Save in $06.
 LDC70:  LSR $07             ;
@@ -4394,7 +4366,7 @@ LDCC3:  LDY #$00            ;
 LDCC5:  STY $0F             ;Clear index into placement data.
 LDCC7:  LAX ($00),y         ;Load control byte from frame pointer data.
 LDCC9:  STA $04             ;Store value in $04 for processing below. ;Keep a copy of the value in x as well.
-LDCCC:  lsr                 ; inlined jsr Adiv16
+LDCCC:  lsr
         lsr
         lsr
         asr #$06
@@ -5083,7 +5055,7 @@ LE0D7:  lda HealthHi            ;
 LE0DA:  and #$0F            ;Extract upper health digit.
 LE0DC:  jsr SPRWriteDigit       ;($E173)Display digit on screen.
 LE0DF:  lda HealthLo            ;
-LE0E2:  lsr                 ; inlined jsr Adiv16
+LE0E2:  lsr
         lsr
         lsr
         lsr
@@ -5150,7 +5122,7 @@ LE11A:  bne ++              ;Branch always.
 ;Display 3-digit end sequence timer.
 LE11C:* lda EndTimerHi          ;
 LE11F:     
-        lsr                 ; inlined jsr Adiv16
+        lsr
         lsr
         lsr
         lsr
@@ -5160,7 +5132,7 @@ LE128:  and #$0F            ;Middle timer digit.
 LE12A:  jsr SPRWriteDigit       ;($E173)Display digit on screen.
 LE12D:  lda EndTimerLo          ;
 LE130:  
-        lsr                 ; inlined jsr Adiv16
+        lsr
         lsr
         lsr
         lsr
@@ -5186,7 +5158,7 @@ LE155:  sta $00             ;Energy tanks are drawn from right to left.
 LE157:  ldy #$6F            ;"Full energy tank" tile.
 LE159:  lda HealthHi            ;
 LE15C:  
-        lsr                 ; inlined jsr Adiv16
+        lsr
         lsr
         lsr
         lsr
@@ -5397,7 +5369,7 @@ LE286:  and #$03            ;Start the jump SFX every 4th frame while in lava.
 LE288:  bne +               ;
 LE28A:  jsr SFX_SamusJump       ;($CBAC)Initiate jump SFX.
 LE28D:* lda FrameCount          ;
-LE28F:  asr #$06            ;This portion of the code causes Samus to be damaged by ;lava twice every 8 frames if she does not have the varia
+LE28F:  asr #$07            ;This portion of the code causes Samus to be damaged by ;lava twice every 8 frames if she does not have the varia
 LE292:  bne ++              ;but only once every 8 frames if she does.
 LE294:  lda SamusGear           ;
 LE297:  and #gr_VARIA           ;Does Samus have the Varia?
@@ -5842,13 +5814,15 @@ LE570:  rts             ;
 
 ; check if it's time to update nametable (when scrolling is VERTICAL)
 
-LE571:  ldx ScrollDir
+LE571:
+    ldx ScrollDir
     lda ScrollY
     and #$07    ; compare value = 0 if ScrollDir = down, else 7
     cmp Table11,x
     bne GetNameAddrsExit     ; exit if not equal (no nametable update)
 
-LE57C:  ldx ScrollDir           ;
+LE57C:
+    ldx ScrollDir           ;
     cpx TempScrollDir       ;Still scrolling same direction when room was loaded?
     bne GetNameAddrsExit              ;If not, branch to exit.
     lda ScrollY
@@ -5860,7 +5834,8 @@ LE57C:  ldx ScrollDir           ;
     asl $00
     rol
 
-LE590:  sta $01  ; $0001 = (ScrollY & 0xF8) << 2 = row offset
+LE590:
+    sta $01  ; $0001 = (ScrollY & 0xF8) << 2 = row offset
     jsr GetNameAddrs
     ora $01
     sta $03
@@ -6078,12 +6053,15 @@ LE731:  bne +++++           ;Can't load room, a door is in the way. This has the
                     ;through the door(horizontal scrolling only).
 
 LE733:* lda MapPosY         ;Map pos y.
-LE735:  jsr Amul16          ;($C2C5)Multiply by 16.
+LE735:  asl
+        asl
+        asl
+        asl                 ;($C2C5)Multiply by 16.
 LE738:  sta $00             ;Store multiplied value in $00.
 LE73A:  lda #$00            ;
-LE73C:  rol             ;Save carry, if any.
+LE73C:  rol                 ;Save carry, if any.
 LE73D:  rol $00             ;Multiply value in $00 by 2.
-LE73F:  rol             ;Save carry, if any.
+LE73F:  rol                 ;Save carry, if any.
 LE740:  sta $01             ;
 LE742:  lda $00             ;
 LE744:  adc MapPosX         ;Add map pos X to A.
@@ -6593,23 +6571,13 @@ LEA2A:  rts                 ;
 
 ;------------------------------------------[ Setup room ]--------------------------------------------
 
-
-;; .scope
-;;     ; My attempt to fix room load lag
-;;     lda SpareMemCD
-;;     EOR #$01
-;;     sta SpareMemCD
-;;     bne _skip
-;;         rts
-;;     _skip:
-;; .scend
 GoDrawRoom:
     jmp DrawRoom
 
 SetupRoom:
 LEA2B:  lda RoomNumber          ;Room number.
 LEA2D:  cmp #$FF            ;
-LEA2F:  beq RoomFinishedExit  ;Branch to exit if room is undefined.
+LEA2F:  beq Exit18  ;Branch to exit if room is undefined.
 LEA31:  cmp #$FE            ;
 LEA33:  beq GoDrawRoom      ;Branch if empty place holder byte found in room data.
 LEA35:  cmp #$F0            ;
@@ -6627,14 +6595,15 @@ LEA4A:  sta RoomPtr+1           ;Base copied from $959B to $3C.
 LEA4C:  ldy #$00            ;
 LEA4E:  lda (RoomPtr),y         ;First byte of room data.
 LEA50:  sta RoomPal         ;store initial palette # to fill attrib table with.
-LEA52:  lda #$01            ;
-LEA54:  jsr AddToRoomPtr        ;($EAC0)Increment room data pointer.
+
+LEAC3:  inc RoomPtr         ;
+LEAC5:  bne SelectRoomRAM   ;Did carry occur? If not branch to exit.
+LEAC7:  inc RoomPtr+1       ;Increment high byte of room pointer if carry occured.
 
 ;------------------------------------------[ Select room RAM ]---------------------------------------
 
 SelectRoomRAM:
-    lda #$00            ;
-    sta CartRAMPtrLB          ;Save two byte pointer to start of proper room RAM.
+    sty CartRAMPtrLB        ;Save two byte pointer to start of proper room RAM.
     jsr GetNameTable        ;($EB85)Find name table to draw room on.
     asl             ;
     asl             ;
@@ -6663,15 +6632,23 @@ FillRoomRAM_60:
             iny
         bne _loop
         lda ATDataTable,x   ;Load attribute table data from table below.
-        ldy #$E0            ;Low byte of start of all attribute tables.
+        ldy #$F0            ;Low byte of start of all attribute tables.
         _loop2:
-            sta $62E0,y         ;Fill attribute table.      $63C0 - $63E0
-            sta $6300,y         ;Fill attribute table.      $63E0 - $6400
+            sta $62D0,y         ;Fill attribute table.  $62C0 - $62CF
+            sta $62E0,y         ;Fill attribute table.  $62D0 - $62DF
+            sta $62F0,y         ;Fill attribute table.  $62E0 - $62EF
+            sta $6300,y         ;Fill attribute table.  $62F0 - $62FF
             iny
         bne _loop2
-        beq DrawRoom
+        jmp DrawRoom
     .scend
  
+ ATDataTable:
+    .byte %00000000         ; #$00
+    .byte %01010101         ; #$55 Data to fill attribute table
+    .byte %10101010         ; #$AA
+    .byte %11111111         ; #$FF
+
 FillRoomRAM_64:
     lda #$FF
     .scope
@@ -6687,10 +6664,12 @@ FillRoomRAM_64:
             iny
         bne _loop
         lda ATDataTable,x   ;Load attribute table data from table below.
-        ldy #$E0            ;Low byte of start of all attribute tables.
+        ldy #$F0            ;Low byte of start of all attribute tables.
         _loop2:
-            sta $66E0,y         ;Fill attribute table.
-            sta $6700,y         ;Fill attribute table.
+            sta $66D0,y         ;Fill attribute table.  $67C0 - $67CF
+            sta $66E0,y         ;Fill attribute table.  $67D0 - $67DF
+            sta $66F0,y         ;Fill attribute table.  $67E0 - $67EF
+            sta $6700,y         ;Fill attribute table.  $67F0 - $67FF
             iny
         bne _loop2
         beq DrawRoom            ;($EAAA)Load room contents into room RAM.
@@ -6699,41 +6678,45 @@ FillRoomRAM_64:
 ;---------------------------------------[ Draw room object ]-----------------------------------------
 
 DrawObject:
-LEA60:  sta $0E             ;Store object position byte(%yyyyxxxx).
-LEA62:  lda CartRAMPtrLB          ;
-LEA64:  sta CartRAMWorkPtrLB      ;Set the working pointer equal to the room pointer
-LEA66:  lda CartRAMPtrUB        ;(start at beginning of the room).
-LEA68:  sta CartRAMWorkPtrUB        ;
-LEA6A:  lda $0E             ;Reload object position byte.
-LEA6C:  ;($C2BF)/16. Lower nibble contains object y position.   
-        lsr                 ; inlined jsr Adiv16
+LEA62:  ldx CartRAMPtrLB
+LEA64:  stx CartRAMWorkPtrLB    ;Set the working pointer equal to the room pointer
+LEA66:  ldx CartRAMPtrUB        ;(start at beginning of the room).
+LEA68:  stx CartRAMWorkPtrUB
+LEA6C:  sta $0E                 ;($C2BF)/16. Lower nibble contains object y position.   
         lsr
         lsr
         lsr
-LEA6F:  tax             ;Transfer it to X, prepare for loop.
-LEA70:  beq +++             ;Skip y position calculation loop as y position=0 and
-                    ;does not need to be calculated.
-LEA72:* lda CartRAMWorkPtrLB      ;LoW byte of pointer working in room RAM.
-    LEA74:  clc             ;
-    LEA75:  adc #$40            ;Advance two rows in room RAM(one y unit).
-    LEA77:  sta CartRAMWorkPtrLB      ;
-    LEA79:  bcc +               ;If carry occurred, increment high byte of pointer
-    LEA7B:  inc CartRAMWorkPtrUB        ;in room RAM.
-    LEA7D:* dex             ;
-LEA7E:  bne --              ;Repeat until at desired y position(X=0).
+        lsr
+LEA70:  beq LEA80               ;Skip y position calculation loop as y position=0 and
+                              ;does not need to be calculated.
+.scope
+    tax                         ;Transfer it to X, prepare for loop.
+    lda CartRAMWorkPtrLB        ; Load low byte once
+    clc                         ; Ensure C = 0 before first ADC         
+    _loop:
+        adc #$40                    ; Add $40 to low byte
+        bcc _skip                      ; If no carry, skip high-byte increment
+        inc CartRAMWorkPtrUB        ; Carry happened → increment high byte
+        clc                         ; Clear C for next iteration's ADC
+    _skip:
+        dex                         ; One "row" done
+        bne _loop                   ; Repeat until X == 0
 
-LEA80:* lda $0E             ;Reload object position byte.
+    sta CartRAMWorkPtrLB        ; Store final low byte back to RAM
+.scend
+
+LEA80:  lda $0E             ;Reload object position byte.
 LEA82:  and #$0F            ;Remove y position upper nibble.
 LEA84:  asl             ;Each x unit is 2 tiles.
 LEA85:  adc CartRAMWorkPtrLB      ;
 LEA87:  sta CartRAMWorkPtrLB      ;Add x position to room RAM work pointer.
-LEA89:  bcc +               ;If carry occurred, increment high byte of room RAM work
+LEA89:  bcc LEA8D               ;If carry occurred, increment high byte of room RAM work
 LEA8B:  inc CartRAMWorkPtrUB        ;pointer, else branch to draw object.
 
 ;CartRAMWorkPtr now points to the object's starting location (upper left corner)
 ;on the room RAM which will eventually be loaded into a name table.
 
-LEA8D:* iny             ;Move to the next byte of room data which is
+LEA8D:  iny             ;Move to the next byte of room data which is
 LEA8E:  lax (RoomPtr),y         ;the index into the structure pointer table.
 LEA91:  iny             ;Move to the next byte of room data which is
 LEA92:  lda (RoomPtr),y         ;the attrib table info for the structure.
@@ -6742,13 +6725,24 @@ LEA96:  txa             ;Restore structure pointer to A.
 LEA97:  asl             ;*2. Structure pointers are two bytes in size.
 LEA98:  tay             ;
 LEA99:  lda (StructPtrTable),y      ;Low byte of 16-bit structure ptr.
-LEA9B:  sta StructPtrLB           ;
-LEA9D:  iny             ;
+LEA9B:  sta StructPtrLB             ;
+LEA9D:  iny                         ;
 LEA9E:  lda (StructPtrTable),y      ;High byte of 16-bit structure ptr.
-LEAA0:  sta StructPtrUB         ;
-LEAA2:  jsr DrawStruct          ;($EF8C)Draw one structure.
+LEAA0:  sta StructPtrUB             ;
+
+; replacing a jsr
+DrawObject_DrawStruct:
+LEAA2:  jmp DrawStruct          ;($EF8C)Draw one structure.
+AfterDrawObject_DrawStruct:
+
 LEAA5:  lda #$03            ;Move to next set of structure data.
-LEAA7:  jsr AddToRoomPtr        ;($EAC0)Add A to room data pointer.
+
+; AddToRoomPtr
+    clc                 ;Prepare to add index in A to room pointer.
+    adc RoomPtr         ;
+    sta RoomPtr         ;
+    bcc DrawRoom        ;Did carry occur? If not branch to exit.
+    inc RoomPtr+1       ;Increment high byte of room pointer if carry occurred.
 
 ;-------------------------------------------[ Draw room ]--------------------------------------------
 
@@ -6772,8 +6766,15 @@ LEAD0:  sta $01             ;
 LEAD2:  lda #$01            ;Prepare to increment to enemy/door data.
 
 EnemyLoop:
-LEAD4:  jsr AddToPtr00      ;($EF09)Add A to pointer at $0000.
-LEAD7:  ldy #$00            ;
+; TODO: Something funny happens when I try to optimize this
+; AddToPtr00:
+    clc                 ;
+    adc $00             ;
+    sta $00             ; A is added to the 16 bit address stored in $0000.
+    bcc LEAD7           ;
+    inc $01             ;
+
+LEAD7:  ldy #$00
 LEAD9:  lda ($00),y         ;Get first byte of enemy/door data.
 LEADB:  cmp #$FF            ;End of enemy/door data?
 LEADD:  beq EndOfRoom       ;If so, branch to finish room setup.
@@ -6792,20 +6793,11 @@ EnemyLoopTable_HiBytes:
 EnemyLoopTable_LoBytes:
     .byte <ExitSub, <LoadEnemy, <LoadDoor, <ExitSub, <LoadElevator, <ExitSub, <LoadStatues, <ZebHole
 
-;-------------------------------------[ Add A to room pointer ]--------------------------------------
-
-AddToRoomPtr:
-LEAC0:  clc             ;Prepare to add index in A to room pointer.
-LEAC1:  adc RoomPtr         ;
-LEAC3:  sta RoomPtr         ;
-LEAC5:  bcc +               ;Did carry occur? If not branch to exit.
-LEAC7:  inc RoomPtr+1           ;Increment high byte of room pointer if carry occured.
-LEAC9:* rts             ;
-
 ;---------------------------------------------------------------------------------------------------
 
 EndOfRoom:
-LEAF4:  ldx #$F0            ;Prepare for PPU attribute table write.
+LEAF4:
+    ldx #$F0            ;Prepare for PPU attribute table write.
     stx RoomNumber          ;
 EndOfRoomWithoutRoomNumberUpdate:
     lda ScrollDir           ;
@@ -6870,7 +6862,10 @@ Near_LEB4D:  tay             ;Save enemy position data in Y.
     ora #$08            ;Add 8 pixels to y position so enemy is always on screen. 
     sta EnYRoomPos,x        ;Store enemy y position.
     tya             ;Restore enemy position data.
-    jsr Amul16          ;*16 to extract enemy x position.
+    asl
+    asl
+    asl
+    asl                 ;*16 to extract enemy x position.
     ora #$0C            ;Add 12 pixels to x position so enemy is always on screen.
     sta EnXRoomPos,x        ;Store enemy x position.
     lda #$01            ;
@@ -6939,7 +6934,10 @@ LEB8B:  RTS                     ;
 LEB92:  iny
     lda ($00),y     ; door info byte
     pha
-    jsr Amul16      ; CF = door side (0=right, 1=left)
+    asl
+    asl
+    asl
+    asl             ; CF = door side (0=right, 1=left)
     php
     lda MapPosX
     clc
@@ -6963,7 +6961,10 @@ LEB92:  iny
     sta $09
     ldy MapPosX
     txa
-    jsr Amul16       ; * 16
+    asl
+    asl
+    asl
+    asl       ; * 16
     bcc +
     dey
 *   tya
@@ -7072,7 +7073,10 @@ LEC57:  ldx #$20
     ora #$08
     sta $072A,x
     tya
-    jsr Amul16       ; * 16
+    asl
+    asl
+    asl
+    asl       ; * 16
     ora #$00
     sta $072B,x
     jsr GetNameTable        ;($EB85)
@@ -7238,7 +7242,7 @@ LEDA0:  sta $01             ;
 LEDA2:  ldy #$00            ;Index starts at #$00.
 LEDA4:  lda ($00),y         ;Load map Ypos of item.
 LEDA6:  cmp MapPosY         ;Does it equal Samus' Ypos on map?
-LEDA8:  beq +               ;If yes, check Xpos too.
+LEDA8:  beq LEDBE           ;If yes, check Xpos too.
 
 LEDAA:  bcs Exit11          ;Exit if item Y pos >  Samus Y Pos.
 LEDAC:  iny             ;
@@ -7252,8 +7256,15 @@ LEDB7:  lda ($00),y         ;High byte of ptr to next item data.
 LEDB9:  stx $00             ;Write low byte for next item.
 LEDBB:  jmp ScanOneItem         ;Process next item.
 
-LEDBE:* lda #$03            ;Get ready to look at byte containing X pos.
-LEDC0:  jsr AddToPtr00          ;($EF09)Add 3 to pointer at $0000.
+LEDBE:
+*   lda #$03            ;Get ready to look at byte containing X pos.
+
+; AddToPtr00:
+    clc                 ;
+    adc $00             ;
+    sta $00             ; A is added to the 16 bit address stored in $0000.
+    bcc ScanItemX           ;
+    inc $01             ;
 
 ScanItemX:
 LEDC3:  ldy #$00            ;
@@ -7269,7 +7280,13 @@ LEDD1:  jmp ScanItemX           ;Try next X coord.
 LEDD4:* lda #$02            ;Move ahead two bytes to find item data.
 
 ChooseHandlerRoutine:
-LEDD6:  jsr AddToPtr00          ;($EF09)Add A to pointer at $0000.
+
+; AddToPtr00:
+    clc                 ;
+    adc $00             ;
+    sta $00             ; A is added to the 16 bit address stored in $0000.
+    bcc LEDD9           ;
+    inc $01             ;
 LEDD9:  ldy #$00                ;
 LEDDB:  lda ($00),y             ;Object type
 LEDDD:  and #$0F                ;Object handling routine index stored in 4 LSBs.
@@ -7342,7 +7359,10 @@ LEE23:  and #$F0            ;Extract Y coordinate.
 LEE25:  ora #$08            ;+ 8 to find  Y coordinate center.
 LEE27:  sta PowerUpYCoord,x     ;Store center Y coord
 LEE2A:  tya             ;Reload position data.
-LEE2B:  jsr Amul16          ;($C2C5)*16. Move lower 4 bits to upper 4 bits.
+LEE2B:  asl
+        asl
+        asl
+        asl                 ;($C2C5)*16. Move lower 4 bits to upper 4 bits.
 LEE2E:  ora #$08            ;+ 8 to find X coordinate center.
 LEE30:  sta PowerUpXCoord,x     ;Store center X coord
 LEE33:  jsr GetNameTable        ;($EB85)Get name table to place item on.
@@ -7468,21 +7488,22 @@ AnotherItem:
 LEF00:
     lda ($00),y         ;Is there another item with same Y pos?
     cmp #$FF            ;If so, A is amount to add to ptr. to find X pos.
-    bne AddToPtr00          ;($EF09)
+    bne AnotherItemEnd          ;($EF09)
+    AddToPtr00:
+        clc                 ;
+        adc $00             ;
+        sta $00             ; A is added to the 16 bit address stored in $0000.
+        bcs IncPtr00HiByte  ;
+    Exit29:
+        rts                 ;
+    IncPtr00HiByte:
+        inc $01             ;
+        rts;
+
+AnotherItemEnd:
     pla             ;
     pla             ;No more items to check. Pull last subroutine
     rts             ;off stack and exit.
-
-AddToPtr00:
-    clc                 ;
-    adc $00             ;
-    sta $00             ; A is added to the 16 bit address stored in $0000.
-    bcs IncPtr00HiByte  ;
-Exit29:
-    rts                 ;
-IncPtr00HiByte:
-    inc $01             ;
-    rts;
 
 ;----------------------------------[ Draw structure routines ]----------------------------------------
 
@@ -7505,14 +7526,6 @@ LEF23:  sta $00                 ;
         lda CartRAMWorkPtrUB
 LEF29:  sta $01                 ;$0000 = work pointer.
 
-        lda ObjectPal           ;Load attribute data of structure. ObjectPal = $67
-        cmp RoomPal             ;Is it the same as the room's default attribute data? RoomPal = $68
-        beq PalNeedsUpdate      ; Y should be 00 before getting here from before the DrawStructRow call
-        PalNotNeedsUpdate:
-            iny
-        PalNeedsUpdate:
-            sty SpareMemD0
-
 DrawMacro:
 LEF2B:  lda $01             ;High byte of current location in room RAM.
 LEF2D:  cmp #$63            ;Check high byte of room RAM address for both room RAMs
@@ -7524,7 +7537,7 @@ LEF33:  bcc ++              ;If not at end of room RAM, branch to draw macro.
 
 LEF38:* lda $00             ;Low byte of current nametable address.
 LEF3A:  cmp #$A0            ;Reached attrib table?
-LEF3C:  bcs Exit29               ;If not, branch to draw the macro.
+LEF3C:  bcs DrawStructExit  ;If not, branch to draw the macro.
 
 LEF3F:* inc $10             ;Increase struct data index.
 LEF41:  ldy $10             ;Load struct data index into Y.
@@ -7535,43 +7548,29 @@ LEF46:  asl             ;A=macro number * 4. Each macro is 4 bytes long.
 ;The following table is used to draw macros in room RAM. Each macro is 2 x 2 tiles.
 ;The following table contains the offsets required to place the tiles in each macro.
     tax
-
     ; upper-left
-    TAY
-    LDA (MacroPtr),Y            ;Get macro number. MacroPtr = $3F Lo $40 Hi
+    LDA MacroDefs, x
     LDY #$00
     STA ($00),Y
-    INX
 
     ; upper-right
-    TXA
-    TAY
-    LDA (MacroPtr),Y
-    LDY #$01
+    LDA MacroDefs+1, x
+    iny
     STA ($00),Y
-    INX
 
     ; lower-left
-    TXA
-    TAY
-    LDA (MacroPtr),Y
+    LDA MacroDefs+2, x
     LDY #$20
     STA ($00),Y
-    INX
 
     ; lower-right
-    TXA
-    TAY
-    LDA (MacroPtr),Y
-    LDY #$21
+    LDA MacroDefs+3, x
+    iny
     STA ($00),Y
-    INX
-
-    STX MacroTileIndex
 
 
 ; Update attribute if changed
-LEF9E:  lda SpareMemD0
+LEF9E:  lda SpareMemD1
 LEFA2:  bne UpdateAttrib        ;If so, no need to modify the attribute table, exit.
 AfterUpdateAttr:
     LDA $00      ; 3
@@ -7603,8 +7602,16 @@ LEF84:  adc CartRAMWorkPtrLB      ;Advance to next macro row in room RAM(two til
 LEF86:  sta CartRAMWorkPtrLB      ;
 LEF88:  bcs IncCartRAMWorkPtrUB   ;Begin drawing next structure row.
 
-DrawStruct:
-        ldy #$00                        ;Reset struct index.
+DrawStruct:                   ;Reset struct index.
+ldy #$00
+        lda ObjectPal           ;Load attribute data of structure. ObjectPal = $67
+        cmp RoomPal             ;Is it the same as the room's default attribute data? RoomPal = $68
+        beq PalNeedsUpdate      ; Y should be 00 before getting here from before the DrawStructRow call
+        PalNotNeedsUpdate:
+            iny
+        PalNeedsUpdate:
+            sty SpareMemD1
+            ldy #$00
 LEF8E:  sty ScreenYPos          ;
 LEF90:  lax (StructPtr),y       ;Load data byte.
 LEF94:  bmi DrawStructExit      ;If so, branch to exit.
@@ -7620,11 +7627,13 @@ IncCartRAMWorkPtrUB:
         jmp DrawStruct
 
 DrawStructExit:
-    rts
+    ;rts
+    jmp AfterDrawObject_DrawStruct
 ;---------------------------------[ Update attribute table bits ]------------------------------------
 
 ;The following routine updates attribute bits for one 2x2 tile section on the screen.
 
+; HOTSPOT
 UpdateAttrib:
 ;Figure out cart RAM address of the byte containing the relevant bits.
 
@@ -7636,25 +7645,24 @@ LEFAB:  ror $02             ;
 LEFAD:  lsr                 ;
 LEFAE:  ror $02             ;
 LEFB0:  lda $02             ;The following section of code calculates the
-LEFB2:  and #$07            ;proper attribute byte that corresponds to the
-LEFB4:  sta $03             ;macro that has just been placed in the room RAM.
-LEFB6:  lda $02             ;
+LEFB2:  ldx #$07            ;proper attribute byte that corresponds to the
+LEFB4:  sax $03             ;macro that has just been placed in the room RAM.
+;LEFB6:  lda $02             ;
 LEFB8:  lsr                 ;
         asr #$70            ;
 LEFBC:  ora $03             ;
 LEFBE:  ora #$C0            ;
 LEFC0:  sta $02             ;
-LEFC2:  lda #$63            ;
-LEFC4:  sta $03             ;$0002 contains pointer to attribute byte.
 
-LEFC6:  ldx #$00            ;
-LEFC8:  bit $00             ;
-LEFCA:  bvc +               ;
-LEFCC:  ldx #$02            ;The following section of code figures out which
-LEFCE:* lda $00             ;pair of bits to modify in the attribute table byte
-LEFD0:  and #$02            ;for the macro that has just been placed in the
-LEFD2:  beq +               ;room RAM.
-LEFD4:  inx             ;
+        ldx #$00    ; X = 0
+        lda #$02    ; A = 2, used as BIT mask for bit1
+        bit $00     ; V = bit6 of $00, Z = (bit1 of $00 == 0)?
+
+        beq +       ; if bit1 = 0, skip first increment
+        inx         ; bit1 = 1 → X += 1
+*       bvc +       ; if bit6 = 0, skip high-bit contribution
+        inx         ; bit6 = 1 → X += 2
+        inx
 
 ;X now contains which macro attribute table bits to modify:
 ;+---+---+
@@ -7665,36 +7673,39 @@ LEFD4:  inx             ;
 ;Where each box represents a macro(2x2 tiles).
 
 ;The following code clears the old attribute table bits and sets the new ones.
-LEFD5:* lda $01             ;Load high byte of work pointer in room RAM.
-LEFD7:  and #$04            ;
-LEFD9:  ora $03             ;Choose proper attribute table associated with the
-LEFDB:  sta $03             ;current room RAM.
-LEFDD:  lda AttribMaskTable,x       ;Choose appropriate attribute table bit mask from table below.
-LEFE0:  ldy #$00            ;
-LEFE2:  and ($02),y         ;clear the old attribute table bits.
-LEFE4:  sta ($02),y         ;
-LEFE6:  lda ObjectPal           ;Load new attribute table data(#$00 thru #$03).
-LEFE8:* dex             ;
-LEFE9:  bmi +               ;
-LEFEB:  asl             ;
-LEFEC:  asl             ;Attribute table bits shifted one step left
-LEFED:  bcc -               ;Loop until attribute table bits are in the proper location.
-LEFEF:* ora ($02),y         ;
-LEFF1:  sta ($02),y         ;Set attribute table bits.
-;LEFF3:* rts             ;
-*       jmp AfterUpdateAttr
+    LEFD5:* lda $01             ;Load high byte of work pointer in room RAM.
+    LEFD7:  and #$04            ;
+    LEFD9:  ora #$63            ;Choose proper attribute table associated with the
+    LEFDB:  sta $03             ;current room RAM.
 
-AttribMaskTable:
-LEFF4:  .byte %11111100         ;Upper left macro.
-LEFF5:  .byte %11110011         ;Upper right macro.
-LEFF6:  .byte %11001111         ;Lower left macro.
-LEFF7:  .byte %00111111         ;Lower right macro.
+*   lda ObjectPal           ; A = 0..3
+    asl                     ; *2
+    asl                     ; *4
+    adc IdentityTable, x    ; idx = pal*4 + quadrant (0..15)
+    tax                     ; X = idx
 
-ATDataTable:
-    .byte %00000000   
-    .byte %01010101         ;Data to fill attribute table
-    .byte %10101010   
-    .byte %11111111         ;
+    ldy #$00
+    lda ($02),y             ; load current attribute byte
+    and AttribMask16Table,x ; clear bits for our quadrant
+    ora AttrSetBitsTable,x  ; insert new bits for our quadrant
+    sta ($02),y             ; store updated attribute byte
+
+    jmp AfterUpdateAttr
+
+; 16-entry mask table (4 copies of the original 4 masks).
+AttribMask16Table:
+    .byte %11111100, %11110011, %11001111, %00111111
+    .byte %11111100, %11110011, %11001111, %00111111
+    .byte %11111100, %11110011, %11001111, %00111111
+    .byte %11111100, %11110011, %11001111, %00111111
+
+; For each ObjectPal (0..3) and quadrant (0..3):
+; value = ObjectPal << (2*quadrant)
+AttrSetBitsTable:
+    .byte %00000000, %00000000, %00000000, %00000000   ; pal 0
+    .byte %00000001, %00000100, %00010000, %01000000   ; pal 1
+    .byte %00000010, %00001000, %00100000, %10000000   ; pal 2
+    .byte %00000011, %00001100, %00110000, %11000000   ; pal 3
 
 ;----------------------------------------------------------------------------------------------------
 
@@ -8151,7 +8162,7 @@ EXIT24:
     rol
     tay
     txa
-    lsr                 ; inlined jsr Adiv16
+    lsr
     lsr
     lsr
     lsr
@@ -9532,13 +9543,6 @@ DoOneTile:
     sta CodePtr + 1
     jmp (CodePtr)
 
-; Replace this table
-;    .word ExitSub
-;    .word $FE3D
-;    .word $FE54
-;    .word $FE59
-;    .word $FE54
-;    .word $FE83
 UpdateTilesTable_HiBytes:
     .byte >LFE3D, >LFE54, >LFE59, >LFE54, >LFE83
 UpdateTilesTable_LoBytes:
@@ -9656,7 +9660,10 @@ GetTileFramePtr:
     sty $11
     lax ($02),y
     
-    jsr Adiv16       ; / 16
+    lsr
+    lsr
+    lsr
+    lsr
     sta $04
     txa
     

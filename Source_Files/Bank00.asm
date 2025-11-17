@@ -30,7 +30,7 @@ L8022:  JSR RemIntroSprts       ;($C1BC)Remove sparkle and crosshair sprites fro
 L8025:  LDA TitleRoutine        ;
 
 doChooseRoutine:
-L8027:  JSR ChooseRoutine       ;($C27C)Jump to proper routine below.
+L8027:  JSR Bank00ChooseRoutine       ;($C27C)Jump to proper routine below.
 
 ;----------------------------------------------------------------------------------------------------
 
@@ -400,6 +400,20 @@ LCB1B:  .byte $04               ;Best ending. Max. 1.2 hours
 ;;LCD26:  jmp EraseAllSprites     ;($C1A3)Clear sprite data.
 
 ;----------------------------------------------------------------------------------------------------
+
+Bank00_Adiv16:
+    lsr
+    lsr
+    lsr
+    lsr
+    rts
+
+Bank00_Amul16:
+    asl
+    asl
+    asl
+    asl
+    rts
 
 .advance $822E
 
@@ -892,7 +906,9 @@ L8819:  RTS                     ;Exit sparkle update routine.
 
 DoSprkleprteCoord:
 L881A:  TXA                     ;
-L881B:  JSR Adiv8               ;($C2C0)Y=0 when working with top sparkle sprite
+L881B:  lsr
+        lsr
+        lsr                     ;($C2C0)Y=0 when working with top sparkle sprite
 L881E:  TAY                     ;and y=2 when working with bottom sparkle sprite.
 
 L881F:  LDA SprklAddrTbl,Y      ;
@@ -931,7 +947,7 @@ L8852:  LDA #$00                ;Set IntroSpr0ByteTyp to #$00 after processing.
 L8854:  STA IntroSpr0ByteTyp,X  ;
 
 L8857:  PLA                     ;
-L8858:  JSR Adiv16              ;($C2BF)Move upper 4 bits to lower 4 bits.
+L8858:  JSR Bank00_Adiv16       ;($C2BF)Move upper 4 bits to lower 4 bits.
 L885B:  JSR NibbleSubtract      ;($8871)Check if nibble to be converted to twos compliment.
 L885E:  STA SprklSpr0YChange,X  ;Twos compliment stored if Y coord decreasing.
 
@@ -1525,7 +1541,9 @@ L8BB4:  RTS                     ;
 
 UniqueItemFound:
 L8BB5:  TXA                     ;
-L8BB6:  JSR Adiv8               ;($C2C0)Divide by 8.
+L8BB6:  lsr
+        lsr
+        lsr                     ;($C2C0)Divide by 8.
 L8BB9:  STA $05                 ;Shifts 5 MSBs to LSBs of item # and saves results in $05.
 L8BBB:  asl
         asl
@@ -1966,10 +1984,10 @@ L8F32:  RTS                     ;
 TwoLoAndFourUp:
 L8F33:  LDA PasswordByte00,Y    ;
 L8F36:  AND #$03                ;Saves two lower bits and stores them
-L8F38:  JSR Amul16              ;($C2C5)in bits 4 and 5.
+L8F38:  JSR Bank00_Amul16       ;($C2C5)in bits 4 and 5.
 L8F3B:  STA $00                 ;
 L8F3D:  LDA PasswordByte01,Y    ;Saves upper 4 bits and stores them
-L8F40:  JSR Adiv16              ;($C2BF)bits 0, 1, 2 and 3.
+L8F40:  JSR Bank00_Adiv16       ;($C2BF)bits 0, 1, 2 and 3.
 L8F43:  ORA $00                 ;Add two sets of bits together to make a byte
 L8F45:  RTS                     ;where bits 6 and 7 = 0.
  
@@ -2058,13 +2076,13 @@ L8FF4:  ASL                     ;lower six bits to upper six bits.
 L8FF5:  ASL                     ;
 L8FF6:  STA $00                 ;
 L8FF8:  LDA PasswordChar01,Y    ;Move bits 4and 5 to lower two
-L8FFB:  JSR Adiv16              ;($C2BF)bits and discard the rest.
+L8FFB:  JSR Bank00_Adiv16       ;($C2BF)bits and discard the rest.
 L8FFE:  ORA $00                 ;Combine the two bytes together.
 L9000:  RTS                     ;
 
 FourLoNFiveThruTwo:
 L9001:  LDA PasswordChar00,Y    ;Take four lower bits and transfer
-L9004:  JSR Amul16              ;($C2C5)them to upper four bits. Discard the rest.
+L9004:  JSR Bank00_Amul16       ;($C2C5)them to upper four bits. Discard the rest.
 L9007:  STA $00                 ;
 L9009:  LDA PasswordChar01,Y    ;Remove two lower bits and transfer
 L900C:  LSR                     ;bits 5 thru 2 to lower four bits. 
@@ -2662,13 +2680,32 @@ L9458:  STX $02                 ;Address of byte where tile size
 L945A:  STY $03                 ;of tile to be erased is stored.
 L945C:  JMP EraseTile           ;($C328)Erase the selected tiles.
 
-;----------------------------------------------------------------------------------------------------
+;-----------------------------------------[ Choose routine ]-----------------------------------------
 
-;Unused intro routines. Perhaps from the FDS version of the game.
-L945F:  .byte $8E, $A0, $07, $A9, $00, $9D, $A1, $07, $A9, $01, $85, $1B, $60, $85, $05, $29
-L946F:  .byte $F0, $4A, $4A, $4A, $4A, $20, $7B, $94, $A5, $05, $29, $0F, $9D, $A1, $07, $E8
-L947F:  .byte $8A, $C9, $55, $90, $0A, $AE, $A0, $07, $A9, $00, $9D, $A1, $07, $F0, $F9, $60
-L948F:  .byte $98, $48, $20, $C5, $C2, $A8, $B9, $4B, $68, $85, $0B, $B9, $4A, $68, $85, $0A
+;This is an indirect jump routine. A is used as an index into a code
+;pointer table, and the routine at that position is executed. The programmers
+;always put the pointer table itself directly after the JSR to _ChooseRoutine,
+;meaning that its address can be popped from the stack.
+
+Bank00ChooseRoutine:
+    ASL
+    STY TempY
+    TAY
+    INY
+    PLA
+    STA TempPtr
+    PLA
+    STA TempPtr+1
+    LDA (TempPtr),Y
+    STA CodePtr
+    INY
+    LDA (TempPtr),Y
+    STA CodePtr+1
+    LDY TempY
+    JMP (CodePtr)
+
+.advance $949F
+
 L949F:  .byte $20, $DA, $94, $A5, $06, $9D, $3D, $68, $A5, $07, $9D, $3C, $68, $68, $A8, $60
 L94AF:  .byte $98, $48, $20, $C5, $C2, $A8, $B9, $4D, $68, $85, $0B, $B9, $4C, $68, $85, $0A
 L94BF:  .byte $20, $DA, $94, $A5, $06, $9D, $34, $68, $A5, $07, $9D, $33, $68, $B9, $42, $68
@@ -3164,7 +3201,7 @@ L9ABA:  BNE +                   ;
 L9ABC:  LDA #$01                ;
 L9ABE:  STA PalDataPending      ;
 L9AC0:* LDA GenByte33           ;GenByte33 used in end of game to determine
-L9AC2:  JSR ChooseRoutine       ;($C27C)which subroutine to run below.
+L9AC2:  JSR Bank00ChooseRoutine       ;($C27C)which subroutine to run below.
 
 L9AC5:  .word LoadEndGFX        ;($9AD5)Load end GFX to pattern tables.
 L9AC7:  .word ShowEndSamus      ;($9B1C)Show Samus and end message.

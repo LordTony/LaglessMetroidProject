@@ -513,7 +513,7 @@ _IncrementSFXFrame:
 
 _CheckSFXFlag:
   STA CurrentSFXFlags     ;Store any set flags in some space zeropage.
-  STX SFXPtrE4LB          ;
+  STX SFXPtrE4LB          
   LDY #$04                ;Y=0 for counting loop ahead.
   LDA (SFXPtrE4),Y        ;
   STA ChannelType         ;#$00=SQ1,#$01=SQ2,#$02=Triangle,#$03=Noise
@@ -530,68 +530,70 @@ _CheckSFXFlag:
   LDA (SFXPtrE4),Y
   STA $E0
 
-  ;Y is now 0
+  ;Y is zero at this point
+  lax CurrentSFXFlags
+  beq _NoSound
+  bmi _SFXFlagFound
+  asr #$F0
+  beq _CheckLowNibble
+  lsr
+  lsr
+  lsr
+  tax
+  ldy _SFXHiBitToIndex - 1, x
+  lda (SFXPtrE0),Y
+  sta SFXPtrE2LB
+  iny
+  lda (SFXPtrE0),Y
+  sta SFXPtrE2UB
+  rts
 
-  LDA CurrentSFXFlags
-  ASL
-  BCS _SFXFlagFound
-  INY
-  ASL     
-  BCS _SFXFlagFound            
-  INY
-  ASL
-  BCS _SFXFlagFound
-  INY
-  ASL     
-  BCS _SFXFlagFound            
-  INY
-  ASL                     ;
-  BCS _SFXFlagFound       ;This portion of the routine loops a maximum of
-  INY                     ;eight times looking for any SFX flags that have
-  ASL     
-  BCS _SFXFlagFound            
-  INY
-  ASL
-  BCS _SFXFlagFound
-  INY
-  ASL     
-  BCS _SFXFlagFound
-
-_NoSound:
-  RTS                     ;Exit above routine. Also used when no function present.
-  nop
-  nop
-  nop
-  nop
-  nop
-  nop
-  nop
-  nop
-  nop
-  nop
-  nop
-  nop
-  nop
-  nop
-  nop
-  nop
-  nop
-  nop
-  nop
-  nop
-  nop
-  nop
+_CheckLowNibble:
+  ldy _SFXLoBitToIndex,x
 
 _SFXFlagFound:
-  tya
-  asl
-  tay
-* LDA (SFXPtrE0),Y        ;This routine stores the starting address of the
-  STA SFXPtrE2LB          ;specific SFX handling routine for the SFX flag 
-  INY                     ;found.  The address is stored in registers
-  LDA (SFXPtrE0),Y        ;$E2 and $E3.
-  STA SFXPtrE2UB          ;
-  RTS
+  lda (SFXPtrE0),Y        ;This routine stores the starting address of the
+  sta SFXPtrE2LB          ;specific SFX handling routine for the SFX flag 
+  iny                     ;found.  The address is stored in registers
+  lda (SFXPtrE0),Y        ;$E2 and $E3.
+  sta SFXPtrE2UB          ;
+
+_NoSound:
+  rts
+
+_SFXHiBitToIndex:
+    .byte 6
+    .byte 4
+    .byte 4
+    .byte 2
+    .byte 2 
+    .byte 2 
+    .byte 2
+
+_SFXLoBitToIndex:
+    .byte 14
+    .byte 14
+    .byte 12
+    .byte 12
+    .byte 10
+    .byte 10
+    .byte 10
+    .byte 10
+    .byte 8
+    .byte 8
+    .byte 8
+    .byte 8
+    .byte 8
+    .byte 8
+    .byte 8
+    .byte 8
+
+nop
+nop
+nop
+nop
+nop
+nop
 
 ;-----------------------------------[ SFX Handling Routines ]---------------------------------------
 

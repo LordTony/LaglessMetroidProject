@@ -32,7 +32,7 @@
 .alias CodePtrLB        $0C     ;Pointer to an indirect function call, lower byte.
 .alias CodePtrUB        $0D     ;Pointer to an indirect function call, upper byte.
 
-.alias TempPtr          $CB     ;Used in ChooseRoutine
+.alias TempPtr          $CB
 .alias TempPtrLB        $CB     
 .alias TempPtrUB        $CC 
 
@@ -867,6 +867,7 @@
 .alias SpecItmsTable            $9598
 .alias MemuByte                 $95E4
 .alias CopyMap                  $A93E
+.alias MacroDefs                $AEF0
 .alias DoorHandler              $8B79
 
 ;----------------------------------------------------------------------------------------------------
