@@ -101,4 +101,4 @@ Now that I've gotten the identity table in, I can't help but wonder if those 256
 The "Visualize Hotspots" lua script can be run and tweaked to find places in the code that are hit more often. It helped me get some big wins.
 
 ## Bugs
-* Opening a missile door crashes the game
+* No known bugs

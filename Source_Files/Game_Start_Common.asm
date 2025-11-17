@@ -1465,6 +1465,7 @@ _L8B81:  SBC #$10
 _L8B83:  TAX 
 _L8B84:  BMI -
 _L8B86:  RTS
+
 _L8B87:  STX PageIndex
 _L8B89:  LDA ObjAction,X
 _L8B8C:  JSR _ChooseRoutine       ;($C27C)
@@ -1475,6 +1476,7 @@ _L8B95:  .word $8C01
 _L8B97:  .word $8C84
 _L8B99:  .word $8CC6
 _L8B9B:  .word $8CF0
+
 _L8B9D:  INC $0300,X
 _L8BA0:  LDA #$30
 _L8BA2:  JSR SetProjectileAnim       ;($D2FA)
@@ -1498,6 +1500,7 @@ _L8BCA:  STA $6B
 _L8BCC:  LDA #$06
 _L8BCE:  JMP AnimDrawObject
 _L8BD1:  .byte $05, $01, $0A, $01
+
 _L8BD5:  LDA $030A,X
 _L8BD8:  AND #$04
 _L8BDA:  BEQ $8BB1
@@ -1517,6 +1520,7 @@ _L8BF8:  STA $0305,X
 _L8BFB:  SEC 
 _L8BFC:  SBC #$03
 _L8BFE:  JMP $8C7E
+
 _L8C01:  LDA DoorStatus
 _L8C03:  BEQ $8C1D
 _L8C05:  LDA $030C
@@ -1551,7 +1555,7 @@ _L8C46:  JSR _Amul16
 _L8C49:  BCC $8C4C
 _L8C4B:  DEY 
 _L8C4C:  TYA 
-_L8C4D:  JSR $DC1E
+_L8C4D:  JSR LDC1E
 _L8C50:  LDA #$00
 _L8C52:  STA $0300,X
 _L8C55:  BEQ $8C73
@@ -1574,6 +1578,7 @@ _L8C7B:  SEC
 _L8C7C:  SBC #$02
 _L8C7E:  JSR SetProjectileAnimWithoutReset
 _L8C81:  JMP SFXDoor
+
 _L8C84:  LDA DoorStatus
 _L8C86:  CMP #$05
 _L8C88:  BCS $8CC3
@@ -1604,6 +1609,7 @@ _L8CBB:  JSR TourianMusic
 _L8CBE:  BNE $8CC3
 _L8CC0:  JSR MotherBrainMusic
 _L8CC3:  JMP $8C71
+
 _L8CC6:  LDA DoorStatus
 _L8CC8:  CMP #$05
 _L8CCA:  BNE $8CED
@@ -1623,6 +1629,7 @@ _L8CE6:  LDX PageIndex
 _L8CE8:  LDA #$02
 _L8CEA:  STA $0300,X
 _L8CED:  JMP $8BB1
+
 _L8CF0:  LDA DoorStatus
 _L8CF2:  BNE $8CED
 _L8CF4:  JMP $8C61

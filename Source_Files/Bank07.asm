@@ -884,7 +884,7 @@ LC4B4:  LDA #$47                ;Prepare to set PPU for vertical mirroring (agai
 SetPPUMirror:
 LC4B6:  LSR                     ;
 LC4B7:  LSR                     ;Move bit 3 to bit 0 position.
-LC4B9:  asr #$02                ;Remove all other bits.
+LC4B9:  asr #$03                ;Remove all other bits.
 LC4BB:  STA $00                 ;Store at address $00.
 LC4BD:  LDA MMCReg0Cntrl        ;
 LC4BF:  AND #$FE                ;Load MMCReg0Cntrl and remove bit 0.
@@ -2137,7 +2137,7 @@ LCD6D:  JSR UpdateObjAnim       ;($DC8F)Update animation if needed.
 LCD70:  JSR IsScrewAttackActive     ;($CD9C)Check if screw attack active to change palette.
 LCD73:  BCS +               ;If screw attack not active, branch to skip palette change.
 LCD75:  LDA FrameCount      ;
-LCD77:  ASR #$06            ; Every other frame, change Samus palette while screw
+LCD77:  ASR #$07            ; Every other frame, change Samus palette while screw
 LCD7A:  ORA #$A0            ;Attack is active.
 LCD7C:  STA ObjectCntrl         ;
 LCD7E:* JSR CheckHealthStatus       ;($CDFA)Check if Samus hit, blinking or Health low.
@@ -2405,7 +2405,7 @@ LCF2B:* JMP ClearHealthChange       ;($F323)
 ;----------------------------------------------------------------------------------------------------
 
 LCF2E:  LDA SamusHit
-LCF31:  asr #$04
+LCF31:  asr #$05
         BEQ +++
         BCS +
         LDA SamusHorzAccel
@@ -4102,7 +4102,7 @@ LDB6C:  AND #$0F            ;Load power up type byte and keep only bits 0 thru 3
 LDB6E:  ORA #$50            ;Set bits 4 and 6.
 LDB70:  STA PowerUpAnimFrame        ;Save index to find object animation.
 LDB73:  LDA FrameCount          ;
-LDB76:  asr #$06            ;Color affected every other frame. ;the 2 LSBs of object control byte change palette of object.
+LDB76:  asr #$07            ;Color affected every other frame. ;the 2 LSBs of object control byte change palette of object.
 LDB78:  ORA #$80            ;Indicate ObjectCntrl contains valid data by setting MSB.
 LDB7A:  STA ObjectCntrl         ;Change color of item every other frame.
 LDB7C:  LDA SpritePagePos       ;Load current index into sprite RAM.
@@ -4369,7 +4369,7 @@ LDCC9:  STA $04             ;Store value in $04 for processing below. ;Keep a co
 LDCCC:  lsr
         lsr
         lsr
-        asr #$06
+        asr #$07
 LDCD1:  STA $05             ;The following lines take the upper 4 bits in the
 LDCD3:  TXA             ;control byte and transfer bits 4 and 5 into $05 bits 0
 LDCD4:  AND #$C0            ;and 1(sprite color bits).  Bits 6 and 7 are
@@ -7649,7 +7649,7 @@ LEFB2:  ldx #$07            ;proper attribute byte that corresponds to the
 LEFB4:  sax $03             ;macro that has just been placed in the room RAM.
 ;LEFB6:  lda $02             ;
 LEFB8:  lsr                 ;
-        asr #$70            ;
+        asr #$71            ;
 LEFBC:  ora $03             ;
 LEFBE:  ora #$C0            ;
 LEFC0:  sta $02             ;
