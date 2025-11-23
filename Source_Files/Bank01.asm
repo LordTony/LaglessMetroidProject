@@ -141,19 +141,30 @@ Bank01_L9550:  .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00,
 
 ;----------------------------------------------------------------------------------------------------
 
+.scope
+
 ;The following table points to the palette data used in this bank.
 
-.checkpc PalPntrTbl
-.advance PalPntrTbl
+.checkpc PalPntrTbl_Hi
+.advance PalPntrTbl_Hi
 
-.scope
-    .word _Palette00, _Palette01, _Palette02, _Palette03
-    .word _Palette04, _Palette05, _Palette06, _Palette06
-    .word _Palette06, _Palette06, _Palette06, _Palette06
-    .word _Palette06, _Palette06, _Palette06, _Palette06
-    .word _Palette06, _Palette06, _Palette06, _Palette06
-    .word _Palette07, _Palette08, _Palette09, _Palette0A
-    .word _Palette0B, _Palette0C, _Palette0D, _Palette0E
+    .byte >_Palette00, >_Palette01, >_Palette02, >_Palette03
+    .byte >_Palette04, >_Palette05, >_Palette06, >_Palette06
+    .byte >_Palette06, >_Palette06, >_Palette06, >_Palette06
+    .byte >_Palette06, >_Palette06, >_Palette06, >_Palette06
+    .byte >_Palette06, >_Palette06, >_Palette06, >_Palette06
+    .byte >_Palette07, >_Palette08, >_Palette09, >_Palette0A
+    .byte >_Palette0B, >_Palette0C, >_Palette0D, >_Palette0E
+
+.checkpc PalPntrTbl_Lo
+.advance PalPntrTbl_Lo
+    .byte <_Palette00, <_Palette01, <_Palette02, <_Palette03
+    .byte <_Palette04, <_Palette05, <_Palette06, <_Palette06
+    .byte <_Palette06, <_Palette06, <_Palette06, <_Palette06
+    .byte <_Palette06, <_Palette06, <_Palette06, <_Palette06
+    .byte <_Palette06, <_Palette06, <_Palette06, <_Palette06
+    .byte <_Palette07, <_Palette08, <_Palette09, <_Palette0A
+    .byte <_Palette0B, <_Palette0C, <_Palette0D, <_Palette0E
 ;----------------------------------------------------------------------------------------------------
 
 .checkpc SpecItmsTblPtr
@@ -168,8 +179,42 @@ Bank01_L95A2:  .word _EnemyFramePtrTbl2     ;($9EE0)tables needed to accommodate
 Bank01_L95A4:  .word _EnemyPlacePtrTbl      ;($9F0E)Pointers to enemy frame placement data.
 Bank01_L95A6:  .word _EnemyAnimIndexTbl     ;($9D6A)index to values in addr tables for enemy animations.
 
-Bank01_L95A8:  .byte $60, $EA, $EA, $60, $EA, $EA, $60, $EA, $EA, $60, $EA, $EA, $60, $EA, $EA, $60 
-Bank01_L95B8:  .byte $EA, $EA, $60, $EA, $EA, $60, $EA, $EA, $60, $EA, $EA
+Bank01_L95A8: 
+    rts 
+    nop 
+    nop 
+Bank01_L95AB:
+    rts 
+    nop 
+    nop 
+Bank01_L95AE:
+    rts 
+    nop 
+    nop 
+Bank01_L95B1:
+    rts 
+    nop 
+    nop 
+Bank01_L95B4:
+    rts 
+    nop 
+    nop 
+Bank01_L95B7:
+    rts 
+    nop 
+    nop 
+Bank01_L95BA:
+    rts 
+    nop 
+    nop 
+Bank01_L95BD:
+    rts 
+    nop 
+    nop 
+Bank01_L95C0:
+    rts 
+    nop 
+    nop 
 
 .checkpc AreaRoutine
 .advance AreaRoutine
@@ -505,9 +550,9 @@ Bank01_L9AE7:  LSR $00
 Bank01_L9AE9:  ROL 
 Bank01_L9AEA:  ASL 
 Bank01_L9AEB:  TAY 
-Bank01_L9AEC:  LDA $8049,Y
+Bank01_L9AEC:  LDA L8048_Ptr_Table+1,Y
 Bank01_L9AEF:  PHA 
-Bank01_L9AF0:  LDA $8048,Y
+Bank01_L9AF0:  LDA L8048_Ptr_Table,Y
 Bank01_L9AF3:  PHA 
 Bank01_L9AF4:  RTS
 

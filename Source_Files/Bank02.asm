@@ -140,39 +140,71 @@ Bank02_L9540:  .byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $00, $00, $00, $00,
 Bank02_L9550:  .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
 
 ;----------------------------------------------------------------------------------------------------
-
-.checkpc PalPntrTbl
-.advance PalPntrTbl
-
 .scope
-Bank02_L9560:  .word _Palette00         ;($A178)
-Bank02_L9562:  .word _Palette01         ;($A19C)
-Bank02_L9564:  .word _Palette02         ;($A1A8)
-Bank02_L9566:  .word _Palette03         ;($A1A2)
-Bank02_L9568:  .word _Palette04         ;($A1AE)
-Bank02_L956A:  .word _Palette05         ;($A1B4)
-Bank02_L956C:  .word _Palette06         ;($A1D7)
-Bank02_L956E:  .word _Palette06         ;($A1D7)
-Bank02_L9570:  .word _Palette06         ;($A1D7)
-Bank02_L9572:  .word _Palette06         ;($A1D7)
-Bank02_L9574:  .word _Palette06         ;($A1D7)
-Bank02_L9576:  .word _Palette06         ;($A1D7)
-Bank02_L9578:  .word _Palette06         ;($A1D7)
-Bank02_L957A:  .word _Palette06         ;($A1D7)
-Bank02_L957C:  .word _Palette06         ;($A1D7)
-Bank02_L957E:  .word _Palette06         ;($A1D7)
-Bank02_L9580:  .word _Palette06         ;($A1D7)
-Bank02_L9582:  .word _Palette06         ;($A1D7)
-Bank02_L9584:  .word _Palette06         ;($A1D7)
-Bank02_L9586:  .word _Palette06         ;($A1D7)
-Bank02_L9588:  .word _Palette07         ;($A1DE)
-Bank02_L958A:  .word _Palette08         ;($A1E5)
-Bank02_L958C:  .word _Palette09         ;($A1EC)
-Bank02_L958E:  .word _Palette0A         ;($A1F3)
-Bank02_L9590:  .word _Palette0B         ;($A1FB)
-Bank02_L9592:  .word _Palette0C         ;($A203)
-Bank02_L9594:  .word _Palette0D         ;($A20B)
-Bank02_L9596:  .word _Palette0E         ;($A213)
+
+.checkpc PalPntrTbl_Hi
+.advance PalPntrTbl_Hi
+
+    .byte >_Palette00         ;($A178)
+    .byte >_Palette01         ;($A19C)
+    .byte >_Palette02         ;($A1A8)
+    .byte >_Palette03         ;($A1A2)
+    .byte >_Palette04         ;($A1AE)
+    .byte >_Palette05         ;($A1B4)
+    .byte >_Palette06         ;($A1D7)
+    .byte >_Palette06         ;($A1D7)
+    .byte >_Palette06         ;($A1D7)
+    .byte >_Palette06         ;($A1D7)
+    .byte >_Palette06         ;($A1D7)
+    .byte >_Palette06         ;($A1D7)
+    .byte >_Palette06         ;($A1D7)
+    .byte >_Palette06         ;($A1D7)
+    .byte >_Palette06         ;($A1D7)
+    .byte >_Palette06         ;($A1D7)
+    .byte >_Palette06         ;($A1D7)
+    .byte >_Palette06         ;($A1D7)
+    .byte >_Palette06         ;($A1D7)
+    .byte >_Palette06         ;($A1D7)
+    .byte >_Palette07         ;($A1DE)
+    .byte >_Palette08         ;($A1E5)
+    .byte >_Palette09         ;($A1EC)
+    .byte >_Palette0A         ;($A1F3)
+    .byte >_Palette0B         ;($A1FB)
+    .byte >_Palette0C         ;($A203)
+    .byte >_Palette0D         ;($A20B)
+    .byte >_Palette0E         ;($A213)
+
+.checkpc PalPntrTbl_Lo
+.advance PalPntrTbl_Lo
+
+    .byte <_Palette00         ;($A178)
+    .byte <_Palette01         ;($A19C)
+    .byte <_Palette02         ;($A1A8)
+    .byte <_Palette03         ;($A1A2)
+    .byte <_Palette04         ;($A1AE)
+    .byte <_Palette05         ;($A1B4)
+    .byte <_Palette06         ;($A1D7)
+    .byte <_Palette06         ;($A1D7)
+    .byte <_Palette06         ;($A1D7)
+    .byte <_Palette06         ;($A1D7)
+    .byte <_Palette06         ;($A1D7)
+    .byte <_Palette06         ;($A1D7)
+    .byte <_Palette06         ;($A1D7)
+    .byte <_Palette06         ;($A1D7)
+    .byte <_Palette06         ;($A1D7)
+    .byte <_Palette06         ;($A1D7)
+    .byte <_Palette06         ;($A1D7)
+    .byte <_Palette06         ;($A1D7)
+    .byte <_Palette06         ;($A1D7)
+    .byte <_Palette06         ;($A1D7)
+    .byte <_Palette07         ;($A1DE)
+    .byte <_Palette08         ;($A1E5)
+    .byte <_Palette09         ;($A1EC)
+    .byte <_Palette0A         ;($A1F3)
+    .byte <_Palette0B         ;($A1FB)
+    .byte <_Palette0C         ;($A203)
+    .byte <_Palette0D         ;($A20B)
+    .byte <_Palette0E         ;($A213)
 
 .checkpc SpecItmsTblPtr
 .advance SpecItmsTblPtr
@@ -186,8 +218,42 @@ Bank02_L95A2:  .word _EnemyFramePtrTbl2     ;($9D64)tables needed to accommodate
 Bank02_L95A4:  .word _EnemyPlacePtrTbl      ;($9D78)Pointers to enemy frame placement data.
 Bank02_L95A6:  .word _EnemyAnimIndexTbl     ;($9BDA)Index to values in addr tables for enemy animations.
 
-Bank02_L95A8:  .byte $60, $EA, $EA, $60, $EA, $EA, $60, $EA, $EA, $60, $EA, $EA, $60, $EA, $EA, $60 
-Bank02_L95B8:  .byte $EA, $EA, $60, $EA, $EA, $60, $EA, $EA, $60, $EA, $EA
+Bank02_L95A8: 
+    rts 
+    nop 
+    nop 
+Bank02_L95AB:
+    rts 
+    nop 
+    nop 
+Bank02_L95AE:
+    rts 
+    nop 
+    nop 
+Bank02_L95B1:
+    rts 
+    nop 
+    nop 
+Bank02_L95B4:
+    rts 
+    nop 
+    nop 
+Bank02_L95B7:
+    rts 
+    nop 
+    nop 
+Bank02_L95BA:
+    rts 
+    nop 
+    nop 
+Bank02_L95BD:
+    rts 
+    nop 
+    nop 
+Bank02_L95C0:
+    rts 
+    nop 
+    nop 
 
 .checkpc AreaRoutine
 .advance AreaRoutine
@@ -538,9 +604,9 @@ Bank02_L9A34:  LSR $00
 Bank02_L9A36:  ROL 
 Bank02_L9A37:  ASL 
 Bank02_L9A38:  TAY 
-Bank02_L9A39:  LDA $8049,Y
+Bank02_L9A39:  LDA L8048_Ptr_Table+1,Y
 Bank02_L9A3C:  PHA 
-Bank02_L9A3D:  LDA $8048,Y
+Bank02_L9A3D:  LDA L8048_Ptr_Table,Y
 Bank02_L9A40:  PHA 
 Bank02_L9A41:  RTS
 

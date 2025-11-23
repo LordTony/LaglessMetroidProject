@@ -177,7 +177,7 @@
 .alias InArea           $74     ;#$10(or #$00)=Brinstar, #$11=Norfair, #$12=Kraid hideout,
                                 ;#$13=Tourian, #$14=Ridley hideout.
 
-.alias SpareMem75       $75     ;Initialized to #$FF in AreaInit. Not used.
+.alias AlwaysFF         $75     ;Zero page that can always be relied on to be #$FF
 .alias PalToggle        $76
 
 .alias ItemRmMusicSts   $79     ;#$00=Item room music not playing. 
@@ -248,7 +248,7 @@
 .alias SpareMemCD       $CD     ;Written to in title routine, but never accessed.
 .alias SpareMemCE       $CE     ;Written to in title routine, but never accessed.
 .alias SpareMemCF       $CF     ;Written to in title routine, but never accessed.
-.alias SpareMemD0       $D0     ;Written to in title routine, but never accessed.
+.alias AlwaysZero       $D0     ;Spare me that can be relied on to always be zero.
 .alias SpareMemD1       $D1     ;Written to in title routine, but never accessed.
 .alias SpareMemD2       $D2     ;Written to in title routine, but never accessed.
 .alias SpareMemD3       $D3     ;Written to in title routine, but never accessed.
@@ -850,18 +850,20 @@
 
 .alias SoundEngineOrg           $B200
 .alias SoundEngineEntryPoint    $B3C6
+.alias L8048_Ptr_Table          $8048
 .alias ObjectAnimIdxTbl         $8572
 .alias FramePtrTable            $860B
 .alias PlacePtrTable            $86DF
 .alias SamusEnterDoor           $8B13
 .alias GFXMetroidTitle          $8BE0
-.alias PalPntrTbl               $9560
+.alias PalPntrTbl_Hi            $9560
+.alias PalPntrTbl_Lo            $957C
 .alias SpecItmsTblPtr           $9598
 .alias AreaPointers             $9598
 .alias AreaRoutine              $95C3
 .alias EnemyHitPointTbl         $962B
 .alias EnemyInitDelayTbl        $96BB
-.alias DecSpriteYCoord          $988A
+.alias DecSpriteYCoord          $9893
 .alias NMIScreenWrite           $9A07
 .alias EndGamePalWrite          $9F54
 .alias SpecItmsTable            $9598

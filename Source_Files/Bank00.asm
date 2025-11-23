@@ -85,7 +85,7 @@ L8077:  DEY                     ;
 L8078:  STY SpareMemCE          ;Not used.
 L807A:  STY SpareMemD1          ;
 L807C:  DEY                     ;
-L807D:  STY SpareMemD0          ;
+L807D:  STY AlwaysZero          ;
 L807F:  STY SpareMemCD          ;
 L8081:  STY SpareMemD3          ;
 
@@ -1351,7 +1351,7 @@ L8A88:  .byte $6A, $C8, $80, $79
 ;----------------------------------------------------------------------------------------------------
 
 LoadPalData:
-L8A8C:  lDY PalDataIndex        ;
+L8A8C:  LDY PalDataIndex        ;
 L8A8E:  LDA PalSelectTbl,Y      ;Chooses which set of palette data
 L8A91:  CMP #$FF                ;to load from the table below.
 L8A93:  BEQ +                   ;
@@ -2704,6 +2704,14 @@ Bank00ChooseRoutine:
     LDY TempY
     JMP (CodePtr)
 
+ClearSamusStats:
+    LDY #$0F                ;
+    LDA #$00                ;Clears Samus stats(Health, full tanks, game timer, etc.).
+*   STA $0100,y             ;Load $100 thru $10F with #$00.
+    DEY                     ;
+    BPL -                   ;Loop 16 times.
+    RTS                     ;
+
 .advance $949F
 
 L949F:  .byte $20, $DA, $94, $A5, $06, $9D, $3D, $68, $A5, $07, $9D, $3C, $68, $68, $A8, $60
@@ -2733,18 +2741,27 @@ AddYToPtr02:
 
 ;The following table points to the palette data used in this bank.
 
-.checkpc PalPntrTbl
-.advance PalPntrTbl
 .scope
 
-    _PalPntrTbl:
-    .word _Palette00, _Palette01, _Palette02, _Palette03
-    .word _Palette04, _Palette05, _Palette06, _Palette07
-    .word _Palette08, _Palette09, _Palette0A, _Palette0B
-    .word _Palette0C, _Palette0D, _Palette0E, _Palette0F
-    .word _Palette10, _Palette11, _Palette12
+.checkpc PalPntrTbl_Hi
+.advance PalPntrTbl_Hi
 
-;----------------------------------------------------------------------------------------------------
+        .byte >_Palette00, >_Palette01, >_Palette02, >_Palette03
+        .byte >_Palette04, >_Palette05, >_Palette06, >_Palette07
+        .byte >_Palette08, >_Palette09, >_Palette0A, >_Palette0B
+        .byte >_Palette0C, >_Palette0D, >_Palette0E, >_Palette0F
+        .byte >_Palette10, >_Palette11, >_Palette12
+
+.checkpc PalPntrTbl_Lo
+.advance PalPntrTbl_Lo
+
+        .byte <_Palette00, <_Palette01, <_Palette02, <_Palette03
+        .byte <_Palette04, <_Palette05, <_Palette06, <_Palette07
+        .byte <_Palette08, <_Palette09, <_Palette0A, <_Palette0B
+        .byte <_Palette0C, <_Palette0D, <_Palette0E, <_Palette0F
+        .byte <_Palette10, <_Palette11, <_Palette12
+
+;-----------------------------------------------------------------------------------------<----------
 
 _Palette00:
 L9586:  .byte $3F, $00, $20     ;PPU palette adress and data length.
@@ -2976,7 +2993,9 @@ L9889:  RTS                     ;Return A/time.
 
 ;This function decrements the y coordinate of the 40 intro star sprites.
 
-_DecSpriteYCoord:
+.checkpc DecSpriteYCoord
+.advance DecSpriteYCoord
+
 L988A:  LDA TitleRoutine        ;
 L988C:  CMP #$1D                ;
 L988E:  BCS ++                  ;If the end game is playing, branch to exit.
@@ -3031,8 +3050,7 @@ L9950:  .byte $07, $CC, $E3, $A4, $87, $CD, $63, $5D, $5A, $CE, $62, $4F, $38, $
 
 ;Not used.
 L9960:  .byte $3F, $00, $20, $02, $20, $1B, $3A, $02, $20, $21, $01, $02, $2C, $30, $27, $02
-L9970:  .byte $26, $31, $17, $02, $16, $19, $27, $02, $16, $20, $27, $02, $16, $20, $11, $02
-L9980:  .byte $01, $20, $21, $00
+L9970:  .byte $26, $31, $17, $02, $16, $19, $27, $02, $16, $20, $27
 
 ;----------------------------------------------------------------------------------------------------
 
@@ -4400,8 +4418,10 @@ LA8DE:  .byte ___, ___, ___, ___, ___, ___, ___, ___, $1D, $1B, $17, $18, $0C, _
 LA8FE:  .byte ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, $0B, ___, $0C, $16, $18, $17, $18, $17, $0F, $17, $17, $1A, $1A, $17, $1B, $1B, $17, $19, $09, ___
 LA91E:  .byte ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___
 
+.checkpc CopyMap
+.advance CopyMap
+
 ; TODO - copy the map faster, can eat into the unused data
-_CopyMap:
 LA93E:  LDA #<WorldMap          ;
 LA940:  STA GenPtr00LB          ;Source pointer for map data.
 LA942:  LDA #>WorldMap          ;
@@ -4432,13 +4452,68 @@ LA960:  RTS                     ;Finished loading map data into RAM.
  
 ;----------------------------------------------------------------------------------------------------
 
+;The following routine is only used by the intro routine to load the sprite 
+;palette data for the twinkling stars. The following memory addresses are used:
+;$00-$01 Destination address for PPU write
+;$02-$03 Source address for PPU data,
+;$04 Temp storage for PPU data byte
+;$05 PPU data string counter byte,
+;$06 Temp storage for index byte.
+
+PrepPPUPalStr:
+    LDY #$01                ;
+    STY PPUDataPending      ;Indicate data waiting to be written to PPU.
+    DEY                     ;
+    BEQ ++++                ;Branch always
+*   STA $04                 ;$04 now contains next data byte to be put into the PPU string.
+    LDA $01                 ;High byte of staring address to write PPU data 
+    JSR WritePPUByte        ;($C36B)Put data byte into PPUDataString.
+    LDA $00                 ;Low byte of starting address to write PPU data.
+    JSR WritePPUByte        ;($C36B)Put data byte into PPUDataString.
+    LDA $04                 ;A now contains next data byte to be put into the PPU string.
+    JSR Bank00_SeparateControlBits ;($C3C6)Break control byte into two bytes.
+
+    BIT $04                 ;Check to see if RLE bit is set in control byte.
+    BVC WritePalStringByte  ;If not set, branch to load byte. Else increment index
+    INY                     ;to find repeating data byte.
+
+WritePalStringByte:
+    BIT $04                 ;Check if RLE bit is set (again). if set, load same
+    BVS +                   ;byte over and over again until counter = #$00.
+    INY                     ;Non-repeating data byte. Increment for next byte.
+*   LDA ($02),y             ;
+    JSR WritePPUByte        ;($C36B)Put data byte into PPUDataString.
+    STY $06                 ;Temporarily store data index.
+    LDY #$01                ;PPU address increment = 1.
+    BIT $04                 ;If MSB set in control bit, it looks like this routine might
+    BPL +                   ;have been used for a software control verticle mirror, but
+                            ;the starting address has already been written to the PPU
+                            ;string so this section has no effect whether the MSB is set
+                            ;or not. The PPU is always incremented by 1.
+    LDY #$20                ;PPU address increment = 32.
+*   JSR AddYToPtr00         ;($C2A8)Set next PPU write address.(Does nothing, already set).
+    LDY $06                 ;Restore data index to Y.
+    DEC $05                 ;Decrement counter byte.
+    BNE WritePalStringByte  ;If more bytes to write, branch to write another byte.
+    STX PPUStrIndex         ;Store total length, in bytes, of PPUDataString.
+    INY                     ;Move to next data byte(should be #$00).
+
+*   LDX PPUStrIndex         ;X now contains current length of PPU data string.
+    LDA ($02),y             ;
+    BNE ----                ;Is PPU string done loading (#$00)? If so exit,
+    JSR EndPPUString        ;($C376)else branch to process PPU byte.
+
+Bank00_SeparateControlBits:
+    STA $04                 ;Store current byte 
+    AND #$BF                ;
+    STA PPUDataString,x     ;Remove RLE bit and save control bit in PPUDataString.
+    AND #$3F                ;
+    STA $05                 ;Extract counter bits and save them for use above.
+    JMP NextPPUByte         ;($C36E)
+
+.advance $A9C1
+
 ;Unused tile patterns.
-LA961:  .byte $00, $40, $90, $D0, $08, $5C, $0C, $00, $00, $C0, $70, $F8, $FC, $F4, $FC, $10
-LA962:  .byte $22, $56, $03, $2B, $74, $37, $0D, $3F, $5F, $7D, $7F, $7F, $5F, $3F, $0F, $68
-LA981:  .byte $F6, $BC, $5E, $3C, $DE, $7C, $F0, $FC, $DE, $FE, $FE, $FE, $FE, $FC, $F0, $00
-LA991:  .byte $00, $7F, $80, $80, $FF, $7F, $00, $00, $7F, $80, $7F, $FF, $FF, $7F, $00, $00
-LA9A1:  .byte $00, $FC, $01, $03, $FF, $FE, $00, $00, $FE, $03, $FF, $FF, $FF, $FE, $00, $00
-LA9B1:  .byte $10, $20, $20, $00, $20, $00, $00, $3C, $42, $81, $81, $81, $81, $42, $3C, $7F
 LA9C1:  .byte $7F, $3F, $1F, $80, $0F, $08, $88, $12, $80, $C0, $E0, $E0, $EF, $E8, $E8, $FC
 LA9D1:  .byte $FC, $FC, $F8, $1C, $DC, $58, $5C, $48, $04, $0C, $18, $1C, $DC, $18, $1C, $0F
 LA9E1:  .byte $00, $9F, $3F, $7F, $DB, $00, $00, $E0, $E0, $FF, $FF, $FF, $DB, $00, $00, $DC

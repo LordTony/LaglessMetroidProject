@@ -26,7 +26,9 @@ _L803F:  JMP DrawTileBlast
 _L8042:  JMP SubtractHealth      ;($CE92)
 _L8045:  JMP Base10Subtract      ;($C3FB)
 
-_L8048:  .word $84FD, $84A6, $844A, $844A, $84A6, $84FD, $83F4, $83F4
+.checkpc L8048_Ptr_Table
+.advance L8048_Ptr_Table
+    .word $84FD, $84A6, $844A, $844A, $84A6, $84FD, $83F4, $83F4
 
 _L8058:  LDX PageIndex
 _L805A:  LDA $0405,X
@@ -67,6 +69,7 @@ _L80AB:  DEC $66
 _L80AD:  BNE -
 _L80AF:* RTS
 
+; TODO: This is unsed in Bank07
 _L80B0:  LDY EnDataIndex,X
 _L80B3:  LDA $977B,Y
 _L80B6:  ASL                     ;*2 
@@ -1458,24 +1461,24 @@ _L8B78:  RTS                     ;
 .advance DoorHandler
 
 _L8B79:  LDX #$B0
-_L8B7B:* JSR $8B87
-_L8B7E:  LDA PageIndex
-_L8B80:  SEC 
-_L8B81:  SBC #$10
-_L8B83:  TAX 
-_L8B84:  BMI -
+_L8B7B:* JSR _L8B87
+_L8B7E:  LAX PageIndex
+_L8B81:  SBX #$10
+_L8B84:  BMI _L8B7B
 _L8B86:  RTS
+
+.advance $8B87
 
 _L8B87:  STX PageIndex
 _L8B89:  LDA ObjAction,X
 _L8B8C:  JSR _ChooseRoutine       ;($C27C)
 _L8B8F:  .word ExitSub
-_L8B91:  .word $8B9D
-_L8B93:  .word $8BD5
-_L8B95:  .word $8C01
-_L8B97:  .word $8C84
-_L8B99:  .word $8CC6
-_L8B9B:  .word $8CF0
+_L8B91:  .word _L8B9D
+_L8B93:  .word _L8BD5
+_L8B95:  .word _L8C01
+_L8B97:  .word _L8C84
+_L8B99:  .word _L8CC6
+_L8B9B:  .word _L8CF0
 
 _L8B9D:  INC $0300,X
 _L8BA0:  LDA #$30
@@ -1533,6 +1536,7 @@ _L8C14:  BMI $8C1D
 _L8C16:  LDA #$04
 _L8C18:  STA $0300,X
 _L8C1B:  BNE $8C73
+
 _L8C1D:  LDA $0306,X
 _L8C20:  CMP $0305,X
 _L8C23:  BCC $8C73
@@ -1571,6 +1575,7 @@ _L8C69:  LDA #$02
 _L8C6B:  STA $0300,X
 _L8C6E:  JSR $8C76
 _L8C71:  LDX PageIndex
+
 _L8C73:  JMP $8BB1
 _L8C76:  LDA #$30
 _L8C78:  STA $0305,X
@@ -1636,6 +1641,7 @@ _L8CF4:  JMP $8C61
 _L8CF7:  LDA #$FF
 _L8CF9:  BNE $8CFD
 _L8CFB:  LDA #$4E
+
 _L8CFD:  PHA 
 _L8CFE:  LDA #$50
 _L8D00:  STA $02
@@ -1663,14 +1669,15 @@ _L8D26:  LDX PageIndex
 _L8D28:  TXA 
 _L8D29:  lsr
          lsr
-         lsr
-_L8D2C:  AND #$06
+         asr #$0C
 _L8D2E:  TAY 
 _L8D2F:  LDA $04
 _L8D31:  STA $005C,Y
 _L8D34:  LDA $05
 _L8D36:  STA $005D,Y
 _L8D39:  RTS
+
+.advance $8D3A
 
 _L8D3A:  .byte $E8, $10, $60, $AD, $91, $69, $8D, $78, $68, $AD, $92, $69, $8D, $79, $68, $A9 
 _L8D4A:  .byte $00, $85, $00, $85, $02, $AD, $97, $69, $29, $80, $F0, $06, $A5, $00, $09, $80

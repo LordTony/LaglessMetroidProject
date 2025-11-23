@@ -2,14 +2,14 @@
 --Press F5 or click the Run button to execute it
 --Type "emu." to show a list of all available API function
 
-start_addr = 0xEF00
-end_addr = 0xF022
+start_addr = 0x7000
+end_addr = 0xFFFF
 how_many_to_show = 50
-framesToResetOn = 200
+framesToResetOn = 1
 timer = 0
 
 function printHex(num)
-	return "0x" .. string.upper(string.format("%x", num))
+	return "$" .. string.upper(string.format("%x", num))
 end
 
 function round(num)
