@@ -542,7 +542,6 @@ SetPPUInc:
 *   STA PPUControl0         ;
     STA PPUCNT0ZP           ;
     TXA                     ;Restore A.
-
     ASL                     ;Carry Flag = bit 6 of byte at ($00),y (1 = RLE).
     LDA ($00),y             ;Get data byte again.
     AND #$3F                ;Keep lower 6 bits as loop counter.
@@ -940,21 +939,31 @@ LC554:  STA GameMode            ;GameMode = play.
 LC556:  JSR ScreenNmiOff        ;($C45D)Disable screen and Vblank.
 LC559:  LDA MainRoutine         ;
 LC55B:  CMP #$03                ;Is game engine running? if so, branch.
-LC55D:  BEQ +                   ;Else do some housekeeping first.
+LC55D:  BEQ InitBank1_RomSwitch ;Else do some housekeeping first.
 LC55F:  LDA #$00                ;
 LC561:  STA MainRoutine         ;Run InitArea routine next.
 LC563:  STA InArea              ;Start in Brinstar.
 LC565:  STA GamePaused          ;Make sure game is not paused.
 LC567:  JSR ClearRAM_33_DF      ;($C1D4)Clear game engine memory addresses.
-        LDY #$0F                ;
-        LDA #$00                ;Clears Samus stats(Health, full tanks, game timer, etc.).
-*       STA $0100,y             ;Load $100 thru $10F with #$00.
+        LDY #$0F                ;Clears Samus stats(Health, full tanks, game timer, etc.).
+*       STA $0100,y             ;A = 0 here. Load $100 thru $10F with #$00.
         DEY                     ;
         BPL -                   ;Loop 16 times.
-LC56D:* LDY #$00                ;
+InitBank1_RomSwitch:
+LC56D:  tay                     ; A = 0 and Y = 0 here
 LC56F:  JSR ROMSwitch           ;($C4EF)Load Brinstar memory page into lower 16Kb memory.
-LC572:  JSR InitBrinstarGFX     ;($C604)Load Brinstar GFX.
+        lda #$05
+        sta SpareMemD1
+BrinstarGFX_Loop:
+        ldx SpareMemD1
+        ldy BrinstarGFXTable, x
+        JSR LoadGFX
+        dec SpareMemD1
+        bpl BrinstarGFX_Loop
 LC575:  JMP NmiOn               ;($C487)Turn on VBlank interrupts.
+
+BrinstarGFXTable:
+    .byte $16, $19, $06, $05, $04, $03
 
 ;Norfair memory page.
 
@@ -962,8 +971,18 @@ InitBank2:
 LC583:  LDA #$00                ;GameMode = play.
 LC585:  STA GameMode            ;
 LC587:  JSR ScreenNmiOff        ;($C45D)Disable screen and Vblank.
-LC58A:  JSR InitNorfairGFX      ;($C622)Load Norfair GFX.
+        lda #$06
+        sta SpareMemD1
+NorfairGFX_Loop:
+        ldx SpareMemD1
+        ldy NorfairGFXTable, x
+        JSR LoadGFX
+        dec SpareMemD1
+        bpl NorfairGFX_Loop
 LC58D:  JMP NmiOn               ;($C487)Turn on VBlank interrupts.
+
+NorfairGFXTable:
+    .byte $16, $19, $09, $08, $07, $05, $04
 
 ;Tourian memory page.
 
@@ -976,14 +995,24 @@ LC599:* LDA MetroidData,y       ;Load info from table below into
 LC59C:  STA $77F0,y             ;$77F0 thru $77FD.
 LC59F:  DEY                     ;
 LC5A0:  BPL -                   ;
-LC5A2:  JSR InitTourianGFX      ;($C645)Load Tourian GFX.
+        lda #$09
+        sta SpareMemD1
+TourianGFX_Loop:
+        ldx SpareMemD1
+        ldy TourianGFXTable, x
+        JSR LoadGFX
+        dec SpareMemD1
+        bpl TourianGFX_Loop
 LC5A5:  JMP NmiOn               ;($C487)Turn on VBlank interrupts.
+
+TourianGFXTable:
+    .byte $16, $19, $1C, $1A, $0E, $0D, $0C, $0B, $0A, $05
 
 ;Table used by above subroutine and loads the initial data used to describe
 ;metroid's behavior in the Tourian section of the game.
 
 MetroidData:
-LC5A8:  .byte $F8, $08, $30, $D0, $60, $A0, $02, $04, $00, $00, $00, $00, $00, $00
+    .byte $F8, $08, $30, $D0, $60, $A0, $02, $04, $00, $00, $00, $00, $00, $00
 
 ;Kraid memory page.
 
@@ -991,8 +1020,18 @@ InitBank4:
 LC5B6:  LDA #$00                ;GameMode = play.
 LC5B8:  STA GameMode            ;
 LC5BA:  JSR ScreenNmiOff        ;($C45D)Disable screen and Vblank.
-LC5BD:  JSR InitKraidGFX        ;($C677)Load Kraid GFX.
+        lda #$07
+        sta SpareMemD1
+KraidGFX_Loop:
+        ldx SpareMemD1
+        ldy KraidGFXTable, x
+        JSR LoadGFX
+        dec SpareMemD1
+        bpl KraidGFX_Loop
 LC5C0:  JMP NmiOn               ;($C487)Turn on VBlank interrupts.
+
+KraidGFXTable:
+    .byte $16, $19, $11, $10, $0F, $0A, $05, $04
 
 ;Ridley memory page.
 
@@ -1000,131 +1039,54 @@ InitBank5:
 LC5C3:  LDA #$00                ;GameMode = play.
 LC5C5:  STA GameMode            ;
 LC5C7:  JSR ScreenNmiOff        ;($C45D)Disable screen and Vblank.
-LC5CA:  JSR InitRidleyGFX       ;($C69F)Loag Ridley GFX.
+        lda #$06
+        sta SpareMemD1
+RidleyGFX_Loop:
+        ldx SpareMemD1
+        ldy RidleyGFXTable, x
+        JSR LoadGFX
+        dec SpareMemD1
+        bpl RidleyGFX_Loop
 LC5CD:  JMP NmiOn               ;($C487)Turn on VBlank interrupts.
+
+RidleyGFXTable:
+    .byte $16, $19, $13, $12, $0A, $05, $04
 
 InitEndGFX:
 LC5D0:  LDA #$01                ;
 LC5D2:  STA GameMode            ;Game is at title/end game.
-LC5D4:  JMP InitGFX6            ;($C6C2)Load end game GFX.
+LC6C2:  TAY                     ;Y = 1 here. Entry 1 in GFXInfo table.
+LC6C4:  JSR LoadGFX             ;($C7AB)Load pattern table GFX.
+LC6C7:  LDY #$02                ;Entry 2 in GFXInfo table.
+        JSR LoadGFX             ;($C7AB)Load pattern table GFX.
+        LDY #$19
+        JSR LoadGFX             ;($C7AB)Load pattern table GFX.
+        LDY #$16
+        JMP LoadGFX
 
 InitTitleGFX:
 LC5D7:  LDY #$15                ;Entry 21 in GFXInfo table.
 LC5D9:  JSR LoadGFX             ;($C7AB)Load pattern table GFX.
 
 LoadSamusGFX:
-LC5DC:  LDY #$00                ;Entry 0 in GFXInfo table.
-LC5DE:  JSR LoadGFX             ;($C7AB)Load pattern table GFX.
-LC5E1:  LDA JustInBailey        ;
-LC5E4:  BEQ +                   ;Branch if wearing suit
-LC5E6:  LDY #$1B                ;Entry 27 in GFXInfo table.
-LC5E8:  JSR LoadGFX             ;($C7AB)Switch to girl gfx
-LC5EB:* LDY #$14                ;Entry 20 in GFXInfo table.
-LC5ED:  JSR LoadGFX             ;($C7AB)Load pattern table GFX.
-LC5F0:  LDY #$17                ;Entry 23 in GFXInfo table.
-LC5F2:  JSR LoadGFX             ;($C7AB)Load pattern table GFX.
-LC5F5:  LDY #$18                ;Entry 24 in GFXInfo table.
-LC5F7:  JSR LoadGFX             ;($C7AB)Load pattern table GFX.
-LC5FA:  LDY #$19                ;Entry 25 in GFXInfo table.
-LC5FC:  JSR LoadGFX             ;($C7AB)Load pattern table GFX.
-LC5FF:  LDY #$16                ;Entry 22 in GFXInfo table.
-LC601:  JMP LoadGFX             ;($C7AB)Load pattern table GFX.
+    LDY #$00                ;Entry 0 in GFXInfo table.
+    JSR LoadGFX             ;($C7AB)Load pattern table GFX.
+    lda #$04
+    sta SpareMemD1
+    lda JustInBailey
+    beq SamusGFX_Loop
+    inc SpareMemD1
+SamusGFX_Loop:
+    ldx SpareMemD1
+    ldy SamusGFXTable, x
+    JSR LoadGFX
+    dec SpareMemD1
+    bpl SamusGFX_Loop
+SamusGFX_AfterLoop:
+    rts
 
-InitBrinstarGFX:
-LC604:  LDY #$03                ;Entry 3 in GFXInfo table.
-LC606:  JSR LoadGFX             ;($C7AB)Load pattern table GFX.
-Lc609:  LDY #$04                ;Entry 4 in GFXInfo table.
-LC60B:  JSR LoadGFX             ;($C7AB)Load pattern table GFX.
-LC60E:  LDY #$05                ;Entry 5 in GFXInfo table.
-LC610:  JSR LoadGFX             ;($C7AB)Load pattern table GFX.
-LC613:  LDY #$06                ;Entry 6 in GFXInfo table.
-LC615:  JSR LoadGFX             ;($C7AB)Load pattern table GFX.
-LC618:  LDY #$19                ;Entry 25 in GFXInfo table.
-LC61A:  JSR LoadGFX             ;($C7AB)Load pattern table GFX.
-LC61D:  LDY #$16                ;Entry 22 in GFXInfo table.
-LC61F:  JMP LoadGFX             ;($C7AB)Load pattern table GFX.
-
-InitNorfairGFX:
-LC622:  LDY #$04                ;Entry 4 in GFXInfo table.
-LC624:  JSR LoadGFX             ;($C7AB)Load pattern table GFX.
-LC627:  LDY #$05                ;Entry 5 in GFXInfo table.
-LC629:  JSR LoadGFX             ;($C7AB)Load pattern table GFX.
-LC62C:  LDY #$07                ;Entry 7 in GFXInfo table.
-LC62E:  JSR LoadGFX             ;($C7AB)Load pattern table GFX.
-LC631:  LDY #$08                ;Entry 8 in GFXInfo table.
-LC633:  JSR LoadGFX             ;($C7AB)Load pattern table GFX.
-LC636:  LDY #$09                ;Entry 9 in GFXInfo table.
-LC638:  JSR LoadGFX             ;($C7AB)Load pattern table GFX.
-LC63B:  LDY #$19                ;Entry 25 in GFXInfo table.
-LC63D:  JSR LoadGFX             ;($C7AB)Load pattern table GFX.
-LC640:  LDY #$16                ;Entry 22 in GFXInfo table.
-LC642:  JMP LoadGFX             ;($C7AB)Load pattern table GFX.
-
-InitTourianGFX:
-LC645:  LDY #$05                ;Entry 5 in GFXInfo table.
-LC647:  JSR LoadGFX             ;($C7AB)Load pattern table GFX.
-LC64A:  LDY #$0A                ;Entry 10 in GFXInfo table.
-LC64C:  JSR LoadGFX             ;($C7AB)Load pattern table GFX.
-LC64F:  LDY #$0B                ;Entry 11 in GFXInfo table.
-LC651:  JSR LoadGFX             ;($C7AB)Load pattern table GFX.
-LC654:  LDY #$0C                ;Entry 12 in GFXInfo table.
-LC656:  JSR LoadGFX             ;($C7AB)Load pattern table GFX.
-LC659:  LDY #$0D                ;Entry 13 in GFXInfo table.
-LC65B:  JSR LoadGFX             ;($C7AB)Load pattern table GFX.
-LC65E:  LDY #$0E                ;Entry 14 in GFXInfo table.
-LC660:  JSR LoadGFX             ;($C7AB)Load pattern table GFX.
-LC663:  LDY #$1A                ;Entry 26 in GFXInfo table.
-LC665:  JSR LoadGFX             ;($C7AB)Load pattern table GFX.
-LC668:  LDY #$1C                ;Entry 28 in GFXInfo table.
-LC66A:  JSR LoadGFX             ;($C7AB)Load pattern table GFX.
-LC66D:  LDY #$19                ;Entry 25 in GFXInfo table.
-LC66F:  JSR LoadGFX             ;($C7AB)Load pattern table GFX.
-LC672:  LDY #$16                ;Entry 22 in GFXInfo table.
-LC674:  JMP LoadGFX             ;($C7AB)Load pattern table GFX.
-
-InitKraidGFX:
-LC677:  LDY #$04                ;Entry 4 in GFXInfo table.
-LC679:  JSR LoadGFX             ;($C7AB)Load pattern table GFX.
-LC67C:  LDY #$05                ;Entry 5 in GFXInfo table.
-LC67E:  JSR LoadGFX             ;($C7AB)Load pattern table GFX.
-LC681:  LDY #$0A                ;Entry 10 in GFXInfo table.
-LC683:  JSR LoadGFX             ;($C7AB)Load pattern table GFX.
-LC686:  LDY #$0F                ;Entry 15 in GFXInfo table.
-LC688:  JSR LoadGFX             ;($C7AB)Load pattern table GFX.
-LC68B:  LDY #$10                ;Entry 16 in GFXInfo table.
-LC68D:  JSR LoadGFX             ;($C7AB)Load pattern table GFX.
-LC690:  LDY #$11                ;Entry 17 in GFXInfo table.
-LC692:  JSR LoadGFX             ;($C7AB)Load pattern table GFX.
-LC695:  LDY #$19                ;Entry 25 in GFXInfo table.
-LC697:  JSR LoadGFX             ;($C7AB)Load pattern table GFX.
-LC69A:  LDY #$16                ;Entry 22 in GFXInfo table.
-LC69C:  JMP LoadGFX             ;($C7AB)Load pattern table GFX.
-
-InitRidleyGFX:
-LC69F:  LDY #$04                ;Entry 4 in GFXInfo table.
-LC6A1:  JSR LoadGFX             ;($C7AB)Load pattern table GFX.
-LC6A4:  LDY #$05                ;Entry 5 in GFXInfo table.
-LC6A6:  JSR LoadGFX             ;($C7AB)Load pattern table GFX.
-LC6A9:  LDY #$0A                ;Entry 10 in GFXInfo table.
-LC6AB:  JSR LoadGFX             ;($C7AB)Load pattern table GFX.
-LC6AE:  LDY #$12                ;Entry 18 in GFXInfo table.
-LC6B0:  JSR LoadGFX             ;($C7AB)Load pattern table GFX.
-LC6B3:  LDY #$13                ;Entry 19 in GFXInfo table.
-LC6B5:  JSR LoadGFX             ;($C7AB)Load pattern table GFX.
-LC6B8:  LDY #$19                ;Entry 25 in GFXInfo table.
-LC6BA:  JSR LoadGFX             ;($C7AB)Load pattern table GFX.
-LC6BD:  LDY #$16                ;Entry 22 in GFXInfo table.
-LC6BF:  JMP LoadGFX             ;($C7AB)Load pattern table GFX.
-
-InitGFX6:
-LC6C2:  LDY #$01                ;Entry 1 in GFXInfo table.
-LC6C4:  JSR LoadGFX             ;($C7AB)Load pattern table GFX.
-LC6C7:  LDY #$02                ;Entry 2 in GFXInfo table.
-LC6C9:  JSR LoadGFX             ;($C7AB)Load pattern table GFX.
-LC6CC:  LDY #$19                ;Entry 25 in GFXInfo table.
-LC6CE:  JSR LoadGFX             ;($C7AB)Load pattern table GFX.
-LC6D1:  LDY #$16                ;Entry 22 in GFXInfo table.
-LC6D3:  JMP LoadGFX             ;($C7AB)Load pattern table GFX.
+SamusGFXTable:
+    .byte $16, $19, $18, $17, $14, $1B      ;$1B should only be loaded if JustInBailey
 
 InitGFX7:
 LC6D6:  LDY #$17                ;Entry 23 in GFXInfo table.
@@ -1142,7 +1104,7 @@ LC6DD:  JMP LoadGFX             ;($C7AB)Load pattern table GFX.
 GFXInfo:
 ;[SPR]Samus, items. Entry 0.
 LC6E0:  .byte $06
-LC6E1:  .word $8000, $0000, $09A0
+LC6E1:  .word GFXSuitedSamus, $0000, $09A0
 
 ;[SPR]Samus in ending. Entry 1.
 LC6E7:  .byte $04
@@ -1154,7 +1116,7 @@ LC6EF:  .word $8D60, $1000, $0400
 
 ;[BGR]Brinstar rooms. Entry 3.
 LC6F5:  .byte $06
-LC6F6:  .word $9DA0, $1000, $0150
+LC6F6:  .word GFXBrinstar1, $1000, $0150
 
 ;[BGR]Misc. objects. Entry 4.
 LC6FC:  .byte $05
@@ -1162,7 +1124,7 @@ LC6FD:  .word $8D60, $1200, $0450
 
 ;[BGR]More Brinstar rooms. Entry 5.
 LC703:  .byte $06
-LC704:  .word $9EF0, $1800, $0800
+LC704:  .word GFXBrinstar2, $1800, $0800
 
 ;[SPR]Brinstar enemies. Entry 6.
 LC70A:  .byte $01
@@ -1170,11 +1132,11 @@ LC70B:  .word $9160, $0C00, $0400
 
 ;[BGR]Norfair rooms. Entry 7.
 LC711:  .byte $06
-LC712:  .word $A6F0, $1000, $0260
+LC712:  .word GFXNorfair1, $1000, $0260
 
 ;[BGR]More Norfair rooms. Entry 8.
 LC718:  .byte $06
-LC719:  .word $A950, $1700, $0070
+LC719:  .word GFXNorfair2, $1700, $0070
 
 ;[SPR]Norfair enemies. Entry 9.
 LC71F:  .byte $02
@@ -1182,13 +1144,13 @@ LC720:  .word $8D60, $0C00, $0400
 
 ;[BGR]Tourian rooms. Entry 10.
 LC726:  .byte $06
-LC727:  .word $A9C0, $1000, $02E0
+LC727:  .word GFXTourian1, $1000, $02E0
 
 LC72D:  .byte $06           ;[BGR]More Tourian rooms. Entry 11.
-LC72E:  .word $ACA0, $1200, $0600
+LC72E:  .word GFXTourian2, $1200, $0600
 
 LC734:  .byte $06           ;[BGR]Mother Brain room. Entry 12.
-LC735:  .word $B2A0, $1900, $0090
+LC735:  .word GFXMthrBrnRoom, $1900, $0090
 
 LC73B:  .byte $05           ;[BGR]Misc. object. Entry 13.
 LC73C:  .word $91B0, $1D00, $0300
@@ -1197,7 +1159,7 @@ LC742:  .byte $02           ;[SPR]Tourian enemies. Entry 14.
 LC743:  .word $9160, $0C00, $0400
 
 LC749:  .byte $06           ;[BGR]More Tourian rooms. Entry 15.
-LC74A:  .word $B330, $1700, $00C0
+LC74A:  .word GFXTourian3, $1700, $00C0
 
 LC750:  .byte $04           ;[BGR]Misc. object and fonts. Entry 16.
 LC751:  .word $9360, $1E00, $0200
@@ -1206,35 +1168,35 @@ LC757:  .byte $03               ;[SPR]Miniboss I enemies. Entry 17.
 LC758:  .word $8D60, $0C00, $0400
 
 LC75E:  .byte $06               ;[BGR]More Tourian Rooms. Entry 18.
-LC75F:  .word $B3F0, $1700, $00C0
+LC75F:  .word GFXTourian4, $1700, $00C0
 
 LC765:  .byte $03           ;[SPR]Miniboss II enemies. Entry 19.
 LC766:  .word $9160, $0C00, $0400
 
 LC76C:  .byte $06           ;[SPR]Inrto/End sprites. Entry 20.
-LC76D:  .word $89A0, $0C00, $0100
+LC76D:  .word GFXIntroEnd, $0C00, $0100
 
 LC773:  .byte $06           ;[BGR]Title. Entry 21.
-LC774:  .word $8BE0, $1400, $0500
+LC774:  .word GFXMetroidTitle, $1400, $0500
 
 LC77A:  .byte $06           ;[BGR]Solid tiles.      Entry 22.
-LC77B:  .word $9980, $1FC0, $0040
+LC77B:  .word GFXBlankTiles, $1FC0, $0040
 
 LC781:  .byte $06           ;[BGR]Complete font.        Entry 23.
-LC782:  .word $B4C0, $1000, $0400
+LC782:  .word GFXFont, $1000, $0400
 
 LC788:  .byte $06           ;[BGR]Complete font.        Entry 24.
-LC789:  .word $B4C0, $0A00, $00A0
+LC789:  .word GFXFont, $0A00, $00A0
 
 LC78F:  .byte $06           ;[BGR]Solid tiles.      Entry 25.
-LC790:  .word $9980, $0FC0, $0040
+LC790:  .word GFXBlankTiles, $0FC0, $0040
 
 LC796:  .byte $06           ;[BGR]Complete font.        Entry 26.
-LC797:  .word $B4C0, $1D00, $02A0
+LC797:  .word GFXFont, $1D00, $02A0
 
 ;[SPR]Suitless Samus.           Entry 27.
 LC79D:  .byte $06
-LC79E:  .word $90E0, $0000, $07B0
+LC79E:  .word GFXSuitlesSamus, $0000, $07B0
 
 ;[BGR]Exclaimation point.       Entry 28.
 LC7A4:  .byte $06
@@ -1319,14 +1281,11 @@ LC81A:  jsr IsEngineRunning     ;($CA18)Check to see if ok to switch lower memor
 MoreInit:
 LC81D:  ldy #$01                ;
 LC81F:  sty PalDataPending      ;Palette data pending = yes.
-LC821:  ldx #$FF                ;
-LC823:  stx AlwaysFF            ;$75 Not referenced ever again in the game.
-LC825:  inx                     ;X=0.
+LC821:  lax AlwaysZero          ; A and X = 0
 LC826:  stx AtEnding            ;Not playing ending scenes.
 LC829:  stx DoorStatus          ;Samus not in door.
 LC82B:  stx SamusDoorData       ;Samus is not inside a door.
 LC82D:  stx UpdtngPrjctl        ;No projectiles need to be updated.
-LC82F:  txa                     ;A=0.
 
 LC830:* cpx #$65                ;Check to see if more RAM to clear in $7A thru $DE.
 LC832:  bcs +                   ;
@@ -1346,20 +1305,22 @@ LC849:  jsr DestroyEnemies      ;($C8BB)
     stx DoorOnNameTable0        ;
     inx             ;X=1.
     inx             ;X=2.
-LC854:  stx ScrollDir           ;Set initial scroll direction as left.
-
+LC854:  
+    stx ScrollDir               ;Set initial scroll direction as left.
     lda $95D7                   ;Get Samus start x pos on map.
     sta MapPosX                 ;
     lda $95D8                   ;Get Samus start y pos on map.
     sta MapPosY                 ;
 
-LC860:  lda $95DA               ;Get ??? Something to do with palette switch
+LC860:
+    lda $95DA               ;Get ??? Something to do with palette switch
     sta PalToggle
     lda #$FF
     sta RoomNumber              ;Room number = $FF(undefined room).
-LC869:  jsr CopyPtrs            ;copy pointers from ROM to RAM 
-LC86C:  jsr GetRoomNum          ;($E720)Put room number at current map pos in $5A.
-*       jsr SetupRoom           ;($EA2B)
+    jsr CopyPtrs            ;copy pointers from ROM to RAM 
+LC86C:  
+    jsr GetRoomNum          ;($E720)Put room number at current map pos in $5A.
+*   jsr SetupRoom           ;($EA2B)
     ldy RoomNumber              ;load room number
     iny
     bne -
@@ -1381,7 +1342,7 @@ LC86C:  jsr GetRoomNum          ;($E720)Put room number at current map pos in $5
     ldy #$00
     sty PPUAddress
     ldx #$04    ; prepare to write 4 pages
-*       lda ($00),y
+*   lda ($00),y
     sta PPUIOReg
     iny
     bne -
@@ -1395,13 +1356,11 @@ LC86C:  jsr GetRoomNum          ;($E720)Put room number at current map pos in $5
     inc MainRoutine         ;SamusInit is next routine to run.
     jmp ScreenOn
 
-; CopyPtrs
-; ========
 ; Copy 7 16-bit pointers from $959A thru $95A7 to $3B thru $48.
 
 CopyPtrs:
     ldx #$0D
-*   lda AreaPointers+2,x
+*   lda AreaPointers,x
     sta RoomPtrTable,x
     dex
     bpl -
@@ -2397,7 +2356,7 @@ LCF0C:  LDA HealthHiChange      ;Amount to add to HealthHi.
 LCF0E:  JSR Base10Add           ;($C3DA)Perform base 10 addition.
 LCF11:  STA HealthHi            ;Save results.
 
-LCF14:  lda TankCount           ;
+LCF14:  lax TankCount           ;
 LCF17:  lda Mul16Table, x
 LCF1A:  ORA #$0F            ;Set lower 4 bits.
 LCF1C:  CMP HealthHi            ;
@@ -2883,12 +2842,12 @@ LD275:  lda MetroidOnSamus
     sta ObjectOnScreen,y
     jsr LD340
     ldx SamusDir
-    lda Table09+4,x
+    lda Table09,x
     sta $05
     lda ObjAction,y
     and #$01
     tax
-    lda Table09+6,x
+    lda Table09+2,x
     sta $04
     jsr LD306
     lda SamusGear
@@ -2902,23 +2861,18 @@ LD275:  lda MetroidOnSamus
     cmp #$01
     bne +
     jsr SFX_BulletFire
-*   ldx SamusDir
-    ldy Table09,x
+*   ldy #$26
     lda SamusGravity
     beq +
-    ldy Table09+2,x
+    ldy #$34
 *   lda ObjAction
     cmp #$01
     beq +
-    jmp LD26B
+    bne LD26B
 
 ; Table used by above subroutine
 
 Table09:
-    .byte $26
-    .byte $26
-    .byte $34
-    .byte $34
     .byte $01
     .byte $FF
     .byte $EC
@@ -4391,7 +4345,7 @@ LDCE4:  STA $04             ;horizontal mirroring of the sprite if set.
 LDCE6:  LDA ObjectCntrl         ;
 LDCE8:  BPL +               ;If MSB is set in ObjectCntrl, use its flip bits(6 and 7).
 LDCEA:  ASL ObjectCntrl         ;
-LDCEC:  JSR SpriteFlipBitsOveride   ;($E038)Use object flip bits as priority over sprite flip bits. 
+LDCEC:  JSR SpriteFlipBitsOverride   ;($E038)Use object flip bits as priority over sprite flip bits. 
 LDCEF:* TXA             ;Discard upper nibble so only entry number into
 LDCF0:  AND #$0F            ;PlacePtrTbl remains.
 LDCF2:  ASL             ;*2. pointers in PlacePntrTbl are 2 bytes in size.
@@ -4631,11 +4585,10 @@ LDE68:  sta $0B             ;data into $0A, $0B and $06 respectively.
 LDE6A:  lda ObjectHi,x          ;
 LDE6D:  sta $06             ;
 LDE6F:  lda AnimFrame,x         ;Load A with index into FramePtrTable.
-LDE72:  asl             ;*2. Frame pointers are two bytes.
-LDE73:  tax             ;X is now the index into the FramePtrTable.
-LDE74:  lda FramePtrTable,x     ;
+LDE73:  tax                        ;X is now the index into the FramePtrTable.
+LDE74:  lda FramePtrTable_Lo,x     ;
 LDE77:  sta $00             ;
-LDE79:  lda FramePtrTable+1,x       ;Entry from FramePtrTable is stored in $0000.
+LDE79:  lda FramePtrTable_Hi,x       ;Entry from FramePtrTable is stored in $0000.
 LDE7C:  sta $01             ;
 LDE7E:  jsr GetSpriteCntrlData      ;($DCC3)Get place pointer index and sprite control data.
 LDE81:  lda PlacePtrTable,x     ;
@@ -4648,7 +4601,7 @@ LDE8D:  beq LDEBC               ;If not, branch.
 ;Special case for Samus exploding.
 LDE8F:  cpx #$0E            ;Is Samus exploding?
 LDE91:  bne LDEBC               ;If not, branch to skip this section of code.
-LDE93:  ldx PageIndex           ;X=0.
+
 LDE95:  inc ObjectCounter       ;Incremented every frame during explode sequence.
 LDE97:  lda ObjectCounter       ;Bottom two bits used for index into ExplodeRotationTbl.
 LDE99:  pha             ;Save value of A.
@@ -4661,19 +4614,18 @@ LDEA4:  sta $05             ;Save modified sprite control byte.
 LDEA6:  pla             ;Restore A
 LDEA7:  cmp #$19            ;After 25 frames, Move on to second part of death 
 LDEA9:  bne LDEBC               ;handler, else branch to skip the rest of this code.
-LDEAB:  ldx PageIndex           ;X=0.
+
 LDEAD:  lda #sa_Dead2           ;
-LDEAF:  sta ObjAction,x         ;Move to next part of the death handler.
+LDEAF:  sta ObjAction         ;Move to next part of the death handler.
 LDEB2:  lda #$28            ;
-LDEB4:  sta AnimDelay,x         ;Set animation delay for 40 frames(.667 seconds).
-LDEB7:  pla             ;Pull last return address off of the stack.
-LDEB8:  pla             ;
-        lda #$00
-        sta ObjectCntrl         ;Clear object control byte.
-        rts             ;
+LDEB4:  sta AnimDelay       ;Set animation delay for 40 frames(.667 seconds).
+LDEB7:  pla                 ;Pull last return address off of the stack.
+LDEB8:  pla                 ;
+        sty ObjectCntrl     ;Y = 0 here; Clear object control byte.
+        rts                 ;
 
 LDEBC:* ldx PageIndex           ;
-LDEBE:  iny             ;Increment to second frame data byte.
+LDEBE:  iny                 ;Increment to second frame data byte.
 LDEBF:  lda ($00),y         ;
 LDEC1:  sta ObjRadY,x           ;Get verticle radius in pixles of object.
 LDEC3:  jsr ReduceYRadius       ;($DE3D)Reduce temp y radius by #$10.
@@ -4687,7 +4639,7 @@ LDED0:  jsr IsObjectVisible     ;($DFDF)Determine if object is within the screen
 LDED3:  txa             ;
 LDED4:  ldx PageIndex           ;Get index to object.
 LDED6:  sta ObjectOnScreen,x        ;Store visibility status of object.
-LDEDB:  tax             ;
+LDEDB:  tax                    ;
 LDEDC:  beq SetObjectCntrlToA   ;
 
 DoDrawSpriteObject:
@@ -4861,7 +4813,7 @@ GetNewControlByte:
 LDF3B:* iny             ;Increment index to next byte of frame data.
 LDF3C:  asl ObjectCntrl         ;If MSB of ObjectCntrl is not set, no overriding of
 LDF3E:  bcc +               ;flip bits needs to be performed.
-LDF40:  jsr SpriteFlipBitsOveride   ;($E038)Use object flip bits as priority over sprite flip bits.
+LDF40:  jsr SpriteFlipBitsOverride   ;($E038)Use object flip bits as priority over sprite flip bits.
 LDF43:  bne ++              ;Branch always.
 LDF45:* lsr ObjectCntrl         ;Restore MSB of ObjectCntrl.
 LDF47:  lda ($00),y         ;
@@ -4955,7 +4907,7 @@ LE037:* rts             ;
 ;over the sprite control bits.  This function modifies the sprite control byte with any flipping
 ;bits found in ObjectCntrl.
 
-SpriteFlipBitsOveride:
+SpriteFlipBitsOverride:
 LE038:  lsr ObjectCntrl         ;Restore MSB.
 LE03A:  lda ($00),y         ;Reload frame data control byte into A.
 LE03C:  and #$C0            ;Extract the two sprite flip bytes from theoriginal
@@ -5894,10 +5846,8 @@ LE590:
     sta $01
     lda $00
     sta $02
-    lda ScrollDir
-    lsr     ; A = 0 if vertical scrolling, 1 if horizontal
-    tax
-    lda Table01,x
+    lax ScrollDir ; Bit1 = 0 if vertical scrolling, Bit1 = 1 if horizontal
+    lda Table01,x ; A = 0 if vertical scrolling, 1 if horizontal
     sta $04
     ldy #$01
     sty PPUDataPending      ; data pending = YES
@@ -5910,27 +5860,40 @@ LE590:
     lda $04
     jsr SeparateControlBits     ;($C3C6)
 
-; TODO: Hot loop? 20 scan lines?
-Hot_Loop:
+; TODO: This is a hot loop. See if it can be helped
+    bit $04                 ; ... if bit 7 (PPU inc) of $04 clear
+    bmi Inc_32_Loop
+
+Inc_1_Loop:
+    lda ($00),y
+    jsr WritePPUByte
+    inc $00
+    bcc +                   ;Increment $01(upper address byte) if carry
+    inc $01                 ;has occurred.
+*   dec $05
+    bne Inc_1_Loop
+    beq After_Inc_Loop  ; always branch if you get here
+
+Inc_32_Loop:
 *   lda ($00),y
     jsr WritePPUByte
-    lda #$01                ; WRAM pointer increment = 1...
-    bit $04                 ; ... if bit 7 (PPU inc) of $04 clear
-    bpl +
-    lda #$20                ; else ptr inc = 32
-*   ADC $00                 ;byte stored in $00.
-    STA $00                 ;
-    BCC +                   ;Increment $01(upper address byte) if carry
-    CLC
-    INC $01                 ;has occurred.
+    lda $00                 ; else ptr inc = 32
+    adc #$20                ;byte stored in $00.
+    sta $00                 ;
+    bcc +                   ;Increment $01(upper address byte) if carry
+    clc
+    inc $01                 ;has occurred.
 *   dec $05
-    bne Hot_Loop
+    bne Inc_32_Loop
 
+After_Inc_Loop:
     stx PPUStrIndex
     jsr EndPPUString
 
 Table01:
     .byte $20           ;Horizontal write. PPU inc = 1, length = 32 tiles.
+    .byte $20           ;Horizontal write. PPU inc = 1, length = 32 tiles.
+    .byte $9E           ;Vertical write... PPU inc = 32, length = 30 tiles.
     .byte $9E           ;Vertical write... PPU inc = 32, length = 30 tiles.
 
 ;----------------------------------------------------------------------------------------------------
@@ -6078,6 +6041,9 @@ LE731:  bne +++++           ;Can't load room, a door is in the way. This has the
                     ;effect of stopping the scrolling until Samus walks
                     ;through the door(horizontal scrolling only).
 
+;; TODO
+;;LE733:* ldy MapPosY         ;Map pos y.
+;;       lda Mul16Table, y
 LE733:* lda MapPosY         ;Map pos y.
         asl
         asl
@@ -6266,9 +6232,7 @@ LE81E:  ldx UpdtngPrjctl
     lda $04
     lsr
     lsr
-    lsr       ; / 8
-    ; TODO: I don't think and does anything
-    and #$01
+    asr #$03
     tax
     inc $0366,x
 
@@ -6556,14 +6520,26 @@ LE60A:  jsr WritePPUByte        ;($C36B)Put data byte into PPUDataString.
 LE60D:  lda #$20            ;Length of data to write(1 row of attrib data).
 LE60F:  sta $04             ;
 LE611:  jsr WritePPUByte        ;($C36B)Write control byte. Horizontal write.
-LE614:  ldy #$00            ;Reset index into data string.
-LE616:* lda ($00),y         ;Get data byte.
-LE618:  jsr WritePPUByte        ;($C36B)Put data byte into PPUDataString.
-LE61B:  iny             ;Increment to next attrib data byte.
-LE61C:  dec $04             ;
-LE61E:  bne -               ;Loop until all attrib data loaded into PPU.
-LE620:  stx PPUStrIndex         ;Store updated PPU string index.
-LE623:  jsr EndPPUString        ;($C376)Append end marker(#$00) and exit writing routines.
+
+ldy #$00            ;Reset index into data string.
+WritePPUAttribTblLoop:
+    lda ($00),y             ;Get data byte.
+    STA PPUDataString,x     ;Store data byte at end of PPUDataString.
+    INX                     ;PPUDataString has increased in size by 1 byte.
+    CPX #$4F                ;PPU byte writer can only write a maximum of #$4F bytes
+    BCC AFTER_PPU_Write     ;If PPU string not full, branch to get more data.
+    LDX PPUStrIndex         ;
+    LDA #$00                ;If PPU string is already full, or all PPU bytes loaded,
+    STA PPUDataString,x     ;add #$00 as last byte to the PPU byte string.
+    RTS                     ;PPU writing routines.
+
+AFTER_PPU_Write:
+    iny                         ;Increment to next attrib data byte.
+    dec $04                     ;
+    bne WritePPUAttribTblLoop   ;Loop until all attrib data loaded into PPU.
+
+LE620:  stx PPUStrIndex             ;Store updated PPU string index.
+LE623:  jsr EndPPUString            ;($C376)Append end marker(#$00) and exit writing routines.
 
 ;------------------------------------[ write attribute table data ]----------------------------------
 
@@ -6628,7 +6604,6 @@ LEAC7:  inc RoomPtr+1       ;Increment high byte of room pointer if carry occure
 ;------------------------------------------[ Select room RAM ]---------------------------------------
 
 SelectRoomRAM:
-    sty CartRAMPtrLB    ;Save two byte pointer to start of proper room RAM.
     lda PPUCNT0ZP       ;
     eor ScrollDir       ;Store #$01 if object should be loaded onto name table 3,
     and #$01            ;store #$00 if it should be loaded onto name table 0.
@@ -6639,7 +6614,7 @@ SelectRoomRAM:
 ;------------------------[ Initialize room RAM and associated attribute table ]-----------------------
 
 InitTables:
-ldy #$80
+ldy #$C0            ; steps from #$C0 to #$FF so about #$39
 ldx RoomPal         ;Index into table below (Lowest 2 bits).
 cmp #$60
 bne FillRoomRAM_64
@@ -6647,24 +6622,35 @@ bne FillRoomRAM_64
 FillRoomRAM_60:
     .scope
         lda #$FF
-        _loop:              ; Fill $6400 - $63C0 with #$FF
+        _loop:              ; Fill $6000 - $63C0 with #$FF
+            sta $5F40,y     ;
             sta $5F80,y     ;
+            sta $5FC0,y     ;
             sta $6000,y     ;
+            sta $6040,y     ;
             sta $6080,y     ;
+            sta $60C0,y     ;
             sta $6100,y     ;
+            sta $6140,y     ;
             sta $6180,y     ;
+            sta $61C0,y     ;
             sta $6200,y     ;
+            sta $6240,y     ;
             sta $6280,y     ;
-            sta $6300,y     ;   
+            sta $62C0,y     ;
             iny
         bne _loop
         lda ATDataTable,x   ;Load attribute table data from table below.
-        ldy #$F0            ;Low byte of start of all attribute tables.
+        ldy #$F8            ;Low byte of start of all attribute tables.
         _loop2:
-            sta $62D0,y         ;Fill attribute table.  $62C0 - $62CF
-            sta $62E0,y         ;Fill attribute table.  $62D0 - $62DF
-            sta $62F0,y         ;Fill attribute table.  $62E0 - $62EF
-            sta $6300,y         ;Fill attribute table.  $62F0 - $62FF
+            sta $62C8,y         ;$67C0 - $67C7
+            sta $62D0,y         ;$67C8 - $67CF
+            sta $62D8,y         ;$67D0 - $67D7
+            sta $62E0,y         ;$67D8 - $67EF
+            sta $62E8,y         ;$67E0 - $67E7
+            sta $62F0,y         ;$67E8 - $67FF
+            sta $62F8,y         ;$67F0 - $67F7
+            sta $6300,y         ;$67F8 - $67FF
             iny
         bne _loop2
         jmp DrawRoom
@@ -6678,46 +6664,60 @@ FillRoomRAM_60:
 
 CartRamMulOffsetLoTable:
     .byte $00,$40,$80,$C0   ; low-byte part of X * $40 (X & 3)
+    .byte $00,$40,$80,$C0
+    .byte $00,$40,$80,$C0
+    .byte $00,$40,$80,$C0
 
 FillRoomRAM_64:
     lda #$FF
     .scope
-        _loop:              ; Fill $6400 - $6800 with #$FF
-            sta $6380,y     ;
-            sta $6400,y     ;
-            sta $6480,y     ;
-            sta $6500,y     ;
-            sta $6580,y     ;
-            sta $6600,y     ;
-            sta $6680,y     ;
-            sta $6700,y     ;
+        _loop:              ; Fill $6400 - $67C0 with #$FF
+            sta $6340,y
+            sta $6380,y
+            sta $63C0,y
+            sta $6400,y
+            sta $6440,y
+            sta $6480,y
+            sta $64C0,y
+            sta $6500,y
+            sta $6540,y
+            sta $6580,y
+            sta $65C0,y
+            sta $6600,y
+            sta $6640,y
+            sta $6680,y
+            sta $66C0,y
             iny
         bne _loop
         lda ATDataTable,x   ;Load attribute table data from table below.
-        ldy #$F0            ;Low byte of start of all attribute tables.
+        ldy #$F8            ;Low byte of start of all attribute tables.
         _loop2:
-            sta $66D0,y         ;Fill attribute table.  $67C0 - $67CF
-            sta $66E0,y         ;Fill attribute table.  $67D0 - $67DF
-            sta $66F0,y         ;Fill attribute table.  $67E0 - $67EF
-            sta $6700,y         ;Fill attribute table.  $67F0 - $67FF
+            sta $66C8,y         ;$67C0 - $67C7
+            sta $66D0,y         ;$67C8 - $67CF
+            sta $66D8,y         ;$67D0 - $67D7
+            sta $66E0,y         ;$67D8 - $67EF
+            sta $66E8,y         ;$67E0 - $67E7
+            sta $66F0,y         ;$67E8 - $67FF
+            sta $66F8,y         ;$67F0 - $67F7
+            sta $6700,y         ;$67F8 - $67FF
             iny
         bne _loop2
-        beq DrawRoom            ;($EAAA)Load room contents into room RAM.
+        jmp DrawRoom            ;($EAAA)Load room contents into room RAM.
      .scend
 
 ;---------------------------------------[ Draw room object ]-----------------------------------------
 
 DrawObject:
-LEA6C:  sta $0E                 ;($C2BF)/16. Lower nibble contains object y position.   
+LEA6C:  sta ScreenXPos                 ;($C2BF)/16. Lower nibble contains object y position.   
         lsr
         lsr
         lsr
         lsr
 LEA70:  
-    bne UpdateCartPointerYPosition        ;Skip y position calculation loop as y position=0
-                                    ;does not need to be calculated.
-    ldx CartRAMPtrLB
-    stx CartRAMWorkPtrLB    ;Set the working pointer equal to the room pointer
+    bne UpdateCartPointerYPosition      ;Skip y position calculation loop as y position=0
+                                        ;does not need to be calculated.
+                                        ; A = 0 at this point
+    sta CartRAMWorkPtrLB    ;Set the working pointer equal to the room pointer
     ldx CartRAMPtrUB        ;(start at beginning of the room).
     stx CartRAMWorkPtrUB
     jmp UpdateCartPointerXPosition
@@ -6727,23 +6727,15 @@ UpdateCartPointerYPosition:
 
     lsr
     lsr
-    sta SpareMemBB
-
-    txa
-    and #$03
-    tax 
-    lda CartRamMulOffsetLoTable,x
-
     clc
-    adc CartRAMPtrLB
-    sta CartRAMWorkPtrLB
-
-    lda SpareMemBB
     adc CartRAMPtrUB
     sta CartRAMWorkPtrUB
 
+    lda CartRamMulOffsetLoTable,x
+    sta CartRAMWorkPtrLB
+
 UpdateCartPointerXPosition:
-LEA80:  lda $0E                 ;Reload object position byte.
+LEA80:  lda ScreenXPos          ;Reload object position byte.
 LEA82:  and #$0F                ;Remove y position upper nibble.
 LEA84:  asl                     ;Each x unit is 2 tiles.
 LEA85:  adc CartRAMWorkPtrLB    ;
@@ -6755,7 +6747,7 @@ LEA8B:  inc CartRAMWorkPtrUB    ;pointer, else branch to draw object.
 ;on the room RAM which will eventually be loaded into a name table.
 
 SetupStructPtr:
-                        ; Y will be 0 here
+                        ;Y = 0 at this point
 LEA8D:  iny             ;Move to the next byte of room data which is
 LEA8E:  lax (RoomPtr),y         ;the index into the structure pointer table.
 LEA91:  iny             ;Move to the next byte of room data which is
@@ -6773,7 +6765,6 @@ LEAA0:  sta StructPtrUB             ;
 ; replacing a jsr
 DrawObject_DrawStruct:
 LEAA2:  jmp DrawStruct          ;($EF8C)Draw one structure.
-AfterDrawObject_DrawStruct:
 
 AddToRoomPtr:
     lda #$03            ;Move to next set of structure data.
@@ -6793,16 +6784,15 @@ LEAAC:  lda (RoomPtr),y         ;Load byte of room data.
 LEAAE:  cmp #$FF            ;Is it #$FF(end-of-room)?
 LEAB0:  beq EndOfRoom           ;If so, branch to exit.
 LEAB6:  cmp #$FD            ;is A=#$FD(end-of-objects)?
-LEAB8:  bne DrawObject          ;If not, branch to draw room object.
-
-;----------------------------------------------------------------------------------------------------
-
-EndOfObjs:
+LEAB8:  bne DrawObject      ;If not, branch to draw room object.
 LEACA:  lda RoomPtr         ;
 LEACC:  sta $00             ;Store room pointer in $0000.
 LEACE:  lda RoomPtr+1       ;
 LEAD0:  sta $01             ;
-LEAD2:  lda #$01            ;Prepare to increment to enemy/door data.
+        inc $00
+        jmp LEAD9
+
+;----------------------------------------------------------------------------------------------------
 
 EnemyLoop:
 ; TODO: Something funny happens when I try to optimize this
@@ -7140,11 +7130,11 @@ UpdateDoorData:
     eor #$03          ;
     tax
 
-    and $006C         ;Moves door info from one name table to the next
-    sta $006C         ;when the room is transferred across name tables.
+    and $6C         ;Moves door info from one name table to the next
+    sta $6C         ;when the room is transferred across name tables.
     txa               
-    and $006D         ;Moves door info from one name table to the next
-    sta $006D         ;when the room is transferred across name tables.
+    and $6D         ;Moves door info from one name table to the next
+    sta $6D         ;when the room is transferred across name tables.
 
     ldx #$50
     jsr GetNameTable        ;($EB85)
@@ -7574,8 +7564,8 @@ LEF38:* lda $00             ;Low byte of current nametable address.
 LEF3A:  cmp #$A0            ;Reached attrib table?
 LEF3C:  bcs DrawStructExit  ;If not, branch to draw the macro.
 
-LEF3F:* inc $10             ;Increase struct data index.
-LEF41:  ldy $10             ;Load struct data index into Y.
+LEF3F:* inc ScreenYPos             ;Increase struct data index.
+LEF41:  ldy ScreenYPos             ;Load struct data index into Y.
 LEF43:  lda (StructPtr),y       ;Get macro number. StructPtr = $35
 LEF45:  asl             ;
 LEF46:  asl             ;A=macro number * 4. Each macro is 4 bytes long.
@@ -7663,8 +7653,7 @@ IncCartRAMWorkPtrUB:
         jmp DrawStruct
 
 DrawStructExit:
-    ;rts
-    jmp AfterDrawObject_DrawStruct
+    jmp AddToRoomPtr
 ;---------------------------------[ Update attribute table bits ]------------------------------------
 
 ;The following routine updates attribute bits for one 2x2 tile section on the screen.
@@ -8155,20 +8144,25 @@ LF340:  lda $10
 
 UpdateEnemies:
 LF345:  
-    ldx #$50        ;Load x with #$50
-*   jsr DoOneEnemy          ;($F352)
-    ;TODO - hmm
-    lda PageIndex
-    sec
-    sbc #$10
-    tax
-    bne -
+    ldx #$50            ;Load x with #$50
+    jsr DoOneEnemy      ;($F352)
+    ldx #$40            ;Load x with #$50
+    jsr DoOneEnemy      ;($F352)
+    ldx #$30            ;Load x with #$50
+    jsr DoOneEnemy      ;($F352)
+    ldx #$20            ;Load x with #$50
+    jsr DoOneEnemy      ;($F352)
+    ldx #$10            ;Load x with #$50
+    jsr DoOneEnemy      ;($F352)
+    ldx #$00            ;Load x with #$50
 DoOneEnemy:
 LF352:
     stx PageIndex           ;PageIndex starts at $50 and is subtracted by #$0F each
                             ;iteration. There is a max of 6 enemies at a time.
     ldy EnStatus,x
-    beq ++
+    ; LOW TRUST - If anything is weird with enemies. This might be the cause, used to be a
+    ; beq ++ instead of beq EXIT 24
+    beq EXIT24
     cpy #$03
     bcs ++
 ; inlined what used to be jsr LF37F
@@ -8190,9 +8184,10 @@ LF352:
     bne +
 EXIT24:    
     rts
+
 ; end inline jsr LF37F
 *   ldx PageIndex
-; inlined what used to be jsr LF3AA
+
 *   lda $0405,x
     asl
     rol
@@ -8208,7 +8203,7 @@ EXIT24:
     ror
     ror
     sta $0405,x
-; end inline jsr LF3AA
+
     ldy EnStatus,x
     sty $81
     beq EXIT24
@@ -8225,7 +8220,8 @@ DoOneEnemyTableHiByte:
 DoOneEnemyTableLoByte:
     .byte <LF3BE, <LF3E6, <LF40D, <LF43E, <LF483, <LF4EE, <KillObject
 
-LF3BE:  lda $0405,x
+LF3BE:
+    lda $0405,x
     asl
     bmi +  ; TODO - maybe should be bmi LF40D ??
     lda #$00
@@ -9653,8 +9649,7 @@ LFF3C:
     sta $09
     lda $01
     lsr
-    lsr
-    and #$01
+    asr #$03
     sta $0B
     ldy #$00
     jsr GetObject1CoordData

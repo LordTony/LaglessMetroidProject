@@ -105,6 +105,7 @@
 .alias StructPtrTableLB $3D     ;start of structure pointer table, lower byte.
 .alias StructPtrTableUB $3E     ;start of structure pointer table, upper byte.
 
+                                ;These are now unused
 .alias MacroPtr         $3F     ;Pointer into macro definitions.
 .alias MacroPtrLB       $3F     ;Pointer into macro definitions, lower byte.
 .alias MacroPtrUB       $40     ;Pointer into macro definitions, upper byte.
@@ -177,7 +178,7 @@
 .alias InArea           $74     ;#$10(or #$00)=Brinstar, #$11=Norfair, #$12=Kraid hideout,
                                 ;#$13=Tourian, #$14=Ridley hideout.
 
-.alias AlwaysFF         $75     ;Zero page that can always be relied on to be #$FF
+.alias SpareMem75       $75     ;never read or written
 .alias PalToggle        $76
 
 .alias ItemRmMusicSts   $79     ;#$00=Item room music not playing. 
@@ -848,29 +849,31 @@
 
 ;---------------------------------- [ Constant Locations in Swap Banks ] -----------------------------
 
-.alias SoundEngineOrg           $B200
-.alias SoundEngineEntryPoint    $B3C6
 .alias L8048_Ptr_Table          $8048
 .alias ObjectAnimIdxTbl         $8572
-.alias FramePtrTable            $860B
+.alias FramePtrTable_Hi         $860B
+.alias FramePtrTable_Lo         $8675
 .alias PlacePtrTable            $86DF
 .alias SamusEnterDoor           $8B13
-.alias GFXMetroidTitle          $8BE0
+.alias DoorHandler              $8B79
 .alias PalPntrTbl_Hi            $9560
 .alias PalPntrTbl_Lo            $957C
 .alias SpecItmsTblPtr           $9598
-.alias AreaPointers             $9598
+.alias AreaPointers             $959A
 .alias AreaRoutine              $95C3
 .alias EnemyHitPointTbl         $962B
 .alias EnemyInitDelayTbl        $96BB
 .alias DecSpriteYCoord          $9893
 .alias NMIScreenWrite           $9A07
 .alias EndGamePalWrite          $9F54
-.alias SpecItmsTable            $9598
 .alias MemuByte                 $95E4
 .alias CopyMap                  $A93E
-.alias MacroDefs                $AEF0
-.alias DoorHandler              $8B79
+.alias RoomPointerTable         $AE90
+.alias StructPointerTable       $AF18
+.alias MacroDefs                $AF88
+.alias SoundEngineOrg           $B200
+.alias SoundEngineEntryPoint    $B3C6
+.alias InterruptVectors         $BFFA
 
 ;----------------------------------------------------------------------------------------------------
 

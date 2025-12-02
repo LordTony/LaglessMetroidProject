@@ -621,8 +621,8 @@ _SptFlmSFXCont:
 _ScrwAtkSFXStart:
   LDA #$05                ;Number of frames to play sound before a change.
   LDY #$11                ;Lower byte of sound data start address(base=$B200).
-  JSR _SelectSFXRoutine    ;($B452)Setup registers for SFX.
-  LDA $B213               ;#$00.
+  JSR _SelectSFXRoutine   ;($B452)Setup registers for SFX.
+  LDA SoundEngineOrg+$13  ;#$00.
   STA NoiseSFXData        ;Clear NoiseSFXData.
 * RTS                     ;
 
@@ -830,7 +830,7 @@ _MslPkupSFXCont:
   BNE +                   ;
   JMP _EndSQ1SFX           ;($B6F2)SFX completed.
 * STA SQ1Cntrl2           ;
-  LDA $B244               ;#$28.
+  LDA SoundEngineOrg+$44               ;#$28.
   STA SQ1Cntrl3           ;load SQ1Cntrl3 with #$28.
   INC SQ1SFXData          ;Increment index to data table above every 5 frames.
 
@@ -987,9 +987,9 @@ _WvBmSFXDisLnTbl:
   .byte $00               ;
 
 _DoorSFXStart:
-  LDA $B287               ;#$30.
+  LDA SoundEngineOrg+$87               ;#$30.
   STA TriPeriodLow        ;Set triangle period low data byte.
-  LDA $B288               ;#$B2.
+  LDA SoundEngineOrg+$88               ;#$B2.
   AND #$07                ;Set triangle period high data byte.
   STA TriPeriodHigh       ;#$B7.
   LDA #$0F                ;
@@ -1025,9 +1025,9 @@ _BigEnHitSFXStart:
   STA TriChangeLow        ;
   LDA #$00                ;
   STA TriChangeHigh       ;Does not change triangle period high.
-  LDA $B27F               ;#$42.
+  LDA SoundEngineOrg+$7F               ;#$42.
   STA TriPeriodLow        ;Save new triangle period low data.
-  LDA $B280               ;#$18.
+  LDA SoundEngineOrg+$80               ;#$18.
   AND #$07                ;#$1F.
   STA TriPeriodHigh       ;Save new triangle period high data.
   LDA #$0A                ;Number of frames to play sound before a change.
@@ -1057,9 +1057,9 @@ _SmsBallSFXStart:
   JSR _SelectSFXRoutine    ;($B452)Setup registers for SFX.
   LDA #$05                ;
   STA PercentDiff         ;Stores percent difference. In this case 5 = 1/5 = 20%.
-  LDA $B26F               ;#$DD.
+  LDA SoundEngineOrg+$6F               ;#$DD.
   STA TriPeriodLow        ;Save new triangle period low data.
-  LDA $B270               ;#$3B.
+  LDA SoundEngineOrg+$70               ;#$3B.
   AND #$07                ;#$02.
   STA TriPeriodHigh       ;Save new triangle period high data.
   RTS                     ;
@@ -1141,7 +1141,7 @@ _SmsDieSFXStart:
   JSR _SelectSFXRoutine    ;($B452)Setup registers for SFX.
   LDA #$15                ;Decrease triangle SFX periods by 4.8% every frame.
   STA PercentDiff         ;
-  LDA $B277               ;#$40.
+  LDA SoundEngineOrg+$77               ;#$40.
   STA TriPeriodLow        ;
   LDA #$00                ;Initial values of triangle periods.
   STA TriPeriodHigh       ;
@@ -1169,9 +1169,9 @@ _SmsDieSFXCont:
   JMP _WriteTriPeriods     ;($B869)Save new periods.
 
 _StRaiseSFXStart:
-  LDA $B283               ;#$11.
+  LDA SoundEngineOrg+$83               ;#$11.
   STA TriPeriodLow        ;Save period low data.
-  LDA $B284               ;#$09.
+  LDA SoundEngineOrg+$84               ;#$09.
   AND #$07                ;
   STA TriPeriodHigh       ;Store last three bits in $B284.
   LDA #$00                ;

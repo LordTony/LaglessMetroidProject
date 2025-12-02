@@ -101,4 +101,6 @@ Now that I've gotten the identity table in, I can't help but wonder if those 256
 The "Visualize Hotspots" lua script can be run and tweaked to find places in the code that are hit more often. It helped me get some big wins.
 
 ## Bugs
-* No known bugs
+* Starting with a Ridley Password and going up the elevator gets a bugged map
+* Green Spinner explosions are missing the projectile the fires out to the right.
+* Enemies that fly off the screen tend to stay there and blink if you run behind them (this might be a behavior in the base game. Will need to check)

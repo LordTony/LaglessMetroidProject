@@ -182,32 +182,8 @@ Bank06_L8A90:  .byte $00, $00, $04, $00, $00, $00, $00, $00, $00, $00, $00, $00,
 
 ;----------------------------------------------------------------------------------------------------
 
-;Not used.
-Bank06_L8AA0:  .byte $FF, $04, $00, $00, $5A, $FF, $13, $00, $00, $B0, $B1, $B2, $B3, $FF, $13, $00
-Bank06_L8AB0:  .byte $00, $B4, $B5, $B6, $B7, $B8, $B6, $B9, $B3, $FF, $13, $00, $00, $B3, $BA, $BA
-Bank06_L8AC0:  .byte $FE, $80, $80, $FF, $1E, $00, $08, $FA, $FB, $FA, $FB, $FC, $00, $04, $C5, $C6
-Bank06_L8AD0:  .byte $C7, $D5, $D6, $D7, $E5, $E6, $E7, $FF, $1E, $00, $08, $FA, $FB, $FA, $FB, $FE
-Bank06_L8AE0:  .byte $C8, $C9, $EB, $D8, $D9, $EA, $E8, $E9, $FF, $0A, $04, $08, $FD, $00, $57, $FD
-Bank06_L8AF0:  .byte $40, $57, $FF, $0B, $04, $0C, $FD, $00, $57, $18, $FD, $40, $18, $57, $FD, $C0
-Bank06_L8B00:  .byte $18, $18, $FF, $0C, $04, $10, $FD, $00, $57, $18, $FD, $40, $18, $57, $FD, $C0
-Bank06_L8B10:  .byte $18, $18, $FF, $A5, $56, $D0, $55, $A4, $58, $F0, $51, $85, $95, $85, $96, $A5
-Bank06_L8B20:  .byte $2E, $29, $0F, $85, $93, $0A, $09, $40, $85, $94, $A5, $FF, $49, $01, $29, $01
-Bank06_L8B30:  .byte $A8, $4A, $99, $6C, $00, $A5, $49, $29, $02, $D0, $10, $A2, $04, $A5, $FC, $F0
-Bank06_L8B40:  .byte $2C, $A5, $FF, $4D, $0C, $03, $4A, $90, $0A, $B0, $07, $A2, $02, $AD, $0E, $03
-Bank06_L8B50:  .byte $10, $01, $CA, $8A, $85, $57, $20, $74, $8B, $A9, $12, $85, $59, $A5, $58, $20
-Bank06_L8B60:  .byte $C5, $C2, $0D, $00, $03, $85, $58, $A9, $05, $8D, $00, $03, $60, $20, $53, $8B
-Bank06_L8B70:  .byte $20, $1B, $E2, $8A, $09, $80, $85, $56, $60, $A2, $B0, $20, $87, $8B, $A5, $4B
-Bank06_L8B80:  .byte $38, $E9, $10, $AA, $30, $F5, $60, $86, $4B, $BD, $00, $03, $20, $7C, $C2, $5C
-Bank06_L8B90:  .byte $C4, $9D, $8B, $D5, $8B, $01, $8C, $84, $8C, $C6, $8C, $F0, $8C, $FE, $00, $03
-Bank06_L8BA0:  .byte $A9, $30, $20, $FA, $D2, $20, $FB, $8C, $BC, $07, $03, $B9, $D1, $8B, $9D, $0F
-Bank06_L8BB0:  .byte $03, $BD, $07, $03, $C9, $03, $D0, $02, $A9, $01, $09, $A0, $85, $6B, $A9, $00
-Bank06_L8BC0:  .byte $9D, $0A, $03, $8A, $29, $10, $49, $10, $05, $6B, $85, $6B, $A9, $06, $4C, $47
-Bank06_L8BD0:  .byte $DE, $05, $01, $0A, $01, $BD, $0A, $03, $29, $04, $F0, $D5, $DE, $0F, $03, $D0
-
-;----------------------------------------------------------------------------------------------------
-
 ;METROID title screen tile patterns.
-_GFXMetroidTitle:
+GFXMetroidTitle:
 Bank06_L8BE0:  .byte $7F, $40, $40, $40, $40, $40, $40, $40, $00, $3F, $3F, $3F, $3F, $3F, $3F, $3F
 Bank06_L8BF0:  .byte $00, $00, $02, $03, $03, $03, $03, $03, $FF, $FF, $FD, $FC, $FD, $FD, $FD, $FD
 Bank06_L8C00:  .byte $03, $03, $02, $02, $02, $02, $02, $02, $FD, $FD, $FC, $FC, $FC, $FC, $FC, $FC
@@ -425,96 +401,12 @@ Bank06_L9890:  .byte $18, $18, $18, $18, $18, $00, $18, $00, $00, $00, $00, $00,
 
 ;----------------------------------------------------------------------------------------------------
 
-;Not used.
-Bank06_L98A0:  .byte $B9, $D5, $98, $9D, $03, $04, $BD, $05, $04, $0A, $30, $1E, $BD, $F4, $6A, $C9
-Bank06_L98B0:  .byte $02, $D0, $17, $20, $36, $80, $48, $20, $39, $80, $85, $05, $68, $85, $04, $20
-Bank06_L98C0:  .byte $E1, $9A, $20, $27, $80, $90, $08, $20, $F1, $9A, $A9, $03, $4C, $03, $80, $A9
-Bank06_L98D0:  .byte $00, $9D, $F4, $6A, $60, $08, $F8, $A9, $03, $85, $00, $A9, $08, $85, $01, $BD
-Bank06_L98E0:  .byte $F4, $6A, $C9, $01, $D0, $0C, $BD, $05, $04, $29, $10, $F0, $05, $A9, $01, $20
-Bank06_L98F0:  .byte $58, $99, $20, $F8, $98, $4C, $30, $98, $BD, $F4, $6A, $C9, $02, $D0, $0C, $A9
-Bank06_L9900:  .byte $20, $BC, $02, $04, $10, $02, $A9, $1D, $9D, $F9, $6A, $60, $A5, $81, $C9, $01
-Bank06_L9910:  .byte $F0, $10, $C9, $03, $F0, $3F, $BD, $F4, $6A, $C9, $01, $D0, $0A, $A9, $00, $20
-Bank06_L9920:  .byte $58, $99, $A9, $08, $4C, $03, $80, $A9, $80, $9D, $FE, $6A, $BD, $02, $04, $30
-Bank06_L9930:  .byte $1C, $BD, $05, $04, $29, $10, $F0, $15, $BD, $00, $04, $38, $ED, $0D, $03, $10
-Bank06_L9940:  .byte $03, $20, $C6, $95, $C9, $10, $B0, $05, $A9, $00, $9D, $FE, $6A, $20, $F8, $98
-Bank06_L9950:  .byte $A9, $03, $4C, $00, $80, $4C, $06, $80, $9D, $02, $6B, $BD, $0B, $04, $48, $20
-Bank06_L9960:  .byte $2A, $80, $68, $9D, $0B, $04, $60, $20, $09, $80, $29, $03, $F0, $34, $A5, $81
-Bank06_L9970:  .byte $C9, $01, $F0, $36, $C9, $03, $F0, $2F, $BD, $F4, $6A, $C9, $03, $F0, $23, $BD
-
-;----------------------------------------------------------------------------------------------------
-
 ;Blank tile patterns.
 GFXBlankTiles:
 Bank06_L9980:  .byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
 Bank06_L9990:  .byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
 Bank06_L99A0:  .byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
 Bank06_L99B0:  .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
-
-;----------------------------------------------------------------------------------------------------
-
-;Not used.
-Bank06_L99C0:  .byte $53, $4D, $50, $50, $4D, $53, $A6, $4B, $B0, $19, $A5, $00, $D0, $0D, $BC, $0A
-Bank06_L99D0:  .byte $04, $88, $98, $29, $03, $9D, $0A, $04, $4C, $AD, $99, $BD, $05, $04, $49, $01
-Bank06_L99E0:  .byte $9D, $05, $04, $60, $20, $F8, $99, $20, $00, $9A, $A6, $4B, $90, $09, $20, $F8
-Bank06_L99F0:  .byte $99, $9D, $0A, $04, $20, $AD, $99, $60, $BC, $0A, $04, $C8, $98, $29, $03, $60
-Bank06_L9A00:  .byte $BC, $05, $04, $84, $00, $46, $00, $2A, $0A, $A8, $B9, $49, $80, $48, $B9, $48
-Bank06_L9A10:  .byte $80, $48, $60, $BD, $F4, $6A, $C9, $03, $90, $19, $F0, $04, $C9, $05, $D0, $21
-Bank06_L9A20:  .byte $A9, $00, $8D, $04, $6B, $8D, $14, $6B, $8D, $24, $6B, $8D, $34, $6B, $8D, $44
-Bank06_L9A30:  .byte $6B, $F0, $0E, $A9, $0B, $85, $85, $A9, $0E, $85, $86, $20, $1B, $80, $20, $79
-Bank06_L9A40:  .byte $9A, $A9, $03, $85, $00, $85, $01, $4C, $30, $98, $BD, $05, $04, $48, $A9, $02
-Bank06_L9A50:  .byte $85, $00, $85, $01, $20, $30, $98, $68, $A6, $4B, $5D, $05, $04, $4A, $B0, $13
-Bank06_L9A60:  .byte $BD, $05, $04, $4A, $B0, $12, $BD, $01, $04, $38, $ED, $0E, $03, $90, $09, $C9
-Bank06_L9A70:  .byte $20, $90, $05, $A9, $00, $9D, $F4, $6A, $60, $A4, $80, $D0, $02, $A0, $60, $A5
-Bank06_L9A80:  .byte $2D, $29, $02, $D0, $24, $88, $84, $80, $98, $0A, $30, $1D, $29, $0F, $C9, $0A
-Bank06_L9A90:  .byte $D0, $17, $A2, $50, $BD, $F4, $6A, $F0, $11, $BD, $05, $04, $29, $02, $F0, $0A
-Bank06_L9AA0:  .byte $8A, $38, $E9, $10, $AA, $D0, $ED, $E6, $7E, $60, $8A, $A8, $A2, $00, $20, $E1
-Bank06_L9AB0:  .byte $9A, $98, $AA, $AD, $05, $04, $9D, $05, $04, $29, $01, $A8, $B9, $DF, $9A, $85
-Bank06_L9AC0:  .byte $05, $A9, $F8, $85, $04, $20, $27, $80, $90, $DF, $A9, $00, $9D, $0F, $04, $A9
-Bank06_L9AD0:  .byte $0A, $9D, $02, $6B, $A9, $01, $9D, $F4, $6A, $20, $F1, $9A, $4C, $2A, $80, $08
-Bank06_L9AE0:  .byte $F8, $BD, $00, $04, $85, $08, $BD, $01, $04, $85, $09, $BD, $FB, $6A, $85, $0B
-Bank06_L9AF0:  .byte $60, $A5, $0B, $29, $01, $9D, $FB, $6A, $A5, $08, $9D, $00, $04, $A5, $09, $9D
-Bank06_L9B00:  .byte $01, $04, $60, $BD, $F4, $6A, $C9, $02, $D0, $03, $20, $1E, $80, $A9, $02, $85
-Bank06_L9B10:  .byte $00, $85, $01, $4C, $30, $98, $A9, $00, $9D, $F5, $6A, $9D, $F6, $6A, $A9, $10
-Bank06_L9B20:  .byte $9D, $05, $04, $8A, $4A, $4A, $4A, $4A, $65, $2D, $29, $07, $D0, $1A, $5E, $05
-Bank06_L9B30:  .byte $04, $A9, $03, $85, $87, $A5, $2E, $4A, $3E, $05, $04, $29, $03, $F0, $09, $85
-Bank06_L9B40:  .byte $88, $A9, $02, $85, $85, $4C, $21, $80, $60, $22, $FF, $FF, $FF, $FF, $22, $80
-Bank06_L9B50:  .byte $81, $82, $83, $22, $84, $85, $86, $87, $22, $88, $89, $8A, $8B, $22, $8C, $8D
-Bank06_L9B60:  .byte $8E, $8F, $22, $94, $95, $96, $97, $22, $9C, $9D, $9D, $9C, $22, $9E, $9F, $9F
-Bank06_L9B70:  .byte $9E, $22, $90, $91, $92, $93, $22, $70, $71, $72, $73, $22, $74, $75, $76, $77
-Bank06_L9B80:  .byte $22, $78, $79, $7A, $7B, $00, $01, $FF, $02, $FF, $03, $04, $FF, $07, $08, $FF
-Bank06_L9B90:  .byte $05, $06, $FF, $09, $0A, $FF, $0B, $FF, $0C, $0D, $0E, $0F, $FF, $10, $11, $12
-Bank06_L9BA0:  .byte $13, $FF, $17, $18, $FF, $19, $1A, $FF, $1B, $FF, $21, $22, $FF, $27, $28, $29
-Bank06_L9BB0:  .byte $2A, $FF, $2B, $2C, $2D, $2E, $FF, $2F, $FF, $42, $FF, $43, $44, $F7, $FF, $37
-Bank06_L9BC0:  .byte $FF, $38, $FF, $30, $31, $FF, $31, $32, $FF, $33, $34, $FF, $34, $35, $FF, $58
-Bank06_L9BD0:  .byte $59, $FF, $5A, $5B, $FF, $5C, $5D, $FF, $5E, $5F, $FF, $60, $FF, $61, $F7, $62
-Bank06_L9BE0:  .byte $F7, $FF, $66, $67, $FF, $69, $6A, $FF, $68, $FF, $6B, $FF, $66, $FF, $69, $FF
-Bank06_L9BF0:  .byte $D8, $9D, $DD, $9D, $E2, $9D, $E7, $9D, $FA, $9D, $0E, $9E, $24, $9E, $3A, $9E
-Bank06_L9C00:  .byte $4D, $9E, $61, $9E, $77, $9E, $8D, $9E, $97, $9E, $9C, $9E, $A1, $9E, $A6, $9E
-Bank06_L9C10:  .byte $AB, $9E, $B0, $9E, $B5, $9E, $BA, $9E, $BF, $9E, $BF, $9E, $BF, $9E, $BF, $9E
-Bank06_L9C20:  .byte $CE, $9E, $DD, $9E, $EE, $9E, $FF, $9E, $07, $9F, $07, $9F, $07, $9F, $07, $9F
-Bank06_L9C30:  .byte $07, $9F, $07, $9F, $0F, $9F, $17, $9F, $17, $9F, $17, $9F, $17, $9F, $17, $9F
-Bank06_L9C40:  .byte $23, $9F, $31, $9F, $3F, $9F, $4D, $9F, $59, $9F, $67, $9F, $75, $9F, $83, $9F
-Bank06_L9C50:  .byte $8E, $9F, $9C, $9F, $AA, $9F, $B6, $9F, $C4, $9F, $D2, $9F, $DE, $9F, $DE, $9F
-Bank06_L9C60:  .byte $F2, $9F, $06, $A0, $06, $A0, $06, $A0, $06, $A0, $06, $A0, $06, $A0, $06, $A0
-Bank06_L9C70:  .byte $06, $A0, $06, $A0, $06, $A0, $0B, $A0, $13, $A0, $1B, $A0, $1B, $A0, $1B, $A0
-Bank06_L9C80:  .byte $1B, $A0, $1B, $A0, $1B, $A0, $1B, $A0, $1B, $A0, $1B, $A0, $1B, $A0, $1B, $A0
-Bank06_L9C90:  .byte $1B, $A0, $1B, $A0, $1B, $A0, $1B, $A0, $1B, $A0, $1B, $A0, $1B, $A0, $1B, $A0
-Bank06_L9CA0:  .byte $1B, $A0, $27, $A0, $33, $A0, $3F, $A0, $4B, $A0, $57, $A0, $63, $A0, $6F, $A0
-Bank06_L9CB0:  .byte $7B, $A0, $83, $A0, $91, $A0, $AB, $A0, $AB, $A0, $AB, $A0, $AB, $A0, $B3, $A0
-Bank06_L9CC0:  .byte $BB, $A0, $C3, $A0, $CB, $A0, $D3, $A0, $DB, $A0, $DB, $A0, $DB, $A0, $DB, $A0
-Bank06_L9CD0:  .byte $DB, $A0, $DB, $A0, $DB, $A0, $DB, $A0, $DB, $A0, $DB, $A0, $DB, $A0, $DB, $A0
-Bank06_L9CE0:  .byte $DB, $A0, $DB, $A0, $DB, $A0, $DB, $A0, $DB, $A0, $DB, $A0, $DB, $A0, $DB, $A0
-Bank06_L9CF0:  .byte $DB, $A0, $E1, $A0, $E6, $A0, $E6, $A0, $E6, $A0, $E6, $A0, $E6, $A0, $E6, $A0
-Bank06_L9D00:  .byte $E6, $A0, $E6, $A0, $22, $9D, $24, $9D, $3C, $9D, $60, $9D, $72, $9D, $64, $9D
-Bank06_L9D10:  .byte $6E, $9D, $76, $9D, $82, $9D, $8A, $9D, $8A, $9D, $AA, $9D, $B8, $9D, $BC, $9D
-Bank06_L9D20:  .byte $CC, $9D, $FC, $FC, $80, $80, $81, $81, $82, $82, $83, $83, $84, $84, $85, $85
-Bank06_L9D30:  .byte $F4, $F8, $F4, $00, $FC, $F8, $FC, $00, $04, $F8, $04, $00, $EC, $F8, $EC, $00
-Bank06_L9D40:  .byte $F4, $F8, $F4, $00, $FC, $F8, $FC, $00, $04, $E8, $04, $F0, $04, $F8, $04, $00
-Bank06_L9D50:  .byte $0C, $F0, $0C, $F8, $0C, $00, $F4, $F4, $F4, $EC, $FC, $F4, $12, $E8, $14, $F8
-Bank06_L9D60:  .byte $F4, $F4, $F4, $04, $F8, $F4, $F8, $FC, $F8, $04, $00, $F8, $00, $00, $FC, $F8
-Bank06_L9D70:  .byte $FC, $00, $F0, $F8, $F0, $00, $F8, $F8, $F8, $00, $00, $F8, $00, $00, $08, $F8
-Bank06_L9D80:  .byte $08, $00, $F8, $E8, $F8, $10, $F8, $F0, $F8, $08, $F8, $F8, $F8, $00, $00, $F8
-Bank06_L9D90:  .byte $00, $00, $F0, $00, $F0, $08, $F8, $08, $F0, $F0, $F0, $F8, $F8, $F0, $00, $F0
 
 ;----------------------------------------------------------------------------------------------------
 
@@ -932,11 +824,6 @@ Bank06_LB4A0:  .byte $58, $D4, $14, $DC, $EC, $D8, $00, $00, $B8, $34, $F4, $DC,
 
 ;----------------------------------------------------------------------------------------------------
 
-;Not used.
-Bank06_LB4B0:  .byte $65, $06, $DD, $60, $06, $D0, $05, $A9, $00, $9D, $65, $06, $60, $8D, $4D, $06
-
-;----------------------------------------------------------------------------------------------------
-
 ;Complete font tile patterns.
 GFXFont:
 Bank06_LB4C0:  .byte $00, $00, $00, $00, $00, $00, $00, $00, $38, $4C, $CE, $C6, $E6, $64, $38, $00
@@ -1006,118 +893,1038 @@ Bank06_LB8B0:  .byte $00, $00, $00, $7C, $00, $00, $00, $00, $00, $00, $00, $7C,
 
 ;----------------------------------------------------------------------------------------------------
 
-;Not used.
-Bank06_LB8C0:  .byte $18, $18, $18, $18, $18, $00, $18, $00, $00, $00, $00, $00, $00, $00, $00, $00
-Bank06_LB8D0:  .byte $40, $60, $20, $04, $B4, $A9, $0E, $A0, $75, $20, $52, $B4, $A9, $15, $8D, $16
-Bank06_LB8E0:  .byte $06, $AD, $77, $B2, $8D, $10, $06, $A9, $00, $8D, $11, $06, $60, $20, $A9, $B4
-Bank06_LB8F0:  .byte $D0, $1A, $A9, $20, $8D, $12, $06, $A9, $00, $8D, $13, $06, $20, $8C, $B9, $EE
-Bank06_LB900:  .byte $73, $06, $AD, $73, $06, $C9, $06, $D0, $E3, $4C, $96, $B8, $20, $A0, $B9, $AD
-Bank06_LB910:  .byte $14, $06, $8D, $12, $06, $AD, $15, $06, $8D, $13, $06, $20, $78, $B9, $4C, $69
-Bank06_LB920:  .byte $B8, $AD, $83, $B2, $8D, $10, $06, $AD, $84, $B2, $29, $07, $8D, $11, $06, $A9
-Bank06_LB930:  .byte $00, $8D, $13, $06, $A9, $0B, $8D, $12, $06, $A9, $06, $A0, $81, $4C, $52, $B4
-Bank06_LB940:  .byte $20, $A9, $B4, $D0, $2D, $EE, $73, $06, $AD, $73, $06, $C9, $09, $D0, $03, $4C
-Bank06_LB950:  .byte $96, $B8, $AD, $12, $06, $48, $AD, $13, $06, $48, $A9, $25, $8D, $12, $06, $A9
-Bank06_LB960:  .byte $00, $8D, $13, $06, $20, $78, $B9, $68, $8D, $13, $06, $68, $8D, $12, $06, $4C
-Bank06_LB970:  .byte $69, $B8, $20, $8C, $B9, $4C, $69, $B8, $18, $AD, $10, $06, $6D, $12, $06, $8D
-Bank06_LB980:  .byte $10, $06, $AD, $11, $06, $6D, $13, $06, $8D, $11, $06, $60, $38, $AD, $10, $06
-Bank06_LB990:  .byte $ED, $12, $06, $8D, $10, $06, $AD, $11, $06, $ED, $13, $06, $8D, $11, $06, $60
-Bank06_LB9A0:  .byte $AD, $10, $06, $48, $AD, $11, $06, $48, $A9, $00, $8D, $17, $06, $A2, $10, $2E
-Bank06_LB9B0:  .byte $10, $06, $2E, $11, $06, $2E, $17, $06, $AD, $17, $06, $CD, $16, $06, $90, $06
-Bank06_LB9C0:  .byte $ED, $16, $06, $8D, $17, $06, $2E, $10, $06, $2E, $11, $06, $CA, $D0, $E6, $AD
-Bank06_LB9D0:  .byte $10, $06, $8D, $14, $06, $AD, $11, $06, $8D, $15, $06, $68, $8D, $11, $06, $68
-Bank06_LB9E0:  .byte $8D, $10, $06, $60, $A9, $7F, $8D, $48, $06, $8D, $49, $06, $8E, $28, $06, $8C
-Bank06_LB9F0:  .byte $29, $06, $60, $AD, $40, $06, $C9, $01, $D0, $03, $8D, $6A, $06, $AD, $41, $06
-Bank06_LBA00:  .byte $C9, $01, $D0, $03, $8D, $6B, $06, $60, $AD, $07, $06, $F0, $29, $A9, $00, $8D
-Bank06_LBA10:  .byte $07, $06, $AD, $48, $06, $8D, $01, $40, $AD, $00, $06, $8D, $02, $40, $AD, $01
-Bank06_LBA20:  .byte $06, $8D, $03, $40, $AD, $49, $06, $8D, $05, $40, $AD, $04, $06, $8D, $06, $40
-Bank06_LBA30:  .byte $AD, $05, $06, $8D, $07, $40, $60, $A2, $00, $20, $41, $BA, $E8, $20, $41, $BA
-Bank06_LBA40:  .byte $60, $BD, $2E, $06, $F0, $45, $85, $EB, $20, $08, $BA, $BD, $6C, $06, $C9, $10
-Bank06_LBA50:  .byte $F0, $47, $A0, $00, $C6, $EB, $F0, $04, $C8, $C8, $D0, $F8, $B9, $B0, $BC, $85
-Bank06_LBA60:  .byte $EC, $B9, $B1, $BC, $85, $ED, $BC, $6A, $06, $B1, $EC, $85, $EA, $C9, $FF, $F0
-Bank06_LBA70:  .byte $1F, $C9, $F0, $F0, $20, $BD, $28, $06, $29, $F0, $05, $EA, $A8, $FE, $6A, $06
-Bank06_LBA80:  .byte $BD, $53, $06, $D0, $06, $8A, $F0, $04, $8C, $04, $40, $60, $8C, $00, $40, $60
-Bank06_LBA90:  .byte $BC, $28, $06, $D0, $EB, $A0, $10, $D0, $E7, $A0, $10, $D0, $E0, $20, $F0, $B3
-Bank06_LBAA0:  .byte $60, $20, $37, $BA, $60, $20, $F3, $B9, $A9, $00, $AA, $8D, $4B, $06, $F0, $12
-Bank06_LBAB0:  .byte $8A, $4A, $AA, $E8, $8A, $C9, $04, $F0, $E8, $AD, $4B, $06, $18, $69, $04, $8D
-Bank06_LBAC0:  .byte $4B, $06, $8A, $0A, $AA, $BD, $30, $06, $85, $E6, $BD, $31, $06, $85, $E7, $BD
-Bank06_LBAD0:  .byte $31, $06, $F0, $DC, $8A, $4A, $AA, $DE, $40, $06, $D0, $D7, $BC, $38, $06, $FE
-Bank06_LBAE0:  .byte $38, $06, $B1, $E6, $F0, $B7, $A8, $C9, $FF, $F0, $09, $29, $C0, $C9, $C0, $F0
-Bank06_LBAF0:  .byte $13, $4C, $1C, $BB, $BD, $24, $06, $F0, $1A, $DE, $24, $06, $BD, $3C, $06, $9D
-Bank06_LBB00:  .byte $38, $06, $D0, $0F, $98, $29, $3F, $9D, $24, $06, $DE, $24, $06, $BD, $38, $06
-Bank06_LBB10:  .byte $9D, $3C, $06, $4C, $DC, $BA, $4C, $DE, $BB, $4C, $B7, $BB, $98, $29, $B0, $C9
-Bank06_LBB20:  .byte $B0, $D0, $1D, $98, $29, $0F, $18, $6D, $2B, $06, $A8, $B9, $F7, $BE, $9D, $20
-Bank06_LBB30:  .byte $06, $A8, $8A, $C9, $02, $F0, $E2, $BC, $38, $06, $FE, $38, $06, $B1, $E6, $A8
-Bank06_LBB40:  .byte $8A, $C9, $03, $F0, $D1, $48, $AE, $4B, $06, $B9, $78, $BE, $F0, $0B, $9D, $00
-Bank06_LBB50:  .byte $06, $B9, $77, $BE, $09, $08, $9D, $01, $06, $A8, $68, $AA, $98, $D0, $0F, $A9
-Bank06_LBB60:  .byte $00, $85, $EA, $8A, $C9, $02, $F0, $0B, $A9, $10, $85, $EA, $D0, $05, $BD, $28
-Bank06_LBB70:  .byte $06, $85, $EA, $8A, $DE, $53, $06, $DD, $53, $06, $F0, $35, $FE, $53, $06, $AC
-Bank06_LBB80:  .byte $4B, $06, $8A, $C9, $02, $F0, $05, $BD, $2E, $06, $D0, $05, $A5, $EA, $99, $00
-Bank06_LBB90:  .byte $40, $A5, $EA, $9D, $6C, $06, $B9, $00, $06, $99, $02, $40, $B9, $01, $06, $99
-Bank06_LBBA0:  .byte $03, $40, $BD, $48, $06, $99, $01, $40, $BD, $20, $06, $9D, $40, $06, $4C, $B3
-Bank06_LBBB0:  .byte $BA, $FE, $53, $06, $4C, $A8, $BB, $AD, $2D, $06, $29, $0F, $D0, $1A, $AD, $2D
-Bank06_LBBC0:  .byte $06, $29, $F0, $D0, $04, $98, $4C, $CD, $BB, $A9, $FF, $D0, $0B, $18, $69, $FF
-Bank06_LBBD0:  .byte $0A, $0A, $C9, $3C, $90, $02, $A9, $3C, $8D, $2A, $06, $4C, $37, $BB, $AD, $88
-Bank06_LBBE0:  .byte $06, $29, $FC, $D0, $12, $B9, $00, $B2, $8D, $0C, $40, $B9, $01, $B2, $8D, $0E
-Bank06_LBBF0:  .byte $40, $B9, $02, $B2, $8D, $0F, $40, $4C, $A8, $BB, $41, $8F, $34, $27, $1A, $0D
-Bank06_LBC00:  .byte $00, $82, $68, $75, $4E, $5B, $80, $BC, $7A, $BC, $86, $BC, $7A, $BC, $EE, $B4
-Bank06_LBC10:  .byte $73, $B6, $EC, $B5, $95, $B6, $EE, $B4, $EE, $B4, $EE, $B4, $EE, $B4, $EE, $B4
-Bank06_LBC20:  .byte $50, $B6, $F6, $B5, $A1, $B6, $83, $BC, $77, $BC, $77, $BC, $77, $BC, $80, $BC
-Bank06_LBC30:  .byte $7D, $BC, $77, $BC, $80, $BC, $AD, $5D, $06, $A2, $B6, $D0, $05, $AD, $85, $06
-Bank06_LBC40:  .byte $A2, $B1, $20, $BD, $B4, $20, $53, $BC, $6C, $E2, $00, $AD, $8D, $06, $F0, $26
-Bank06_LBC50:  .byte $4C, $A5, $BA, $A9, $FF, $8D, $5E, $06, $AD, $4D, $06, $F0, $06, $EE, $5E, $06
-Bank06_LBC60:  .byte $0A, $90, $FA, $60, $AD, $5E, $06, $18, $69, $08, $8D, $5E, $06, $60, $AD, $8D
-Bank06_LBC70:  .byte $06, $09, $F0, $8D, $8D, $06, $60, $4C, $AA, $BC, $4C, $A4, $BC, $4C, $9A, $BC
-Bank06_LBC80:  .byte $4C, $96, $BC, $4C, $89, $BC, $4C, $9E, $BC, $A9, $B3, $AA, $A8, $20, $E4, $B9
-Bank06_LBC90:  .byte $20, $19, $BF, $4C, $A5, $BA, $A9, $34, $D0, $F1, $A9, $F4, $D0, $ED, $A2, $F5
-Bank06_LBCA0:  .byte $A0, $F6, $D0, $E9, $A2, $B6, $A0, $F6, $D0, $E3, $A2, $92, $A0, $96, $D0, $DD
-Bank06_LBCB0:  .byte $BA, $BC, $C5, $BC, $CF, $BC, $DA, $BC, $03, $BD, $01, $02, $02, $03, $03, $04
-Bank06_LBCC0:  .byte $05, $06, $07, $08, $FF, $02, $04, $05, $06, $07, $08, $07, $06, $05, $FF, $00
-Bank06_LBCD0:  .byte $0D, $09, $07, $06, $05, $05, $05, $04, $04, $FF, $02, $06, $07, $07, $07, $06
-Bank06_LBCE0:  .byte $06, $06, $06, $05, $05, $05, $04, $04, $04, $03, $03, $03, $03, $02, $03, $03
-Bank06_LBCF0:  .byte $03, $03, $03, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $01, $01, $01
-Bank06_LBD00:  .byte $01, $01, $F0, $0A, $0A, $09, $08, $07, $06, $05, $04, $03, $02, $07, $07, $06
-Bank06_LBD10:  .byte $05, $04, $04, $03, $02, $02, $02, $05, $05, $05, $04, $03, $02, $02, $02, $01
-Bank06_LBD20:  .byte $01, $04, $04, $03, $02, $01, $02, $02, $01, $01, $01, $02, $02, $02, $01, $01
-Bank06_LBD30:  .byte $F0, $0B, $FF, $F5, $00, $00, $00, $01, $00, $03, $00, $05, $00, $00, $0B, $FF
-Bank06_LBD40:  .byte $00, $02, $02, $00, $01, $00, $03, $00, $05, $00, $07, $0B, $FF, $F0, $04, $04
-Bank06_LBD50:  .byte $00, $01, $00, $03, $00, $05, $00, $07, $00, $FF, $F0, $00, $00, $3F, $B0, $41
-Bank06_LBD60:  .byte $B0, $AA, $B0, $00, $00, $0B, $FF, $03, $00, $00, $DA, $BD, $DC, $BD, $CD, $BD
-Bank06_LBD70:  .byte $00, $00, $0B, $FF, $F0, $01, $01, $22, $B0, $31, $B0, $00, $B0, $00, $00, $17
-Bank06_LBD80:  .byte $00, $00, $02, $01, $00, $01, $00, $03, $00, $05, $00, $07, $17, $00, $F0, $02
-Bank06_LBD90:  .byte $05, $00, $01, $00, $03, $00, $05, $00, $07, $0B, $00, $F0, $02, $00, $3E, $BE
-Bank06_LBDA0:  .byte $1D, $BE, $36, $BE, $00, $00, $00, $00, $F0, $01, $00, $F7, $BD, $0D, $BE, $08
-Bank06_LBDB0:  .byte $BE, $00, $00, $0B, $FF, $00, $02, $03, $00, $01, $00, $03, $00, $05, $00, $07
-Bank06_LBDC0:  .byte $0B, $FF, $03, $00, $00, $59, $BE, $47, $BE, $62, $BE, $00, $00, $C8, $B0, $38
-Bank06_LBDD0:  .byte $3A, $3C, $3E, $40, $3E, $3C, $3A, $B6, $02, $FF, $B8, $02, $B3, $02, $B2, $74
-Bank06_LBDE0:  .byte $02, $6A, $02, $72, $02, $62, $B4, $02, $B2, $60, $02, $6C, $02, $76, $B3, $02
-Bank06_LBDF0:  .byte $B2, $7E, $02, $7C, $B3, $02, $00, $B3, $48, $42, $B2, $3E, $38, $30, $38, $4C
-Bank06_LBE00:  .byte $44, $3E, $36, $C8, $B0, $38, $3C, $FF, $B4, $2C, $2A, $1E, $1C, $B2, $22, $2C
-Bank06_LBE10:  .byte $30, $34, $38, $30, $26, $30, $3A, $34, $2C, $26, $B4, $2A, $00, $C4, $B0, $3E
-Bank06_LBE20:  .byte $30, $FF, $C4, $42, $30, $FF, $C4, $3A, $2C, $FF, $C4, $38, $26, $FF, $C4, $34
-Bank06_LBE30:  .byte $20, $FF, $E0, $34, $24, $FF, $B3, $36, $34, $30, $2A, $B4, $1C, $1C, $B3, $34
-Bank06_LBE40:  .byte $3A, $34, $30, $B4, $2A, $2A, $00, $B4, $12, $B3, $10, $18, $16, $0A, $B4, $14
-Bank06_LBE50:  .byte $12, $B3, $10, $06, $0E, $04, $B4, $0C, $00, $E0, $B0, $54, $4E, $48, $42, $48
-Bank06_LBE60:  .byte $4E, $FF, $E0, $B3, $02, $B0, $3C, $40, $44, $4A, $4E, $54, $58, $5C, $62, $66
-Bank06_LBE70:  .byte $6C, $70, $74, $7A, $B3, $02, $FF, $07, $F0, $00, $00, $06, $4E, $05, $F3, $05
-Bank06_LBE80:  .byte $4D, $05, $01, $04, $B9, $04, $75, $04, $35, $03, $F8, $03, $BF, $03, $89, $03
-Bank06_LBE90:  .byte $57, $03, $27, $02, $F9, $02, $CF, $02, $A6, $02, $80, $02, $5C, $02, $3A, $02
-Bank06_LBEA0:  .byte $1A, $01, $FC, $01, $DF, $01, $C4, $01, $AB, $01, $93, $01, $7C, $01, $67, $01
-Bank06_LBEB0:  .byte $52, $01, $3F, $01, $2D, $01, $1C, $01, $0C, $00, $FD, $00, $EE, $00, $E1, $00
-Bank06_LBEC0:  .byte $D4, $00, $C8, $00, $BD, $00, $B2, $00, $A8, $00, $9F, $00, $96, $00, $8D, $00
-Bank06_LBED0:  .byte $85, $00, $7E, $00, $76, $00, $70, $00, $69, $00, $63, $00, $5E, $00, $58, $00
-Bank06_LBEE0:  .byte $53, $00, $4F, $00, $4A, $00, $46, $00, $42, $00, $3E, $00, $3A, $00, $37, $00
-Bank06_LBEF0:  .byte $34, $00, $31, $00, $2E, $00, $27, $04, $08, $10, $20, $40, $18, $30, $0C, $0B
-Bank06_LBF00:  .byte $05, $02, $06, $0C, $18, $30, $60, $24, $48, $12, $10, $08, $03, $10, $07, $0E
-Bank06_LBF10:  .byte $1C, $38, $70, $2A, $54, $15, $12, $02, $03, $20, $FC, $B3, $AD, $4D, $06, $8D
-Bank06_LBF20:  .byte $8D, $06, $AD, $5E, $06, $A8, $B9, $FA, $BB, $A8, $A2, $00, $B9, $31, $BD, $9D
-Bank06_LBF30:  .byte $2B, $06, $C8, $E8, $8A, $C9, $0D, $D0, $F3, $A9, $01, $8D, $40, $06, $8D, $41
-Bank06_LBF40:  .byte $06, $8D, $42, $06, $8D, $43, $06, $A9, $00, $8D, $38, $06, $8D, $39, $06, $8D
-Bank06_LBF50:  .byte $3A, $06, $8D, $3B, $06, $60, $10, $07, $0E, $1C, $38, $70, $2A, $54, $15, $12
-Bank06_LBF60:  .byte $02, $03, $20, $2C, $B4, $AD, $4D, $06, $8D, $8D, $06, $AD, $5E, $06, $A8, $B9
-Bank06_LBF70:  .byte $2A, $BC, $A8, $A2, $00, $B9, $61, $BD, $9D, $2B, $06, $C8, $E8, $8A, $C9, $0D
-Bank06_LBF80:  .byte $D0, $F3, $A9, $01, $8D, $40, $06, $8D, $41, $06, $8D, $42, $06, $8D, $43, $06
-Bank06_LBF90:  .byte $A9, $00, $8D, $38, $06, $8D, $39, $06, $8D, $3A, $06, $8D, $3B, $06, $60, $FF
-Bank06_LBFA0:  .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+Bank06_ClearRam_6400_To_67BF:
+    lda #$FF
+
+    ; write to $6400
+    sta $6400
+    sta $6401
+    sta $6402
+    sta $6403
+    sta $6404
+    sta $6405
+    sta $6406
+    sta $6407
+    sta $6408
+    sta $6409
+    sta $640A
+    sta $640B
+    sta $640C
+    sta $640D
+    sta $640E
+    sta $640F
+
+    sta $6410
+    sta $6411
+    sta $6412
+    sta $6413
+    sta $6414
+    sta $6415
+    sta $6416
+    sta $6417
+    sta $6418
+    sta $6419
+    sta $641A
+    sta $641B
+    sta $641C
+    sta $641D
+    sta $641E
+    sta $641F
+
+    sta $6420
+    sta $6421
+    sta $6422
+    sta $6423
+    sta $6424
+    sta $6425
+    sta $6426
+    sta $6427
+    sta $6428
+    sta $6429
+    sta $642A
+    sta $642B
+    sta $642C
+    sta $642D
+    sta $642E
+    sta $642F
+
+    sta $6430
+    sta $6431
+    sta $6432
+    sta $6433
+    sta $6434
+    sta $6435
+    sta $6436
+    sta $6437
+    sta $6438
+    sta $6439
+    sta $643A
+    sta $643B
+    sta $643C
+    sta $643D
+    sta $643E
+    sta $643F
+
+    sta $6440
+    sta $6441
+    sta $6442
+    sta $6443
+    sta $6444
+    sta $6445
+    sta $6446
+    sta $6447
+    sta $6448
+    sta $6449
+    sta $644A
+    sta $644B
+    sta $644C
+    sta $644D
+    sta $644E
+    sta $644F
+
+    sta $6450
+    sta $6451
+    sta $6452
+    sta $6453
+    sta $6454
+    sta $6455
+    sta $6456
+    sta $6457
+    sta $6458
+    sta $6459
+    sta $645A
+    sta $645B
+    sta $645C
+    sta $645D
+    sta $645E
+    sta $645F
+
+    sta $6460
+    sta $6461
+    sta $6462
+    sta $6463
+    sta $6464
+    sta $6465
+    sta $6466
+    sta $6467
+    sta $6468
+    sta $6469
+    sta $646A
+    sta $646B
+    sta $646C
+    sta $646D
+    sta $646E
+    sta $646F
+
+    sta $6470
+    sta $6471
+    sta $6472
+    sta $6473
+    sta $6474
+    sta $6475
+    sta $6476
+    sta $6477
+    sta $6478
+    sta $6479
+    sta $647A
+    sta $647B
+    sta $647C
+    sta $647D
+    sta $647E
+    sta $647F
+
+    sta $6480
+    sta $6481
+    sta $6482
+    sta $6483
+    sta $6484
+    sta $6485
+    sta $6486
+    sta $6487
+    sta $6488
+    sta $6489
+    sta $648A
+    sta $648B
+    sta $648C
+    sta $648D
+    sta $648E
+    sta $648F
+
+    sta $6490
+    sta $6491
+    sta $6492
+    sta $6493
+    sta $6494
+    sta $6495
+    sta $6496
+    sta $6497
+    sta $6498
+    sta $6499
+    sta $649A
+    sta $649B
+    sta $649C
+    sta $649D
+    sta $649E
+    sta $649F
+
+    sta $64A0
+    sta $64A1
+    sta $64A2
+    sta $64A3
+    sta $64A4
+    sta $64A5
+    sta $64A6
+    sta $64A7
+    sta $64A8
+    sta $64A9
+    sta $64AA
+    sta $64AB
+    sta $64AC
+    sta $64AD
+    sta $64AE
+    sta $64AF
+
+    sta $64B0
+    sta $64B1
+    sta $64B2
+    sta $64B3
+    sta $64B4
+    sta $64B5
+    sta $64B6
+    sta $64B7
+    sta $64B8
+    sta $64B9
+    sta $64BA
+    sta $64BB
+    sta $64BC
+    sta $64BD
+    sta $64BE
+    sta $64BF
+
+    sta $64C0
+    sta $64C1
+    sta $64C2
+    sta $64C3
+    sta $64C4
+    sta $64C5
+    sta $64C6
+    sta $64C7
+    sta $64C8
+    sta $64C9
+    sta $64CA
+    sta $64CB
+    sta $64CC
+    sta $64CD
+    sta $64CE
+    sta $64CF
+
+    sta $64D0
+    sta $64D1
+    sta $64D2
+    sta $64D3
+    sta $64D4
+    sta $64D5
+    sta $64D6
+    sta $64D7
+    sta $64D8
+    sta $64D9
+    sta $64DA
+    sta $64DB
+    sta $64DC
+    sta $64DD
+    sta $64DE
+    sta $64DF
+
+    sta $64E0
+    sta $64E1
+    sta $64E2
+    sta $64E3
+    sta $64E4
+    sta $64E5
+    sta $64E6
+    sta $64E7
+    sta $64E8
+    sta $64E9
+    sta $64EA
+    sta $64EB
+    sta $64EC
+    sta $64ED
+    sta $64EE
+    sta $64EF
+
+    sta $64F0
+    sta $64F1
+    sta $64F2
+    sta $64F3
+    sta $64F4
+    sta $64F5
+    sta $64F6
+    sta $64F7
+    sta $64F8
+    sta $64F9
+    sta $64FA
+    sta $64FB
+    sta $64FC
+    sta $64FD
+    sta $64FE
+    sta $64FF
+
+    ; write to $6500
+    sta $6500
+    sta $6501
+    sta $6502
+    sta $6503
+    sta $6504
+    sta $6505
+    sta $6506
+    sta $6507
+    sta $6508
+    sta $6509
+    sta $650A
+    sta $650B
+    sta $650C
+    sta $650D
+    sta $650E
+    sta $650F
+
+    sta $6510
+    sta $6511
+    sta $6512
+    sta $6513
+    sta $6514
+    sta $6515
+    sta $6516
+    sta $6517
+    sta $6518
+    sta $6519
+    sta $651A
+    sta $651B
+    sta $651C
+    sta $651D
+    sta $651E
+    sta $651F
+
+    sta $6520
+    sta $6521
+    sta $6522
+    sta $6523
+    sta $6524
+    sta $6525
+    sta $6526
+    sta $6527
+    sta $6528
+    sta $6529
+    sta $652A
+    sta $652B
+    sta $652C
+    sta $652D
+    sta $652E
+    sta $652F
+
+    sta $6530
+    sta $6531
+    sta $6532
+    sta $6533
+    sta $6534
+    sta $6535
+    sta $6536
+    sta $6537
+    sta $6538
+    sta $6539
+    sta $653A
+    sta $653B
+    sta $653C
+    sta $653D
+    sta $653E
+    sta $653F
+
+    sta $6540
+    sta $6541
+    sta $6542
+    sta $6543
+    sta $6544
+    sta $6545
+    sta $6546
+    sta $6547
+    sta $6548
+    sta $6549
+    sta $654A
+    sta $654B
+    sta $654C
+    sta $654D
+    sta $654E
+    sta $654F
+
+    sta $6550
+    sta $6551
+    sta $6552
+    sta $6553
+    sta $6554
+    sta $6555
+    sta $6556
+    sta $6557
+    sta $6558
+    sta $6559
+    sta $655A
+    sta $655B
+    sta $655C
+    sta $655D
+    sta $655E
+    sta $655F
+
+    sta $6560
+    sta $6561
+    sta $6562
+    sta $6563
+    sta $6564
+    sta $6565
+    sta $6566
+    sta $6567
+    sta $6568
+    sta $6569
+    sta $656A
+    sta $656B
+    sta $656C
+    sta $656D
+    sta $656E
+    sta $656F
+
+    sta $6570
+    sta $6571
+    sta $6572
+    sta $6573
+    sta $6574
+    sta $6575
+    sta $6576
+    sta $6577
+    sta $6578
+    sta $6579
+    sta $657A
+    sta $657B
+    sta $657C
+    sta $657D
+    sta $657E
+    sta $657F
+
+    sta $6580
+    sta $6581
+    sta $6582
+    sta $6583
+    sta $6584
+    sta $6585
+    sta $6586
+    sta $6587
+    sta $6588
+    sta $6589
+    sta $658A
+    sta $658B
+    sta $658C
+    sta $658D
+    sta $658E
+    sta $658F
+
+    sta $6590
+    sta $6591
+    sta $6592
+    sta $6593
+    sta $6594
+    sta $6595
+    sta $6596
+    sta $6597
+    sta $6598
+    sta $6599
+    sta $659A
+    sta $659B
+    sta $659C
+    sta $659D
+    sta $659E
+    sta $659F
+
+    sta $65A0
+    sta $65A1
+    sta $65A2
+    sta $65A3
+    sta $65A4
+    sta $65A5
+    sta $65A6
+    sta $65A7
+    sta $65A8
+    sta $65A9
+    sta $65AA
+    sta $65AB
+    sta $65AC
+    sta $65AD
+    sta $65AE
+    sta $65AF
+
+    sta $65B0
+    sta $65B1
+    sta $65B2
+    sta $65B3
+    sta $65B4
+    sta $65B5
+    sta $65B6
+    sta $65B7
+    sta $65B8
+    sta $65B9
+    sta $65BA
+    sta $65BB
+    sta $65BC
+    sta $65BD
+    sta $65BE
+    sta $65BF
+
+    sta $65C0
+    sta $65C1
+    sta $65C2
+    sta $65C3
+    sta $65C4
+    sta $65C5
+    sta $65C6
+    sta $65C7
+    sta $65C8
+    sta $65C9
+    sta $65CA
+    sta $65CB
+    sta $65CC
+    sta $65CD
+    sta $65CE
+    sta $65CF
+
+    sta $65D0
+    sta $65D1
+    sta $65D2
+    sta $65D3
+    sta $65D4
+    sta $65D5
+    sta $65D6
+    sta $65D7
+    sta $65D8
+    sta $65D9
+    sta $65DA
+    sta $65DB
+    sta $65DC
+    sta $65DD
+    sta $65DE
+    sta $65DF
+
+    sta $65E0
+    sta $65E1
+    sta $65E2
+    sta $65E3
+    sta $65E4
+    sta $65E5
+    sta $65E6
+    sta $65E7
+    sta $65E8
+    sta $65E9
+    sta $65EA
+    sta $65EB
+    sta $65EC
+    sta $65ED
+    sta $65EE
+    sta $65EF
+
+    sta $65F0
+    sta $65F1
+    sta $65F2
+    sta $65F3
+    sta $65F4
+    sta $65F5
+    sta $65F6
+    sta $65F7
+    sta $65F8
+    sta $65F9
+    sta $65FA
+    sta $65FB
+    sta $65FC
+    sta $65FD
+    sta $65FE
+    sta $65FF
+
+    ; write to $6600 - $6700
+    sta $6600
+    sta $6601
+    sta $6602
+    sta $6603
+    sta $6604
+    sta $6605
+    sta $6606
+    sta $6607
+    sta $6608
+    sta $6609
+    sta $660A
+    sta $660B
+    sta $660C
+    sta $660D
+    sta $660E
+    sta $660F
+
+    sta $6610
+    sta $6611
+    sta $6612
+    sta $6613
+    sta $6614
+    sta $6615
+    sta $6616
+    sta $6617
+    sta $6618
+    sta $6619
+    sta $661A
+    sta $661B
+    sta $661C
+    sta $661D
+    sta $661E
+    sta $661F
+
+    sta $6620
+    sta $6621
+    sta $6622
+    sta $6623
+    sta $6624
+    sta $6625
+    sta $6626
+    sta $6627
+    sta $6628
+    sta $6629
+    sta $662A
+    sta $662B
+    sta $662C
+    sta $662D
+    sta $662E
+    sta $662F
+
+    sta $6630
+    sta $6631
+    sta $6632
+    sta $6633
+    sta $6634
+    sta $6635
+    sta $6636
+    sta $6637
+    sta $6638
+    sta $6639
+    sta $663A
+    sta $663B
+    sta $663C
+    sta $663D
+    sta $663E
+    sta $663F
+
+    sta $6640
+    sta $6641
+    sta $6642
+    sta $6643
+    sta $6644
+    sta $6645
+    sta $6646
+    sta $6647
+    sta $6648
+    sta $6649
+    sta $664A
+    sta $664B
+    sta $664C
+    sta $664D
+    sta $664E
+    sta $664F
+
+    sta $6650
+    sta $6651
+    sta $6652
+    sta $6653
+    sta $6654
+    sta $6655
+    sta $6656
+    sta $6657
+    sta $6658
+    sta $6659
+    sta $665A
+    sta $665B
+    sta $665C
+    sta $665D
+    sta $665E
+    sta $665F
+
+    sta $6660
+    sta $6661
+    sta $6662
+    sta $6663
+    sta $6664
+    sta $6665
+    sta $6666
+    sta $6667
+    sta $6668
+    sta $6669
+    sta $666A
+    sta $666B
+    sta $666C
+    sta $666D
+    sta $666E
+    sta $666F
+
+    sta $6670
+    sta $6671
+    sta $6672
+    sta $6673
+    sta $6674
+    sta $6675
+    sta $6676
+    sta $6677
+    sta $6678
+    sta $6679
+    sta $667A
+    sta $667B
+    sta $667C
+    sta $667D
+    sta $667E
+    sta $667F
+
+    sta $6680
+    sta $6681
+    sta $6682
+    sta $6683
+    sta $6684
+    sta $6685
+    sta $6686
+    sta $6687
+    sta $6688
+    sta $6689
+    sta $668A
+    sta $668B
+    sta $668C
+    sta $668D
+    sta $668E
+    sta $668F
+
+    sta $6690
+    sta $6691
+    sta $6692
+    sta $6693
+    sta $6694
+    sta $6695
+    sta $6696
+    sta $6697
+    sta $6698
+    sta $6699
+    sta $669A
+    sta $669B
+    sta $669C
+    sta $669D
+    sta $669E
+    sta $669F
+
+    sta $66A0
+    sta $66A1
+    sta $66A2
+    sta $66A3
+    sta $66A4
+    sta $66A5
+    sta $66A6
+    sta $66A7
+    sta $66A8
+    sta $66A9
+    sta $66AA
+    sta $66AB
+    sta $66AC
+    sta $66AD
+    sta $66AE
+    sta $66AF
+
+    sta $66B0
+    sta $66B1
+    sta $66B2
+    sta $66B3
+    sta $66B4
+    sta $66B5
+    sta $66B6
+    sta $66B7
+    sta $66B8
+    sta $66B9
+    sta $66BA
+    sta $66BB
+    sta $66BC
+    sta $66BD
+    sta $66BE
+    sta $66BF
+
+    sta $66C0
+    sta $66C1
+    sta $66C2
+    sta $66C3
+    sta $66C4
+    sta $66C5
+    sta $66C6
+    sta $66C7
+    sta $66C8
+    sta $66C9
+    sta $66CA
+    sta $66CB
+    sta $66CC
+    sta $66CD
+    sta $66CE
+    sta $66CF
+
+    sta $66D0
+    sta $66D1
+    sta $66D2
+    sta $66D3
+    sta $66D4
+    sta $66D5
+    sta $66D6
+    sta $66D7
+    sta $66D8
+    sta $66D9
+    sta $66DA
+    sta $66DB
+    sta $66DC
+    sta $66DD
+    sta $66DE
+    sta $66DF
+
+    sta $66E0
+    sta $66E1
+    sta $66E2
+    sta $66E3
+    sta $66E4
+    sta $66E5
+    sta $66E6
+    sta $66E7
+    sta $66E8
+    sta $66E9
+    sta $66EA
+    sta $66EB
+    sta $66EC
+    sta $66ED
+    sta $66EE
+    sta $66EF
+
+    sta $66F0
+    sta $66F1
+    sta $66F2
+    sta $66F3
+    sta $66F4
+    sta $66F5
+    sta $66F6
+    sta $66F7
+    sta $66F8
+    sta $66F9
+    sta $66FA
+    sta $66FB
+    sta $66FC
+    sta $66FD
+    sta $66FE
+    sta $66FF
+
+    ;write $6700 to $67C0 
+    sta $6700
+    sta $6701
+    sta $6702
+    sta $6703
+    sta $6704
+    sta $6705
+    sta $6706
+    sta $6707
+    sta $6708
+    sta $6709
+    sta $670A
+    sta $670B
+    sta $670C
+    sta $670D
+    sta $670E
+    sta $670F
+
+    sta $6710
+    sta $6711
+    sta $6712
+    sta $6713
+    sta $6714
+    sta $6715
+    sta $6716
+    sta $6717
+    sta $6718
+    sta $6719
+    sta $671A
+    sta $671B
+    sta $671C
+    sta $671D
+    sta $671E
+    sta $671F
+
+    sta $6720
+    sta $6721
+    sta $6722
+    sta $6723
+    sta $6724
+    sta $6725
+    sta $6726
+    sta $6727
+    sta $6728
+    sta $6729
+    sta $672A
+    sta $672B
+    sta $672C
+    sta $672D
+    sta $672E
+    sta $672F
+
+    sta $6730
+    sta $6731
+    sta $6732
+    sta $6733
+    sta $6734
+    sta $6735
+    sta $6736
+    sta $6737
+    sta $6738
+    sta $6739
+    sta $673A
+    sta $673B
+    sta $673C
+    sta $673D
+    sta $673E
+    sta $673F
+
+    sta $6740
+    sta $6741
+    sta $6742
+    sta $6743
+    sta $6744
+    sta $6745
+    sta $6746
+    sta $6747
+    sta $6748
+    sta $6749
+    sta $674A
+    sta $674B
+    sta $674C
+    sta $674D
+    sta $674E
+    sta $674F
+
+    sta $6750
+    sta $6751
+    sta $6752
+    sta $6753
+    sta $6754
+    sta $6755
+    sta $6756
+    sta $6757
+    sta $6758
+    sta $6759
+    sta $675A
+    sta $675B
+    sta $675C
+    sta $675D
+    sta $675E
+    sta $675F
+
+    sta $6760
+    sta $6761
+    sta $6762
+    sta $6763
+    sta $6764
+    sta $6765
+    sta $6766
+    sta $6767
+    sta $6768
+    sta $6769
+    sta $676A
+    sta $676B
+    sta $676C
+    sta $676D
+    sta $676E
+    sta $676F
+
+    sta $6770
+    sta $6771
+    sta $6772
+    sta $6773
+    sta $6774
+    sta $6775
+    sta $6776
+    sta $6777
+    sta $6778
+    sta $6779
+    sta $677A
+    sta $677B
+    sta $677C
+    sta $677D
+    sta $677E
+    sta $677F
+
+    sta $6780
+    sta $6781
+    sta $6782
+    sta $6783
+    sta $6784
+    sta $6785
+    sta $6786
+    sta $6787
+    sta $6788
+    sta $6789
+    sta $678A
+    sta $678B
+    sta $678C
+    sta $678D
+    sta $678E
+    sta $678F
+
+    sta $6790
+    sta $6791
+    sta $6792
+    sta $6793
+    sta $6794
+    sta $6795
+    sta $6796
+    sta $6797
+    sta $6798
+    sta $6799
+    sta $679A
+    sta $679B
+    sta $679C
+    sta $679D
+    sta $679E
+    sta $679F
+
+    sta $67A0
+    sta $67A1
+    sta $67A2
+    sta $67A3
+    sta $67A4
+    sta $67A5
+    sta $67A6
+    sta $67A7
+    sta $67A8
+    sta $67A9
+    sta $67AA
+    sta $67AB
+    sta $67AC
+    sta $67AD
+    sta $67AE
+    sta $67AF
+
+    sta $67B0
+    sta $67B1
+    sta $67B2
+    sta $67B3
+    sta $67B4
+    sta $67B5
+    sta $67B6
+    sta $67B7
+    sta $67B8
+    sta $67B9
+    sta $67BA
+    sta $67BB
+    sta $67BC
+    sta $67BD
+    sta $67BE
+    sta $67BF
+
+    rts
+; In the rom at 1B8C0 - 1BFC0 - huge code cave
+
+.checkpc $BFB0
+.advance $BFB0
 
 ;----------------------------------------------------------------------------------------------------
 

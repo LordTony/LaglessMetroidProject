@@ -212,6 +212,10 @@ Bank04_L9550:  .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00,
 .advance SpecItmsTblPtr
 
 Bank04_L9598:  .word _SpecItmsTbl       ;($A26D)Beginning of special items table.
+
+.checkpc AreaPointers
+.advance AreaPointers
+
 Bank04_L959A:  .word _RmPtrTbl          ;($A1D5)Beginning of room pointer table.
 Bank04_L959C:  .word _StrctPtrTbl       ;($A21F)Beginning of structure pointer table.
 Bank04_L959E:  .word _MacroDefs         ;($AC32)Beginning of macro definitions.
@@ -1230,22 +1234,6 @@ Bank04_LA1D0:  .byte $0F, $15, $34, $29
 
 Bank04_LA1D4:  .byte $00           ;End Palette0D info.
 
-;----------------------------[ Room and structure pointer tables ]-----------------------------------
-
-_RmPtrTbl:
-Bank04_LA1D5:  .word $A2B7, $A2C5, $A2CD, $A308, $A345, $A388, $A3B8, $A401
-Bank04_LA1E5:  .word $A442, $A47E, $A4AD, $A4E2, $A514, $A558, $A590, $A5BF
-Bank04_LA1F5:  .word $A5E8, $A647, $A647, $A683, $A6B5, $A6D9, $A713, $A745
-Bank04_LA205:  .word $A780, $A7B2, $A7F6, $A83F, $A8A3, $A8C7, $A923, $A94F
-Bank04_LA215:  .word $A972, $A990, $A9BE, $A9FE, $AA33
-
-_StrctPtrTbl:
-Bank04_LA21F:  .word $AA6B, $AA7E, $AA97, $AAB0, $AAB7, $AABE, $AAC2, $AAD2
-Bank04_LA22F:  .word $AAE2, $AAE7, $AAEC, $AAEF, $AAF2, $AAFD, $AB03, $AB08
-Bank04_LA23F:  .word $AB11, $AB26, $AB29, $AB3C, $AB51, $AB55, $AB68, $AB75
-Bank04_LA24F:  .word $AB88, $AB9B, $ABB0, $ABBA, $ABBD, $ABC4, $ABE0, $ABE9
-Bank04_LA25F:  .word $ABFE, $AC01, $AC0A, $AC0F, $AC14, $AC1E, $AC27
-
 ;-----------------------------------[ Special items table ]-----------------------------------------
 
 ;The way the bytes work int the special items table is as follows:
@@ -1286,17 +1274,17 @@ _SpecItmsTbl:
 
 ;Elevator from Brinstar.
 Bank04_LA26D:  .byte $12
-Bank04_LA26E:  .word $A275
+Bank04_LA26E:  .word Bank04_LA275
 Bank04_LA270:  .byte $07, $FF, $04, $81, $00
 
 ;Elevator to Brinstar.
 Bank04_LA275:  .byte $14
-Bank04_LA276:  .word $A27D
+Bank04_LA276:  .word Bank04_LA27D
 Bank04_LA278:  .byte $07, $FF, $04, $82, $00
 
 ;Missiles.
 Bank04_LA27D:  .byte $15
-Bank04_LA27E:  .word $A28C
+Bank04_LA27E:  .word Bank04_LA28C
 Bank04_LA27F:  .byte $04, $06, $02, $09, $47, $00
 
 ;Missiles.
@@ -1304,22 +1292,22 @@ Bank04_LA286:  .byte $09, $FF, $02, $09, $47, $00
 
 ;Energy tank.
 Bank04_LA28C:  .byte $16
-Bank04_LA28D:  .word $A295
+Bank04_LA28D:  .word Bank04_LA295
 Bank04_LA28F:  .byte $0A, $FF, $02, $08, $66, $00
 
 ;Missiles.
 Bank04_LA295:  .byte $19
-Bank04_LA296:  .word $A29E
+Bank04_LA296:  .word Bank04_LA29E
 Bank04_LA298:  .byte $0A, $FF, $02, $09, $47, $00
 
 ;Missiles.
 Bank04_LA29E:  .byte $1B
-Bank04_LA29F:  .word $A2A7
+Bank04_LA29F:  .word Bank04_LA2A7
 Bank04_LA2A1:  .byte $05, $FF, $02, $09, $47, $00
 
 ;Memus.
 Bank04_LA2A7:  .byte $1C
-Bank04_LA2A8:  .word $A2AE
+Bank04_LA2A8:  .word Bank04_LA2AE
 Bank04_LA2A9:  .byte $07, $FF, $03, $00
 
 ;Energy tank.
@@ -1811,14 +1799,36 @@ Bank04_LAC1E:  .byte $01, $13, $01, $13, $01, $13, $01, $13, $FF
 ;Structure #$26
 Bank04_LAC27:  .byte $04, $0C, $0C, $0C, $0C, $04, $0D, $0D, $0D, $0D, $FF
 
-.checkpc MacroDefs
-.advance MacroDefs
+;----------------------------[ Room and structure pointer tables ]-----------------------------------
+
+.checkpc RoomPointerTable
+.advance RoomPointerTable
+
+_RmPtrTbl:
+Bank04_LA1D5:  .word Bank04_LA2B7, Bank04_LA2C5, Bank04_LA2CD, Bank04_LA308, Bank04_LA345, Bank04_LA388, Bank04_LA3B8, Bank04_LA401
+Bank04_LA1E5:  .word Bank04_LA442, Bank04_LA47E, Bank04_LA4AD, Bank04_LA4E2, Bank04_LA514, Bank04_LA558, Bank04_LA590, Bank04_LA5BF
+Bank04_LA1F5:  .word Bank04_LA5E8, Bank04_LA647, Bank04_LA647, Bank04_LA683, Bank04_LA6B5, Bank04_LA6D9, Bank04_LA713, Bank04_LA745
+Bank04_LA205:  .word Bank04_LA780, Bank04_LA7B2, Bank04_LA7F6, Bank04_LA83F, Bank04_LA8A3, Bank04_LA8C7, Bank04_LA923, Bank04_LA94F
+Bank04_LA215:  .word Bank04_LA972, Bank04_LA990, Bank04_LA9BE, Bank04_LA9FE, Bank04_LAA33
+
+.checkpc StructPointerTable
+.advance StructPointerTable
+
+_StrctPtrTbl:
+Bank04_LA21F:  .word Bank04_LAA6B, Bank04_LAA7E, Bank04_LAA97, Bank04_LAAB0, Bank04_LAAB7, Bank04_LAABE, Bank04_LAAC2, Bank04_LAAD2
+Bank04_LA22F:  .word Bank04_LAAE2, Bank04_LAAE7, Bank04_LAAEC, Bank04_LAAEF, Bank04_LAAF2, Bank04_LAAFD, Bank04_LAB03, Bank04_LAB08
+Bank04_LA23F:  .word Bank04_LAB11, Bank04_LAB26, Bank04_LAB29, Bank04_LAB3C, Bank04_LAB51, Bank04_LAB55, Bank04_LAB68, Bank04_LAB75
+Bank04_LA24F:  .word Bank04_LAB88, Bank04_LAB9B, Bank04_LABB0, Bank04_LABBA, Bank04_LABBD, Bank04_LABC4, Bank04_LABE0, Bank04_LABE9
+Bank04_LA25F:  .word Bank04_LABFE, Bank04_LAC01, Bank04_LAC0A, Bank04_LAC0F, Bank04_LAC14, Bank04_LAC1E, Bank04_LAC27
 
 ;----------------------------------------[ Macro definitions ]---------------------------------------
 
 ;The macro definitions are simply index numbers into the pattern tables that represent the 4 quadrants
 ;of the macro definition. The bytes correspond to the following position in order: lower right tile,
 ;lower left tile, upper right tile, upper left tile. 
+
+.checkpc MacroDefs
+.advance MacroDefs
 
 _MacroDefs:
 
@@ -1863,8 +1873,6 @@ Bank04_LACC6:  .byte $78, $79, $7A, $7B
 Bank04_LACCA:  .byte $E8, $E9, $EA, $EB
 Bank04_LACCE:  .byte $26, $27, $28, $29
 Bank04_LACD2:  .byte $2A, $2B, $2C, $2D
-
-.advance $B000
 
 ;------------------------------------------[ Area music data ]---------------------------------------
 
@@ -2125,26 +2133,6 @@ Bank04_LB0E6:  .byte $FF           ;
 
 .scend
 
-;Not used.
-Bank04_LB0E7:  .byte $2A, $2A, $2A, $B9, $2A, $2A, $2A, $B2, $2A, $2A, $2A, $2A, $2A, $B9, $2A, $12
-Bank04_LB0F7:  .byte $2A, $B2, $26, $B9, $0E, $26, $26, $B2, $26, $B9, $0E, $26, $26, $B2, $22, $B9
-Bank04_LB107:  .byte $0A, $22, $22, $B2, $22, $B9, $0A, $22, $22, $B2, $20, $20, $B9, $20, $20, $20
-Bank04_LB117:  .byte $B2, $20, $B9, $34, $30, $34, $38, $34, $38, $3A, $38, $3A, $3E, $3A, $3E, $FF
-Bank04_LB127:  .byte $C2, $B2, $18, $30, $18, $30, $18, $30, $18, $30, $22, $22, $B1, $22, $22, $B2
-Bank04_LB137:  .byte $22, $20, $1C, $18, $16, $14, $14, $14, $2C, $2A, $2A, $B9, $2A, $2A, $2A, $B2
-Bank04_LB147:  .byte $2A, $28, $28, $B9, $28, $28, $28, $B2, $28, $26, $26, $B9, $26, $26, $3E, $26
-Bank04_LB157:  .byte $26, $3E, $FF, $F0, $B2, $01, $04, $01, $04, $FF, $E0, $BA, $2A, $1A, $02, $3A
-Bank04_LB167:  .byte $40, $02, $1C, $2E, $38, $2C, $3C, $38, $02, $40, $44, $46, $02, $1E, $02, $2C
-Bank04_LB177:  .byte $38, $46, $26, $02, $3A, $20, $02, $28, $2E, $02, $18, $44, $02, $46, $48, $4A
-Bank04_LB187:  .byte $4C, $02, $18, $1E, $FF, $B8, $02, $C8, $B0, $0A, $0C, $FF, $C8, $0E, $0C, $FF
-Bank04_LB197:  .byte $C8, $10, $0E, $FF, $C8, $0E, $0C, $FF, $00, $2B, $3B, $1B, $5A, $D0, $D1, $C3
-Bank04_LB1A7:  .byte $C3, $3B, $3B, $9B, $DA, $D0, $D0, $C0, $C0, $2C, $23, $20, $20, $30, $98, $CF
-Bank04_LB1B7:  .byte $C7, $00, $00, $00, $00, $00, $00, $00, $30, $1F, $80, $C0, $C0, $60, $70, $FC
-Bank04_LB1C7:  .byte $C0, $00, $00, $00, $00, $00, $00, $00, $00, $01, $00, $00, $00, $00, $00, $00
-Bank04_LB1D7:  .byte $00, $80, $80, $C0, $78, $4C, $C7, $80, $80, $C4, $A5, $45, $0B, $1B, $03, $03
-Bank04_LB1E7:  .byte $00, $3A, $13, $31, $63, $C3, $83, $03, $04, $E6, $E6, $C4, $8E, $1C, $3C, $18
-Bank04_LB1F7:  .byte $30, $E8, $E8, $C8, $90, $60, $00, $00, $00
-
 ;------------------------------------------[ Sound Engine ]------------------------------------------
 
 .checkpc SoundEngineOrg
@@ -2183,15 +2171,15 @@ Bank04_LB1F7:  .byte $30, $E8, $E8, $C8, $90, $60, $00, $00, $00
 
     ;Kraid area music.
     _LBD58:  .byte $00, $FF, $F0, $00, $00
-    _LBD5D:  .word $B03F, $B041, $B0AA, $0000
+    _LBD5D:  .word KraidSQ1IndexData_B4, KraidSQ2IndexData_B4, KraidTriangleIndexData_B4, $0000
 
     ;Item room music.
     _LBD65:  .byte $0B, $FF, $03, $00, $00
-    _LBD6A:  .word $BDDA, $BDDC, $BDCD, $0000
+    _LBD6A:  .word _ItmRmSQ1Data, _ItmRmSQ2Data, _ItmRmTriData, $0000
 
     ;Ridley area music.
     _LBD72:  .byte $0B, $FF, $F0, $01, $01
-    _LBD77:  .word $B022, $B031, $B000, $0000
+    _LBD77:  .word RidleySQ1IndexData_B4, RidleySQ2IndexData_B4, RidleyTriangleIndexData_B4, $0000
 
     ;End game music(not used this memory page).
     _LBD7F:  .byte $17, $00, $00, $02, $01
@@ -2203,11 +2191,11 @@ Bank04_LB1F7:  .byte $30, $E8, $E8, $C8, $90, $60, $00, $00, $00
 
     ;Fade in music
     _LBD99:  .byte $0B, $00, $F0, $02, $00
-    _LBD9E:  .word $BE3E, $BE1D, $BE36, $0000
+    _LBD9E:  .word _FadeInSQ1Data, _FadeInSQ2Data, _FadeInTriData, $0000
 
     ;Power up music
     _LBDA6:  .byte $00, $00, $F0, $01, $00
-    _LBDAB:  .word $BDF7, $BE0D, $BE08, $0000
+    _LBDAB:  .word _PwrUpSQ1Data, _PwrUpSQ2Data, _PwrUpTriData, $0000
 
     ;Brinstar music(not used this memory page).
     _LBDB3:  .byte $0B, $FF, $00, $02, $03
@@ -2215,20 +2203,10 @@ Bank04_LB1F7:  .byte $30, $E8, $E8, $C8, $90, $60, $00, $00, $00
 
     ;Tourian music
     _LBDC0:  .byte $0B, $FF, $03, $00, $00
-    _LBDC5:  .word $BE59, $BE47, $BE62, $0000
+    _LBDC5:  .word _TourianSQ1Data, _TourianSQ2Data, _TourianTriData, $0000
 
     .include "Sound_Engine_Common_2.asm"
 .scend
-
-;---------------------------------------- [ Not used ] ----------------------------------------------
-
-;Not used.
-Bank04_LBF56:  .byte $10, $07, $0E, $1C, $38, $70, $2A, $54, $15, $12, $02, $03, $20, $2C, $B4, $AD
-Bank04_LBF66:  .byte $4D, $06, $8D, $8D, $06, $AD, $5E, $06, $A8, $B9, $2A, $BC, $A8, $A2, $00, $B9
-Bank04_LBF76:  .byte $61, $BD, $9D, $2B, $06, $C8, $E8, $8A, $C9, $0D, $D0, $F3, $A9, $01, $8D, $40
-Bank04_LBF86:  .byte $06, $8D, $41, $06, $8D, $42, $06, $8D, $43, $06, $A9, $00, $8D, $38, $06, $8D
-Bank04_LBF96:  .byte $39, $06, $8D, $3A, $06, $8D, $3B, $06, $60, $FF, $00, $00, $00, $00, $00, $00
-Bank04_LBFA6:  .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
 
 ;----------------------------------------------------------------------------------------------------
 
@@ -2251,12 +2229,8 @@ Bank04_LBFD2:  JMP Startup             ;($C01A)Does preliminry housekeeping.
 
 ;----------------------------------------------------------------------------------------------------
 
-;Not used.
-Bank04_LBFD5:  .byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $00, $00, $00, $00, $00
-Bank04_LBFE5:  .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
-Bank04_LBFF5:  .byte $00, $00, $00, $00, $00
-
-;----------------------------------------------------------------------------------------------------
+.checkpc InterruptVectors
+.advance InterruptVectors
 
 ;Interrupt vectors.
 .word NMI               ;($C0D9)NMI vector.
