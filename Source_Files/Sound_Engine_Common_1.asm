@@ -357,7 +357,6 @@ _EndGamePaused:
 ;The sound channels are assigned music numbers.  Those music numbers are:
 ;SQ1=0, SQ2=1, Triangle=2, Noise=3
 
-.checkpc SoundEngineEntryPoint
 .advance SoundEngineEntryPoint
 
     ; TODO: This could be set once when the game starts and it will never change

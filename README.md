@@ -21,8 +21,8 @@ The idea here is to attempt to take the Metroid lag as low as possible without a
 The baseline benchmark is Samus standing still in the opening room with 2 of the spikey bois both alive and crawing on the walls.
 
   * Metroid finishes all work for the benchmark frames in **137 to 149** scanlines
-  * Lagless Metroid finishes in **81 to 94** scanlines
-  * Lagless Metroid finishes in **%59 to %63** of the scanlines it takes Metroid
+  * Lagless Metroid finishes in **78 to 92** scanlines
+  * Lagless Metroid finishes in **%57 to %62** of the scanlines it takes Metroid
   * The limit might be something like **75** scanlines, so keep pushing
 
 ### Code Progress
@@ -102,5 +102,4 @@ The "Visualize Hotspots" lua script can be run and tweaked to find places in the
 
 ## Bugs
 * Starting with a Ridley Password and going up the elevator gets a bugged map
-* Green Spinner explosions are missing the projectile the fires out to the right.
 * Enemies that fly off the screen tend to stay there and blink if you run behind them (this might be a behavior in the base game. Will need to check)

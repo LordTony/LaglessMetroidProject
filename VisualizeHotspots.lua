@@ -2,10 +2,10 @@
 --Press F5 or click the Run button to execute it
 --Type "emu." to show a list of all available API function
 
-start_addr = 0x8000
-end_addr = 0xFFFF
+start_addr = 0xCDD2
+end_addr = 0xCDD2
 how_many_to_show = 50
-framesToResetOn = 1
+framesToResetOn = 60
 timer = 0
 
 function printHex(num)

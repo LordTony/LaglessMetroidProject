@@ -70,7 +70,7 @@
 .alias FrameCount       $2D     ;Increments every frame(overflows every 256 frames).
 .alias RandomNumber1    $2E     ;Random numbers used     
 .alias RandomNumber2    $2F     ;throughout the game.
-.alias SpareMem30       $30     ;never accessed / unused.
+.alias ObjectPalTimes4  $30     ;never accessed / unused.
 .alias GamePaused       $31     ;#$00=Game running, #$01=Game paused.
 
 .alias RoomPtr          $33     ;Room pointer.
@@ -97,22 +97,25 @@
                                 ;RAM conatins a completed room in it, the entire contents
                                 ;of the room RAM is loaded into the PPU. 
 
-.alias RoomPtrTable     $3B     ;start of room pointer table.
-.alias RoomPtrTableLB   $3B     ;start of room pointer table, lower byte.
-.alias RoomPtrTableUB   $3C     ;start of room pointer table, upper byte.
+; These are now unused
+; $3B, $3C, $3D, $3E, $3F, $40, $41, $42, $43, $44, $45, $46, $47, $48
 
-.alias StructPtrTable   $3D     ;start of structure pointer table.
-.alias StructPtrTableLB $3D     ;start of structure pointer table, lower byte.
-.alias StructPtrTableUB $3E     ;start of structure pointer table, upper byte.
-
-                                ;These are now unused
-.alias MacroPtr         $3F     ;Pointer into macro definitions.
-.alias MacroPtrLB       $3F     ;Pointer into macro definitions, lower byte.
-.alias MacroPtrUB       $40     ;Pointer into macro definitions, upper byte.
-
-.alias EnemyAnimPtr     $47     ;EnemyAnimIndexTbl pointer.
-.alias EnemyAnimPtrLB   $47     ;EnemyAnimIndexTbl pointer, lower byte.
-.alias EnemyAnimPtrUB   $48     ;EnemyAnimIndexTbl pointer, upper byte.
+;.alias RoomPtrTable     $3B     ;start of room pointer table.
+;.alias RoomPtrTableLB   $3B     ;start of room pointer table, lower byte.
+;.alias RoomPtrTableUB   $3C     ;start of room pointer table, upper byte.
+;
+;.alias StructPtrTable   $3D     ;start of structure pointer table.
+;.alias StructPtrTableLB $3D     ;start of structure pointer table, lower byte.
+;.alias StructPtrTableUB $3E     ;start of structure pointer table, upper byte.
+;
+;                                ;These are now unused
+;.alias MacroPtr         $3F     ;Pointer into macro definitions.
+;.alias MacroPtrLB       $3F     ;Pointer into macro definitions, lower byte.
+;.alias MacroPtrUB       $40     ;Pointer into macro definitions, upper byte.
+;
+;.alias EnemyAnimPtr     $47     ;EnemyAnimIndexTbl pointer.
+;.alias EnemyAnimPtrLB   $47     ;EnemyAnimIndexTbl pointer, lower byte.
+;.alias EnemyAnimPtrUB   $48     ;EnemyAnimIndexTbl pointer, upper byte.
 
 .alias ScrollDir        $49     ;0=Up, 1=Down, 2=Left, 3=Right.
 
@@ -853,13 +856,13 @@
 .alias ObjectAnimIdxTbl         $8572
 .alias FramePtrTable_Hi         $860B
 .alias FramePtrTable_Lo         $8675
-.alias PlacePtrTable            $86DF
+.alias PlacePtrTable_Hi         $86DF
+.alias PlacePtrTable_Lo         $86EE
 .alias SamusEnterDoor           $8B13
 .alias DoorHandler              $8B79
 .alias PalPntrTbl_Hi            $9560
 .alias PalPntrTbl_Lo            $957C
 .alias SpecItmsTblPtr           $9598
-.alias AreaPointers             $959A
 .alias AreaRoutine              $95C3
 .alias EnemyHitPointTbl         $962B
 .alias EnemyInitDelayTbl        $96BB
@@ -868,11 +871,21 @@
 .alias EndGamePalWrite          $9F54
 .alias MemuByte                 $95E4
 .alias CopyMap                  $A93E
-.alias RoomPointerTable         $AE90
-.alias StructPointerTable       $AF18
-.alias MacroDefs                $AF88
+.alias EnemyAnimIndexTbl        $AC85
+.alias EnemyFramePtrTbl_Hi      $AD0F
+.alias EnemyFramePtrTbl_Lo      $ADA6
+.alias EnemyPlacePtrTbl_Hi      $AEB6
+.alias EnemyPlacePtrTbl_Lo      $AEDC
+.alias RoomPointerTable_Hi      $AEEC
+.alias RoomPointerTable_Lo      $AF1A
+.alias MacroLowerRight          $AF48
+.alias MacroLowerLeft           $AF8d
+.alias MacroUpperRight          $AFD2
+.alias MacroUpperLeft           $B017
 .alias SoundEngineOrg           $B200
 .alias SoundEngineEntryPoint    $B3C6
+.alias StructPointerTable_Hi    $BF56
+.alias StructPointerTable_Lo    $BF88
 .alias InterruptVectors         $BFFA
 
 ;----------------------------------------------------------------------------------------------------
@@ -1041,5 +1054,7 @@
 .alias BTN_SELECT       $20     ;Controller button select.
 .alias BTN_B            $40     ;Controller button B.
 .alias BTN_A            $80     ;Controller button A.
+
+.alias PPUMaxSize       $4F     ;How many bytes the PPU can handle at once
 
 .alias ___              $FF     ;Used in world map to make it more readable.

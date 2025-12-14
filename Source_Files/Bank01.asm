@@ -2,9 +2,6 @@
 
 .include "Game_Start_Common.asm"
 
-.checkpc $8D60
-.advance $8D60
-
 ;------------------------------------------[ Graphics data ]-----------------------------------------
 
 ;Partial font, "THE END".
@@ -145,7 +142,6 @@ Bank01_L9550:  .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00,
 
 ;The following table points to the palette data used in this bank.
 
-.checkpc PalPntrTbl_Hi
 .advance PalPntrTbl_Hi
 
     .byte >_Palette00, >_Palette01, >_Palette02, >_Palette03
@@ -156,7 +152,6 @@ Bank01_L9550:  .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00,
     .byte >_Palette07, >_Palette08, >_Palette09, >_Palette0A
     .byte >_Palette0B, >_Palette0C, >_Palette0D, >_Palette0E
 
-.checkpc PalPntrTbl_Lo
 .advance PalPntrTbl_Lo
     .byte <_Palette00, <_Palette01, <_Palette02, <_Palette03
     .byte <_Palette04, <_Palette05, <_Palette06, <_Palette06
@@ -167,21 +162,20 @@ Bank01_L9550:  .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00,
     .byte <_Palette0B, <_Palette0C, <_Palette0D, <_Palette0E
 ;----------------------------------------------------------------------------------------------------
 
-.checkpc SpecItmsTblPtr
 .advance SpecItmsTblPtr
 
 Bank01_L9598:  .word _SpecItmsTbl       ;($A3D6)Beginning of special items table.
 
-.checkpc AreaPointers
-.advance AreaPointers
+; TODO: Figure out how to .advnace by 14 bytes without the need for manual junk
+; Not used / Unused
 
-Bank01_L959A:  .word _RmPtrTbl          ;($A314)Beginning of room pointer table.    
-Bank01_L959C:  .word _StrctPtrTbl       ;($A372)Beginning of structure pointer table.
-Bank01_L959E:  .word _MacroDefs             ;($AEF0)Beginning of macro definitions.
-Bank01_L95A0:  .word _EnemyFramePtrTbl1     ;($9DE0)Pointer table into enemy animation data. Two-->
-Bank01_L95A2:  .word _EnemyFramePtrTbl2     ;($9EE0)tables needed to accommodate all entries.
-Bank01_L95A4:  .word _EnemyPlacePtrTbl      ;($9F0E)Pointers to enemy frame placement data.
-Bank01_L95A6:  .word _EnemyAnimIndexTbl     ;($9D6A)index to values in addr tables for enemy animations.
+Bank01_L959A: .word $0000
+Bank01_L959C: .word $0000
+Bank01_L959E: .word $0000
+Bank01_L95A0: .word $0000
+Bank01_L95A2: .word $0000
+Bank01_L95A4: .word $0000
+Bank01_L95A6: .word $0000
 
 Bank01_L95A8: 
     rts 
@@ -218,9 +212,8 @@ Bank01_L95BD:
 Bank01_L95C0:
     rts 
     nop 
-    nop 
+    nop
 
-.checkpc AreaRoutine
 .advance AreaRoutine
 
 Bank01_L95C3:  JMP $9D35           ;Area specific routine.
@@ -247,7 +240,6 @@ Bank01_L95D9:  .byte $B0           ;Samus start verticle screen position.
 
 Bank01_L95DA:  .byte $01, $00, $03, $43, $00, $00, $00, $00, $00, $00 
 
-.checkpc MemuByte
 .advance MemuByte
     .byte $69
 
@@ -830,125 +822,6 @@ Bank01_L9D45:  .byte $22, $88, $89, $8A, $8B, $22, $8C, $8D, $8E, $8F, $22, $94,
 Bank01_L9D55:  .byte $9C, $9D, $9D, $9C, $22, $9E, $9F, $9F, $9E, $22, $90, $91, $92, $93, $32, $4E
 Bank01_L9D65:  .byte $4E, $4E, $4E, $4E, $4E
 
-;-----------------------------------[ Enemy animation data tables ]----------------------------------
-
-_EnemyAnimIndexTbl:
-
-Bank01_L9D6A:  .byte $00, $01, $FF
-
-Bank01_L9D6D:  .byte $02, $FF
-
-Bank01_L9D6F:  .byte $19, $1A, $FF
-
-Bank01_L9D72:  .byte $1A, $1B, $FF
-
-Bank01_L9D75:  .byte $1C, $1D, $FF
-
-Bank01_L9D78:  .byte $1D, $1E, $FF
-
-Bank01_L9D7B:  .byte $22, $23, $24, $FF
-
-Bank01_L9D7F:  .byte $1F, $20, $21, $FF
-
-Bank01_L9D83:  .byte $22, $FF
-
-Bank01_L9D85:  .byte $1F, $FF
-
-Bank01_L9D87:  .byte $23, $04, $FF
-
-Bank01_L9D8A:  .byte $20, $03, $FF
-
-Bank01_L9D8D:  .byte $27, $28, $29, $FF
-
-Bank01_L9D91:  .byte $37, $FF
-
-Bank01_L9D93:  .byte $38, $FF
-
-Bank01_L9D95:  .byte $39, $FF
-
-Bank01_L9D97:  .byte $3A, $FF
-
-Bank01_L9D99:  .byte $3B, $FF
-
-Bank01_L9D9B:  .byte $3C, $FF
-
-Bank01_L9D9D:  .byte $3D, $FF
-
-Bank01_L9D9F:  .byte $58, $59, $FF
-
-Bank01_L9DA2:  .byte $5A, $5B, $FF
-
-Bank01_L9DA5:  .byte $5C, $5D, $FF
-
-Bank01_L9DA8:  .byte $5E, $5F, $FF
-
-Bank01_L9DAB:  .byte $60, $FF
-
-Bank01_L9DAD:  .byte $61, $F7, $62, $F7, $FF
-
-Bank01_L9DB2:  .byte $63, $64, $FF
-
-Bank01_L9DB5:  .byte $65, $FF
-
-Bank01_L9DB7:  .byte $66, $67, $FF
-
-Bank01_L9DBA:  .byte $69, $6A, $FF
-
-Bank01_L9DBD:  .byte $68, $FF
-
-Bank01_L9DBF:  .byte $6B, $FF
-
-Bank01_L9DC1:  .byte $66, $FF
-
-Bank01_L9DC3:  .byte $69, $FF
-
-Bank01_L9DC5:  .byte $6C, $FF
-
-Bank01_L9DC7:  .byte $6D, $FF
-
-Bank01_L9DC9:  .byte $6F, $70, $71, $6E, $FF
-
-Bank01_L9DCE:  .byte $73, $74, $75, $72, $FF
-
-Bank01_L9DD3:  .byte $8F, $90, $FF
-
-Bank01_L9DD6:  .byte $91, $92, $FF
-
-Bank01_L9DD9:  .byte $93, $94, $FF
-
-Bank01_L9DDC:  .byte $95, $FF
-
-Bank01_L9DDE:  .byte $96, $FF
-
-;----------------------------[ Enemy sprite drawing pointer tables ]---------------------------------
-
-_EnemyFramePtrTbl1:
-Bank01_L9DE0:  .word $9FC2, $9FC7, $9FCC, $9FD1, $9FDA, $9FE3, $9FE3, $9FE3
-Bank01_L9DF0:  .word $9FE3, $9FE3, $9FE3, $9FE3, $9FE3, $9FE3, $9FE3, $9FE3
-Bank01_L9E00:  .word $9FE3, $9FE3, $9FE3, $9FE3, $9FE3, $9FE3, $9FE3, $9FE3
-Bank01_L9E10:  .word $9FE3, $9FE3, $9FF1, $9FFF, $A00B, $A019, $A027, $A033
-Bank01_L9E20:  .word $A03C, $A046, $A050, $A059, $A063, $A06D, $A06D, $A06D
-Bank01_L9E30:  .word $A07B, $A082, $A08B, $A08B, $A08B, $A08B, $A08B, $A08B
-Bank01_L9E40:  .word $A08B, $A08B, $A08B, $A08B, $A08B, $A08B, $A08B, $A08B
-Bank01_L9E50:  .word $A09F, $A0B3, $A0BE, $A0C9, $A0D2, $A0DB, $A0E6, $A0E6
-Bank01_L9E60:  .word $A0E6, $A0E6, $A0E6, $A0E6, $A0E6, $A0E6, $A0E6, $A0E6
-Bank01_L9E70:  .word $A0E6, $A0E6, $A0E6, $A0E6, $A0E6, $A0E6, $A0E6, $A0E6
-Bank01_L9E80:  .word $A0E6, $A0E6, $A0E6, $A0E6, $A0E6, $A0E6, $A0E6, $A0E6
-Bank01_L9E90:  .word $A0E6, $A0EE, $A0F6, $A0FE, $A106, $A10E, $A116, $A11E
-Bank01_L9EA0:  .word $A126, $A12E, $A13C, $A156, $A162, $A16F, $A177, $A17F
-Bank01_L9EB0:  .word $A187, $A18F, $A197, $A19F, $A1A7, $A1AF, $A1B7, $A1BF
-Bank01_L9EC0:  .word $A1C7, $A1CF, $A1D7, $A1DF, $A1E7, $A1EF, $A1F7, $A1F7
-Bank01_L9ED0:  .word $A1F7, $A1F7, $A1F7, $A1F7, $A1F7, $A1F7, $A1F7, $A1F7
-
-_EnemyFramePtrTbl2:
-Bank01_L9EE0:  .word $A1F7, $A1FF, $A204, $A204, $A204, $A204, $A204, $A204
-Bank01_L9EF0:  .word $A204, $A204, $A209, $A209, $A209, $A209, $A209, $A209
-Bank01_L9F00:  .word $A213, $A21D, $A22D, $A23D, $A24D, $A25D, $A267
-
-_EnemyPlacePtrTbl:
-Bank01_L9F0E:  .word $9F2E, $9F30, $9F48, $9F60, $9F60, $9F60, $9F70, $9F7C
-Bank01_L9F1E:  .word $9F84, $9F90, $9F90, $9FB0, $9FBE, $9FBE, $9FBE, $9FBE
-
 ;------------------------------[ Enemy sprite placement data tables ]--------------------------------
 
 Bank01_L9F2E:  .byte $FC, $FC
@@ -1371,7 +1244,7 @@ Bank01_LA43C:  .byte $07, $FF, $04, $02, $00
 ;The first byte of the room definitions is attribute table data and is used to set the base color of
 ;the room. The object data is grouped into 3 byte segments and represents a structure in the room.
 ;The first byte of the structure data has the format yyyyxxxx and contains the y, x location of the
-;structure in the room(measured in tiles). The second byte is an index into the _StrctPtrTbl and
+;structure in the room(measured in tiles). The second byte is an index into the StructPointerTable and
 ;identifies which structure to use.  The third byte is an attribute table byte and determines the
 ;color of the structure.  Most of the time, this byte will have the same value as the attribute byte
 ;for the base color of the room. Having a room base color byte reduces the calculations required to
@@ -1773,16 +1646,10 @@ Bank01_LAC45:  .byte $00, $AF, $15, $00, $FD
 ;Room enemy/door data:
 Bank01_LAC4A:  .byte $02, $A1, $FF
 
-;Room #$2D
-Bank01_LAC4D:  .byte $03               ;Attribute table data.
-;Room object data:
-Bank01_LAC4E:  .byte $00, $11, $01, $08, $11, $01, $1E, $1E, $03, $5F, $04, $02, $8B, $10, $03, $9E
-Bank01_LAC5E:  .byte $0B, $03, $D0, $10, $03, $D8, $10, $03, $FD
-;Room enemy/door data:
-Bank01_LAC67:  .byte $02, $A1, $FF
+;The old #$2D was unused so it was replaced
 
-;Room #$2E
-Bank01_LAC6A:  .byte $03               ;Attribute table data.
+;Room #$2D
+Bank01_LAC6A:  .byte $0C               ;Attribute table data.
 ;Room object data:
 Bank01_LAC6B:  .byte $00, $0B, $03, $0E, $0B, $03, $50, $03, $02, $5E, $0B, $03, $80, $0B, $03, $AE
 Bank01_LAC7B:  .byte $0B, $03, $D0, $0B, $03, $FD
@@ -1795,7 +1662,7 @@ Bank01_LAC81:  .byte $02, $B1, $FF
 ;structure. The the number of bytes after the macro number byte is equal to the value of the macro
 ;number byte and those bytes define what each macro in the row are. For example, if the macro number
 ;byte is #$08, the next 8 bytes represent 8 macros. The macro description bytes are the macro numbers
-;and are multiplied by 4 to find the index to the desired macro in _MacroDefs.  Any further bytes in
+;and are multiplied by 4 to find the index to the desired macro in MacroDefs.  Any further bytes in
 ;the structure definition represent the next rows.  #$FF marks the end of the structure definition.
 
 ;Structure #$00
@@ -1965,106 +1832,229 @@ Bank01_LAEE4:  .byte $01, $17, $01, $17, $01, $17, $01, $17, $FF
 ;Structure #$31
 Bank01_LAEED:  .byte $01, $24, $FF
 
-;----------------------------[ Room and structure pointer tables ]-----------------------------------
+;-----------------------------------[ Enemy animation data tables ]----------------------------------
 
-.checkpc RoomPointerTable
-.advance RoomPointerTable
+.advance EnemyAnimIndexTbl
 
-_RmPtrTbl:
-Bank01_LA314:  .word Bank01_LA441, Bank01_LA454, Bank01_LA45C, Bank01_LA480, Bank01_LA4BB, Bank01_LA4ED, Bank01_LA524, Bank01_LA55A
-Bank01_LA324:  .word Bank01_LA587, Bank01_LA5B9, Bank01_LA5DD, Bank01_LA615, Bank01_LA635, Bank01_LA661, Bank01_LA68D, Bank01_LA6B1
-Bank01_LA334:  .word Bank01_LA6DB, Bank01_LA715, Bank01_LA73C, Bank01_LA768, Bank01_LA78B, Bank01_LA7A3, Bank01_LA7D0, Bank01_LA7F1
-Bank01_LA344:  .word Bank01_LA81B, Bank01_LA85B, Bank01_LA88B, Bank01_LA8B1, Bank01_LA8E7, Bank01_LA910, Bank01_LA92B, Bank01_LA96B
-Bank01_LA354:  .word Bank01_LA997, Bank01_LA9C6, Bank01_LA9F6, Bank01_LAA20, Bank01_LAA56, Bank01_LAAA4, Bank01_LAAE6, Bank01_LAB19
-Bank01_LA364:  .word Bank01_LAB48, Bank01_LAB71, Bank01_LAB92, Bank01_LABBF, Bank01_LAC24, Bank01_LAC4D, Bank01_LAC6A 
+    .byte $00, $01, $FF
+    .byte $02, $FF
+    .byte $19, $1A, $FF
+    .byte $1A, $1B, $FF
+    .byte $1C, $1D, $FF
+    .byte $1D, $1E, $FF
+    .byte $22, $23, $24, $FF
+    .byte $1F, $20, $21, $FF
+    .byte $22, $FF
+    .byte $1F, $FF
+    .byte $23, $04, $FF
+    .byte $20, $03, $FF
+    .byte $27, $28, $29, $FF
+    .byte $37, $FF
+    .byte $38, $FF
+    .byte $39, $FF
+    .byte $3A, $FF
+    .byte $3B, $FF
+    .byte $3C, $FF
+    .byte $3D, $FF
+    .byte $58, $59, $FF
+    .byte $5A, $5B, $FF
+    .byte $5C, $5D, $FF
+    .byte $5E, $5F, $FF
+    .byte $60, $FF
+    .byte $61, $F7, $62, $F7, $FF
+    .byte $63, $64, $FF
+    .byte $65, $FF
+    .byte $66, $67, $FF
+    .byte $69, $6A, $FF
+    .byte $68, $FF
+    .byte $6B, $FF
+    .byte $66, $FF
+    .byte $69, $FF
+    .byte $6C, $FF
+    .byte $6D, $FF
+    .byte $6F, $70, $71, $6E, $FF
+    .byte $73, $74, $75, $72, $FF
+    .byte $8F, $90, $FF
+    .byte $91, $92, $FF
+    .byte $93, $94, $FF
+    .byte $95, $FF
+    .byte $96, $FF
 
-.checkpc StructPointerTable
-.advance StructPointerTable
+;----------------------------[ Enemy sprite drawing pointer tables ]---------------------------------
 
-_StrctPtrTbl:
-Bank01_LA372:  .word Bank01_LAC84, Bank01_LAC97, Bank01_LACB0, Bank01_LACC9, Bank01_LACD0, Bank01_LACD7, Bank01_LACDB, Bank01_LACE6
-Bank01_LA382:  .word Bank01_LACF3, Bank01_LACFF, Bank01_LAD05, Bank01_LAD0A, Bank01_LAD1A, Bank01_LAD1E, Bank01_LAD28, Bank01_LAD4D 
-Bank01_LA392:  .word Bank01_LAD57, Bank01_LAD6A, Bank01_LAD7F, Bank01_LAD8E, Bank01_LAD98, Bank01_LADA2, Bank01_LADAD, Bank01_LADBE
-Bank01_LA3A2:  .word Bank01_LADE3, Bank01_LADE6, Bank01_LADEC, Bank01_LADF9, Bank01_LAE09, Bank01_LAE13, Bank01_LAE18, Bank01_LAE2D
-Bank01_LA3B2:  .word Bank01_LAE42, Bank01_LAE48, Bank01_LAE4B, Bank01_LAE5F, Bank01_LAE70, Bank01_LAE85, Bank01_LAE8E, Bank01_LAE92
-Bank01_LA3C2:  .word Bank01_LAEA5, Bank01_LAEB0, Bank01_LAEB3, Bank01_LAEBE, Bank01_LAEC8, Bank01_LAECB, Bank01_LAEDE, Bank01_LAEE1
-Bank01_LA3D2:  .word Bank01_LAEE4, Bank01_LAEED 
+.advance EnemyFramePtrTbl_Hi
 
-.checkpc MacroDefs
-.advance MacroDefs
+    .byte >Bank01_L9FC2, >Bank01_L9FC7, >Bank01_L9FCC, >Bank01_L9FD1, >Bank01_L9FDA, >Bank01_L9FE3, >Bank01_L9FE3, >Bank01_L9FE3
+    .byte >Bank01_L9FE3, >Bank01_L9FE3, >Bank01_L9FE3, >Bank01_L9FE3, >Bank01_L9FE3, >Bank01_L9FE3, >Bank01_L9FE3, >Bank01_L9FE3
+    .byte >Bank01_L9FE3, >Bank01_L9FE3, >Bank01_L9FE3, >Bank01_L9FE3, >Bank01_L9FE3, >Bank01_L9FE3, >Bank01_L9FE3, >Bank01_L9FE3
+    .byte >Bank01_L9FE3, >Bank01_L9FE3, >Bank01_L9FF1, >Bank01_L9FFF, >Bank01_LA00B, >Bank01_LA019, >Bank01_LA027, >Bank01_LA033
+    .byte >Bank01_LA03C, >Bank01_LA046, >Bank01_LA050, >Bank01_LA059, >Bank01_LA063, >Bank01_LA06D, >Bank01_LA06D, >Bank01_LA06D
+    .byte >Bank01_LA07B, >Bank01_LA082, >Bank01_LA08B, >Bank01_LA08B, >Bank01_LA08B, >Bank01_LA08B, >Bank01_LA08B, >Bank01_LA08B
+    .byte >Bank01_LA08B, >Bank01_LA08B, >Bank01_LA08B, >Bank01_LA08B, >Bank01_LA08B, >Bank01_LA08B, >Bank01_LA08B, >Bank01_LA08B
+    .byte >Bank01_LA09F, >Bank01_LA0B3, >Bank01_LA0BE, >Bank01_LA0C9, >Bank01_LA0D2, >Bank01_LA0DB, >Bank01_LA0E6, >Bank01_LA0E6
+    .byte >Bank01_LA0E6, >Bank01_LA0E6, >Bank01_LA0E6, >Bank01_LA0E6, >Bank01_LA0E6, >Bank01_LA0E6, >Bank01_LA0E6, >Bank01_LA0E6
+    .byte >Bank01_LA0E6, >Bank01_LA0E6, >Bank01_LA0E6, >Bank01_LA0E6, >Bank01_LA0E6, >Bank01_LA0E6, >Bank01_LA0E6, >Bank01_LA0E6
+    .byte >Bank01_LA0E6, >Bank01_LA0E6, >Bank01_LA0E6, >Bank01_LA0E6, >Bank01_LA0E6, >Bank01_LA0E6, >Bank01_LA0E6, >Bank01_LA0E6
+    .byte >Bank01_LA0E6, >Bank01_LA0EE, >Bank01_LA0F6, >Bank01_LA0FE, >Bank01_LA106, >Bank01_LA10E, >Bank01_LA116, >Bank01_LA11E
+    .byte >Bank01_LA126, >Bank01_LA12E, >Bank01_LA13C, >Bank01_LA156, >Bank01_LA162, >Bank01_LA16F, >Bank01_LA177, >Bank01_LA17F
+    .byte >Bank01_LA187, >Bank01_LA18F, >Bank01_LA197, >Bank01_LA19F, >Bank01_LA1A7, >Bank01_LA1AF, >Bank01_LA1B7, >Bank01_LA1BF
+    .byte >Bank01_LA1C7, >Bank01_LA1CF, >Bank01_LA1D7, >Bank01_LA1DF, >Bank01_LA1E7, >Bank01_LA1EF, >Bank01_LA1F7, >Bank01_LA1F7
+    .byte >Bank01_LA1F7, >Bank01_LA1F7, >Bank01_LA1F7, >Bank01_LA1F7, >Bank01_LA1F7, >Bank01_LA1F7, >Bank01_LA1F7, >Bank01_LA1F7
+    .byte >Bank01_LA1F7, >Bank01_LA1FF, >Bank01_LA204, >Bank01_LA204, >Bank01_LA204, >Bank01_LA204, >Bank01_LA204, >Bank01_LA204
+    .byte >Bank01_LA204, >Bank01_LA204, >Bank01_LA209, >Bank01_LA209, >Bank01_LA209, >Bank01_LA209, >Bank01_LA209, >Bank01_LA209
+    .byte >Bank01_LA213, >Bank01_LA21D, >Bank01_LA22D, >Bank01_LA23D, >Bank01_LA24D, >Bank01_LA25D, >Bank01_LA267
+
+.advance EnemyFramePtrTbl_Lo
+
+    .byte <Bank01_L9FC2, <Bank01_L9FC7, <Bank01_L9FCC, <Bank01_L9FD1, <Bank01_L9FDA, <Bank01_L9FE3, <Bank01_L9FE3, <Bank01_L9FE3
+    .byte <Bank01_L9FE3, <Bank01_L9FE3, <Bank01_L9FE3, <Bank01_L9FE3, <Bank01_L9FE3, <Bank01_L9FE3, <Bank01_L9FE3, <Bank01_L9FE3
+    .byte <Bank01_L9FE3, <Bank01_L9FE3, <Bank01_L9FE3, <Bank01_L9FE3, <Bank01_L9FE3, <Bank01_L9FE3, <Bank01_L9FE3, <Bank01_L9FE3
+    .byte <Bank01_L9FE3, <Bank01_L9FE3, <Bank01_L9FF1, <Bank01_L9FFF, <Bank01_LA00B, <Bank01_LA019, <Bank01_LA027, <Bank01_LA033
+    .byte <Bank01_LA03C, <Bank01_LA046, <Bank01_LA050, <Bank01_LA059, <Bank01_LA063, <Bank01_LA06D, <Bank01_LA06D, <Bank01_LA06D
+    .byte <Bank01_LA07B, <Bank01_LA082, <Bank01_LA08B, <Bank01_LA08B, <Bank01_LA08B, <Bank01_LA08B, <Bank01_LA08B, <Bank01_LA08B
+    .byte <Bank01_LA08B, <Bank01_LA08B, <Bank01_LA08B, <Bank01_LA08B, <Bank01_LA08B, <Bank01_LA08B, <Bank01_LA08B, <Bank01_LA08B
+    .byte <Bank01_LA09F, <Bank01_LA0B3, <Bank01_LA0BE, <Bank01_LA0C9, <Bank01_LA0D2, <Bank01_LA0DB, <Bank01_LA0E6, <Bank01_LA0E6
+    .byte <Bank01_LA0E6, <Bank01_LA0E6, <Bank01_LA0E6, <Bank01_LA0E6, <Bank01_LA0E6, <Bank01_LA0E6, <Bank01_LA0E6, <Bank01_LA0E6
+    .byte <Bank01_LA0E6, <Bank01_LA0E6, <Bank01_LA0E6, <Bank01_LA0E6, <Bank01_LA0E6, <Bank01_LA0E6, <Bank01_LA0E6, <Bank01_LA0E6
+    .byte <Bank01_LA0E6, <Bank01_LA0E6, <Bank01_LA0E6, <Bank01_LA0E6, <Bank01_LA0E6, <Bank01_LA0E6, <Bank01_LA0E6, <Bank01_LA0E6
+    .byte <Bank01_LA0E6, <Bank01_LA0EE, <Bank01_LA0F6, <Bank01_LA0FE, <Bank01_LA106, <Bank01_LA10E, <Bank01_LA116, <Bank01_LA11E
+    .byte <Bank01_LA126, <Bank01_LA12E, <Bank01_LA13C, <Bank01_LA156, <Bank01_LA162, <Bank01_LA16F, <Bank01_LA177, <Bank01_LA17F
+    .byte <Bank01_LA187, <Bank01_LA18F, <Bank01_LA197, <Bank01_LA19F, <Bank01_LA1A7, <Bank01_LA1AF, <Bank01_LA1B7, <Bank01_LA1BF
+    .byte <Bank01_LA1C7, <Bank01_LA1CF, <Bank01_LA1D7, <Bank01_LA1DF, <Bank01_LA1E7, <Bank01_LA1EF, <Bank01_LA1F7, <Bank01_LA1F7
+    .byte <Bank01_LA1F7, <Bank01_LA1F7, <Bank01_LA1F7, <Bank01_LA1F7, <Bank01_LA1F7, <Bank01_LA1F7, <Bank01_LA1F7, <Bank01_LA1F7
+    .byte <Bank01_LA1F7, <Bank01_LA1FF, <Bank01_LA204, <Bank01_LA204, <Bank01_LA204, <Bank01_LA204, <Bank01_LA204, <Bank01_LA204
+    .byte <Bank01_LA204, <Bank01_LA204, <Bank01_LA209, <Bank01_LA209, <Bank01_LA209, <Bank01_LA209, <Bank01_LA209, <Bank01_LA209
+    .byte <Bank01_LA213, <Bank01_LA21D, <Bank01_LA22D, <Bank01_LA23D, <Bank01_LA24D, <Bank01_LA25D, <Bank01_LA267
+
+.advance EnemyPlacePtrTbl_Hi
+
+    .byte >Bank01_L9F2E, >Bank01_L9F30, >Bank01_L9F48, >Bank01_L9F60, >Bank01_L9F60, >Bank01_L9F60, >Bank01_L9F70, >Bank01_L9F7C
+    .byte >Bank01_L9F84, >Bank01_L9F90, >Bank01_L9F90, >Bank01_L9FB0, >Bank01_L9FBE, >Bank01_L9FBE, >Bank01_L9FBE, >Bank01_L9FBE
+
+.advance EnemyPlacePtrTbl_Lo
+
+    .byte <Bank01_L9F2E, <Bank01_L9F30, <Bank01_L9F48, <Bank01_L9F60, <Bank01_L9F60, <Bank01_L9F60, <Bank01_L9F70, <Bank01_L9F7C
+    .byte <Bank01_L9F84, <Bank01_L9F90, <Bank01_L9F90, <Bank01_L9FB0, <Bank01_L9FBE, <Bank01_L9FBE, <Bank01_L9FBE, <Bank01_L9FBE
+
+;-------------------------------------[ Room Pointer Table ]-----------------------------------------
+
+.advance RoomPointerTable_Hi
+
+    .byte >Bank01_LA441, >Bank01_LA454, >Bank01_LA45C, >Bank01_LA480, >Bank01_LA4BB, >Bank01_LA4ED, >Bank01_LA524, >Bank01_LA55A
+    .byte >Bank01_LA587, >Bank01_LA5B9, >Bank01_LA5DD, >Bank01_LA615, >Bank01_LA635, >Bank01_LA661, >Bank01_LA68D, >Bank01_LA6B1
+    .byte >Bank01_LA6DB, >Bank01_LA715, >Bank01_LA73C, >Bank01_LA768, >Bank01_LA78B, >Bank01_LA7A3, >Bank01_LA7D0, >Bank01_LA7F1
+    .byte >Bank01_LA81B, >Bank01_LA85B, >Bank01_LA88B, >Bank01_LA8B1, >Bank01_LA8E7, >Bank01_LA910, >Bank01_LA92B, >Bank01_LA96B
+    .byte >Bank01_LA997, >Bank01_LA9C6, >Bank01_LA9F6, >Bank01_LAA20, >Bank01_LAA56, >Bank01_LAAA4, >Bank01_LAAE6, >Bank01_LAB19
+    .byte >Bank01_LAB48, >Bank01_LAB71, >Bank01_LAB92, >Bank01_LABBF, >Bank01_LAC24, >Bank01_LAC6A 
+
+.advance RoomPointerTable_Lo
+
+    .byte <Bank01_LA441, <Bank01_LA454, <Bank01_LA45C, <Bank01_LA480, <Bank01_LA4BB, <Bank01_LA4ED, <Bank01_LA524, <Bank01_LA55A
+    .byte <Bank01_LA587, <Bank01_LA5B9, <Bank01_LA5DD, <Bank01_LA615, <Bank01_LA635, <Bank01_LA661, <Bank01_LA68D, <Bank01_LA6B1
+    .byte <Bank01_LA6DB, <Bank01_LA715, <Bank01_LA73C, <Bank01_LA768, <Bank01_LA78B, <Bank01_LA7A3, <Bank01_LA7D0, <Bank01_LA7F1
+    .byte <Bank01_LA81B, <Bank01_LA85B, <Bank01_LA88B, <Bank01_LA8B1, <Bank01_LA8E7, <Bank01_LA910, <Bank01_LA92B, <Bank01_LA96B
+    .byte <Bank01_LA997, <Bank01_LA9C6, <Bank01_LA9F6, <Bank01_LAA20, <Bank01_LAA56, <Bank01_LAAA4, <Bank01_LAAE6, <Bank01_LAB19
+    .byte <Bank01_LAB48, <Bank01_LAB71, <Bank01_LAB92, <Bank01_LABBF, <Bank01_LAC24, <Bank01_LAC6A 
+
 ;----------------------------------------[ Macro definitions ]---------------------------------------
 
 ;The macro definitions are simply index numbers into the pattern tables that represent the 4 quadrants
 ;of the macro definition. The bytes correspond to the following position in order: lower right tile,
 ;lower left tile, upper right tile, upper left tile. 
 
-_MacroDefs:
+.advance MacroLowerRight
+    .byte $F1, $FF, $64, $D5, $A4, $FF, $A0, $A1, $00, $0B, $03, $08, $0E, $12, $FF, $FF
+    .byte $FF, $FF, $34, $3A, $3C, $FF, $44, $45, $FF, $48, $48, $49, $4B, $51, $55, $59
+    .byte $5C, $4F, $88, $84, $8C, $FF, $FF, $FF, $FF, $B0, $B4, $B8, $FF, $BB, $C7, $94
+    .byte $0D, $FF, $FF, $80, $04, $06, $60, $C1, $0B, $BF, $C0, $FF, $C2, $30, $CD, $D1
+    .byte $90
 
-Bank01_LAEF0:  .byte $F1, $F1, $F1, $F1
-Bank01_LAEF4:  .byte $FF, $FF, $F0, $F0
-Bank01_LAEF8:  .byte $64, $64, $64, $64
-Bank01_LAEFC:  .byte $D5, $D6, $CB, $CC
-Bank01_LAF00:  .byte $A4, $FF, $A4, $FF
-Bank01_LAF04:  .byte $FF, $A5, $FF, $A5
-Bank01_LAF08:  .byte $A0, $A0, $A0, $A0
-Bank01_LAF0C:  .byte $A1, $A1, $A1, $A1
-Bank01_LAF10:  .byte $00, $01, $02, $03
-Bank01_LAF14:  .byte $0B, $00, $FF, $0B
-Bank01_LAF18:  .byte $03, $0A, $0A, $FF
-Bank01_LAF1C:  .byte $08, $09, $02, $03
-Bank01_LAF20:  .byte $0E, $0F, $10, $11
-Bank01_LAF24:  .byte $12, $13, $14, $0C
-Bank01_LAF28:  .byte $FF, $FF, $FF, $30
-Bank01_LAF2C:  .byte $FF, $33, $FF, $36
-Bank01_LAF30:  .byte $FF, $39, $FF, $3D
-Bank01_LAF34:  .byte $FF, $FF, $31, $32
-Bank01_LAF38:  .byte $34, $35, $37, $38
-Bank01_LAF3C:  .byte $3A, $3B, $3E, $3F
-Bank01_LAF40:  .byte $3C, $41, $40, $42
-Bank01_LAF44:  .byte $FF, $FF, $43, $43
-Bank01_LAF48:  .byte $44, $44, $44, $44
-Bank01_LAF4C:  .byte $45, $46, $45, $46
-Bank01_LAF50:  .byte $FF, $47, $47, $48
-Bank01_LAF54:  .byte $48, $FF, $47, $48
-Bank01_LAF58:  .byte $48, $47, $47, $48
-Bank01_LAF5C:  .byte $49, $49, $4A, $4A
-Bank01_LAF60:  .byte $4B, $4C, $4D, $50
-Bank01_LAF64:  .byte $51, $52, $53, $54
-Bank01_LAF68:  .byte $55, $56, $57, $58
-Bank01_LAF6C:  .byte $59, $5B, $59, $5B
-Bank01_LAF70:  .byte $5C, $5D, $5E, $5F
-Bank01_LAF74:  .byte $4F, $4F, $4F, $4F
-Bank01_LAF78:  .byte $88, $89, $8A, $8B
-Bank01_LAF7C:  .byte $84, $85, $86, $87
-Bank01_LAF80:  .byte $8C, $8D, $8E, $8F
-Bank01_LAF84:  .byte $FF, $FF, $FF, $FF    ;Not used.
-Bank01_LAF88:  .byte $FF, $FF, $FF, $FF    ;Not used.
-Bank01_LAF8C:  .byte $FF, $FF, $FF, $FF    ;Not used.
-Bank01_LAF90:  .byte $FF, $FF, $FF, $FF    ;Not used.
-Bank01_LAF94:  .byte $B0, $B1, $B2, $B3
-Bank01_LAF98:  .byte $B4, $B5, $B6, $B7
-Bank01_LAF9C:  .byte $B8, $B8, $B9, $B9
-Bank01_LAFA0:  .byte $FF, $FF, $BA, $BA
-Bank01_LAFA4:  .byte $BB, $BB, $BB, $BB
-Bank01_LAFA8:  .byte $C7, $C8, $C9, $CA
-Bank01_LAFAC:  .byte $94, $95, $96, $97
-Bank01_LAFB0:  .byte $0D, $FF, $FF, $FF
-Bank01_LAFB4:  .byte $FF, $FF, $59, $5A
-Bank01_LAFB8:  .byte $FF, $FF, $5A, $5B
-Bank01_LAFBC:  .byte $80, $81, $82, $83
-Bank01_LAFC0:  .byte $04, $05, $04, $05
-Bank01_LAFC4:  .byte $06, $06, $07, $07
-Bank01_LAFC8:  .byte $60, $61, $62, $63
-Bank01_LAFCC:  .byte $C1, $00, $00, $08
-Bank01_LAFD0:  .byte $0B, $BE, $BC, $BD
-Bank01_LAFD4:  .byte $BF, $01, $02, $03
-Bank01_LAFD8:  .byte $C0, $01, $C0, $03
-Bank01_LAFDC:  .byte $FF, $C1, $FF, $FF
-Bank01_LAFE0:  .byte $C2, $01, $FF, $FF
-Bank01_LAFE4:  .byte $30, $00, $BC, $BD
-Bank01_LAFE8:  .byte $CD, $CE, $CF, $D0
-Bank01_LAFEC:  .byte $D1, $D2, $D3, $D4
-Bank01_LAFF0:  .byte $90, $91, $92, $93
+.advance MacroLowerLeft
+    .byte $F1, $FF, $64, $D6, $FF, $A5, $A0, $A1, $01, $00, $0A, $09, $0F, $13, $FF, $33
+    .byte $39, $FF, $35, $3B, $41, $FF, $44, $46, $47, $FF, $47, $49, $4C, $52, $56, $5B
+    .byte $5D, $4F, $89, $85, $8D, $FF, $FF, $FF, $FF, $B1, $B5, $B8, $FF, $BB, $C8, $95
+    .byte $FF, $FF, $FF, $81, $05, $06, $61, $00, $BE, $01, $01, $C1, $01, $00, $CE, $D2
+    .byte $91
+
+.advance MacroUpperRight
+    .byte $F1, $F0, $64, $CB, $A4, $FF, $A0, $A1, $02, $FF, $0A, $02, $10, $14, $FF, $FF
+    .byte $FF, $31, $37, $3E, $40, $43, $44, $45, $47, $47, $47, $4A, $4D, $53, $57, $59
+    .byte $5E, $4F, $8A, $86, $8E, $FF, $FF, $FF, $FF, $B2, $B6, $B9, $BA, $BB, $C9, $96
+    .byte $FF, $59, $5A, $82, $04, $07, $62, $00, $BC, $02, $C0, $FF, $FF, $BC, $CF, $D3
+    .byte $92
+
+.advance MacroUpperLeft
+    .byte $F1, $F0, $64, $CC, $FF, $A5, $A0, $A1, $03, $0B, $FF, $03, $11, $0C, $30, $36
+    .byte $3D, $32, $38, $3F, $42, $43, $44, $46, $48, $48, $48, $4A, $50, $54, $58, $5B
+    .byte $5F, $4F, $8B, $87, $8F, $FF, $FF, $FF, $FF, $B3, $B7, $B9, $BA, $BB, $CA, $97
+    .byte $FF, $5A, $5B, $83, $05, $07, $63, $08, $BD, $03, $03, $FF, $FF, $BD, $D0, $D4
+    .byte $93
+
+;; Bank01_LAEF0:  .byte $F1, $F1, $F1, $F1
+;; Bank01_LAEF4:  .byte $FF, $FF, $F0, $F0
+;; Bank01_LAEF8:  .byte $64, $64, $64, $64
+;; Bank01_LAEFC:  .byte $D5, $D6, $CB, $CC
+;; Bank01_LAF00:  .byte $A4, $FF, $A4, $FF
+;; Bank01_LAF04:  .byte $FF, $A5, $FF, $A5
+;; Bank01_LAF08:  .byte $A0, $A0, $A0, $A0
+;; Bank01_LAF0C:  .byte $A1, $A1, $A1, $A1
+;; Bank01_LAF10:  .byte $00, $01, $02, $03
+;; Bank01_LAF14:  .byte $0B, $00, $FF, $0B
+;; Bank01_LAF18:  .byte $03, $0A, $0A, $FF
+;; Bank01_LAF1C:  .byte $08, $09, $02, $03
+;; Bank01_LAF20:  .byte $0E, $0F, $10, $11
+;; Bank01_LAF24:  .byte $12, $13, $14, $0C
+;; Bank01_LAF28:  .byte $FF, $FF, $FF, $30
+;; Bank01_LAF2C:  .byte $FF, $33, $FF, $36
+;; Bank01_LAF30:  .byte $FF, $39, $FF, $3D
+;; Bank01_LAF34:  .byte $FF, $FF, $31, $32
+;; Bank01_LAF38:  .byte $34, $35, $37, $38
+;; Bank01_LAF3C:  .byte $3A, $3B, $3E, $3F
+;; Bank01_LAF40:  .byte $3C, $41, $40, $42
+;; Bank01_LAF44:  .byte $FF, $FF, $43, $43
+;; Bank01_LAF48:  .byte $44, $44, $44, $44
+;; Bank01_LAF4C:  .byte $45, $46, $45, $46
+;; Bank01_LAF50:  .byte $FF, $47, $47, $48
+;; Bank01_LAF54:  .byte $48, $FF, $47, $48
+;; Bank01_LAF58:  .byte $48, $47, $47, $48
+;; Bank01_LAF5C:  .byte $49, $49, $4A, $4A
+;; Bank01_LAF60:  .byte $4B, $4C, $4D, $50
+;; Bank01_LAF64:  .byte $51, $52, $53, $54
+;; Bank01_LAF68:  .byte $55, $56, $57, $58
+;; Bank01_LAF6C:  .byte $59, $5B, $59, $5B
+;; Bank01_LAF70:  .byte $5C, $5D, $5E, $5F
+;; Bank01_LAF74:  .byte $4F, $4F, $4F, $4F
+;; Bank01_LAF78:  .byte $88, $89, $8A, $8B
+;; Bank01_LAF7C:  .byte $84, $85, $86, $87
+;; Bank01_LAF80:  .byte $8C, $8D, $8E, $8F
+;; Bank01_LAF84:  .byte $FF, $FF, $FF, $FF    ;Not used.
+;; Bank01_LAF88:  .byte $FF, $FF, $FF, $FF    ;Not used.
+;; Bank01_LAF8C:  .byte $FF, $FF, $FF, $FF    ;Not used.
+;; Bank01_LAF90:  .byte $FF, $FF, $FF, $FF    ;Not used.
+;; Bank01_LAF94:  .byte $B0, $B1, $B2, $B3
+;; Bank01_LAF98:  .byte $B4, $B5, $B6, $B7
+;; Bank01_LAF9C:  .byte $B8, $B8, $B9, $B9
+;; Bank01_LAFA0:  .byte $FF, $FF, $BA, $BA
+;; Bank01_LAFA4:  .byte $BB, $BB, $BB, $BB
+;; Bank01_LAFA8:  .byte $C7, $C8, $C9, $CA
+;; Bank01_LAFAC:  .byte $94, $95, $96, $97
+;; Bank01_LAFB0:  .byte $0D, $FF, $FF, $FF
+;; Bank01_LAFB4:  .byte $FF, $FF, $59, $5A
+;; Bank01_LAFB8:  .byte $FF, $FF, $5A, $5B
+;; Bank01_LAFBC:  .byte $80, $81, $82, $83
+;; Bank01_LAFC0:  .byte $04, $05, $04, $05
+;; Bank01_LAFC4:  .byte $06, $06, $07, $07
+;; Bank01_LAFC8:  .byte $60, $61, $62, $63
+;; Bank01_LAFCC:  .byte $C1, $00, $00, $08
+;; Bank01_LAFD0:  .byte $0B, $BE, $BC, $BD
+;; Bank01_LAFD4:  .byte $BF, $01, $02, $03
+;; Bank01_LAFD8:  .byte $C0, $01, $C0, $03
+;; Bank01_LAFDC:  .byte $FF, $C1, $FF, $FF
+;; Bank01_LAFE0:  .byte $C2, $01, $FF, $FF
+;; Bank01_LAFE4:  .byte $30, $00, $BC, $BD
+;; Bank01_LAFE8:  .byte $CD, $CE, $CF, $D0
+;; Bank01_LAFEC:  .byte $D1, $D2, $D3, $D4
+;; Bank01_LAFF0:  .byte $90, $91, $92, $93
 
 ;------------------------------------------[ Area music data ]---------------------------------------
 
@@ -2398,7 +2388,6 @@ Bank01_LB134:  .byte $FF           ;
 
 ;------------------------------------------[ Sound Engine ]------------------------------------------
 
-.checkpc SoundEngineOrg
 .advance SoundEngineOrg
 
 .scope
@@ -2471,6 +2460,28 @@ Bank01_LB134:  .byte $FF           ;
     .include "Sound_Engine_Common_2.asm"
 .scend
 
+;-------------------------------- Struct Pointer Table -------------------------------------------
+
+.advance StructPointerTable_Hi
+
+    .byte >Bank01_LAC84, >Bank01_LAC97, >Bank01_LACB0, >Bank01_LACC9, >Bank01_LACD0, >Bank01_LACD7, >Bank01_LACDB, >Bank01_LACE6
+    .byte >Bank01_LACF3, >Bank01_LACFF, >Bank01_LAD05, >Bank01_LAD0A, >Bank01_LAD1A, >Bank01_LAD1E, >Bank01_LAD28, >Bank01_LAD4D 
+    .byte >Bank01_LAD57, >Bank01_LAD6A, >Bank01_LAD7F, >Bank01_LAD8E, >Bank01_LAD98, >Bank01_LADA2, >Bank01_LADAD, >Bank01_LADBE
+    .byte >Bank01_LADE3, >Bank01_LADE6, >Bank01_LADEC, >Bank01_LADF9, >Bank01_LAE09, >Bank01_LAE13, >Bank01_LAE18, >Bank01_LAE2D
+    .byte >Bank01_LAE42, >Bank01_LAE48, >Bank01_LAE4B, >Bank01_LAE5F, >Bank01_LAE70, >Bank01_LAE85, >Bank01_LAE8E, >Bank01_LAE92
+    .byte >Bank01_LAEA5, >Bank01_LAEB0, >Bank01_LAEB3, >Bank01_LAEBE, >Bank01_LAEC8, >Bank01_LAECB, >Bank01_LAEDE, >Bank01_LAEE1
+    .byte >Bank01_LAEE4, >Bank01_LAEED
+
+.advance StructPointerTable_Lo
+
+    .byte <Bank01_LAC84, <Bank01_LAC97, <Bank01_LACB0, <Bank01_LACC9, <Bank01_LACD0, <Bank01_LACD7, <Bank01_LACDB, <Bank01_LACE6
+    .byte <Bank01_LACF3, <Bank01_LACFF, <Bank01_LAD05, <Bank01_LAD0A, <Bank01_LAD1A, <Bank01_LAD1E, <Bank01_LAD28, <Bank01_LAD4D 
+    .byte <Bank01_LAD57, <Bank01_LAD6A, <Bank01_LAD7F, <Bank01_LAD8E, <Bank01_LAD98, <Bank01_LADA2, <Bank01_LADAD, <Bank01_LADBE
+    .byte <Bank01_LADE3, <Bank01_LADE6, <Bank01_LADEC, <Bank01_LADF9, <Bank01_LAE09, <Bank01_LAE13, <Bank01_LAE18, <Bank01_LAE2D
+    .byte <Bank01_LAE42, <Bank01_LAE48, <Bank01_LAE4B, <Bank01_LAE5F, <Bank01_LAE70, <Bank01_LAE85, <Bank01_LAE8E, <Bank01_LAE92
+    .byte <Bank01_LAEA5, <Bank01_LAEB0, <Bank01_LAEB3, <Bank01_LAEBE, <Bank01_LAEC8, <Bank01_LAECB, <Bank01_LAEDE, <Bank01_LAEE1
+    .byte <Bank01_LAEE4, <Bank01_LAEED
+
 ;----------------------------------------------------------------------------------------------------
 
 RESET_Bank01:
@@ -2492,7 +2503,6 @@ Bank01_LBFD2:  JMP Startup             ;($C01A)Does preliminry housekeeping.
 
 ;----------------------------------------------------------------------------------------------------
 
-.checkpc InterruptVectors
 .advance InterruptVectors
 
 ;Interrupt vectors.

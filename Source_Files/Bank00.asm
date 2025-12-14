@@ -2743,7 +2743,6 @@ AddYToPtr02:
 
 .scope
 
-.checkpc PalPntrTbl_Hi
 .advance PalPntrTbl_Hi
 
         .byte >_Palette00, >_Palette01, >_Palette02, >_Palette03
@@ -2752,7 +2751,6 @@ AddYToPtr02:
         .byte >_Palette0C, >_Palette0D, >_Palette0E, >_Palette0F
         .byte >_Palette10, >_Palette11, >_Palette12
 
-.checkpc PalPntrTbl_Lo
 .advance PalPntrTbl_Lo
 
         .byte <_Palette00, <_Palette01, <_Palette02, <_Palette03
@@ -2993,7 +2991,6 @@ L9889:  RTS                     ;Return A/time.
 
 ;This function decrements the y coordinate of the 40 intro star sprites.
 
-.checkpc DecSpriteYCoord
 .advance DecSpriteYCoord
 
 L988A:  LDA TitleRoutine        ;
@@ -3124,7 +3121,6 @@ L9A06:  .byte $00               ;End PPU string write.
 
 ;----------------------------------------[ Ending routines ]-----------------------------------------
 
-.checkpc NMIScreenWrite
 .advance NMIScreenWrite
 
 ;The following routine is accessed via the NMI routine every frame.
@@ -4388,7 +4384,7 @@ LA53D:  .byte $00               ;End PPU block write.
 WorldMap:
 LA53E:  .byte ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___
 LA55E:  .byte ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, $08, ___, $08, ___, ___, ___, ___, ___, ___, $08, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___
-LA57E:  .byte ___, ___, ___, $2C, $2B, $27, $15, $15, $16, $14, $13, $04, ___, $06, $08, $0A, $1A, $29, $29, $28, $2E, ___, ___, ___, ___, ___, ___, ___, ___, ___, $08, ___
+LA57E:  .byte ___, ___, ___, $2C, $2B, $27, $15, $15, $16, $14, $13, $04, ___, $06, $08, $0A, $1A, $29, $29, $28, $2D, ___, ___, ___, ___, ___, ___, ___, ___, ___, $08, ___
 LA59E:  .byte ___, $0E, ___, $01, ___, ___, ___, ___, ___, ___, ___, $06, ___, $03, $1F, $23, $25, $24, $26, $20, $1E, $1F, $21, $21, $07, $22, $1D, $1B, $21, $20, $04, ___
 LA5BE:  .byte ___, $10, ___, $0E, ___, ___, ___, ___, ___, ___, ___, $06, ___, $06, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, $02, ___
 LA5DE:  .byte ___, $10, ___, $0B, ___, ___, $08, $0A, $1A, $29, $28, $04, ___, $06, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, $08, $0A, $1A, $29, $29, $28, $04, ___
@@ -4419,7 +4415,6 @@ LA8DE:  .byte ___, ___, ___, ___, ___, ___, ___, ___, $1D, $1B, $17, $18, $0C, _
 LA8FE:  .byte ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, $0B, ___, $0C, $16, $18, $17, $18, $17, $0F, $17, $17, $1A, $1A, $17, $1B, $1B, $17, $19, $09, ___
 LA91E:  .byte ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___
 
-.checkpc CopyMap
 .advance CopyMap
 
 ; TODO - copy the map faster, can eat into the unused data
@@ -5683,7 +5678,6 @@ LB134:  .byte $FF               ;
 
 ;----------------------------------------------------------------------------------------------------
 
-.checkpc SoundEngineOrg
 .advance SoundEngineOrg
 
 .scope
@@ -5781,7 +5775,6 @@ LBFD2:  JMP Startup             ;($C01A)Does preliminry housekeeping.
 
 ;----------------------------------------------------------------------------------------------------
 
-.checkpc InterruptVectors
 .advance InterruptVectors
 
 ;Interrupt vectors.
