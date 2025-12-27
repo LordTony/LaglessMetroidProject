@@ -41,7 +41,7 @@ _L8065:  BNE ++++++++
 _L8067:  JSR $8244
 _L806A:  LDA $00
 _L806C:  BPL ++
-_L806E:  JSR TwosCompliment      ;($C3D4)
+_L806E:  JSR TwosCompliment
 _L8071:  STA $66
 _L8073:* JSR $83F5
 _L8076:  JSR $80B8
@@ -56,7 +56,7 @@ _L8089:  BNE -
 _L808B:* JSR $8318
 _L808E:  LDA $00
 _L8090:  BPL ++
-_L8092:  JSR TwosCompliment      ;($C3D4)
+_L8092:  JSR TwosCompliment
 _L8095:  STA $66
 _L8097:* JSR $84A7
 _L809A:  JSR $816E

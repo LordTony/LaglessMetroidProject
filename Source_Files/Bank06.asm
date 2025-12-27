@@ -893,7 +893,7 @@ Bank06_LB8B0:  .byte $00, $00, $00, $7C, $00, $00, $00, $00, $00, $00, $00, $7C,
 
 ;----------------------------------------------------------------------------------------------------
 
-LotsASpace:
+LotsaSpace:
 
 ; This just makes it this spot easy to find in a hex editor or a debugger
 .byte $DD, $DD, $DD, $DD, $DD, $DD, $DD, $DD, $DD, $DD, $DD, $DD, $DD, $DD, $DD, $DD

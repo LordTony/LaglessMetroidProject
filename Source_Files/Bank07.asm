@@ -492,14 +492,11 @@ LC1FE:* RTS                     ;Exit when no palette data pending.
 
 LC1FF:* DEY                     ;Palette # = PalDataPending - 1.
 LC203:  LDX PalPntrTbl_Lo,y     ;X = low byte of PPU data pointer.
+        STX $00
 LC206:  LDA PalPntrTbl_Hi,y     ;
-LC209:  TAY                     ;Y = high byte of PPU data pointer.
+LC209:  STA $01                 ;A = high byte of PPU data pointer.
 LC20A:  LDA #$00                ;Clear A.
 LC20C:  STA PalDataPending      ;Reset palette data pending byte.
-
-PrepPPUProcess:
-LC20E:  STX $00                 ;Lower byte of pointer to PPU string.
-LC210:  STY $01                 ;Upper byte of pointer to PPU string.
 LC212:  JMP ProcessPPUStr       ;($C30C)Write data string to PPU.
 
 ;----------------------------------[ Add y index to stored addresses ]-------------------------------
@@ -586,6 +583,10 @@ WriteScroll:                ;  Write to scroll registers
     STA PPUScroll           ;
     RTS                     ;
 
+PrepPPUProcess:
+    STX $00                 ;Lower byte of pointer to PPU string.
+    STY $01                 ;Upper byte of pointer to PPU string.
+    BNE ProcessPPUStr       ;Branch always ($C30C)Write data string to PPU.
 
 ;Erase blasted tile on nametable.  Each screen is 16 tiles across and 15 tiles down.
 EraseTile:
@@ -650,12 +651,6 @@ LC3CF:  STA $05                 ;Extract counter bits and save them for use abov
 LC3D1:  JMP NextPPUByte         ;($C36E)
 
 ;----------------------------------------[ Math routines ]-------------------------------------------
-
-TwosCompliment:
-LC3D4:  EOR #$FF                ;
-LC3D6:  CLC                     ;Generate twos compliment of value stored in A.
-LC3D7:  ADC #$01                ;
-LC3D9:  RTS                     ;
 
 Mul16Table:
     .byte $00, $10, $20, $30, $40, $50, $60, $70, $80, $90, $A0, $B0, $C0, $D0, $E0, $F0
@@ -1373,7 +1368,7 @@ LC8BB:
     INX
     BNE --
     STX MetroidOnSamus      ;Samus had no Metroid stuck to her.
-    JMP $95AB
+    JMP $95AB               ;This does nothing if you aren't in Tourian (Bank03)
 
 ; SamusInit
 ; =========
@@ -2233,8 +2228,11 @@ LCDFA:
     jsr LCF4E
 *   dex
     bne +
-    jsr TwosCompliment      ;($C3D4)
+
+    eor #$FF
+    adc #$00
 *   sta ObjHorzSpeed
+
 *   lda $77
     bpl CheckHealthBeep
     lda FrameCount
@@ -2369,7 +2367,8 @@ LCF31:  asr #$05
 *       LDA SamusHorzAccel
         BMI +
         BNE ++
-*       JSR TwosCompliment      ;($C3D4)
+*       eor #$FF
+        adc #$00                ;Carry is always set here
         STA SamusHorzAccel
 
 ClearHorzMvmntData:
@@ -3249,7 +3248,8 @@ UpdateWaveBullet:
     lsr
     bcc +
     tya
-    jsr TwosCompliment      ;($C3D4)
+    eor #$FF
+    adc #$00            ;Carry always set here
     sta ObjHorzSpeed,x
 *   jsr LD609
     bcs +
@@ -4741,19 +4741,22 @@ _ClearAndExit:
 .scend
 
 AfterYDisplacement:
-LDEEB:  adc ScreenYPos             ;Add initial Y position.
+        sbc #$00
+        clc
+LDEEB:  adc ScreenYPos        ;Add initial Y position.
 LDEED:  sta SpriteRAM,x       ;Store sprite Y coord.
-LDEF0:  dec SpriteRAM,x       ;Because PPU uses Y + 1 as real Y coord.
 LDEF3:  inc $0F             ;Increment index to next byte of placement data.
 LDEF5:  ldy MacroTileIndex             ;Get index to frame data.
 LDEF7:  lda ($00),y         ;Tile value.
 LDEF9:  sta SpriteRAM+1,x     ;Store tile value in sprite RAM.
+
 LDEFC:  lda ObjectCntrl         ;
-LDEFE:  asl             ;Move horizontal mirror control byte to bit 6 and
-LDEFF:  asl             ;discard all other bits.
-LDF00:  and #$40            ;
-LDF02:  eor $05             ;Use it to override sprite horz mirror bit.
-LDF04:  sta SpriteRAM+2,x     ;Store sprite control byte in sprite RAM.
+LDEFE:  asl                     ;Move horizontal mirror control byte to bit 6 and
+LDEFF:  asl                     ;discard all other bits.
+LDF00:  and #$40                ;
+LDF02:  eor $05                 ;Use it to override sprite horz mirror bit.
+LDF04:  sta SpriteRAM+2,x       ;Store sprite control byte in sprite RAM.
+
 LDF07:  inc MacroTileIndex    ;Increment to next byte of frame data.
 LDF09:  ldy $0F             ;Load index for placement data.
 
@@ -4835,6 +4838,59 @@ GetNewControlByte:
         sta ObjectCntrl             ;Ensure MSB of object control byte remains set.
         jmp GetNextFrameByte        ;($DF1B)Load next frame data byte.
 .scend
+
+;GetNextFrameByte:
+;LDF1B:  lda ($00),y                 ;Get next frame data byte.
+;LDF1D:  cmp #$FC                    ;If byte < #$FC, byte is tile data.
+;LDF1F:  bcc WriteSpriteRAM          ;If >= #$FC, byte is frame data control info. Branch to draw sprite.
+;LDF21:  beq OffsetObjectPosition    ;#$FC changes object's x and y position.
+;
+;    cmp #$FE
+;    beq SkipPlacementData           ; A == $FE
+;    bcc GetNewControlByte           ; A == $FD
+;    stx SpritePagePos               ; fallthrough: A == $FF
+;    lda #$00
+;    sta ObjectCntrl
+;    rts
+;
+;SkipPlacementData:
+;    lda $0F                     ;Skip next y and x placement data bytes.
+;    adc #$01                    ;Add 1 if no carry, add 2 if carry. This is important here
+;    sta $0F
+;LDF36:  inc MacroTileIndex          ;Increment to next data item in frame data.
+;LDF38:  jmp DrawSpriteObject        ;($DF19)Draw next sprite.
+;
+;.scope
+;
+;GetNewControlByte:
+;    LDF3B:  iny                     ;Increment index to next byte of frame data.
+;            lda ($00),y             ;Reload frame data control byte into A.
+;            iny 
+;            sty MacroTileIndex      ;Save index of frame data.
+;            bit ObjectCntrl         ;If MSB of ObjectCntrl is not set, no overriding of
+;    LDF3E:  bmi _flip               ;flip bits needs to be performed.
+;    
+;    _noFlip:
+;        sta $05                     ;Save new sprite control byte.
+;        jmp GetNextFrameByte        ;($DF1B)Load next frame data byte.
+;
+;    _flip:
+;    ;SpriteFlipBitsOverride
+;        and #$C0                    ;Extract the two sprite flip bytes from the original
+;        bpl _hi_bit_route
+;        ora ObjectCntrl             ;control byte and set any additional bits from ObjectCntrl.
+;        jmp _noFlip
+;
+;    _hi_bit_route:
+;        asl ObjectCntrl     
+;        lsr ObjectCntrl             ;Restore MSB.
+;        ora ObjectCntrl             ;control byte and set any additional bits from ObjectCntrl.
+;        sta $05                     ;Store modified byte to load in sprite control byte later.
+;        lda ObjectCntrl             ;
+;        ora #$80                    ;
+;        sta ObjectCntrl             ;Ensure MSB of object control byte remains set.
+;        jmp GetNextFrameByte        ;($DF1B)Load next frame data byte.
+;.scend
 
 OffsetObjectPosition:
         iny                         ;Increment index to next byte of frame data.
@@ -4958,7 +5014,6 @@ LE0A5:  bne +++             ;branch to exit.
 LE0A7:* sta EnAnimDelay,x           ;Save new animation delay value.
 LE0AA:  ldy EnAnimIndex,x           ;Load enemy animation index.
 LE0AD:* lda EnemyAnimIndexTbl,y     ;Get animation data.
-; TODO: Do we need this?
 LE0AF:  cmp #$FF                    ;End of animation?
 LE0B1:  beq ++                      ;If so, branch to reset animation.
 LE0B3:  sta EnAnimFrame,x       ;Store current animation frame data.
@@ -5356,7 +5411,10 @@ LE2B2:  sta SamusScrY           ;
 LE2B4:  lda $00             ;Load temp copy of vertical speed.
 LE2B6:  bpl ++++            ;If Samus is moving downwards, branch.
 
-LE2B8:  jsr TwosCompliment      ;($C3D4)Get twos compliment of vertical speed.
+        EOR #$FF
+        CLC                 ;TODO: Stick a breakpoint here and see what the carry bit is
+        ADC #$01
+
 LE2BB:  ldy SamusInLava         ;Is Samus in lava?
 LE2BD:  beq +               ;If not, branch,
 LE2BF:  lsr             ;else cut vertical speed in half.
@@ -5422,7 +5480,9 @@ LE325:  lda $00             ;Load Samus' current horizontal speed.
 LE327:  bpl LE347             ;Branch if moving right.
 
 ;Samus is moving left.
-LE329:  jsr TwosCompliment      ;($C3D4)Get twos compliment of horizontal speed.
+        eor #$FF
+        clc
+        adc #$01                ; Carry always set ehre
 LE32C:  ldy SamusInLava         ;Is Samus in lava?
 LE32E:  beq LE333               ;If not, branch,
 LE330:  lsr             ;else cut horizontal speed in half.
@@ -6712,7 +6772,10 @@ FillRoomRAM_60:
     .scend
  
  ATDataTable:
-    .byte %00000000, %01010101, %10101010, %11111111
+    .byte %00000000, %00000000, %00000000, %00000000
+    .byte %01010101, %01010101, %01010101, %01010101
+    .byte %10101010, %10101010, %10101010, %10101010
+    .byte %11111111, %11111111, %11111111, %11111111
 
 CartRamMulOffsetLoTable:
     .byte $00,$40,$80,$C0   ; low-byte part of X * $40 (X & 3)
@@ -7333,7 +7396,7 @@ LEDAC:  iny             ;
 LEDAD:  lax ($00),y         ;Low byte of ptr to next item data.         ;
 LEDB0:  iny             ;
 LEDB1:  and ($00),y         ;AND with hi byte of item ptr.
-LEDB3:  cmp #$FF            ;if result is FFh, then this was the last item
+LEDB3:  cmp #$FF            ;if result is FF, then this was the last item
 LEDB5:  beq Exit11          ;(item ptr = FFFF). Branch to exit.
 
 LEDB7:  lda ($00),y         ;High byte of ptr to next item data.
@@ -7423,15 +7486,31 @@ LEDFE:  iny             ;Prepare to store item type.
 LEDFF:  ldx #$00            ;
 LEE01:  lda #$FF            ;
 LEE03:  cmp PowerUpType         ;Is first power-up item slot available?
-LEE06:  beq +               ;if yes, branch to load item.
+LEE06:  beq LEE0F               ;if yes, branch to load item.
 
 LEE08:  ldx #$08            ;Prepare to check second power-up item slot.
 LEE0A:  cmp PowerUpBType        ;Is second power-up item slot available?         
-LEE0D:  bne ++              ;If not, branch to exit.
-LEE0F:* lda ($00),y         ;Power-up item type.
+LEE0D:  bne LEE39              ;If not, branch to exit.
+
+LEE0F:  lda ($00),y         ;Power-up item type.
 LEE11:  jsr PrepareItemID       ;($EE3D)Get unique item ID.
-LEE14:  jsr CheckForItem        ;($EE4A)Check if Samus already has item.
-LEE17:  bcs +               ;Samus already has item. do not load it.
+
+; TODO: After inlining, it seems like there is some duplicate work here
+CheckForItem:
+LEE4A:  ldy NumUniqueItems      ;
+LEE4D:  beq +++                 ;Samus has no unique items. Load item and exit.
+LEE4F:* lda $07                 ;
+LEE51:  cmp NumUniqueItems,y    ;Look for lower byte of unique item.
+LEE54:  bne +                   ;
+LEE56:  lda $06                 ;Look for upper byte of unique item.
+LEE58:  cmp DataSlot,y          ;
+LEE5B:  beq LEE17               ;Samus already has item. Branch to exit.
+LEE5D:* dey                     ;
+LEE5E:  dey                     ;
+LEE5F:  bne --                  ;Loop until all Samus' unique items are checked.
+LEE61:* clc                     ;Samus does not have the item. It will be placed on screen.
+
+LEE17:  bcs LEE39               ;Samus already has item. do not load it.
 
 LEE19:  ldy #$02            ;Prepare to load item coordinates.
 LEE1B:  lda $09             ;
@@ -7451,7 +7530,7 @@ LEE30:  sta PowerUpXCoord,x     ;Store center X coord
 LEE33:  jsr GetNameTable        ;($EB85)Get name table to place item on.
 LEE36:  sta PowerUpNameTable,x      ;Store name table Item is located on.
 
-LEE39:* lda #$03            ;Get next data byte(Always #$00).
+LEE39:  lda #$03            ;Get next data byte(Always #$00).
 LEE3B:  bne GoChooseHandlerRoutine  ;Branch always to exit handler routines.
     
 PrepareItemID:
@@ -7462,22 +7541,6 @@ LEE41:  sta $07             ;Store item X coordinate.
 LEE42:  lda MapPosY         ;
 LEE45:  sta $06             ;Store item Y coordinate.
 LEE47:  jmp CreateItemID        ;($DC67)Get unique item ID.
-
-; TODO - looks like it can be moved
-CheckForItem:
-LEE4A:  ldy NumUniqueItems     ;
-LEE4D:  beq +++             ;Samus has no unique items. Load item and exit.
-LEE4F:* lda $07             ;
-LEE51:  cmp NumUniqueItems,y   ;Look for lower byte of unique item.
-LEE54:  bne +               ;
-LEE56:  lda $06             ;Look for upper byte of unique item.
-LEE58:  cmp DataSlot,y          ;
-LEE5B:  beq +++             ;Samus already has item. Branch to exit.
-LEE5D:* dey             ;
-LEE5E:  dey             ;
-LEE5F:  bne --              ;Loop until all Samus' unique items are checked.
-LEE61:* clc             ;Samus does not have the item. It will be placed on screen.
-LEE62:* rts             ;
 
 ;-----------------------------------------------------------------------------------------------------
 
@@ -7586,6 +7649,31 @@ LEF09:  clc             ;
 
 ;----------------------------------[ Draw structure routines ]----------------------------------------
 
+DoAnotherMacro:
+LEF72:  dec ScreenXPos              ;Have all macros been drawn on this row?
+LEF74:  bne SetupMacroRam           ;If not, branch to draw another macro.
+LEF76:  lda ScreenYPos              ;Load struct index.
+
+AdvanceRow:
+LEF78:  sec                         ;Since carry bit is set,
+LEF79:  adc StructPtrLB             ;addition will be one more than expected.
+LEF7B:  sta StructPtrLB             ;Update the struct pointer.
+LEF7D:  bcs IncStructPtrUB
+
+UpdateCartRamPtr:
+LEF81:  lda CartRAMWorkPtrLB        ;
+LEF84:  adc #$40                    ;Advance to next macro row in room RAM(two tile rows).
+LEF86:  sta CartRAMWorkPtrLB        ;
+LEF88:  bcs IncCartRAMWorkPtrUB     ;Begin drawing next structure row.
+
+DrawStruct:                     ;Reset struct index.
+        lda CartRAMWorkPtrUB
+        sta $01
+        ldy #$00
+LEF8E:  sty ScreenYPos          ;
+LEF90:  lax (StructPtr),y       ;Load data byte.
+LEF94:  bmi DrawStructExit      ;If so, branch to exit.
+
 ;Draws one row of the structure.
 ;A = number of 2x2 tile macros to draw horizontally.
 
@@ -7607,10 +7695,9 @@ SetupMacroRam:
 ;If not at end of room RAM, branch to draw macro.
 
   lda $01
-  and #$FB
-  cmp #$63
-  bmi DrawMacro
-  bcc DrawMacro
+  and #$03
+  cmp #$03
+  bne DrawMacro
 
 CheckForAttrTable:
 LEF38:  lda $00             ;Low byte of current nametable address.
@@ -7641,11 +7728,11 @@ LEF43:  lax (StructPtr),y       ;Get macro number. StructPtr = $35
     STA ($00),Y
 
 ; Update attribute if changed
-LEF9E:  lda SpareMemD1
+        lda ObjectPal
+        eor RoomPal
 LEFA2:  bne UpdateAttrib            ;If so, no need to modify the attribute table, exit.
 AfterUpdateAttr:
     LDA $00
-    ;clc
     ADC #$02
     STA $00
 LEF63:  and #$1F                    ;Still room left in current row?
@@ -7656,35 +7743,6 @@ LEF67:  lda ScreenYPos             ;Struct index.
 LEF6A:  adc ScreenXPos  ;Add number of macros remaining in current row.
 LEF6D:  sbc #$00            ;-1 from macros remaining in current row.
 LEF6F:  jmp AdvanceRow          ;($EF78)Move to next row of structure.
-
-DoAnotherMacro:
-LEF72:* dec ScreenXPos              ;Have all macros been drawn on this row?
-LEF74:  bne SetupMacroRam           ;If not, branch to draw another macro.
-LEF76:  lda ScreenYPos              ;Load struct index.
-
-AdvanceRow:
-LEF78:  sec                         ;Since carry bit is set,
-LEF79:  adc StructPtrLB             ;addition will be one more than expected.
-LEF7B:  sta StructPtrLB             ;Update the struct pointer.
-LEF7D:  bcs IncStructPtrUB
-
-UpdateCartRamPtr:
-LEF81:  lda CartRAMWorkPtrLB        ;
-LEF84:  adc #$40                    ;Advance to next macro row in room RAM(two tile rows).
-LEF86:  sta CartRAMWorkPtrLB        ;
-LEF88:  bcs IncCartRAMWorkPtrUB     ;Begin drawing next structure row.
-
-DrawStruct:                     ;Reset struct index.
-        lda CartRAMWorkPtrUB
-        sta $01
-        lda ObjectPal
-        eor RoomPal
-        sta SpareMemD1          ; 0 if ObjectPal == RoomPal, non-zero if different
-        ldy #$00
-LEF8E:  sty ScreenYPos          ;
-LEF90:  lax (StructPtr),y       ;Load data byte.
-LEF94:  bmi DrawStructExit      ;If so, branch to exit.
-LEF96:  jmp DrawStructRow       ;($EF13)Draw a row of macros.
 
 IncStructPtrUB:
 LEF7F:  inc StructPtrUB         ;Update high byte of struct pointer if carry occured.
@@ -7705,15 +7763,15 @@ DrawStructExit:
 UpdateAttrib:
 ;Figure out cart RAM address of the byte containing the relevant bits.
 
-LEFA4:  lda $00             ;
-LEFA6:  sta $02             ;
-LEFA8:  lda $01             ;
-LEFAA:  lsr                 ;
-LEFAB:  ror $02             ;
-LEFAD:  lsr                 ;
-LEFAE:  ror $02             ;
+lda $01          
+and #$03         
+tax                   
 
-LEFB0:  lda $02             ;The following section of code calculates the
+lda $00          
+lsr              
+lsr              
+ora CartRamMulOffsetLoTable,x   ; $00, $40, $80, $C0
+
 LEFB2:  ldx #$07            ;proper attribute byte that corresponds to the
 LEFB4:  sax $03             ;macro that has just been placed in the room RAM.
 LEFB8:  lsr                 ;
@@ -7747,8 +7805,6 @@ LEFC0:  sta $02             ;
     LEFDB:  sta $03             ;current room RAM.
 
     lda ObjectPal           ; A = 0..3
-    asl
-    asl
     adc IdentityTable, x    ; idx = pal*4 + quadrant (0..15)
     tax                     ; X = idx
 
@@ -8742,7 +8798,10 @@ LF75B:  lda #$E7
     sec
     sbc $00
     bpl +
-    jsr TwosCompliment      ;($C3D4)
+
+    eor #$FF
+    adc #$00    ;Carry always set here
+
 *   lsr
     lsr
     lsr
@@ -9030,7 +9089,10 @@ LF991:  jsr LFA5B
     PHP
     BCC +
     TYA
-    JSR TwosCompliment      ;($C3D4)
+
+    EOR #$FF
+    ADC #$00    ;Carry always set here
+
     STA $0403,x
 *   PLP
     BNE +
@@ -9230,7 +9292,11 @@ Bank07_LFB88:  ldx PageIndex
     pha
     pla
 *   bpl +
-    jsr TwosCompliment      ;($C3D4)
+
+    EOR #$FF
+    CLC                 ;TODO: Stick a breakpoint here and see what the carry bit is
+    ADC #$01
+
 *   cmp #$08
     bcc +
     cmp #$10
@@ -9394,7 +9460,11 @@ LFD08:
     sbc $B2,x
     bpl +
     iny
-    jsr TwosCompliment      ;($C3D4)
+
+    EOR #$FF
+    CLC                 ;TODO: Stick a breakpoint here and see what the carry bit is
+    ADC #$01
+
 *   cmp #$10
     bcs AfterLFD08
     tya
@@ -9473,7 +9543,8 @@ LFD25:  txa
     lda #$02
     cpy #$20
     bcc +
-    jsr TwosCompliment      ;($C3D4)
+    eor #$FF
+    adc #$00    ; Carry always set here
     cpy #$80
     bcc ++
 *   sta $04

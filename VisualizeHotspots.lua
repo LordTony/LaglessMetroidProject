@@ -2,28 +2,19 @@
 --Press F5 or click the Run button to execute it
 --Type "emu." to show a list of all available API function
 
-start_addr = 0xCDD2
-end_addr = 0xCDD2
+watch_addresses = {
+	{ s = 0xB000, e = 0xFFFF }
+}
+ignore_regions = {
+	{ s = 0xC0C2, e = 0xC0C9 } 
+}
 how_many_to_show = 50
 framesToResetOn = 60
 timer = 0
 
-function printHex(num)
-	return "$" .. string.upper(string.format("%x", num))
-end
-
-function round(num)
-	return string.format("%.2f", num)
-end
-
 function onFrame()
 	timer = timer + 1
-	--if drawMacroCount > 0 then
-	--	emu.drawString(5, 5, "DrawMacro this frame: " .. drawMacroCount, 0xFFFFFF, 0x0, 0, 600)
-	--	drawMacroCount = 0
-	--	
-	--end
-	
+
 	if timer >= framesToResetOn then
 		local entries = {}
 		for addr, ct in pairs(counts) do
@@ -35,7 +26,7 @@ function onFrame()
 		end)
 		local limit = math.min(how_many_to_show, #entries)
 		
-		emu.drawString(5, 5, "Top " .. limit .. " Hotspots in range " .. printHex(start_addr) .. "-" .. printHex(end_addr), 0xFFFFFF, 0x0, 0, framesToResetOn)
+		--emu.drawString(5, 5, "Top " .. limit .. " Hotspots in range " .. printHex(start_addr) .. "-" .. printHex(end_addr), 0xFFFFFF, 0x0, 0, framesToResetOn)
 		emu.drawString(5, 15, "Avg hit/frame - " .. framesToResetOn .. " frames (~" .. framesToResetOn / 60 .. " sec)", 0xFFFFFF, 0x0, 0, framesToResetOn)
 		
 		-- print the top however many
@@ -61,17 +52,38 @@ end
 
 counts = {}
 function countHotspots(address)
-	local ct = counts[address]
-	if ct == nil then
-		ct = 0
+	local ignore = false
+	for _, ignore_region in ipairs(ignore_regions) do
+		if(address >= ignore_region["s"] and address <= ignore_region["e"]) then
+			ignore = true
+			break
+		end
 	end
-	ct = ct + 1
-	counts[address] = ct
+
+	if(not ignore) then
+		local ct = counts[address]
+		if ct == nil then
+			ct = 0
+		end
+		ct = ct + 1
+		counts[address] = ct
+	end
+end
+
+function printHex(num)
+	return "$" .. string.upper(string.format("%x", num))
+end
+
+function round(num)
+	return string.format("%.2f", num)
 end
 
 --Register some code (printInfo function) that will be run at the end of each frame
-emu.addMemoryCallback(countHotspots, emu.callbackType.exec, start_addr, end_addr)
+for _, addr in ipairs(watch_addresses) do
+    emu.addMemoryCallback(countHotspots, emu.callbackType.exec, addr["s"], addr["e"])
+end
+
 emu.addEventCallback(onFrame, emu.eventType.start)
 
 --Display a startup message
-emu.displayMessage("Script", "Example Lua script loaded.")
+emu.displayMessage("Script", "Hmm.")

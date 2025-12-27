@@ -964,12 +964,12 @@ L8870:  RTS                     ;
 ;----------------------------------------------------------------------------------------------------
 
 NibbleSubtract:
-L8871:  CMP #$08                ;If bit 3 is set, nibble is a negative number
-L8873:  BCC +                   ;and lower three bits are converted to twos
+L8871:  CMP #$08                    ;If bit 3 is set, nibble is a negative number
+L8873:  BCC +                       ;and lower three bits are converted to twos
 
-L8875:  AND #$07                ;compliment for subtraction, else exit.
-L8877:  JSR TwosCompliment      ;($C3D4)Prepare for subtraction with twos compliment.
-L887A:* RTS                     ;
+L8875:  AND #$07                    ;compliment for subtraction, else exit.
+L8877:  JSR Bank00_TwosCompliment   ;Prepare for subtraction with twos compliment.
+L887A:* RTS                         ;
 
 ;----------------------------------------------------------------------------------------------------
 
@@ -2712,6 +2712,11 @@ ClearSamusStats:
     BPL -                   ;Loop 16 times.
     RTS                     ;
 
+Bank00_TwosCompliment:
+    EOR #$FF
+    CLC
+    ADC #$01
+    RTS
 .advance $949F
 
 L949F:  .byte $20, $DA, $94, $A5, $06, $9D, $3D, $68, $A5, $07, $9D, $3C, $68, $68, $A8, $60

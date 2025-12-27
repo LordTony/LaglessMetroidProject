@@ -102,4 +102,7 @@ The "Visualize Hotspots" lua script can be run and tweaked to find places in the
 
 ## Bugs
 * Starting with a Ridley Password and going up the elevator gets a bugged map
+* Tourian is really broken
+  * Metroid grabbing you can crash the game
+  * Shooting metroids with missiles plays the wrong sounds
 * Enemies that fly off the screen tend to stay there and blink if you run behind them (this might be a behavior in the base game. Will need to check)

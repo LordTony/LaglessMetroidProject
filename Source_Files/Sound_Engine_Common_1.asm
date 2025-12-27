@@ -194,7 +194,6 @@ _TriContTbl:
   .word _BmbLaunchSFXCont  ;Bomb launch continue SFX.
 
 ;----------------------------------------------------------------------------------------------------
-
 _NseSFXInitFlags:
   LDA NoiseSFXFlag        ;Load A with Noise init SFX flags, (1st SFX cycle).
   LDX #<_NseInitDat        ;Lower address byte in ChooseNextSFXRoutineTbl.
@@ -213,7 +212,6 @@ _SQ1SFXInitFlags:
 _SQ1SFXContFlags:
   LDA SQ1ContSFX          ;Load A with SQ1 continue flags, (6th SFX cycle).
   LDX #<_SQ1ContDat        ;Lower address byte in ChooseNextSFXRoutineTbl.
-  BNE _GotoSFXCheckFlags   ;Branch always.
 
 _GotoSFXCheckFlags:
   JSR _CheckSFXFlag        ;($B4BD)Checks to see if SFX flags set.     
@@ -270,9 +268,7 @@ _MultiSFXContFlags:
   JMP _GotoSFXCheckFlags   ;($B337)Checks to see if SFX or music flags set.
 
 _LoadSQ1Flags:
-  JSR _SQ1SFXInitFlags     ;($B329)Check for SQ1 init flags.
-  RTS                     ;
-  nop
+  JMP _SQ1SFXInitFlags      ;($B329)Check for SQ1 init flags.
 
 ;----------------------------------------------------------------------------------------------------
 
@@ -306,13 +302,14 @@ _LoadSFXData:
 _LoadSFXRegisters:
   LDA (SFXPtrE2),Y        ;Load A with SFX data byte.
   STA (SFXPtrE0),Y        ;Store A in SFX register.
+  INY                     ;
+  LDA (SFXPtrE2),Y        ;Load A with SFX data byte.
+  STA (SFXPtrE0),Y        ;Store A in SFX register.
 
   INY                     ;
   CPY #$04                ;channel are loaded one after the other (the loop
   BNE _LoadSFXRegisters    ;repeats four times).
   RTS                     ;
-  nop
-
 ;----------------------------------------------------------------------------------------------------
 
 _PauseSFX:
