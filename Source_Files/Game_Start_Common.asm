@@ -70,7 +70,7 @@ _L80AB:  DEC $66
 _L80AD:  BNE -
 _L80AF:* RTS
 
-; TODO: This is unsed in Bank07
+; TODO: This is used in Bank07
 _L80B0:  LDY EnDataIndex,X
 _L80B3:  LDA $977B,Y
 _L80B6:  ASL                     ;*2 

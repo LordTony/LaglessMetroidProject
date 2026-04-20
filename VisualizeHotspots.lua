@@ -3,7 +3,7 @@
 --Type "emu." to show a list of all available API function
 
 watch_addresses = {
-	{ s = 0xB000, e = 0xFFFF }
+	{ s = 0xB4CC, e = 0xB4E4 }
 }
 ignore_regions = {
 	{ s = 0xC0C2, e = 0xC0C9 } 
@@ -84,6 +84,3 @@ for _, addr in ipairs(watch_addresses) do
 end
 
 emu.addEventCallback(onFrame, emu.eventType.start)
-
---Display a startup message
-emu.displayMessage("Script", "Hmm.")

@@ -181,7 +181,6 @@
 .alias InArea           $74     ;#$10(or #$00)=Brinstar, #$11=Norfair, #$12=Kraid hideout,
                                 ;#$13=Tourian, #$14=Ridley hideout.
 
-.alias SpareMem75       $75     ;never read or written
 .alias PalToggle        $76
 
 .alias ItemRmMusicSts   $79     ;#$00=Item room music not playing. 
@@ -460,7 +459,7 @@
 .alias SQ2InUse         $0654   ;2=SQ2 channel being used by SFX, 0=not in use
 .alias TriangleInUse    $0655   ;3=Triangle channel being used by SFX, 0=not in use
 
-.alias ChannelType      $065C   ;Stores channel type being processed(0,1,2,3 or 4)
+.alias ChannelType      $75     ;Stores channel type being processed(0,1,2,3 or 4)
 .alias CrntMusicRepeat  $065D   ;Stores flags of music to repeat
 .alias MusicInitIndex   $065E   ;index for loading $62B thru $637(base=$BD31).
 
@@ -492,11 +491,12 @@
 .alias ScrewAtkSFXData  $0678   ;Contains extra data for screw attack SFX
 .alias SQ1SFXPeriodLow  $0679   ;Period low data for processing multi SFX routines
 
+; HERE HERE HERE 
 .alias NoiseSFXFlag     $0680   ;Initialization flags for noise SFX
 .alias SQ1SFXFlag       $0681   ;Initialization flags for SQ1 SFX
 .alias SQ2SFXFlag       $0682   ;Initialization flags for SQ2 SFX(never used)
 .alias TriangleSFXFlag  $0683   ;Initialization flags for triangle SFX
-.alias MultiSFXFlag     $0684   ;Initialization Flags for SFX and some music
+.alias MultiSFXFlag     $0684   ;Initialization flags for SFX and some music
 
 .alias MusicInitFlag    $0685   ;Music init flags
 
@@ -883,7 +883,7 @@
 .alias MacroUpperRight          $AFD2
 .alias MacroUpperLeft           $B017
 .alias SoundEngineOrg           $B200
-.alias SoundEngineEntryPoint    $B3C6
+.alias SoundEngineEntryPoint    $B3D8
 .alias StructPointerTable_Hi    $BF56
 .alias StructPointerTable_Lo    $BF88
 .alias InterruptVectors         $BFFA

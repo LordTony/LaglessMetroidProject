@@ -55,15 +55,15 @@ LC06D:  LDA #%00001110          ;Verticle mirroring.
                                 ;8KB CHRROM switching enabled.
 LC06F:  STA MMCReg0Cntrl        ;
 
-LC071:  LDA #$00                ;Clear bits 3 and 4 of MMC1 register 3.
-LC073:  STA SwitchUprBits       ;
-
-LC075:  LDY #$00                ;
+LC071:  LDY #$00                ;Clear bits 3 and 4 of MMC1 register 3.
+LC073:  STY SwitchUprBits       ;
 LC077:  STY ScrollX             ;ScrollX = 0
 LC079:  STY ScrollY             ;ScrollY = 0
 LC07B:  STY PPUScroll           ;Clear hardware scroll x
 LC07E:  STY PPUScroll           ;Clear hardware scroll y
-LC081:  INY                     ;Y = #$01
+
+
+        INY                     ;
 LC082:  STY GameMode            ;Title screen mode
 LC084:  JSR ClearNameTables     ;($C158)
 LC087:  JSR EraseAllSprites     ;($C1A3)
@@ -84,14 +84,15 @@ LC091:  LDA #%00000010          ;Sprites visible = no
                                 ;Display type = color
 LC093:  STA PPUCNT1ZP           ;
 
-LC095:  LDA #$47                ;
-LC097:  STA MirrorCntrl         ;Prepare to set PPU to vertical mirroring.
 LC099:  JSR PrepVertMirror      ;($C4B2)
 
 LC09C:  LDA #$00                ;
 LC09E:  STA DMCCntrl1           ;PCM volume = 0 - disables DMC channel
 LC0A1:  LDA #$0F                ;
 LC0A3:  STA APUCommonCntrl0     ;Enable sound channel 0,1,2,3
+
+        LDY #$B2                ; Setup Audio Entry point high byte
+        STY SFXPtrE4UB          ;
 
 LC0A6:  LDY #$00                ;
 LC0A8:  STY TitleRoutine        ;Set title routine and and main routine function
@@ -146,10 +147,9 @@ LC0C7:  LDA #$00                ;
 LC0C9:  STA NMIStatus           ;Wait for next NMI to end.
 
 WaitNMIEnd:
-LC0CB:  TAY                     ;
 LC0CC:  LDA NMIStatus           ;
 LC0CE:  BNE RandomNumbers       ;If nonzero, NMI has ended. Else keep waiting.
-LC0D0:  JMP WaitNMIEnd          ;
+LC0D0:  BEQ WaitNMIEnd          ;
 
 ; ----------------------------------------------------------------------------------
 ;This routine generates pseudo random numbers and updates those numbers
@@ -353,9 +353,14 @@ LC131:* STA MainRoutine         ;(MainRoutine = 5 if game paused, 3 if game engi
 LC133:  LDA GamePaused          ;
 LC135:  EOR #$01                ;Toggle game paused.
 LC137:  STA GamePaused          ;
-LC139:  JSR PauseMusic          ;($CB92)Silences music while game paused.
 
-LC13c:* LDX MainRoutine         ;
+;Set PauseMusic SFX flag
+    LDA #MUS_PAUSE
+    ORA NoiseSFXFlag
+    STA NoiseSFXFlag
+
+LC13c:
+* LDX MainRoutine 
 
 LDA MainRoutineTable_LoBytes, x
 STA CodePtr
@@ -406,7 +411,7 @@ LC187:  STA PPUAddress          ;
 LC18A:  LDA #$00                ;Set PPU start address (High byte first).
 LC18C:  STA PPUAddress          ;
 LC18F:  LDX #$04                ;Prepare to loop 4 times.
-LC191:  LDY #$00                ;Inner loop value.
+        TAY                     ;Inner loop value.
 LC193:  LDA $00                 ;Fill-value.
 LC195:* STA PPUIOReg            ;
 LC198:  DEY                     ;
@@ -414,15 +419,6 @@ LC199:  BNE -                   ;Loops until the desired name table is cleared.
 LC19B:  DEX                     ;It also clears the associated attribute table.
 LC19C:  BNE -                   ;
 LC19E:  RTS                     ;
-
-;The following table is used by the above routine for finding
-;the high byte of the proper name table to clear.
-
-HiPPUTable:
-LC19F:  .byte $20               ;Name table 0.
-LC1A0:  .byte $24               ;Name table 1.
-LC1A1:  .byte $28               ;Name table 2.
-LC1A2:  .byte $2C               ;Name table 3.
 
 ;-------------------------------------[ Erase all sprites ]------------------------------------------
 
@@ -652,32 +648,6 @@ LC3D1:  JMP NextPPUByte         ;($C36E)
 
 ;----------------------------------------[ Math routines ]-------------------------------------------
 
-Mul16Table:
-    .byte $00, $10, $20, $30, $40, $50, $60, $70, $80, $90, $A0, $B0, $C0, $D0, $E0, $F0
-
-; TODO - This might be worse than using these bytes fully unroll hot loops
-; TODO - Need to align the identity table to a memory page for maxium cycle gains
-;        Test out if aligning to #$00 or #$F0 is better. There are way more -16s in the code
-    .byte $f0, $f1, $f2, $f3, $f4, $f5, $f6, $f7, $f8, $f9, $fa, $fb, $fc, $fd, $fe, $ff
-IdentityTable:
-    .byte $00, $01, $02, $03, $04, $05, $06, $07, $08, $09, $0a, $0b, $0c, $0d, $0e, $0f
-    .byte $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $1a, $1b, $1c, $1d, $1e, $1f
-    .byte $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $2a, $2b, $2c, $2d, $2e, $2f
-    .byte $30, $31, $32, $33, $34, $35, $36, $37, $38, $39, $3a, $3b, $3c, $3d, $3e, $3f
-    .byte $40, $41, $42, $43, $44, $45, $46, $47, $48, $49, $4a, $4b, $4c, $4d, $4e, $4f
-    .byte $50, $51, $52, $53, $54, $55, $56, $57, $58, $59, $5a, $5b, $5c, $5d, $5e, $5f
-    .byte $60, $61, $62, $63, $64, $65, $66, $67, $68, $69, $6a, $6b, $6c, $6d, $6e, $6f
-    .byte $70, $71, $72, $73, $74, $75, $76, $77, $78, $79, $7a, $7b, $7c, $7d, $7e, $7f
-    .byte $80, $81, $82, $83, $84, $85, $86, $87, $88, $89, $8a, $8b, $8c, $8d, $8e, $8f
-    .byte $90, $91, $92, $93, $94, $95, $96, $97, $98, $99, $9a, $9b, $9c, $9d, $9e, $9f
-    .byte $a0, $a1, $a2, $a3, $a4, $a5, $a6, $a7, $a8, $a9, $aa, $ab, $ac, $ad, $ae, $af
-    .byte $b0, $b1, $b2, $b3, $b4, $b5, $b6, $b7, $b8, $b9, $ba, $bb, $bc, $bd, $be, $bf
-    .byte $c0, $c1, $c2, $c3, $c4, $c5, $c6, $c7, $c8, $c9, $ca, $cb, $cc, $cd, $ce, $cf
-    .byte $d0, $d1, $d2, $d3, $d4, $d5, $d6, $d7, $d8, $d9, $da, $db, $dc, $dd, $de, $df
-    .byte $e0, $e1, $e2, $e3, $e4, $e5, $e6, $e7, $e8, $e9, $ea, $eb, $ec, $ed, $ee, $ef
-    .byte $f0, $f1, $f2, $f3, $f4, $f5, $f6, $f7, $f8, $f9, $fa, $fb, $fc, $fd, $fe, $ff
-    .byte $00, $01, $02, $03, $04, $05, $06, $07, $08, $09, $0a, $0b, $0c, $0d, $0e, $0f    ; Overflow a bit so catch +16 past $ff
-
 ;The following two routines add a Binary coded decimal (BCD) number to another BCD number.
 ;A base number is stored in $03 and the number in A is added/subtracted from $03.  $01 and $02 
 ;contain the lower and upper digits of the value in A respectively.  If an overflow happens after
@@ -703,7 +673,6 @@ LC3F6:* CMP #$A0                ;If result of upper nibble add is greater than #
 LC3F8:  BCS --                  ;Branch to add #$5F to create valid result.
 LC3FA:  RTS                     ;
 
-;TODO
 Base10Subtract:
 LC3FB:  JSR ExtractNibbles      ;($C41D)Separate upper 4 bits and lower 4 bits.
 LC3FE:  SBC $01                 ;Subtract lower nibble from number.
@@ -830,7 +799,8 @@ LC4B0:  BNE SetMainRoutine      ;Branch always.
 ;-----------------------------------[ PPU mirroring routines ]---------------------------------------
 
 PrepVertMirror:
-LC4B4:  LDA #$47                ;Prepare to set PPU for vertical mirroring (again).
+LC095:  LDA #$47                ;
+LC097:  STA MirrorCntrl         ;Prepare to set PPU to vertical mirroring.
 
 SetPPUMirror:
 LC4B6:  LSR                     ;
@@ -963,9 +933,6 @@ BrinstarGFX_Loop:
         bpl BrinstarGFX_Loop
 LC575:  JMP NmiOn               ;($C487)Turn on VBlank interrupts.
 
-BrinstarGFXTable:
-    .byte $16, $19, $06, $05, $04, $03
-
 ;Norfair memory page.
 
 InitBank2:
@@ -981,9 +948,6 @@ NorfairGFX_Loop:
         dec SpareMemD1
         bpl NorfairGFX_Loop
 LC58D:  JMP NmiOn               ;($C487)Turn on VBlank interrupts.
-
-NorfairGFXTable:
-    .byte $16, $19, $09, $08, $07, $05, $04
 
 ;Tourian memory page.
 
@@ -1006,15 +970,6 @@ TourianGFX_Loop:
         bpl TourianGFX_Loop
 LC5A5:  JMP NmiOn               ;($C487)Turn on VBlank interrupts.
 
-TourianGFXTable:
-    .byte $16, $19, $1C, $1A, $0E, $0D, $0C, $0B, $0A, $05
-
-;Table used by above subroutine and loads the initial data used to describe
-;metroid's behavior in the Tourian section of the game.
-
-MetroidData:
-    .byte $F8, $08, $30, $D0, $60, $A0, $02, $04, $00, $00, $00, $00, $00, $00
-
 ;Kraid memory page.
 
 InitBank4:
@@ -1031,9 +986,6 @@ KraidGFX_Loop:
         bpl KraidGFX_Loop
 LC5C0:  JMP NmiOn               ;($C487)Turn on VBlank interrupts.
 
-KraidGFXTable:
-    .byte $16, $19, $11, $10, $0F, $0A, $05, $04
-
 ;Ridley memory page.
 
 InitBank5:
@@ -1049,9 +1001,6 @@ RidleyGFX_Loop:
         dec SpareMemD1
         bpl RidleyGFX_Loop
 LC5CD:  JMP NmiOn               ;($C487)Turn on VBlank interrupts.
-
-RidleyGFXTable:
-    .byte $16, $19, $13, $12, $0A, $05, $04
 
 InitEndGFX:
 LC5D0:  LDA #$01                ;
@@ -1086,122 +1035,11 @@ SamusGFX_Loop:
 SamusGFX_AfterLoop:
     rts
 
-SamusGFXTable:
-    .byte $16, $19, $18, $17, $14, $1B      ;$1B should only be loaded if JustInBailey
-
 InitGFX7:
 LC6D6:  LDY #$17                ;Entry 23 in GFXInfo table.
 LC6D8:  JSR LoadGFX             ;($C7AB)Load pattern table GFX.
 LC6DB:  LDY #$16                ;Entry 22 in GFXInfo table.
 LC6DD:  JMP LoadGFX             ;($C7AB)Load pattern table GFX.
-
-;The table below contains info for each tile data block in the ROM.
-;Each entry is 7 bytes long. The format is as follows:
-;byte 0: ROM bank where GFX data is located.
-;byte 1-2: 16-bit ROM start address (src).
-;byte 3-4: 16-bit PPU start address (dest).
-;byte 5-6: data length (16-bit).
-
-GFXInfo:
-;[SPR]Samus, items. Entry 0.
-LC6E0:  .byte $06
-LC6E1:  .word GFXSuitedSamus, $0000, $09A0
-
-;[SPR]Samus in ending. Entry 1.
-LC6E7:  .byte $04
-LC6E8:  .word $8D60, $0000, $0520
-
-;[BGR]Partial font, "The End". Entry 2.
-LC6EE:  .byte $01
-LC6EF:  .word $8D60, $1000, $0400
-
-;[BGR]Brinstar rooms. Entry 3.
-LC6F5:  .byte $06
-LC6F6:  .word GFXBrinstar1, $1000, $0150
-
-;[BGR]Misc. objects. Entry 4.
-LC6FC:  .byte $05
-LC6FD:  .word $8D60, $1200, $0450
-
-;[BGR]More Brinstar rooms. Entry 5.
-LC703:  .byte $06
-LC704:  .word GFXBrinstar2, $1800, $0800
-
-;[SPR]Brinstar enemies. Entry 6.
-LC70A:  .byte $01
-LC70B:  .word $9160, $0C00, $0400
-
-;[BGR]Norfair rooms. Entry 7.
-LC711:  .byte $06
-LC712:  .word GFXNorfair1, $1000, $0260
-
-;[BGR]More Norfair rooms. Entry 8.
-LC718:  .byte $06
-LC719:  .word GFXNorfair2, $1700, $0070
-
-;[SPR]Norfair enemies. Entry 9.
-LC71F:  .byte $02
-LC720:  .word $8D60, $0C00, $0400
-
-;[BGR]Tourian rooms. Entry 10.
-LC726:  .byte $06
-LC727:  .word GFXTourian1, $1000, $02E0
-
-LC72D:  .byte $06           ;[BGR]More Tourian rooms. Entry 11.
-LC72E:  .word GFXTourian2, $1200, $0600
-
-LC734:  .byte $06           ;[BGR]Mother Brain room. Entry 12.
-LC735:  .word GFXMthrBrnRoom, $1900, $0090
-
-LC73B:  .byte $05           ;[BGR]Misc. object. Entry 13.
-LC73C:  .word $91B0, $1D00, $0300
-
-LC742:  .byte $02           ;[SPR]Tourian enemies. Entry 14.
-LC743:  .word $9160, $0C00, $0400
-
-LC749:  .byte $06           ;[BGR]More Tourian rooms. Entry 15.
-LC74A:  .word GFXTourian3, $1700, $00C0
-
-LC750:  .byte $04           ;[BGR]Misc. object and fonts. Entry 16.
-LC751:  .word $9360, $1E00, $0200
-
-LC757:  .byte $03               ;[SPR]Miniboss I enemies. Entry 17.
-LC758:  .word $8D60, $0C00, $0400
-
-LC75E:  .byte $06               ;[BGR]More Tourian Rooms. Entry 18.
-LC75F:  .word GFXTourian4, $1700, $00C0
-
-LC765:  .byte $03           ;[SPR]Miniboss II enemies. Entry 19.
-LC766:  .word $9160, $0C00, $0400
-
-LC76C:  .byte $06           ;[SPR]Inrto/End sprites. Entry 20.
-LC76D:  .word GFXIntroEnd, $0C00, $0100
-
-LC773:  .byte $06           ;[BGR]Title. Entry 21.
-LC774:  .word GFXMetroidTitle, $1400, $0500
-
-LC77A:  .byte $06           ;[BGR]Solid tiles.      Entry 22.
-LC77B:  .word GFXBlankTiles, $1FC0, $0040
-
-LC781:  .byte $06           ;[BGR]Complete font.        Entry 23.
-LC782:  .word GFXFont, $1000, $0400
-
-LC788:  .byte $06           ;[BGR]Complete font.        Entry 24.
-LC789:  .word GFXFont, $0A00, $00A0
-
-LC78F:  .byte $06           ;[BGR]Solid tiles.      Entry 25.
-LC790:  .word GFXBlankTiles, $0FC0, $0040
-
-LC796:  .byte $06           ;[BGR]Complete font.        Entry 26.
-LC797:  .word GFXFont, $1D00, $02A0
-
-;[SPR]Suitless Samus.           Entry 27.
-LC79D:  .byte $06
-LC79E:  .word GFXSuitlesSamus, $0000, $07B0
-
-;[BGR]Exclaimation point.       Entry 28.
-LC7A4:  .byte $06
-LC7A5:  .word $9890, $1F40, $0010
 
 ;--------------------------------[ Pattern table loading routines ]---------------------------------
 
@@ -1264,6 +1102,8 @@ LC7D2:  jmp ROMSwitch           ;($C4FE)Switch back to the "old" bank.
 
 AreaInit:
 LC801:  lda #$00                ;
+        sta $3F
+        sta $40
 LC803:  sta ScrollX             ;Clear ScrollX.
 LC805:  sta ScrollY             ;Clear ScrollY.
 LC807:  lda PPUCNT0ZP           ;   
@@ -1379,7 +1219,10 @@ LC8D1:  LDA #$08                ;
 LC8D3:  STA MainRoutine         ;SamusIntro will be executed next frame.
 LC8D5:  LDA #$2C                ;440 frames to fade in Samus(7.3 seconds).
 LC8D7:  STA Timer3              ;
-LC8D9:  JSR IntroMusic          ;($CBFD)Start the intro music.
+IntroMusic_Inline:
+        LDA #MUS_FADE_IN 
+        ORA MultiSFXFlag
+        STA MultiSFXFlag
 LC8DC:  LDY #sa_FadeIn0         ;
         STY ObjAction           ;Set Samus status as fading onto screen.
         LDX #$00
@@ -1421,89 +1264,24 @@ Exit25:
 GameEngine:
 LC92B:  jsr ScrollDoor
 LC92E:  jsr ScrollDoor
-;;    ldx #$02 ; put "2" into SpareMem and use it to run through scrolldoor twice
-;;    stx SpareMemB7
-;;
-;;;Scrolls the screen if Samus is inside a door.
-;;ScrollDoor:
-;;LE1F1:  ldx DoorStatus          ;
-;;LE1F3:  beq AfterDoorScroll     ;Exit if Samus isn't in a door.
-;;LE1F5:  dex                 ;
-;;LE1F6:  bne +               ;Not in right door. branch to check left door.
-;;LE1F8:  jsr ScrollRight         ;($E6D2)DoorStatus=1, scroll 1 pixel right.
-;;LE1FB:  jmp ++              ;Jump to check if door scroll is finished.
-;;
-;;LE1FE:* dex             ;Check if in left door.
-;;LE1FF:  bne ++              ;
-;;LE201:  jsr ScrollLeft          ;($E6A7)DoorStatus=2, scroll 1 pixel left.
-;;LE204:* ldx ScrollX         ;Has x scroll offset reached 0?
-;;LE206:  bne AfterDoorScroll ;If not, branch to exit.
-;;
-;;;Scrolled one full screen, time to exit door.
-;;LE208:  ldx #$05            ;Samus is exiting the door.
-;;LE20A:  bne DoOneDoorScroll     ;Branch always.
-;;
-;;LE20C:* dex             ;
-;;LE20D:  bne +               ;Check if need to scroll down to center door.
-;;LE20F:  jsr ScrollDown          ;($E519)DoorStatus=3, scroll 1 pixel down.
-;;LE212:  jmp ++              ;Jump to check y scrolling value.
-;;LE215:* dex             ;
-;;LE216:  bne AfterDoorScroll          ;Check if need to scroll up to center door.
-;;LE218:  jsr ScrollUp            ;($E4F1)DoorStatus=4, scroll 1 pixel up.
-;;
-;;VertRoomCentered:
-;;LE21B:* ldx ScrollY         ;Has room been centered on screen?
-;;LE21D:  bne AfterDoorScroll          ;If not, branch to exit.
-;;LE21F:  stx DoorOnNameTable3        ;
-;;LE221:  stx DoorOnNameTable0        ;Erase door nametable data.
-;;LE223:  inx             ;X=1.
-;;LE224:  lda ObjectX         ;Did Samus enter in the right hand door?
-;;LE227:  bmi ++              ;If so, branch.
-;;LE229:  inx             ;X=2. Samus is in left door.
-;;LE22A:  bne ++              ;Branch always.
-;;
-;;;This function is called once after door scrolling is complete.
-;;
-;;DoOneDoorScroll:
-;;LE22C:  lda #$20            ;Set DoorDelay to 32 frames(comming out of door).
-;;LE22E:  sta DoorDelay           ;
-;;LE230:  lda SamusDoorData       ;Check if scrolling should be toggled.
-;;LE232:  asl 
-;;        asl 
-;;        asl           ;($C2C6)*8. Is door not to toggle scrolling(item room,
-;;LE235:  bcs +               ;bridge room, etc.)? If so, branch to NOT toggle scrolling.
-;;LE237:  ldy DoorScrollStatus        ;If comming from vertical shaft, skip ToggleScroll because
-;;LE239:  cpy #$03            ;the scroll was already toggled after room was centered
-;;LE23B:  bcc ++              ;by the routine just above.
-;;LE23D:* lda #$47            ;Set mirroring for vertical mirroring(horz scrolling).
-;;LE23F:  bne ++              ;Branch always.
-;;
-;;LE241:* jsr ToggleScroll        ;($E252)Toggle scrolling and mirroring.
-;;LE244:* sta MirrorCntrl         ;Store new mirror control data.
-;;LE246:  stx DoorStatus          ;DoorStatus=5. Done with door scrolling.
-;;
-;;AfterDoorScroll:
-;;    dec SpareMemB7          ; This will run the above routine twice
-;;    bne ScrollDoor
 
 ; ===== HANDLE the debug NARPASSWORD =====
 
     HandleNarPassword:
-    LC931:  lda NARPASSWORD         ;
-    LC934:  beq UpdateWorld         ;
-    LC936:  lda #$03                ;The following code is only accessed if 
-    LC938:  sta HealthHi            ;NARPASSWORD has been entered at the 
-    LC93B:  lda #$FF                ;password screen. Gives you new health,
-    LC93D:  sta SamusGear           ;missiles and every power-up every frame.
-    LC940:  lda #$05                ;
-    LC942:  sta MissileCount        ;
+        lda NARPASSWORD         ;
+        beq UpdateWorld         ;
+        lda #$03                ;The following code is only accessed if 
+        sta HealthHi            ;NARPASSWORD has been entered at the 
+        lda #$FF                ;password screen. Gives you new health,
+        sta SamusGear           ;missiles and every power-up every frame.
+        lda #$05                ;
+        sta MissileCount        ;
 
 ; ===== THE REAL GUTS OF THE GAME ENGINE! =====
 
 UpdateWorld:
         ldx #$00
 LCB2B:  stx SpritePagePos
-
 LCB2D:  jsr UpdateEnemies       ;($F345)Display of enemies.
 LCB30:  jsr UpdateProjectiles   ;($D4BF)Display of bullets/missiles/bombs.
 
@@ -1519,7 +1297,7 @@ LCB30:  jsr UpdateProjectiles   ;($D4BF)Display of bullets/missiles/bombs.
 
 ;-------------------------------------- [ Area Routine ] ----------------------------------------------
 
-LCB36:  jsr AreaRoutine         ;($95C3)Area specific routine.
+LCB36:  jsr AreaRoutine         ;($95C3)Area specific routine. - Bank Specific
 LCB39:  jsr UpdateElevator      ;($D7B3)Display of elevators.
 LCB3C:  jsr UpdateStatues       ;($D9D4)Display of Ridley & Kraid statues.
 
@@ -1545,19 +1323,24 @@ LCB4E:  jsr DoorHandler         ; display of doors
 LCB51:  jsr UpdateTiles         ; tile de/regeneration
 LCB54:  jsr CollisionDetection  ; Samus < enemies crash detection
 LCB57:  jsr DisplayBar          ;($E0C1)Display of status bar.
-          
-        ldy #$18
-        jsr LFAFF
-        ldy #$10
-        jsr LFAFF
-        ldy #$08
-        jsr LFAFF
-        ldy #$00
-        jsr LFAFF
+
+; TODO - Optimization(?)
+; This could be looped instead of JSR
+; possibly save cycles
+    ldy #$18
+    jsr LFAFF
+    ldy #$10
+    jsr LFAFF
+    ldy #$08
+    jsr LFAFF
+    ldy #$00
+    jsr LFAFF
 
 jsr CheckMissileToggle
 jsr UpdateItems             ;($DB37)Display of power-up items.
 jsr LFDE3
+
+; TODO - Look into this. It might be slow
 
 ;Clear remaining sprite RAM
     ldx SpritePagePos
@@ -1590,12 +1373,17 @@ LC962:  cmp #sa_Dead2           ;Is Samus dead?
 LC964:  bne GameEngineExit      ;exit if not.
 LC966:  lda AnimDelay           ;Is Samus still exploding?
 LC969:  bne GameEngineExit      ;Exit if still exploding.
-LC96B:  jsr SilenceMusic        ;Turn off music.
+
+SilenceMusic_Inline:
+        lda #MUS_NONE
+        ora NoiseSFXFlag
+        sta NoiseSFXFlag
+
 LC96E:  lda MthrBrainStatus     ;
 LC970:  cmp #$0A                ;Is mother brain already dead? If so, branch.
 LC972:  beq StartGameEgine      ;
 LC974:  lda #$04                ;Set timer for 40 frames (.667 seconds).
-LC976:  ldx #$04                ;GameOver routine to run after delay expires.
+        tax
 LC978:  jmp SetTimer            ;($C4AA)Set delay timer and run game over routine.
 
 StartGameEgine:
@@ -1674,12 +1462,6 @@ LCA0C:  sta SpritePagePos       ;Samus sprites start at Sprite 0.
 LCA0E:  sta PageIndex           ;Samus RAM is first set of RAM.
 LCA10:  jmp AnimDrawObject      ;($DE47)Draw Samus on screen.
 
-;The following table marks the time remaining in Timer3 when a palette change should occur during
-;the Samus fade-in sequence. This creates the fade-in effect.
-
-SamusFadeTmTbl:
-LCA13:  .byte $1E,$14,$0B,$04,$FF
-
 ;---------------------------------[ Check if game engine running ]-----------------------------------
 
 IsEngineRunning:
@@ -1700,16 +1482,6 @@ LCA27:  TAY                     ;Use 4 LSB to load switch pending offset from Ba
 LCA28:  LDA BankTable,y         ;Base is $CA30.
 LCA2B:  STA SwitchPending       ;Store switch data.
 LCA2D:  JMP CheckSwitch         ;($C4DE)Switch lower 16KB to appropriate memory page.
-
-;Table used by above subroutine.
-;Each value is the area bank number plus one.
-
-BankTable:
-LCA30:  .byte $02               ;Brinstar.
-LCA31:  .byte $03               ;Norfair.
-LCA32:  .byte $05               ;Kraid hideout.
-LCA33:  .byte $04               ;Tourian.
-LCA34:  .byte $06               ;Ridley hideout.
 
 ; CheckMissileToggle
 ; ==================
@@ -1755,140 +1527,172 @@ SelectSamusPalExit:
 
 ;----------------------------------[ Initiate SFX and music routines ]-------------------------------
 
-;Initiate sound effects.
+; Initiate sound effects.
+; Most of these have been inlined
 
-SilenceMusic:                   ;The sound flags are stored in memory
-LCB8E:  LDA #MUS_NONE           ;starting at $0680. The following is a
-LCB90:  BNE SFXSetX0            ;list of sound effects played when the
+SFX_MetroidHit:          
+    LDA #SFX_MTRD_HIT
+    BNE Set_TriangleSFXFlag
+
+SFXDoor:              
+    LDA #SFX_DOOR
+
+Set_TriangleSFXFlag:
+    LDX #$03
+    BNE SFX_SetSoundFlag         
+
+PowerUpMusic:
+    LDA #MUS_PWR_UP
+    LDX #$04
+    BNE SFX_SetSoundFlag
+
+MotherBrainMusic:
+    LDA #MUS_BOSS
+    BNE Set_MusicInitFlag
+
+TourianMusic:
+    LDA #MUS_TOURIAN
+
+Set_MusicInitFlag:
+    LDX #$05        
+
+SFX_SetSoundFlag:          
+    ORA NoiseSFXFlag,x 
+    STA NoiseSFXFlag,x 
+    RTS                
+
+;SilenceMusic:                  ;The sound flags are stored in memory
+;LCB8E:  LDA #MUS_NONE          ;starting at $0680. The following is a
+;LCB90:  BNE SFXSetX0           ;list of sound effects played when the
                                 ;flags are set:
-PauseMusic:                     ;
-LCB92:  LDA #MUS_PAUSE          ;$0680: These SFX use noise channel.
-LCB94:  BNE SFXSetX0            ;Bit 7 - No sound.
+;PauseMusic:                    ;
+;LCB92:  LDA #MUS_PAUSE         ;$0680: These SFX use noise channel.
+;LCB94:  BNE SFXSetX0           ;Bit 7 - No sound.
                                 ;Bit 6 - ScrewAttack.
-SFXSamusWalk:                   ;Bit 5 - MissileLaunch.
-LCB96:  LDA #$08                ;Bit 4 - BombExplode.
-LCB98:  BNE SFXSetX0            ;Bit 3 - SamusWalk.
+;SFXSamusWalk:                  ;Bit 5 - MissileLaunch.
+;LCB96:  LDA #$08               ;Bit 4 - BombExplode.
+;LCB98:  BNE SFXSetX0           ;Bit 3 - SamusWalk.        
                                 ;Bit 2 - SpitFlame.
-SFXBombExplode:                 ;Bit 1 - Pause music.
-LCB9A:  LDA #$10                ;Bit 0 - Silence music.
-LCB9C:  BNE SFXSetX0            ;
+;SFXBombExplode:                ;Bit 1 - Pause music.
+;LCB9A:  LDA #$10               ;Bit 0 - Silence music.
+;LCB9C:  BNE SFXSetX0           ;
                                 ;$0681: These SFX use sq1 channel.
-SFXMissileLaunch:               ;Bit 7 - MissilePickup.
-LCB9E:  LDA #$20                ;Bit 6 - EnergyPickup.
+;SFXMissileLaunch:              ;Bit 7 - MissilePickup.
+;LCB9E:  LDA #$20               ;Bit 6 - EnergyPickup.
                                 ;Bit 5 - Metal.
-SFXSetX0:                       ;Bit 4 - BulletFire.
-LCBA0:  LDX #$00                ;Bit 3 - EnemyRegen.
-LCBA2:  BEQ SFX_SetSoundFlag    ;Bit 2 - EnemyHit.
+;SFXSetX0:                      ;Bit 4 - BulletFire.
+;LCBA0:  LDX #$00               ;Bit 3 - EnemyRegen.
+;LCBA2:  BEQ SFX_SetSoundFlag   ;Bit 2 - EnemyHit.
                                 ;Bit 1 - SamusJump.
-SFXEnemyRegen:                  ;Bit 0 - WaveFire.
-LCBA4:  LDA #$08                ;
-LCBA6:  BNE SFXSetX1            ;$0682: Not used.
+;SFXEnemyRegen:                 ;Bit 0 - WaveFire.
+;LCBA4:  LDA #SFX_EN_REGEN               ;
+;LCBA6:  BNE SFXSetX1           ;$0682: Not used.
                                 ;
-SFXBombLaunch:                  ;$0683: These SFX use tri channel.
-LCBA8:  LDA #$01                ;Bit 7 - SamusDie.
-LCBAA:  BNE SFX_SetX3           ;Bit 6 - DoorOpenClose.
+;SFXBombLaunch:                 ;$0683: These SFX use tri channel.
+;LCBA8:  LDA #SFX_BMB_SET       ;Bit 7 - SamusDie.
+;LCBAA:  BNE SFX_SetX3          ;Bit 6 - DoorOpenClose.
                                 ;Bit 5 - MetroidHit.
-SFX_SamusJump:                  ;Bit 4 - StatueRaise.
-LCBAC:  LDA #$02                ;Bit 3 - Beep.
-LCBAE:  BNE SFXSetX1            ;Bit 2 - BigEnemyHit.
+;SFX_SamusJump:                 ;Bit 4 - StatueRaise.
+;LCBAC:  LDA #$02               ;Bit 3 - Beep.
+;LCBAE:  BNE SFXSetX1           ;Bit 2 - BigEnemyHit.
                                 ;Bit 1 - SamusBall.
-SFX_EnemyHit:                   ;Bit 0 - BombLaunch.
-LCBB0:  LDA #$04                ;
-LCBB2:  BNE SFXSetX1            ;$0684: These SFX use multi channels.
+;SFX_EnemyHit:                  ;Bit 0 - BombLaunch.
+;LCBB0:  LDA #SFX_EN_HIT        ;
+;LCBB2:  BNE SFXSetX1           ;$0684: These SFX use multi channels.
                                 ;Bit 7 - FadeInMusic        (music).
-SFX_BulletFire:                 ;Bit 6 - PowerUpMusic       (music).
-LCBB4:  LDA #$10                ;Bit 5 - EndMusic           (music).
-LCBB6:  BNE SFXSetX1            ;Bit 4 - IntroMusic         (music).
+;SFX_BulletFire:                ;Bit 6 - PowerUpMusic       (music).
+;LCBB4:  LDA #SFX_BLT_FIRE      ;Bit 5 - EndMusic           (music).
+;LCBB6:  BNE SFXSetX1           ;Bit 4 - IntroMusic         (music).
                                 ;Bit 3 - not used           (SFX).
-SFXMetal:                       ;Bit 2 - SamusHit           (SFX).
-LCBB8:  LDA #$20                ;Bit 1 - BossHit            (SFX).
-LCBBA:  BNE SFXSetX1            ;Bit 0 - IncorrectPassword  (SFX).
+;SFXMetal:                       ;Bit 2 - SamusHit           (SFX).
+;LCBB8:  LDA #SFX_METAL          ;Bit 1 - BossHit            (SFX).
+;LCBBA:  BNE SFXSetX1            ;Bit 0 - IncorrectPassword  (SFX).
                                 ;
-SFX_EnergyPickup:               ;$0685: Music flags. The music flags start different
-LCBBC:  LDA #$40                ;music depending on what memory bank is loaded. The
-LCBBD:  BNE SFXSetX1            ;following lists what bits start what music for each
+;SFX_EnergyPickup:               ;$0685: Music flags. The music flags start different
+;LCBBC:  LDA #SFX_ENGY_PKUP       ;music depending on what memory bank is loaded. The
+;LCBBD:  BNE SFXSetX1            ;following lists what bits start what music for each
                                 ;memory bank.
-SFX_MissilePickup:              ;
-LCBC0:  LDA #SFX_MSL_PKUP       ;Bank 0: Intro/ending.
+;SFX_MissilePickup:              ;
+;LCBC0:  LDA #SFX_MSL_PKUP       ;Bank 0: Intro/ending.
                                 ;Bit 7 - Not used.
-SFXSetX1:                       ;Bit 6 - TourianMusic.
-LCBC2:  LDX #$01                ;Bit 5 - ItemRoomMusic.
-LCBC4:  BNE SFX_SetSoundFlag    ;Bit 4 - Not used.
+;SFXSetX1:                       ;Bit 6 - TourianMusic.
+;LCBC2:  LDX #$01                ;Bit 5 - ItemRoomMusic.
+;LCBC4:  BNE SFX_SetSoundFlag    ;Bit 4 - Not used.
                                 ;Bit 3 - Not used.
-SFX_WaveFire:                   ;Bit 2 - Not used.
-LCBC6:  LDA #$01                ;Bit 1 - Not used.
-LCBC8:  BNE SFXSetX1            ;Bit 0 - Not used.
+;SFX_WaveFire:                   ;Bit 2 - Not used.
+;LCBC6:  LDA #SFX_WV_FIRE        ;Bit 1 - Not used.
+;LCBC8:  BNE SFXSetX1            ;Bit 0 - Not used.
                                 ;
-SFX_ScrewAttack:                ;Bank 1: Brinstar.
-LCBCA:  LDA #$40                ;Bit 7 - Not used.
-LCBCC:  BNE SFXSetX0            ;Bit 6 - TourianMusic.
+;SFX_ScrewAttack:               ;Bank 1: Brinstar.
+;LCBCA:  LDA #$40               ;Bit 7 - Not used.
+;LCBCC:  BNE SFXSetX0           ;Bit 6 - TourianMusic.
                                 ;Bit 5 - ItemRoomMusic.
-SFX_BigEnemyHit:                ;Bit 4 - Not used.
-LCBCE:  LDA #$04                ;Bit 3 - Not used.
-LCBD0:  BNE SFX_SetX3           ;Bit 2 - Not used.
+;SFX_BigEnemyHit:                ;Bit 4 - Not used.
+;LCBCE:  LDA #$04                ;Bit 3 - Not used.
+;LCBD0:  BNE SFX_SetX3           ;Bit 2 - Not used.
                                 ;Bit 1 - Not used.
-SFX_MetroidHit:                 ;Bit 0 - BrinstarMusic.
-LCBD2:  LDA #$20                ;
-LCBD4:  BNE SFX_SetX3           ;Bank 2: Norfair.
+;SFX_MetroidHit:                 ;Bit 0 - BrinstarMusic.
+;LCBD2:  LDA #SFX_MTRD_HIT       ;
+;LCBD4:  BNE SFX_SetX3           ;Bank 2: Norfair.
                                 ;Bit 7 - Not used.
-SFX_BossHit:                    ;Bit 6 - TourianMusic.
-LCBD6:  LDA #$02                ;Bit 5 - ItemRoomMusic.
-LCBD8:  BNE SFXSetX4            ;Bit 4 - Not used.
+;SFX_BossHit:                    ;Bit 6 - TourianMusic.
+;LCBD6:  LDA #$02                ;Bit 5 - ItemRoomMusic.
+;LCBD8:  BNE SFXSetX4            ;Bit 4 - Not used.
                                 ;Bit 3 - NorfairMusic.
-SFXDoor:                        ;Bit 2 - Not used.
-LCBDA:  LDA #$40                ;Bit 1 - Not used.
-LCBDC:  BNE SFX_SetX3           ;Bit 0 - Not used.
+;SFXDoor:                        ;Bit 2 - Not used.
+;LCBDA:  LDA #SFX_DOOR           ;Bit 1 - Not used.
+;LCBDC:  BNE SFX_SetX3           ;Bit 0 - Not used.
                                 ;
-SFX_SamusHit:                   ;Bank 3: Tourian.
-LCBDE:  LDA #$04                ;Bit 7 - Not used.
-LCBE0:  BNE SFXSetX4            ;Bit 6 - TourianMusic
+;SFX_SamusHit:                   ;Bank 3: Tourian.
+;LCBDE:  LDA #SFX_SMS_HIT        ;Bit 7 - Not used.
+;LCBE0:  BNE SFXSetX4            ;Bit 6 - TourianMusic
                                 ;Bit 5 - ItemRoomMusic.
-SFX_SamusDie:                   ;Bit 4 - Not used.
-LCBE2:  LDA #$80                ;Bit 3 - Not used.
-LCBE4:  BNE SFX_SetX3           ;Bit 2 - EscapeMusic.
+;SFX_SamusDie:                   ;Bit 4 - Not used.
+;LCBE2:  LDA #SFX_SMS_DIE                ;Bit 3 - Not used.
+;LCBE4:  BNE SFX_SetX3           ;Bit 2 - EscapeMusic.
                                 ;Bit 1 - MotherBrainMusic
-SFX_SetX2:                      ;Bit 0 - Not used.
-LCBE6:  LDX #$02                ;
+;SFX_SetX2:                      ;Bit 0 - Not used.
+;LCBE6:  LDX #$02                ;
                                 ;Bank 4: Kraid.
-SFX_SetSoundFlag:               ;Bit 7 - RidleyAreaMusic.
-LCBE8:  ORA $0680,x             ;Bit 6 - TourianMusic.
-LCBEB:  STA $0680,x             ;Bit 5 - ItemRoomMusic.
-LCBEE:  RTS                     ;Bit 4 - KraidAreaMusic.
+;SFX_SetSoundFlag:               ;Bit 7 - RidleyAreaMusic.
+;LCBE8:  ORA NoiseSFXFlag,x      ;Bit 6 - TourianMusic.
+;LCBEB:  STA NoiseSFXFlag,x      ;Bit 5 - ItemRoomMusic.
+;LCBEE:  RTS                     ;Bit 4 - KraidAreaMusic.
                                 ;Bit 3 - Not used.
-SFX_SamusBall:                  ;Bit 2 - Not used.
-LCBEF:  LDA #$02                ;Bit 1 - Not used.
-LCBF1:  BNE SFX_SetX3           ;Bit 0 - Not used.
+;SFX_SamusBall:                  ;Bit 2 - Not used.
+;LCBEF:  LDA #SFX_SMS_BALL                ;Bit 1 - Not used.
+;LCBF1:  BNE SFX_SetX3           ;Bit 0 - Not used.
                                 ;
-SFXBeep:                        ;Bank 5: Ridley.
-LCBF3:  LDA #$08                ;Bit 7 - RidleyAreaMusic.
+;SFXBeep:                        ;Bank 5: Ridley.
+;LCBF3:  LDA #SFX_BEEP               ;Bit 7 - RidleyAreaMusic.
                                 ;Bit 6 - TourianMusic.
-SFX_SetX3:                      ;Bit 5 - ItemRoomMusic.
-LCBF5:  LDX #$03                ;Bit 4 - KraidAreaMusic.
-LCBF7:  BNE SFX_SetSoundFlag    ;Bit 3 - Not used.
+;SFX_SetX3:                      ;Bit 5 - ItemRoomMusic.
+;LCBF5:  LDX #$03                ;Bit 4 - KraidAreaMusic.
+;LCBF7:  BNE SFX_SetSoundFlag    ;Bit 3 - Not used.
                                 ;Bit 2 - Not used.
 ;Initiate music                 ;Bit 1 - Not used.
                                 ;Bit 0 - Not used.
-PowerUpMusic:                   ;
-LCBF9:  LDA #$40                ;
-LCBFB:  BNE SFXSetX4            ;
+;PowerUpMusic:                   ;
+;LCBF9:  LDA #$40                ;
+;LCBFB:  BNE SFXSetX4            ;
                                 ;
-IntroMusic:                     ;
-LCBFD:  LDA #$80                ;
+;IntroMusic:                    ;
+;LCBFD:  LDA #MUS_FADE_IN       ;
                                 ;
-SFXSetX4:                       ;
-LCBFF:  LDX #$04                ;
-LCC01:  BNE SFX_SetSoundFlag    ;
+;SFXSetX4:                       ;
+;LCBFF:  LDX #$04                ;
+;LCC01:  BNE SFX_SetSoundFlag    ;
                                 ;
-MotherBrainMusic:               ;
-LCC03:  LDA #$02                ;
-LCC05:  BNE SFXSetX5            ;
-                                ;
-TourianMusic:                   ;
-LCC07:  LDA #$40                ;
-                                ;
-SFXSetX5:                       ;
-LCC09:  LDX #$05                ;
-LCC0B:  BNE SFX_SetSoundFlag    ;
+;MotherBrainMusic:               ;
+;LCC03:  LDA #$02                ;
+;LCC05:  BNE SFXSetX5            ;
+;                                ;
+;TourianMusic:                   ;
+;LCC07:  LDA #$40                ;
+;                                ;
+;SFXSetX5:                       ;
+;LCC09:  LDX #$05                ;
+;LCC0B:  BNE SFX_SetSoundFlag    ;
 
 GoSamusHandler:
     LDX ObjAction               ;
@@ -1954,14 +1758,6 @@ SamusStandTable_HiBytes:
 SamusStandTable_LoBytes:
     .byte <ExitSub, <SetSamusRun, <SetSamusJump, <SetSamusRoll, <SetSamusPntUp
 
-;Table used by above subroutine.
-
-ActionTable:
-LCC87:  .byte sa_Run            ;Run right.
-LCC88:  .byte sa_Run            ;Run left.
-LCC89:  .byte sa_Roll
-LCC8A:  .byte sa_PntUp
-
 ;----------------------------------------------------------------------------------------------------
 
 SetSamusExplode:
@@ -1992,14 +1788,6 @@ LCCB7:
     lda RunAccelerationTbl,x
     sta SamusHorzAccel
     rts
-
-RunAnimationTbl:
-LCCBE:  .byte an_SamusRun
-    .byte an_SamusRunPntUp
-
-RunAccelerationTbl:
-LCCC0:  .byte $30           ;Accelerate right.
-    .byte $D0           ;Accelerate left.
 
 ; SamusRun
 ; ========
@@ -2056,7 +1844,12 @@ LCCC2:
     bne +          ; branch if not
     lda #$09
     sta WalkSoundDelay  ; # of frames till next walk sound trigger
-    jsr SFXSamusWalk
+
+SFXSamusWalk_Inline1:
+    lda #$08
+    ora NoiseSFXFlag
+    sta NoiseSFXFlag
+
 *   jsr LCF2E
     lda Joy1Change
     bpl +      ; branch if JUMP not pressed
@@ -2151,7 +1944,7 @@ LCDBF:
     lsr
     lsr
     tax
-    lda LCCBE,x
+    lda RunAnimationTbl,x
     cmp AnimResetIndex
     beq ScrewAttackExit
     jsr SetSamusAnim
@@ -2176,14 +1969,6 @@ LCDD7:
     lda Table05,x
     jmp SetSamusNextAnim
 
-; Table used by above subroutine
-
-Table05:
-    .byte $3F
-    .byte $3B
-    .byte $3D
-    .byte $3F
-
 CheckHealthStatus:
 LCDFA:
     lda SamusHit            ;
@@ -2197,7 +1982,12 @@ LCDFA:
     sta $77
     beq ++
     bpl +
-    jsr SFX_SamusHit
+
+SFX_SamusHit_Inline:
+    lda #SFX_SMS_HIT
+    ora MultiSFXFlag
+    sta MultiSFXFlag
+
 *   lda SamusHit
     asr #$08
     lsr
@@ -2254,7 +2044,10 @@ CheckHealthBeep:
 *   lda FrameCount
     and #$0F
     bne +               ;Only beep every 16th frame.
-    jsr SFXBeep
+SFXBeep_Inline:
+    lda #SFX_BEEP
+    ora TriangleSFXFlag
+    sta TriangleSFXFlag
 *   lda #$00
     sta SamusHit
 LCE83:  rts
@@ -2325,7 +2118,12 @@ LCEE8:  sta HealthLo            ;
 LCEEB:  sta HealthHi            ;Set health to #$00.
 LCEEE:  lda #sa_Dead            ;
 LCEF0:  sta ObjAction           ;Death handler.
-LCEF3:  jsr SFX_SamusDie        ;($CBE2)Start Samus die SFX.
+
+SFX_SamusDie_Inline:
+        lda #SFX_SMS_DIE
+        ora TriangleSFXFlag
+        sta TriangleSFXFlag
+
 LCEF6:  jmp SetSamusExplode     ;($CC8B)Set Samus exlpode routine.
 
 ;----------------------------------------[ Add health ]----------------------------------------------
@@ -2380,7 +2178,11 @@ LCF4E:  STY ObjHorzSpeed        ;Set Samus Horizontal speed and horizontal
 StopHorzMovement:
 LCF55:  LDA SamusHorzAccel      ;Is Samus moving horizontally?
         BNE ClearHrztAnimData   ;If so, branch to stop movement.
-        JSR SFXSamusWalk        ;($CB96)Play walk SFX.
+
+SFXSamusWalk_Inline2:
+        LDA #$08
+        ORA NoiseSFXFlag
+        STA NoiseSFXFlag
 
 ClearHrztAnimData:
 LCF5D:  JSR NoHorzMoveNoDelay   ;($CF81)Clear horizontal movement and animation delay data.
@@ -2459,8 +2261,17 @@ AfterSamusJumpSet:
         BEQ +                   ; branch if Samus doesn't have Screw Attack
         LDA #$00
         STA $0686
-        JSR SFX_ScrewAttack
-*       JSR SFX_SamusJump
+
+SFX_ScrewAttack_Inline:
+        LDA #SFX_SCRW_ATK
+        ORA NoiseSFXFlag
+        STA NoiseSFXFlag
+
+SFX_SamusJump_Inline2:
+      * LDA #SFX_SMS_JMP
+        ORA SQ1SFXFlag
+        STA SQ1SFXFlag
+
         LDY #$18                ; gravity (high value -> low jump)
         LDA SamusGear
         AND #gr_HIGHJUMP
@@ -2537,17 +2348,6 @@ LD055:
 *   LDA #$03
     JMP SetSamusData        ;($CD6D)Set Samus control data and animation.
 
-; Table used by above subroutine
-; TODO - no way this table is needed
-Table06:
-    .byte $0C
-    .byte $0C
-    .byte $0C
-Table04:
-    .byte $35
-    .byte $35
-    .byte $35
-
 LD09C:
     lda Joy1Change
     ora Joy1Retrig
@@ -2576,11 +2376,15 @@ LD0B5:
     sta AnimResetIndex
     lda #an_SamusRunJump
     sta AnimIndex
-    lda LCCC0,x
+    lda RunAccelerationTbl,x
     sta SamusHorzAccel
     lda #$01
     sta $0686
-    jmp SFX_SamusBall
+SFX_SamusBall:
+    lda #SFX_SMS_BALL
+    ora TriangleSFXFlag
+    sta TriangleSFXFlag
+    rts
 
 *   lda #sa_Stand
     sta ObjAction
@@ -2686,7 +2490,11 @@ LD150:
     sta ObjectY,x
     lda #wa_LayBomb
     sta ObjAction,x
-    jsr SFXBombLaunch
+
+SFXBombLaunch:
+    lda #SFX_BMB_SET
+    ora TriangleSFXFlag
+    sta TriangleSFXFlag
 *   rts 
 
 SamusPntUp:
@@ -2803,16 +2611,7 @@ LD210:  lda MetroidOnSamus
 *   ldy #$09
 LD26B:  tya
     jmp SetSamusNextAnim
-
-Table08:
-    .byte $0C
-    .byte $F4
-    .byte $08
-    .byte $F8
-
-Table99:
-    .byte $04
-    .byte $FC
+; End
 
 LD275:  lda MetroidOnSamus
     bne +
@@ -2859,14 +2658,6 @@ LD275:  lda MetroidOnSamus
     beq +
     bne LD26B
 
-; Table used by above subroutine
-
-Table09:
-    .byte $01
-    .byte $FF
-    .byte $EC
-    .byte $F0
-
 LD2EB:
     tya
     tax
@@ -2905,7 +2696,12 @@ CheckMissileLaunch:
     lda MissileAnims,x
 GoSetBulletAnim:
 *   jsr SetBulletAnim
-    jsr SFXMissileLaunch
+
+SFXMissileLaunch_Inline:
+    lda #SFX_MSL_LNCH
+    ora NoiseSFXFlag
+    sta NoiseSFXFlag
+
     lda #wa_Missile ; missile handler
     sta ObjAction,y
     lda #$FF
@@ -2915,10 +2711,6 @@ GoSetBulletAnim:
 ; Samus has no more missiles left
     dec MissileToggle       ; put Samus in "regular fire" mode
     jmp SelectSamusPal      ; update Samus' palette to reflect this
-
-MissileAnims:
-    .byte an_MissileRight
-    .byte an_MissileLeft
 
 LD340: 
     lda MissileToggle
@@ -2946,6 +2738,10 @@ LD359:
     sta $0501,y
     sta $0304,y
     TYA
+; // TODO: BUG
+; This is almost certainly a bug.
+; BEQ + after LDA #$0C is an always jump
+; seems very wrong here
     AND #$10               ; test bit 4 of Y (now in A)
     LDA #$0C               ; default = $0C when bit4==0
     BEQ +                  ; if (Y & $10) == 0 → keep $0C
@@ -2955,7 +2751,11 @@ LD359:
     sta ObjAction,y
     lda #an_WaveBeam
     jsr SetBulletAnim
-    jmp SFX_WaveFire
+SFX_WaveFire:
+    lda #SFX_WV_FIRE
+    ora SQ1SFXFlag
+    sta SQ1SFXFlag
+    rts             
 
 LD38A:
     lda #$02
@@ -2970,8 +2770,11 @@ LD38E:
     lda $061F
     ora #$01
     sta $061F
-    jmp SFX_BulletFire
-
+SFX_BulletFire:
+    lda #SFX_BLT_FIRE
+    ORA SQ1SFXFlag
+    STA SQ1SFXFlag
+    RTS             
 ; SamusDoor
 ; =========
 
@@ -3040,7 +2843,7 @@ CheckDoorDelay:
     sta ItemRmMusicSts
 *   lda KrdRdlyPresent
     beq +
-    jsr LCC07
+    jsr TourianMusic
     lda #$00
     sta KrdRdlyPresent
     beq --     ; branch always
@@ -3256,68 +3059,6 @@ UpdateWaveBullet:
     jsr LD624
 *   jmp CheckBulletStat
 
-Table0A:
-    .word Table0C     ; pointer to table #1 below
-    .word Table0D     ; pointer to table #2 below
-
-; Table #1 (size: 25 bytes)
-
-Table0C:
-    .byte $01
-    .byte $F3
-    .byte $01
-    .byte $D3
-    .byte $01
-    .byte $93
-    .byte $01
-    .byte $13
-    .byte $01
-    .byte $53
-    .byte $01
-    .byte $73
-    .byte $01
-    .byte $73
-    .byte $01
-    .byte $53
-    .byte $01
-    .byte $13
-    .byte $01
-    .byte $93
-    .byte $01
-    .byte $D3
-    .byte $01
-    .byte $F3
-    .byte $FF
-
-; Table #2 (size: 25 bytes)
-
-Table0D:
-    .byte $01
-    .byte $B7
-    .byte $01
-    .byte $B5
-    .byte $01
-    .byte $B1
-    .byte $01
-    .byte $B9
-    .byte $01
-    .byte $BD
-    .byte $01
-    .byte $BF
-    .byte $01
-    .byte $BF
-    .byte $01
-    .byte $BD
-    .byte $01
-    .byte $B9
-    .byte $01
-    .byte $B1
-    .byte $01
-    .byte $B5
-    .byte $01
-    .byte $B7
-    .byte $FF
-
 ; UpdateIceBullet
 ; ===============
 
@@ -3412,7 +3153,7 @@ LayBomb1and4:  lda #an_BombTick
     lda #$18    ; fuse length :-)
     sta $030F,x
     inc ObjAction,x       ; bomb update handler
-    DrawBomb:
+DrawBomb:
     lda #$03
     jmp AnimDrawObject
 
@@ -3428,7 +3169,12 @@ LayBomb2and5:  lda FrameCount
     lda #an_BombExplode
 *   jsr SetProjectileAnim
     inc ObjAction,x
-    jsr SFXBombExplode
+
+SFXBombExplode_Inline:
+    lda #SFX_BMB_XPLD
+    ora NoiseSFXFlag
+    sta NoiseSFXFlag
+
 *   jmp DrawBomb
 
 LayBomb3and6:  inc $030F,x
@@ -3948,11 +3694,6 @@ LDA1A:  jsr LDA3D
     bcc ++    ; only display statue at odd frames
 *   jmp DrawFrame       ; display statue
 
-LDA39:  .byte $88
-    .byte $68
-LDA3B:  .byte $65
-    .byte $66
-
 LDA3D:  lda $0304,x
     bmi +
     lda #$01
@@ -4024,19 +3765,6 @@ LDAB0:  lda Table0E,y
     sta PageIndex
 Exit31:
     rts
-
-; Table used by above subroutine
-
-Table0E:
-    .byte $30
-    .byte $AC
-    .byte $F0
-    .byte $6C
-Table1B:
-    .byte $61
-    .byte $60
-    .byte $60
-    .byte $60
 
 ;------------------------------------------[ Update items ]-----------------------------------------
 
@@ -4290,14 +4018,6 @@ DistFromObj0ToObj1:
     sta $05
     jmp LF1FA
 
-;The following table is used to rotate the sprites of both Samus and enemies when they explode.
-
-ExplodeRotationTbl:
-LDC8B:  .byte $00           ;No sprite flipping.
-LDC8C:  .byte $80           ;Flip sprite vertically.
-LDC8D:  .byte $C0           ;Flip sprite vertically and horizontally.
-LDC8E:  .byte $40           ;Flip sprite horizontally.
-
 ; UpdateObjAnim
 ; =============
 ; Move to object's next frame of animation
@@ -4539,20 +4259,6 @@ MoveEnemies:
     LDA $08
     BEQ ++
     JMP DoDrawSpriteObject
-
-;----------------------------------------[ Item drop table ]-----------------------------------------
-
-;The following table determines what, if any, items an enemy will drop when it is killed.
-
-ItemDropTbl:
-LDE35:  .byte $80           ;Missile.
-LDE36:  .byte $81           ;Energy.
-LDE37:  .byte $89           ;No item.
-LDE38:  .byte $80           ;Missile.
-LDE39:  .byte $81           ;Energy.
-LDE3A:  .byte $89           ;No item.
-LDE3B:  .byte $81           ;Energy.
-LDE3C:  .byte $89           ;No item.
 
 ;------------------------------------[ Object drawing routines ]-------------------------------------
 
@@ -4973,31 +4679,6 @@ LE034:  bcc ++              ;boundaries.  If so, branch.
 LE036:* dex             ;Sprite is not within screen boundaries. Decrement X.
 LE037:* rts             ;
 
-;--------------------------------[ Explosion placement data ]---------------------------------------
-
-;The following table has the index values into the table after it for finding the placement data
-;for an exploding object.
-
-ExplodeIndexTbl:
-LE049:  .byte $00, $18, $30
-
-;The following table is used to produce the arcing motion of exploding objects.  It is displacement
-;data for the y directions only.  The x displacement is constant.
-
-ExplodePlacementTbl:
-
-;Bottom sprites.
-LE04C:  .byte $FC, $F8, $F4, $F0, $EE, $EC, $EA, $E8, $E7, $E6, $E6, $E5, $E5, $E4, $E4, $E3
-LE05C:  .byte $E5, $E7, $E9, $EB, $EF, $F3, $F7, $FB
-
-;Middle sprites.
-LE064:  .byte $FE, $FC, $FA, $F8, $F6, $F4, $F2, $F0, $EE, $ED, $EB, $EA, $E9, $E8, $E7, $E6
-LE074:  .byte $E6, $E6, $E6, $E6, $E8, $EA, $EC, $EE
-
-;Top sprites.
-LE07C:  .byte $FE, $FC, $FA, $F8, $F7, $F6, $F5, $F4, $F3, $F2, $F1, $F1, $F0, $F0, $EF, $EF
-LE08C:  .byte $EF, $EF, $EF, $EF, $F0, $F0, $F1, $F2
-
 ;--------------------------------------[ Update enemy animation ]-----------------------------------
 
 ;move to next frame of enemy's animation. Basically the same as UpdateObjAnim, only for enemies.
@@ -5224,22 +4905,6 @@ LE175:  sta SpriteRAM+1,x     ;Store proper nametable pattern in sprite RAM.
         tax
 LE197:  rts             ;
 
-;-------------------------------------[ Status bar sprite data ]-------------------------------------
-
-;Sprite data for Samus' data display
-
-DataDisplayTbl_Reversed:
-    .byte $28,$00,$3A,$21       ; ..
-    .byte $20,$01,$7F,$21       ; N
-    .byte $18,$01,$76,$21       ; E
-    .byte $20,$00,$5F,$2B       ; Right half of missile.
-    .byte $18,$00,$5E,$2B       ; Left half of missile.
-    .byte $38,$01,$FF,$2B       ; Lower missile digit.
-    .byte $30,$01,$FF,$2B       ; Middle missile digit.
-    .byte $28,$01,$FF,$2B       ; Upper missile digit.
-    .byte $38,$01,$A0,$21       ; Lower health digit.
-    .byte $30,$01,$A0,$21       ; Upper health digit.
-
 ;-------------------------------------------[ Bit scan ]---------------------------------------------
 
 ;This function takes the value stored in A and right shifts it until a set bit is encountered.
@@ -5386,7 +5051,12 @@ LE282:  sta SamusBlink          ;Make Samus blink.
 LE284:  lda FrameCount          ;
 LE286:  and #$03            ;Start the jump SFX every 4th frame while in lava.
 LE288:  bne +               ;
-LE28A:  jsr SFX_SamusJump       ;($CBAC)Initiate jump SFX.
+
+SFX_SamusJump_Inline1:
+    LDA #SFX_SMS_JMP
+    ORA SQ1SFXFlag
+    STA SQ1SFXFlag
+
 LE28D:* lda FrameCount          ;
 LE28F:  asr #$07            ;This portion of the code causes Samus to be damaged by ;lava twice every 8 frames if she does not have the varia
 LE292:  bne ++              ;but only once every 8 frames if she does.
@@ -5462,7 +5132,12 @@ LE305:  sta ObjVertSpeed        ;vertical direction of travel(bounce up).
 LE308:  jmp SamusMoveHorizontally   ;($E31A)Attempt to move Samus left/right.
 
 ;Samus has hit the ground after moving downwards. 
-LE30B:* jsr SFXSamusWalk       ;($CB96)Play walk SFX.
+LE30B: 
+SFXSamusWalk_Inline3:
+*       lda #$08
+        ora NoiseSFXFlag
+        sta NoiseSFXFlag
+
 LE30E:* jsr StopVertMovement        ;($D147)Clear vertical movement data.
 LE311:  sty SamusGravity        ;Clear Samus gravity value.
 LE314:  beq SamusMoveHorizontally   ;($E31A)Attempt to move Samus left/right.
@@ -5637,7 +5312,8 @@ LE3E4:  rts             ;
 
 ;TODO - this one seems like it could save bytes
 HorzAccelerate:
-LE3E5:  lda SamusHorzSpdMax
+LE3E5:
+    lda SamusHorzSpdMax
     sta $00
     sta $02
     lda #$01
@@ -5823,67 +5499,64 @@ MoveSamusDown:
     jsr LE9B7       ; switch to the opposite Name Table
     ldx #$FF
 *   inx
-LE53F:  stx ScrollY
-    jsr LE54A       ; check if it's time to update Name Table
+LE53F:
+    stx ScrollY
+    jsr CheckForRoomUpdate       ; check if it's time to update Name Table
     clc
     rts
 
 *   dec MapPosY
 *   sec
+Exit_35:
 *   rts
 
 ; Entry point for roomload / loadroom / load room / room loading?
-LE54A:
+CheckForRoomUpdate:
     jsr SetupRoom
     ldx RoomNumber
     inx
-    bne -
-    lda ScrollDir
+    bne Exit_35
+    lax ScrollDir
     and #$02
-    bne +
-    jmp LE571
-*   jmp LE701
+    bne CheckRoomUpdate_HorizontalScroll
+    jmp CheckRoomUpdate_VerticalScroll
 
-; Table
+; Check if it's time to update nametable (when scrolling is HORIZONTAL)
+CheckRoomUpdate_HorizontalScroll:
+    lda ScrollX
+    and #$07                ; keep lower 3 bits
+    cmp TileBlastAnim-1,x   ; compare value = 0 if ScrollDir = right, else 7
+                            ; Using TileBlastAnim because it has [$07, $00] in there
+                            ; It's a bit a hack.
+    bne Exit_35             ; exit if not equal (no nametable update)
 
-Table11:
-    .byte $07
-    .byte $00
-
-;---------------------------------[ Get PPU and RoomRAM addresses ]----------------------------------
-
-GetNameAddrs:
-    lda PPUCNT0ZP           ;
-    eor ScrollDir           ;Store #$01 if object should be loaded onto name table 3,
-    and #$01                ;store #$00 if it should be loaded onto name table 0.LE569;
-    beq LoadNameAddrs0
-;Get high PPU addr of nametable(dest).
-;Get high cart RAM addr of nametable(src).
-LoadNameAddrs3:
-    lda #$2C                 ;High byte of nametable #3(PPU)
-    ldx #$64                 ;High byte of RoomRAMB(cart RAM)
-    rts                     ;
-LoadNameAddrs0:
-    lda #$20                 ;High byte of nametable #0(PPU).
-    ldx #$60                 ;High byte of RoomRAMA(cart RAM)
-GetNameAddrsExit:
-LE570:  rts                 ;
+LE70C:
+    ldx ScrollDir
+    cpx TempScrollDir
+    bne Exit_35
+    lda ScrollX
+    asr #$F8    ; keep upper five bits
+    lsr
+    lsr       ; / 8 (make 'em lower five)
+    sta $00
+    lda #$00
+    jmp LE590
 
 ;----------------------------------------------------------------------------------------------------
 
 ; check if it's time to update nametable (when scrolling is VERTICAL)
 
-LE571:
-    ldx ScrollDir
+CheckRoomUpdate_VerticalScroll:
     lda ScrollY
     and #$07    ; compare value = 0 if ScrollDir = down, else 7
-    cmp Table11,x
-    bne GetNameAddrsExit     ; exit if not equal (no nametable update)
+    cmp TileBlastAnim+1,x   ; This is a hack because all we need is [$07, $00] 
+                            ; and that just happens to exist in the TileBlastAnim table
+    bne Exit_35             ; exit if not equal (no nametable update)
 
 LE57C:
     ldx ScrollDir           ;
     cpx TempScrollDir       ;Still scrolling same direction when room was loaded?
-    bne GetNameAddrsExit              ;If not, branch to exit.
+    bne Exit_35              ;If not, branch to exit.
     lda ScrollY
     and #$F8    ; keep upper 5 bits
     sta $00
@@ -5894,20 +5567,35 @@ LE57C:
     rol
 
 LE590:
-    sta $01  ; $0001 = (ScrollY & 0xF8) << 2 = row offset
-    jsr GetNameAddrs
+    sta $01                 ; $0001 = (ScrollY & 0xF8) << 2 = row offset
+
+.scope
+    lda PPUCNT0ZP           ;
+    eor ScrollDir           ;Store #$01 if object should be loaded onto name table 3,
+    and #$01                ;store #$00 if it should be loaded onto name table 0.LE569;
+    beq _loadNameAddrs0
+
+    _loadNameAddrs3:
+        lda #$2C            ;High byte of nametable #3(PPU)
+        ldx #$64            ;High byte of RoomRAMB(cart RAM)
+        bne _afterLoad      ;
+    _loadNameAddrs0:
+        lda #$20            ;High byte of nametable #0(PPU).
+        ldx #$60            ;High byte of RoomRAMA(cart RAM)
+    _afterLoad:
+
+.scend
+
     ora $01
     sta $03
     txa
     ora $01
     sta $01
-    ;lda $00
-    ;sta $02
-    ldx ScrollDir ; Bit1 = 0 if vertical scrolling, Bit1 = 1 if horizontal
-    lda Table01,x ; A = 0 if vertical scrolling, 1 if horizontal
+    ldx ScrollDir                   ; Bit1 = 0 if vertical scrolling, Bit1 = 1 if horizontal
+    lda PPUWriteDirectionTable,x    ; A = 0 if vertical scrolling, 1 if horizontal
     sta $04
     ldy #$01
-    sty PPUDataPending      ; data pending = YES
+    sty PPUDataPending              ; data pending = YES
     dey
     ldx PPUStrIndex
     lda $03
@@ -5919,7 +5607,6 @@ LE590:
     lda $04
     jsr SeparateControlBitsWithoutStoring04     ;($C3C6)
 
-; TODO: This is a hot loop. See if it can be helped
     bit $04                 ; ... if bit 7 (PPU inc) of $04 clear
     bmi Inc_32_Loop_Setup
 
@@ -5993,12 +5680,6 @@ After_Inc_Loop:
     stx PPUStrIndex
     jsr EndPPUString
 
-Table01:
-    .byte $20           ;Horizontal write. PPU inc = 1, length = 32 tiles.
-    .byte $20           ;Horizontal write. PPU inc = 1, length = 32 tiles.
-    .byte $9E           ;Vertical write... PPU inc = 32, length = 30 tiles.
-    .byte $9E           ;Vertical write... PPU inc = 32, length = 30 tiles.
-
 ;----------------------------------------------------------------------------------------------------
 
 ;TODO: inline
@@ -6062,7 +5743,7 @@ ScrollLeft:
     bcs ++  ; if function returns CF=1, scrolling left is not possible
     jsr LE9B7       ; switch to the opposite Name Table
 *   dec ScrollX
-    jsr LE54A       ; check if it's time to update Name Table
+    jsr CheckForRoomUpdate       ; check if it's time to update Name Table
     clc
     rts
 
@@ -6089,8 +5770,8 @@ ScrollRight:
     bcs +++   ; if function returns CF=1, scrolling right is not possible
 *   inc ScrollX
     bne +
-    jsr LE9B7       ; switch to the opposite Name Table
-*   jsr LE54A       ; check if it's time to update Name Table
+    jsr LE9B7                   ; switch to the opposite Name Table
+*   jsr CheckForRoomUpdate      ; check if it's time to update Name Table
     clc
     rts
 
@@ -6098,30 +5779,6 @@ ScrollRight:
 *   sec
 ScrollRightExit:
 *   rts
-
-Table02:
-    .byte $07,$00
-
-; check if it's time to update nametable (when scrolling is HORIZONTAL)
-
-LE701:
-    ldx ScrollDir
-    lda ScrollX
-    and #$07    ; keep lower 3 bits
-    cmp Table02-2,x ; compare value = 0 if ScrollDir = right, else 7
-    bne ScrollRightExit      ; exit if not equal (no nametable update)
-
-LE70C:
-    ldx ScrollDir
-    cpx TempScrollDir
-    bne ScrollRightExit
-    lda ScrollX
-    asr #$F8    ; keep upper five bits
-    lsr
-    lsr       ; / 8 (make 'em lower five)
-    sta $00
-    lda #$00
-    jmp LE590
 
 ;---------------------------------------[ Get room number ]-------------------------------------------
 
@@ -6345,7 +6002,11 @@ ClcExit:
     rts
 
 PlaySnd4:
-    jmp SFXMetal
+SFXMetal:
+    lda #SFX_METAL
+    ora SQ1SFXFlag
+    sta SQ1SFXFlag
+    rts
 
 CheckMoveLeft:
     ldx PageIndex
@@ -6411,7 +6072,6 @@ LE8CE:  eor #$FF
     beq +
     inx
 *   txa
-    ; TODO could probably do IdentityTable math here
     clc
     adc $04
     rts
@@ -6699,15 +6359,24 @@ LEA2B:  lda RoomNumber              ;Room number.
 LEA2D:  cmp #$FE                    ;
         bcs Exit18
 LEA2F:  beq GoDrawRoom              ;A == #$FF | Branch if empty place holder byte found in room data.
-LEA35:  cmp #$F0            ;
-LEA37:  bcs AttribTableWrite ;Branch if time to write PPU attribute table data.
+LEA35:  cmp #$F0                    ;
+LEA37:  bcs AttribTableWrite        ;Branch if time to write PPU attribute table data.
 LEA39:  jsr UpdateRoomSpriteInfo    ;($EC9B)Update which sprite belongs on which name table.
 LEA3C:  jsr ScanForItems            ;($ED98)Set up any special items.
+        lda $40                     ; If 3F-40 is not zero, we continue the room setup from this frame
+        beq SetupFromRoomStart 
+        sta RoomPtrUB
+        lda $3F
+        sta RoomPtrLB
+        jmp DrawRoom
+
+SetupFromRoomStart:
 LEA3F:  ldy RoomNumber              ;Room number to load.
 LEA43:  lda RoomPointerTable_Lo,y   ;Low byte of 16-bit room pointer.
 LEA45:  sta RoomPtrLB               ;Base copied from $959A to $3B.
 LEA48:  lda RoomPointerTable_Hi,y   ;High byte of 16-bit room pointer.
 LEA4A:  sta RoomPtrUB               ;Base copied from $959B to $3C.
+
 LEA4C:  ldy #$00            ;
 LEA4E:  lda (RoomPtr),y             ;Y = 0 here. First byte of room data.
 LEA50:  sta RoomPal                 ;store initial palette # to fill attrib table with.
@@ -6770,18 +6439,6 @@ FillRoomRAM_60:
         bne _loop2
         jmp DrawRoom
     .scend
- 
- ATDataTable:
-    .byte %00000000, %00000000, %00000000, %00000000
-    .byte %01010101, %01010101, %01010101, %01010101
-    .byte %10101010, %10101010, %10101010, %10101010
-    .byte %11111111, %11111111, %11111111, %11111111
-
-CartRamMulOffsetLoTable:
-    .byte $00,$40,$80,$C0   ; low-byte part of X * $40 (X & 3)
-    .byte $00,$40,$80,$C0
-    .byte $00,$40,$80,$C0
-    .byte $00,$40,$80,$C0
 
 FillRoomRAM_64:
     lda #$FF
@@ -6874,7 +6531,6 @@ LEA9E:  lda StructPointerTable_Hi, x    ; High byte of 16-bit structure ptr.
 LEAA0:  sta StructPtrUB                 ;
 
 ; replacing a jsr
-DrawObject_DrawStruct:
 LEAA2:  jmp DrawStruct          ;($EF8C)Draw one structure.
 
 AddToRoomPtr:
@@ -6891,9 +6547,9 @@ AddToRoomPtr:
 
 DrawRoom:
 LEAAA:  ldy #$00            ;Zero index.
-LEAAC:  lda (RoomPtr),y         ;Load byte of room data.
+LEAAC:  lda (RoomPtr),y     ;Load byte of room data.
 LEAAE:  cmp #$FF            ;Is it #$FF(end-of-room)?
-LEAB0:  beq EndOfRoom           ;If so, branch to exit.
+LEAB0:  beq EndOfRoom       ;If so, branch to exit.
 LEAB6:  cmp #$FD            ;is A=#$FD(end-of-objects)?
 LEAB8:  bne DrawObject      ;If not, branch to draw room object.
 LEACA:  lda RoomPtr         ;
@@ -6901,7 +6557,7 @@ LEACC:  sta $00             ;Store room pointer in $0000.
 LEACE:  lda RoomPtr+1       ;
 LEAD0:  sta $01             ;
         inc $00
-        jmp LEAD9
+        jmp AfterDrawRoom
 
 ;----------------------------------------------------------------------------------------------------
 
@@ -6916,8 +6572,10 @@ EnemyLoop:
 
 ; TODO: See if you can figure out how to make y always zero
 LEAD7:  ldy #$00
-LEAD9:  lda ($00),y         ;Get first byte of enemy/door data.
-;LEADB:  cmp #$FF            ;End of enemy/door data?
+
+AfterDrawRoom:
+    lda ($00),y             ;Get first byte of enemy/door data.
+;LEADB:  cmp #$FF           ;End of enemy/door data?
 LEADD:  bmi EndOfRoom       ;If so, branch to finish room setup.
 LEADF:  and #$0F            ;Discard upper four bits of data.
 
@@ -7133,7 +6791,7 @@ LEB92:  iny
     sta ObjectX,x
     lda #$68    ; door Y coord is always #$68
     sta ObjectY,x
-    lda LEBFE,y
+    lda LoadDoorTable,y
     tay
     jsr GetNameTable        ;($EB85)
     eor #$01
@@ -7143,19 +6801,6 @@ LEB92:  iny
     sta DoorOnNameTable3,x
     lda #$02
     rts
-
-DoorXs:
-    .byte $F0    ; X coord of RIGHT door
-    .byte $10    ; X coord of LEFT door
-
-LEBFE:
-    .byte $02
-    .byte $01
-LEC00:  
-    .byte $80
-    .byte $B0
-    .byte $A0
-    .byte $90
 
 ; LoadElevator
 ; ============
@@ -7658,13 +7303,20 @@ AdvanceRow:
 LEF78:  sec                         ;Since carry bit is set,
 LEF79:  adc StructPtrLB             ;addition will be one more than expected.
 LEF7B:  sta StructPtrLB             ;Update the struct pointer.
-LEF7D:  bcs IncStructPtrUB
+LEF7D:  bcc UpdateCartRamPtr
+
+IncStructPtrUB:
+LEF7F:  inc StructPtrUB         ;Update high byte of struct pointer if carry occured.
+LEF83:  clc                     ;
 
 UpdateCartRamPtr:
 LEF81:  lda CartRAMWorkPtrLB        ;
 LEF84:  adc #$40                    ;Advance to next macro row in room RAM(two tile rows).
 LEF86:  sta CartRAMWorkPtrLB        ;
-LEF88:  bcs IncCartRAMWorkPtrUB     ;Begin drawing next structure row.
+LEF88:  bcc DrawStruct              ;Begin drawing next structure row.
+
+IncCartRAMWorkPtrUB:
+        inc CartRAMWorkPtrUB        ;Increment high byte of pointer if necessary.
 
 DrawStruct:                     ;Reset struct index.
         lda CartRAMWorkPtrUB
@@ -7744,15 +7396,6 @@ LEF6A:  adc ScreenXPos  ;Add number of macros remaining in current row.
 LEF6D:  sbc #$00            ;-1 from macros remaining in current row.
 LEF6F:  jmp AdvanceRow          ;($EF78)Move to next row of structure.
 
-IncStructPtrUB:
-LEF7F:  inc StructPtrUB         ;Update high byte of struct pointer if carry occured.
-LEF83:  clc                     ;
-        jmp UpdateCartRamPtr
-
-IncCartRAMWorkPtrUB:
-        inc CartRAMWorkPtrUB        ;Increment high byte of pointer if necessary.
-        jmp DrawStruct
-
 DrawStructExit:
     jmp AddToRoomPtr
 ;---------------------------------[ Update attribute table bits ]------------------------------------
@@ -7780,15 +7423,14 @@ LEFBC:  ora $03             ;
 LEFBE:  ora #$C0            ;
 LEFC0:  sta $02             ;
 
-        ldx #$00    ; X = 0
-        lda #$02    ; A = 2, used as BIT mask for bit1
-        bit $00     ; V = bit6 of $00, Z = (bit1 of $00 == 0)?
-
-        beq +       ; if bit1 = 0, skip first increment
-        inx         ; bit1 = 1 → X += 1
-*       bvc +       ; if bit6 = 0, skip high-bit contribution
-        inx         ; bit6 = 1 → X += 2
-        inx
+ldx #$00    ; X = 0
+lda #$02    ; A = 2, used as BIT mask for bit1
+bit $00     ; V = bit6 of $00, Z = (bit1 of $00 == 0)?
+beq +       ; if bit1 = 0, skip first increment
+inx         ; bit1 = 1 → X += 1
+*   bvc +       ; if bit6 = 0, skip high-bit contribution
+inx         ; bit6 = 1 → X += 2
+inx
 
 ;X now contains which macro attribute table bits to modify:
 ;+---+---+
@@ -7815,21 +7457,6 @@ LEFC0:  sta $02             ;
     sta ($02),y             ; store updated attribute byte
 
     jmp AfterUpdateAttr
-
-; 16-entry mask table (4 copies of the original 4 masks).
-AttribMask16Table:
-    .byte %11111100, %11110011, %11001111, %00111111
-    .byte %11111100, %11110011, %11001111, %00111111
-    .byte %11111100, %11110011, %11001111, %00111111
-    .byte %11111100, %11110011, %11001111, %00111111
-
-; For each ObjectPal (0..3) and quadrant (0..3):
-; value = ObjectPal << (2*quadrant)
-AttrSetBitsTable:
-    .byte %00000000, %00000000, %00000000, %00000000   ; pal 0
-    .byte %00000001, %00000100, %00010000, %01000000   ; pal 1
-    .byte %00000010, %00001000, %00100000, %10000000   ; pal 2
-    .byte %00000011, %00001100, %00110000, %11000000   ; pal 3
 
 ;----------------------------------------------------------------------------------------------------
 
@@ -7921,8 +7548,7 @@ LF09F:
         cmp #wa_Missile
         bne ++
     ; check if enemy is actually hit
-    *
-        jsr DistFromEn0ToObj1
+    *   jsr DistFromEn0ToObj1
         jsr GetObject1CoordData
         jsr LF1FA
         jsr LF2CA
@@ -8442,7 +8068,11 @@ LF483:  lda $0404,x
     sty HealthLoChange
     stx HealthHiChange
     jsr AddHealth           ;($CEF9)Add health to Samus.
-    jmp SFX_EnergyPickup
+SFX_EnergyPickup:
+    lda #SFX_ENGY_PKUP
+    ora SQ1SFXFlag
+    sta SQ1SFXFlag
+    rts             
 
 PickupMissile:
     lda #$02
@@ -8456,7 +8086,11 @@ PickupMissile:
     bcc ++        ; branch if yes
 *   lda MaxMissiles  ; set to max. # of missiles allowed
 *   sta MissileCount
-    jmp SFX_MissilePickup
+SFX_MissilePickup:
+    lda #SFX_MSL_PKUP
+    ora SQ1SFXFlag
+    sta SQ1SFXFlag
+    rts             
 
 *   lda FrameCount
     and #$03
@@ -8543,7 +8177,10 @@ LF536:  lda EnSpecialAttribs,x
     beq --
     bit $0A
     bvc +
-    jsr SFX_BossHit
+SFX_BossHit_Inline:
+    lda #SFX_BOSS_HIT
+    ora MultiSFXFlag
+    sta MultiSFXFlag
     bne ++
 *   jsr LF74B
     and #$0C
@@ -8561,7 +8198,11 @@ PlaySnd2:
     jsr SFX_EnemyHit
     bne +       ; branch always
 PlaySnd3:
-    jsr SFX_BigEnemyHit     ;($CBCE)
+SFX_BigEnemyHit_Inline:
+    lda #SFX_BIG_EN_HIT
+    ora TriangleSFXFlag
+    sta TriangleSFXFlag
+
 *   ldx PageIndex
     jsr $80B0
     and #$20
@@ -8823,7 +8464,12 @@ LF7BA:  dec EnDelay,x
 *   lda EnDataIndex,x
     cmp #$07
     bne +
-    jsr SFXEnemyRegen
+
+SFXEnemyRegen_Inline:
+    lda #SFX_EN_REGEN 
+    ora SQ1SFXFlag
+    sta SQ1SFXFlag
+
     ldx PageIndex
 *   inc EnStatus,x
     jsr LF699
@@ -8988,12 +8634,6 @@ LF91D:  ldx PageIndex
     tax
     jsr Bank07_LFD8F
     jmp LFA49
-
-; Table used by above subroutine
-
-Table15:
-    .byte $02
-    .byte $FE
 
 LF92C:  lda #$02
     sta EnRadY,y
@@ -9212,18 +8852,6 @@ SevenBytesAwayFromTwoZeros:
     lda #$03
     jmp LF97E
 
-; Table used by above subroutine
-
-Table16:
-    .byte $00
-    .byte $00
-    .byte $0C
-    .byte $1C
-    .byte $10
-    .byte $F0
-    .byte $F0
-    .byte $08
-
 LFAFF:  
     sty PageIndex
     ldx $0728,y
@@ -9400,18 +9028,6 @@ Exit34:
     rts
 .scend
 
-; Table used by above subroutine
-
-Table17:
-    .byte $00
-    .byte $FB
-    .byte $FB
-    .byte $FE
-    .byte $FB
-    .byte $02
-    .byte $00
-    .byte $05
-
 LFC65:
 UpdateMellowMemu: 
     lda $6BE4
@@ -9520,7 +9136,11 @@ AfterLFCC1:
 LFCBA:
     lda #$00
     sta $B0,x
-    jmp SFX_EnemyHit
+SFX_EnemyHit:
+    lda #SFX_EN_HIT
+    ora SQ1SFXFlag
+    sta SQ1SFXFlag
+    rts
 
 LFD25:  txa
     lsr
@@ -9550,15 +9170,6 @@ LFD25:  txa
 *   sta $04
 *   jsr Bank07_LFD8F
     jmp LFD6C
-
-; Table used by above subroutine
-
-Table18:
-    .byte $02
-    .byte $FE
-    .byte $01
-    .byte $FF
-    .byte $02
 
 LFD5F:  lda $B3,x
     sta $0B
@@ -9755,11 +9366,6 @@ SetTileAnim:
 Exit28:
 *   rts
 
-; Table used for indexing the animations in TileBlastAnim (see below)
-
-Table19:
-    .byte $18,$1C,$20,$00,$04,$08,$0C,$10,$24,$14
-
 LFE83:  lda #$00
     sta TileRoutine,x       ; tile = respawned
     lda TileWRAMLo,x
@@ -9876,22 +9482,542 @@ GetTileFramePtr:
 Exit23:
     rts
 
+; Preconditions
+; X and A must be sound flag state (setup with LAX)
+; Y should be 0 at setup
+; will pass back the index of Y used in the sound engine
+.scope
+    CheckFlagsRedux:
+        beq _NoSound
+        bmi _SFXFlagFound
+        asr #$F0
+        beq _CheckLowNibble
+        lsr
+        lsr
+        lsr
+        tax
+        ldy _SFXHiBitToIndex - 1, x
+        bne _SFXFlagFound       ; branch always 
+
+    _CheckLowNibble:
+        ldy _SFXLoBitToIndex,x
+
+    _SFXFlagFound:
+        rts
+
+    _NoSound:
+        ldy #$FF
+        rts
+
+    _SFXHiBitToIndex:
+        .byte 6
+        .byte 4
+        .byte 4
+        .byte 2
+        .byte 2 
+        .byte 2 
+        .byte 2
+
+    _SFXLoBitToIndex:
+        .byte 14
+        .byte 14
+        .byte 12
+        .byte 12
+        .byte 10
+        .byte 10
+        .byte 10
+        .byte 10
+        .byte 8
+        .byte 8
+        .byte 8
+        .byte 8
+        .byte 8
+        .byte 8
+        .byte 8
+        .byte 8
+
+.scend
+
+;-----------------------------------------------[ TABLES ]--------------------------------------------
+
+BrinstarGFXTable:
+    .byte $16, $19, $06, $05, $04, $03
+    
+NorfairGFXTable:
+    .byte $16, $19, $09, $08, $07, $05, $04
+
+TourianGFXTable:
+    .byte $16, $19, $1C, $1A, $0E, $0D, $0C, $0B, $0A, $05
+
+KraidGFXTable:
+    .byte $16, $19, $11, $10, $0F, $0A, $05, $04
+
+RidleyGFXTable:
+    .byte $16, $19, $13, $12, $0A, $05, $04
+
+SamusGFXTable:
+    .byte $16, $19, $18, $17, $14, $1B      ;$1B should only be loaded if JustInBailey
+    
+;Table used by above subroutine and loads the initial data used to describe
+;metroid's behavior in the Tourian section of the game.
+
+MetroidData:
+    .byte $F8, $08, $30, $D0, $60, $A0, $02, $04, $00, $00, $00, $00, $00, $00
+
+;The table below contains info for each tile data block in the ROM.
+;Each entry is 7 bytes long. The format is as follows:
+;byte 0: ROM bank where GFX data is located.
+;byte 1-2: 16-bit ROM start address (src).
+;byte 3-4: 16-bit PPU start address (dest).
+;byte 5-6: data length (16-bit).
+
+GFXInfo:
+;[SPR]Samus, items. Entry 0.
+LC6E0:  .byte $06
+LC6E1:  .word GFXSuitedSamus, $0000, $09A0
+
+;[SPR]Samus in ending. Entry 1.
+LC6E7:  .byte $04
+LC6E8:  .word $8D60, $0000, $0520
+
+;[BGR]Partial font, "The End". Entry 2.
+LC6EE:  .byte $01
+LC6EF:  .word $8D60, $1000, $0400
+
+;[BGR]Brinstar rooms. Entry 3.
+LC6F5:  .byte $06
+LC6F6:  .word GFXBrinstar1, $1000, $0150
+
+;[BGR]Misc. objects. Entry 4.
+LC6FC:  .byte $05
+LC6FD:  .word $8D60, $1200, $0450
+
+;[BGR]More Brinstar rooms. Entry 5.
+LC703:  .byte $06
+LC704:  .word GFXBrinstar2, $1800, $0800
+
+;[SPR]Brinstar enemies. Entry 6.
+LC70A:  .byte $01
+LC70B:  .word $9160, $0C00, $0400
+
+;[BGR]Norfair rooms. Entry 7.
+LC711:  .byte $06
+LC712:  .word GFXNorfair1, $1000, $0260
+
+;[BGR]More Norfair rooms. Entry 8.
+LC718:  .byte $06
+LC719:  .word GFXNorfair2, $1700, $0070
+
+;[SPR]Norfair enemies. Entry 9.
+LC71F:  .byte $02
+LC720:  .word $8D60, $0C00, $0400
+
+;[BGR]Tourian rooms. Entry 10.
+LC726:  .byte $06
+LC727:  .word GFXTourian1, $1000, $02E0
+
+LC72D:  .byte $06           ;[BGR]More Tourian rooms. Entry 11.
+LC72E:  .word GFXTourian2, $1200, $0600
+
+LC734:  .byte $06           ;[BGR]Mother Brain room. Entry 12.
+LC735:  .word GFXMthrBrnRoom, $1900, $0090
+
+LC73B:  .byte $05           ;[BGR]Misc. object. Entry 13.
+LC73C:  .word $91B0, $1D00, $0300
+
+LC742:  .byte $02           ;[SPR]Tourian enemies. Entry 14.
+LC743:  .word $9160, $0C00, $0400
+
+LC749:  .byte $06           ;[BGR]More Tourian rooms. Entry 15.
+LC74A:  .word GFXTourian3, $1700, $00C0
+
+LC750:  .byte $04           ;[BGR]Misc. object and fonts. Entry 16.
+LC751:  .word $9360, $1E00, $0200
+
+LC757:  .byte $03               ;[SPR]Miniboss I enemies. Entry 17.
+LC758:  .word $8D60, $0C00, $0400
+
+LC75E:  .byte $06               ;[BGR]More Tourian Rooms. Entry 18.
+LC75F:  .word GFXTourian4, $1700, $00C0
+
+LC765:  .byte $03           ;[SPR]Miniboss II enemies. Entry 19.
+LC766:  .word $9160, $0C00, $0400
+
+LC76C:  .byte $06           ;[SPR]Inrto/End sprites. Entry 20.
+LC76D:  .word GFXIntroEnd, $0C00, $0100
+
+LC773:  .byte $06           ;[BGR]Title. Entry 21.
+LC774:  .word GFXMetroidTitle, $1400, $0500
+
+LC77A:  .byte $06           ;[BGR]Solid tiles.      Entry 22.
+LC77B:  .word GFXBlankTiles, $1FC0, $0040
+
+LC781:  .byte $06           ;[BGR]Complete font.        Entry 23.
+LC782:  .word GFXFont, $1000, $0400
+
+LC788:  .byte $06           ;[BGR]Complete font.        Entry 24.
+LC789:  .word GFXFont, $0A00, $00A0
+
+LC78F:  .byte $06           ;[BGR]Solid tiles.      Entry 25.
+LC790:  .word GFXBlankTiles, $0FC0, $0040
+
+LC796:  .byte $06           ;[BGR]Complete font.        Entry 26.
+LC797:  .word GFXFont, $1D00, $02A0
+
+;[SPR]Suitless Samus.           Entry 27.
+LC79D:  .byte $06
+LC79E:  .word GFXSuitlesSamus, $0000, $07B0
+
+;[BGR]Exclaimation point.       Entry 28.
+LC7A4:  .byte $06
+LC7A5:  .word $9890, $1F40, $0010
+
+
+;The following table marks the time remaining in Timer3 when a palette change should occur during
+;the Samus fade-in sequence. This creates the fade-in effect.
+
+SamusFadeTmTbl:
+    .byte $1E, $14, $0B, $04, $FF
+
+;Table used by above subroutine.
+;Each value is the area bank number plus one.
+
+; TODO - This thing being out of order is killing me. Maybe attempt to switch tourian and kraid?
+; This could be a massive rework, but then we could just add 2 (iny, iny or inx, inx) to the indexer register instead of using this table
+BankTable:
+    .byte $02               ;Brinstar.
+    .byte $03               ;Norfair.
+    .byte $05               ;Kraid hideout.
+    .byte $04               ;Tourian.
+    .byte $06               ;Ridley hideout.
+
+ActionTable:
+    .byte sa_Run            ;Run right.
+    .byte sa_Run            ;Run left.
+    .byte sa_Roll
+    .byte sa_PntUp
+
+RunAnimationTbl:
+    .byte an_SamusRun
+    .byte an_SamusRunPntUp
+
+RunAccelerationTbl:
+    .byte $30           ;Accelerate right.
+    .byte $D0           ;Accelerate left.
+
+; 16-entry mask table (4 copies of the original 4 masks).
+; Duplicated because it's used in an "every cycle matters" hot loop
+AttribMask16Table:
+    .byte %11111100, %11110011, %11001111, %00111111
+    .byte %11111100, %11110011, %11001111, %00111111
+    .byte %11111100, %11110011, %11001111, %00111111
+    .byte %11111100, %11110011, %11001111, %00111111
+
+; For each ObjectPal (0..3) and quadrant (0..3):
+; value = ObjectPal << (2*quadrant)
+AttrSetBitsTable:
+    .byte %00000000, %00000000, %00000000, %00000000   ; pal 0
+    .byte %00000001, %00000100, %00010000, %01000000   ; pal 1
+    .byte %00000010, %00001000, %00100000, %10000000   ; pal 2
+    .byte %00000011, %00001100, %00110000, %11000000   ; pal 3
+
+ATDataTable:
+    .byte %00000000, %00000000, %00000000, %00000000
+    .byte %01010101, %01010101, %01010101, %01010101
+    .byte %10101010, %10101010, %10101010, %10101010
+    .byte %11111111, %11111111, %11111111, %11111111
+
+CartRamMulOffsetLoTable:
+    .byte $00, $40, $80, $C0   ; low-byte part of X * $40 (X & 3)
+    .byte $00, $40, $80, $C0
+    .byte $00, $40, $80, $C0
+    .byte $00, $40, $80, $C0
+
+; The following table is used for finding the high byte of the proper name table to clear.
+HiPPUTable:
+    .byte $20               ;Name table 0.
+    .byte $24               ;Name table 1.
+    .byte $28               ;Name table 2.
+    .byte $2C               ;Name table 3.
+
+; TODO - My gut says these tables aren't needed (Table06 and Table04)
+Table06:
+    .byte $0C
+    .byte $0C
+    .byte $0C
+Table04:
+    .byte $35
+    .byte $35
+    .byte $35
+
+; Used in Samus weapon fire routine
+Table05:
+    .byte $3F
+    .byte $3B
+    .byte $3D
+    .byte $3F
+
+; Table09 - Uninvestigated
+Table09:
+    .byte $01
+    .byte $FF
+    .byte $EC
+    .byte $F0
+
+; Table08 - Uninvestigated
+Table08:
+    .byte $0C
+    .byte $F4
+    .byte $08
+    .byte $F8
+
+; Table99 - Uninvestigated
+Table99:
+    .byte $04
+    .byte $FC
+
+MissileAnims:
+    .byte an_MissileRight
+    .byte an_MissileLeft
+
+; Some kinda wave math
+Table0A:
+    .word Table0C     ; pointer to table #1 below
+    .word Table0D     ; pointer to table #2 below
+
+; Table #1 (size: 25 bytes)
+
+Table0C:
+    .byte $01
+    .byte $F3
+    .byte $01
+    .byte $D3
+    .byte $01
+    .byte $93
+    .byte $01
+    .byte $13
+    .byte $01
+    .byte $53
+    .byte $01
+    .byte $73
+    .byte $01
+    .byte $73
+    .byte $01
+    .byte $53
+    .byte $01
+    .byte $13
+    .byte $01
+    .byte $93
+    .byte $01
+    .byte $D3
+    .byte $01
+    .byte $F3
+    .byte $FF
+
+; Table #2 (size: 25 bytes)
+
+Table0D:
+    .byte $01
+    .byte $B7
+    .byte $01
+    .byte $B5
+    .byte $01
+    .byte $B1
+    .byte $01
+    .byte $B9
+    .byte $01
+    .byte $BD
+    .byte $01
+    .byte $BF
+    .byte $01
+    .byte $BF
+    .byte $01
+    .byte $BD
+    .byte $01
+    .byte $B9
+    .byte $01
+    .byte $B1
+    .byte $01
+    .byte $B5
+    .byte $01
+    .byte $B7
+    .byte $FF
+
+; Table used by above subroutine
+
+Table0E:
+    .byte $30
+    .byte $AC
+    .byte $F0
+    .byte $6C
+Table1B:
+    .byte $61
+    .byte $60
+    .byte $60
+    .byte $60
+
+; Table16 - Uninvestigated
+Table16:
+    .byte $00
+    .byte $00
+    .byte $0C
+    .byte $1C
+    .byte $10
+    .byte $F0
+    .byte $F0
+    .byte $08
+
+; Table17 - Uninvestigated
+Table17:
+    .byte $00
+    .byte $FB
+    .byte $FB
+    .byte $FE
+    .byte $FB
+    .byte $02
+    .byte $00
+    .byte $05
+
+; Table18 - Uninvestigated
+Table18:
+    .byte $02
+    .byte $FE
+    .byte $01
+    .byte $FF
+    .byte $02
+
+; Table used for indexing the animations in TileBlastAnim
+Table19:
+    .byte $18, $1C, $20, $00, $04, $08, $0C, $10, $24, $14
+
+; Unknown
+LDA39:  
+    .byte $88
+    .byte $68
+
+LDA3B:
+    .byte $65
+    .byte $66
+
+ExplodeRotationTbl:
+    .byte $00           ;No sprite flipping.
+    .byte $80           ;Flip sprite vertically.
+    .byte $C0           ;Flip sprite vertically and horizontally.
+    .byte $40           ;Flip sprite horizontally.
+
+;----------------------------------------[ Item drop table ]-----------------------------------------
+
+;The following table determines what, if any, items an enemy will drop when it is killed.
+ItemDropTbl:
+    .byte $80           ;Missile.
+    .byte $81           ;Energy.
+    .byte $89           ;No item.
+    .byte $80           ;Missile.
+    .byte $81           ;Energy.
+    .byte $89           ;No item.
+    .byte $81           ;Energy.
+    .byte $89           ;No item.
+
+;--------------------------------[ Explosion placement data ]---------------------------------------
+
+;The following table has the index values into the table after it for finding the placement data
+;for an exploding object.
+
+ExplodeIndexTbl:
+    .byte $00, $18, $30
+
+;The following table is used to produce the arcing motion of exploding objects.  It is displacement
+;data for the y directions only.  The x displacement is constant.
+
+ExplodePlacementTbl:
+;Bottom sprites.
+    .byte $FC, $F8, $F4, $F0, $EE, $EC, $EA, $E8, $E7, $E6, $E6, $E5, $E5, $E4, $E4, $E3
+    .byte $E5, $E7, $E9, $EB, $EF, $F3, $F7, $FB
+
+;Middle sprites.
+    .byte $FE, $FC, $FA, $F8, $F6, $F4, $F2, $F0, $EE, $ED, $EB, $EA, $E9, $E8, $E7, $E6
+    .byte $E6, $E6, $E6, $E6, $E8, $EA, $EC, $EE
+
+;Top sprites.
+    .byte $FE, $FC, $FA, $F8, $F7, $F6, $F5, $F4, $F3, $F2, $F1, $F1, $F0, $F0, $EF, $EF
+    .byte $EF, $EF, $EF, $EF, $F0, $F0, $F1, $F2
+
+;-------------------------------------[ Status bar sprite data ]-------------------------------------
+
+;Sprite data for Samus' data display
+
+DataDisplayTbl_Reversed:
+    .byte $28,$00,$3A,$21       ; ..
+    .byte $20,$01,$7F,$21       ; N
+    .byte $18,$01,$76,$21       ; E
+    .byte $20,$00,$5F,$2B       ; Right half of missile.
+    .byte $18,$00,$5E,$2B       ; Left half of missile.
+    .byte $38,$01,$FF,$2B       ; Lower missile digit.
+    .byte $30,$01,$FF,$2B       ; Middle missile digit.
+    .byte $28,$01,$FF,$2B       ; Upper missile digit.
+    .byte $38,$01,$A0,$21       ; Lower health digit.
+    .byte $30,$01,$A0,$21       ; Upper health digit.
+
+PPUWriteDirectionTable:
+    .byte $20           ;Horizontal write. PPU inc = 1, length = 32 tiles.
+    .byte $20           ;Horizontal write. PPU inc = 1, length = 32 tiles.
+    .byte $9E           ;Vertical write... PPU inc = 32, length = 30 tiles.
+    .byte $9E           ;Vertical write... PPU inc = 32, length = 30 tiles.
+
+DoorXs:
+    .byte $F0    ; X coord of RIGHT door
+    .byte $10    ; X coord of LEFT door
+
+LoadDoorTable:
+    .byte $02
+    .byte $01
+LEC00:  
+    .byte $80
+    .byte $B0
+    .byte $A0
+    .byte $90
+
 ; Frame data for tile blasts
-
 TileBlastAnim:
-    .byte $06,$07,$00,$FE
-    .byte $07,$06,$01,$FE
-    .byte $07,$06,$02,$FE
-    .byte $07,$06,$03,$FE
-    .byte $07,$06,$04,$FE
-    .byte $07,$06,$05,$FE
-    .byte $07,$06,$09,$FE
-    .byte $07,$06,$0A,$FE
-    .byte $07,$06,$0B,$FE
-    .byte $07,$06,$08,$FE
+    .byte $06, $07, $00, $FE
+    .byte $07, $06, $01, $FE
+    .byte $07, $06; $02, $FE
+Table15: .byte $02, $FE             ; Table15 is just $02, $FE. They are interwoven
+    .byte $07, $06, $03, $FE
+    .byte $07, $06, $04, $FE
+    .byte $07, $06, $05, $FE
+    .byte $07, $06, $09, $FE
+    .byte $07, $06, $0A, $FE
+    .byte $07, $06, $0B, $FE
+    .byte $07, $06, $08, $FE
+    ; The following line was oringinally .byte $00, $00 but I because the Mul16Table starts with
+    ; with a $00 byte, I have removed the second one
+    .byte $00
 
-    .byte $00
-    .byte $00
+Mul16Table:
+    .byte $00, $10, $20, $30, $40, $50, $60, $70, $80, $90, $A0, $B0, $C0, $D0, $E0, $F0
+
+; TODO - Need to align the identity table to a memory page for maxium cycle gains
+;        Test out if aligning to #$00 or #$F0 is better. There are way more -16s in the code
+    .byte $f0, $f1, $f2, $f3, $f4, $f5, $f6, $f7, $f8, $f9, $fa, $fb, $fc, $fd, $fe, $ff
+IdentityTable:
+    .byte $00, $01, $02, $03, $04, $05, $06, $07, $08, $09, $0a, $0b, $0c, $0d, $0e, $0f
+    .byte $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $1a, $1b, $1c, $1d, $1e, $1f
+    .byte $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $2a, $2b, $2c, $2d, $2e, $2f
+    .byte $30, $31, $32, $33, $34, $35, $36, $37, $38, $39, $3a, $3b, $3c, $3d, $3e, $3f
+    .byte $40, $41, $42, $43, $44, $45, $46, $47, $48, $49, $4a, $4b, $4c, $4d, $4e, $4f
+    .byte $50, $51, $52, $53, $54, $55, $56, $57, $58, $59, $5a, $5b, $5c, $5d, $5e, $5f
+    .byte $60, $61, $62, $63, $64, $65, $66, $67, $68, $69, $6a, $6b, $6c, $6d, $6e, $6f
+    .byte $70, $71, $72, $73, $74, $75, $76, $77, $78, $79, $7a, $7b, $7c, $7d, $7e, $7f
+    .byte $80, $81, $82, $83, $84, $85, $86, $87, $88, $89, $8a, $8b, $8c, $8d, $8e, $8f
+    .byte $90, $91, $92, $93, $94, $95, $96, $97, $98, $99, $9a, $9b, $9c, $9d, $9e, $9f
+    .byte $a0, $a1, $a2, $a3, $a4, $a5, $a6, $a7, $a8, $a9, $aa, $ab, $ac, $ad, $ae, $af
+    .byte $b0, $b1, $b2, $b3, $b4, $b5, $b6, $b7, $b8, $b9, $ba, $bb, $bc, $bd, $be, $bf
+    .byte $c0, $c1, $c2, $c3, $c4, $c5, $c6, $c7, $c8, $c9, $ca, $cb, $cc, $cd, $ce, $cf
+    .byte $d0, $d1, $d2, $d3, $d4, $d5, $d6, $d7, $d8, $d9, $da, $db, $dc, $dd, $de, $df
+    .byte $e0, $e1, $e2, $e3, $e4, $e5, $e6, $e7, $e8, $e9, $ea, $eb, $ec, $ed, $ee, $ef
+    .byte $f0, $f1, $f2, $f3, $f4, $f5, $f6, $f7, $f8, $f9, $fa, $fb, $fc, $fd, $fe, $ff
+    .byte $00, $01, $02, $03, $04, $05, $06, $07, $08, $09, $0a, $0b, $0c, $0d, $0e, $0f    ; Overflow a bit so catch +16 past $ff
 
 ;-----------------------------------------------[ RESET ]--------------------------------------------
 

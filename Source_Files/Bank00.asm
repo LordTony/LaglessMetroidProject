@@ -389,18 +389,6 @@ LCB19:  .byte $16               ;Max. 6.7 hours
 LCB1A:  .byte $0A               ;Max. 3.0 hours
 LCB1B:  .byte $04               ;Best ending. Max. 1.2 hours
 
-;----------------------------------------------------------------------------------------------------
-
-; UNUSED ???
-;;ClearScreenData:
-;;LCB1C:  jsr ScreenOff           ;($C439)Turn off screen.
-;;LCB1F:  lda #$FF                ;
-;;LCB21:  sta $00                 ;Prepare to fill nametable with #$FF.
-;;LCB23:  jsr ClearNameTable      ;($C175)Clear selected nametable.
-;;LCD26:  jmp EraseAllSprites     ;($C1A3)Clear sprite data.
-
-;----------------------------------------------------------------------------------------------------
-
 Bank00_Adiv16:
     lsr
     lsr
@@ -2477,7 +2465,7 @@ L92DF:  STY SpritePagePos       ;
 L92E1:  STY PageIndex           ;Clear object data.
 L92E3:  STY ObjectCntrl         ;
 L92E5:  STY ObjectHi            ;
-L92E8:  JSR SilenceMusic        ;($CB8E)Turn off music.
+L92E8:  JSR SilenceMusic_Bank00 ;($CB8E)Turn off music.
 L92EB:  LDA #$5A                ;
 L92ED:  STA AnimFrame           ;Set animframe index. changed by initializing routines. 
 L92F0:  LDX #$01                ;x is the index into the position tables below.
@@ -5362,7 +5350,13 @@ LAFB3:  .byte $84, $08, $30, $60, $E0, $00, $02, $1F, $7A, $F4, $C8, $98, $10, $
 LABC3:  .byte $63, $63, $67, $E7, $E7, $06, $0E, $0C, $1C, $1C, $18, $18, $18, $C0, $C0, $80
 LAFD3:  .byte $80, $80, $00, $00, $00, $30, $30, $60, $60, $60, $E0, $E0, $E0, $C7, $C7, $C7
 LAFE3:  .byte $C7, $C7, $C7, $C7, $C7, $38, $38, $38, $38, $38, $38, $38, $38, $20, $20, $20
-LAFF3:  .byte $20, $20, $20, $20, $20, $C0, $C0, $C0, $C0, $C0, $C0, $C0, $C0 
+LAFF3:  .byte $20, $20, $20, $20
+
+SilenceMusic_Bank00:
+    LDA #MUS_NONE
+    ORA NoiseSFXFlag
+    STA NoiseSFXFlag
+    RTS 
 
 IntroSQ2Data:
 LB000:  .byte $C2               ;

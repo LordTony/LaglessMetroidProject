@@ -83,13 +83,13 @@ _DoorSFXData:
 
 _ChooseNextSFXRoutineTbl:
 
-_NseInitDat:
-  .word _NseInitTbl, _NseSFXContFlags        ;Noise init SFX(1st).
-  .byte CHN_NOISE
+;_NseInitDat:
+; .word _NseInitTbl, _NseSFXContFlags        ;Noise init SFX(1st).
+; .byte CHN_NOISE
 
-_NseContDat:
-  .word _NseContTbl, _NoSound                ;Noise continue SFX (2nd).
-  .byte CHN_NOISE
+;_NseContDat:
+; .word _NseContTbl, _NoSound                ;Noise continue SFX (2nd).
+; .byte CHN_NOISE
 
 _SQ1InitDat:
   .word _SQ1InitTbl, _SQ1SFXContFlags        ;SQ1 init SFX(5th).
@@ -136,7 +136,8 @@ _NseInitTbl:
   .word _SmuWlkSFXStart    ;Samus walk init SFX.
   .word _SptFlmSFXStart    ;Spit flame init SFX.
   .word _NoSound           ;No sound.
-  .word _NoSound           ;No sound.
+  ; Since the next table starts with no_sound, we can just cram these together
+  ;.word _NoSound           ;No sound.
 
 ;Noise Continue SFX handling routine addresses:
 _NseContTbl:
@@ -195,14 +196,41 @@ _TriContTbl:
 
 ;----------------------------------------------------------------------------------------------------
 _NseSFXInitFlags:
-  LDA NoiseSFXFlag        ;Load A with Noise init SFX flags, (1st SFX cycle).
-  LDX #<_NseInitDat        ;Lower address byte in ChooseNextSFXRoutineTbl.
-  BNE _GotoSFXCheckFlags   ;Branch always.
+  ;LDA NoiseSFXFlag        ;Load A with Noise init SFX flags, (1st SFX cycle).
+  ;LDX #<_NseInitDat        ;Lower address byte in ChooseNextSFXRoutineTbl.
+  ;BNE _GotoSFXCheckFlags   ;Branch always.
+  
+  ;1st  SFX cycle $E0=#$BB,$E1=#$B2,$E2=#$22,$E3=#$B3.
+  LDA #CHN_NOISE
+  STA ChannelType
+  LDY #$00
+  LAX NoiseSFXFlag
+  JSR CheckFlagsRedux
+  BMI _NseSFXContFlags
+  LDA _NseInitTbl, Y
+  LDX _NseInitTbl + 1, Y
+
+_Jump_To_XXYY:
+  STA $E2
+  STX $E3
+  JMP (SFXPtrE2_)
+
 
 _NseSFXContFlags:
-  LDA NoiseContSFX        ;Load A with Noise continue flags, (2nd SFX cycle).
-  LDX #<_NseContDat        ;Lower address byte in ChooseNextSFXRoutineTbl.
-  BNE _GotoSFXCheckFlags   ;Branch always.
+  ;LDA NoiseContSFX        ;Load A with Noise continue flags, (2nd SFX cycle).
+  ;LDX #<_NseContDat        ;Lower address byte in ChooseNextSFXRoutineTbl.
+  ;BNE _GotoSFXCheckFlags   ;Branch always.
+
+  LDY #$00
+  LAX NoiseContSFX
+  JSR CheckFlagsRedux
+  BMI _NoSound_Exit
+  LDA _NseContTbl, Y
+  LDX _NseContTbl + 1, Y
+  bne _Jump_To_XXYY ; Branch always.
+
+_NoSound_Exit:
+  rts
 
 _SQ1SFXInitFlags:
   LDA SQ1SFXFlag          ;Load A with SQ1 init flags, (5th SFX cycle).
@@ -302,9 +330,9 @@ _LoadSFXData:
 _LoadSFXRegisters:
   LDA (SFXPtrE2),Y        ;Load A with SFX data byte.
   STA (SFXPtrE0),Y        ;Store A in SFX register.
-  INY                     ;
-  LDA (SFXPtrE2),Y        ;Load A with SFX data byte.
-  STA (SFXPtrE0),Y        ;Store A in SFX register.
+  ;INY                     ;
+  ;LDA (SFXPtrE2),Y        ;Load A with SFX data byte.
+  ;STA (SFXPtrE0),Y        ;Store A in SFX register.
 
   INY                     ;
   CPY #$04                ;channel are loaded one after the other (the loop
@@ -347,7 +375,7 @@ _EndGamePaused:
 ;
 ;There are 10 SFX cycles run every time the sound engine subroutine is called.  The cycles
 ;search for set sound flags in the following registers in order:
-;$680, $688, $684, $68C, $681, $689, $683, $68B, $65D, $685 
+;$0680, $0688, $0684, $068C, $0681, $0689, $0683, $068B, $065D, $0685 
 ;
 ;The sound channels are assigned SFX numbers.  Those SFX numbers are:
 ;Noise=0, sq1=1, sq2=2, triangle=3, Multi=4
@@ -355,11 +383,6 @@ _EndGamePaused:
 ;SQ1=0, SQ2=1, Triangle=2, Noise=3
 
 .advance SoundEngineEntryPoint
-
-    ; TODO: This could be set once when the game starts and it will never change
-    LDY #$B2                ;
-    STY SFXPtrE4UB          ;
-
     LDA #$C0                ;Set APU to 5 frame cycle, disable frame interrupt.
     STA APUCommonCntrl1     ;
     LDA NoiseSFXFlag        ;is bit zero is set in NoiseSFXFlag(Silence
@@ -400,9 +423,9 @@ _CheckMusicFlags:
   CMP CurrentSFXFlags     ;with current SFX flags.  If both are equal,
   BEQ ++                  ;just clear music counters, else clear everything.
 
-_InitSoundAddresses:             ;
+_InitSoundAddresses:          ;
 .scope
-  _ClrMusAndSFXAddrs:              ;
+_ClrMusAndSFXAddrs:           ;
   *   LDA #$00                ;
       STA SQ1InUse            ;
       STA SQ2InUse            ;
@@ -414,12 +437,12 @@ _InitSoundAddresses:             ;
       STA TriangleContSFX     ;
       STA MultiContSFX        ;
       STA CurrentMusic        ;
-.scend
+      .scend
   
 JSR _ClearSounds         ;($B43E)all sound addresses in order to start
 
 .scope
-  _ClearSpecialAddrs:
+_ClearSpecialAddrs:
 *   LDA #$00                ;   
     STA TriCounterCntrl     ;Clears addresses used for repeating music,
     STA SFXPaused           ;pausing music and controlling triangle length.
@@ -427,7 +450,7 @@ JSR _ClearSounds         ;($B43E)all sound addresses in order to start
     STA MusicRepeat         ;
 .scend
 
-  RTS                     ;
+    RTS                     ;
 
 _ClearSounds:             ;
   LDA #$10                ;
@@ -509,7 +532,7 @@ _IncrementSFXFrame:
 
 _CheckSFXFlag:
   STA CurrentSFXFlags     ;Store any set flags in some space zeropage.
-  STX SFXPtrE4LB          
+  STX SFXPtrE4LB 
   LDY #$04                ;Y=0 for counting loop ahead.
   LDA (SFXPtrE4),Y        ;
   STA ChannelType         ;#$00=SQ1,#$01=SQ2,#$02=Triangle,#$03=Noise
@@ -528,6 +551,8 @@ _CheckSFXFlag:
 
   ;Y is zero at this point
   lax CurrentSFXFlags
+
+_CheckSFXFlagRefactor:
   beq _NoSound
   bmi _SFXFlagFound
   asr #$F0
@@ -537,12 +562,7 @@ _CheckSFXFlag:
   lsr
   tax
   ldy _SFXHiBitToIndex - 1, x
-  lda (SFXPtrE0),Y
-  sta SFXPtrE2LB
-  iny
-  lda (SFXPtrE0),Y
-  sta SFXPtrE2UB
-  rts
+  bne _SFXFlagFound       ; branch always 
 
 _CheckLowNibble:
   ldy _SFXLoBitToIndex,x
@@ -583,13 +603,6 @@ _SFXLoBitToIndex:
     .byte 8
     .byte 8
     .byte 8
-
-nop
-nop
-nop
-nop
-nop
-nop
 
 ;-----------------------------------[ SFX Handling Routines ]---------------------------------------
 
