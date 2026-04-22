@@ -6778,7 +6778,7 @@ LEB92:  iny
     dey
 *   tya
     jsr LEE41
-    jsr LEE4A
+    jsr CheckForItem
     bcs ++
 *   lda #$01
     sta ObjAction,x
@@ -7139,22 +7139,7 @@ LEE0D:  bne LEE39              ;If not, branch to exit.
 
 LEE0F:  lda ($00),y         ;Power-up item type.
 LEE11:  jsr PrepareItemID       ;($EE3D)Get unique item ID.
-
-; TODO: After inlining, it seems like there is some duplicate work here
-CheckForItem:
-LEE4A:  ldy NumUniqueItems      ;
-LEE4D:  beq +++                 ;Samus has no unique items. Load item and exit.
-LEE4F:* lda $07                 ;
-LEE51:  cmp NumUniqueItems,y    ;Look for lower byte of unique item.
-LEE54:  bne +                   ;
-LEE56:  lda $06                 ;Look for upper byte of unique item.
-LEE58:  cmp DataSlot,y          ;
-LEE5B:  beq LEE17               ;Samus already has item. Branch to exit.
-LEE5D:* dey                     ;
-LEE5E:  dey                     ;
-LEE5F:  bne --                  ;Loop until all Samus' unique items are checked.
-LEE61:* clc                     ;Samus does not have the item. It will be placed on screen.
-
+LEE14:  jsr CheckForItem        ;($EE4A)Check if Samus already has item.
 LEE17:  bcs LEE39               ;Samus already has item. do not load it.
 
 LEE19:  ldy #$02            ;Prepare to load item coordinates.
@@ -7186,6 +7171,21 @@ LEE41:  sta $07             ;Store item X coordinate.
 LEE42:  lda MapPosY         ;
 LEE45:  sta $06             ;Store item Y coordinate.
 LEE47:  jmp CreateItemID        ;($DC67)Get unique item ID.
+
+CheckForItem:
+LEE4A:  ldy NumUniqueItems     ;
+LEE4D:  beq +++             ;Samus has no unique items. Load item and exit.
+LEE4F:* lda $07             ;
+LEE51:  cmp NumUniqueItems,y   ;Look for lower byte of unique item.
+LEE54:  bne +               ;
+LEE56:  lda $06             ;Look for upper byte of unique item.
+LEE58:  cmp DataSlot,y          ;
+LEE5B:  beq +++             ;Samus already has item. Branch to exit.
+LEE5D:* dey             ;
+LEE5E:  dey             ;
+LEE5F:  bne --              ;Loop until all Samus' unique items are checked.
+LEE61:* clc             ;Samus does not have the item. It will be placed on screen.
+LEE62:* rts             ;
 
 ;-----------------------------------------------------------------------------------------------------
 
@@ -7235,7 +7235,7 @@ LEEAE:  jsr $95B4
     sta $07
     lda #$00
     sta $06
-    jsr LEE4A
+    jsr CheckForItem
     bcc LEEC6
     lda #$08
     sta MthrBrainStatus
@@ -7252,7 +7252,7 @@ LEECA:  jsr $95B7
     sta $07
     lda #$00
     sta $06
-    jsr LEE4A
+    jsr CheckForItem
     bcc +
     lda #$81
     sta $0758,x
