@@ -1770,7 +1770,7 @@ SetSamusExplodeExit:
 *   rts
 
 SetSamusRun:
-LCC98:  lda #$09
+    lda #$09
     sta WalkSoundDelay
     ldx #$00
     lda AnimResetIndex
@@ -1783,8 +1783,9 @@ LCC98:  lda #$09
     jsr SetSamusNextAnim
 *   lda RunAnimationTbl,x
     sta AnimResetIndex
+SetRunAccelerationToSamusDir:
     ldx SamusDir
-LCCB7:  
+SetRunAcceleration:  
     lda RunAccelerationTbl,x
     sta SamusHorzAccel
     rts
@@ -1833,12 +1834,13 @@ LCCC2:
     bmi LCD40       ; branch if JUMP pressed
 *   jsr LCF88
     jsr LD09C
-    jsr LCF2E
+    jsr SetSamusHorzAccl
     lda #$02
     bne SetSamusData       ; branch always
+
 *   lda SamusOnElevator
     bne +
-    jsr LCCB7
+    jsr SetRunAcceleration
 *   jsr LCDBF
     dec WalkSoundDelay  ; time to play walk sound?
     bne +          ; branch if not
@@ -1850,18 +1852,35 @@ SFXSamusWalk_Inline1:
     ora NoiseSFXFlag
     sta NoiseSFXFlag
 
-*   jsr LCF2E
+*   jsr SetSamusHorzAccl
     lda Joy1Change
     bpl +      ; branch if JUMP not pressed
-LCD40:  jsr LCFC3
+LCD40:  
+    jsr LCFC3
     lda #$20
     sta SamusHorzSpdMax
     jmp LCD6B
 
 *   ora Joy1Retrig
     asl
-    bpl +      ; branch if FIRE not pressed
-    jsr LCDD7
+    bpl ++      ; branch if FIRE not pressed
+
+    jsr FireWeapon          ;($D1EE)Shoot left/right.
+    lda Joy1Status
+    and #$08
+    bne +
+    lda #an_SamusFireRun
+    sta AnimIndex
+    bne AfterShooting       ; always branch
+
+*   lda AnimIndex
+    sec
+    sbc AnimResetIndex
+    and #$03
+    tax
+    lda Table05,x
+    jsr SetSamusNextAnim
+AfterShooting:
 *   lda Joy1Status
     and #$03
     bne +
@@ -1952,23 +1971,6 @@ LCDBF:
     pla
     jmp LCD6B
 
-LCDD7:
-    jsr FireWeapon          ;($D1EE)Shoot left/right.
-    lda Joy1Status
-    and #$08
-    bne +
-    lda #an_SamusFireRun
-    sta AnimIndex
-    rts
-
-*   lda AnimIndex
-    sec
-    sbc AnimResetIndex
-    and #$03
-    tax
-    lda Table05,x
-    jmp SetSamusNextAnim
-
 CheckHealthStatus:
 LCDFA:
     lda SamusHit            ;
@@ -2020,7 +2022,8 @@ SFX_SamusHit_Inline:
     bne +
 
     eor #$FF
-    adc #$00
+    clc
+    adc #$01
 *   sta ObjHorzSpeed
 
 *   lda $77
@@ -2155,19 +2158,20 @@ LCF2B:* JMP ClearHealthChange       ;($F323)
 
 ;----------------------------------------------------------------------------------------------------
 
-LCF2E:  LDA SamusHit
-LCF31:  asr #$05
-        BEQ +++
-        BCS +
-        LDA SamusHorzAccel
-        BMI +++
-        BPL ++
-*       LDA SamusHorzAccel
-        BMI +
-        BNE ++
-*       eor #$FF
-        adc #$00                ;Carry is always set here
-        STA SamusHorzAccel
+SetSamusHorzAccl:  
+    LDA SamusHit
+    asr #$05
+    BEQ +++
+    BCS +
+    LDA SamusHorzAccel
+    BMI +++
+    BPL ++
+*   LDA SamusHorzAccel
+    BMI +
+    BNE ++
+*   eor #$FF
+    adc #$00                ;Carry is always set here
+    STA SamusHorzAccel
 
 ClearHorzMvmntData:
 LCF4C:  LDY #$00                ;
@@ -2180,7 +2184,7 @@ LCF55:  LDA SamusHorzAccel      ;Is Samus moving horizontally?
         BNE ClearHrztAnimData   ;If so, branch to stop movement.
 
 SFXSamusWalk_Inline2:
-        LDA #$08
+        LDA #SFX_SMS_WLK
         ORA NoiseSFXFlag
         STA NoiseSFXFlag
 
@@ -2217,7 +2221,7 @@ LCF88:  LDA Joy1Status
         BEQ ApplyGravity
         JSR BitScan             ;($E1E1)
         TAX
-        JSR LCCB7
+        JSR SetRunAcceleration
         LDA SamusGravity
         BMI ClearHorzDataExit
         LDA AnimResetIndex
@@ -2235,7 +2239,7 @@ ApplyGravity:
         BNE ClearHorzDataExit
 
 ClearHorzData:
-LCFB7:  JSR ClearHorzMvmntData  ;($CF4C)Clear horizontal speed and linear counter.
+        JSR ClearHorzMvmntData  ;($CF4C)Clear horizontal speed and linear counter.
         STY SamusHorzAccel      ;Clear horizontal acceleration data.
 ClearHorzDataExit:
         RTS                     ;
@@ -2321,7 +2325,7 @@ LD055:
     sty SamusDir
 *   stx ObjHorzSpeed
 
-    JSR LCF2E
+    JSR SetSamusHorzAccl
     LDA Joy1Status
     AND #$08     ; UP pressed?
     BEQ +      ; branch if not
@@ -2356,9 +2360,8 @@ LD09C:
     lda AnimResetIndex
     cmp #an_SamusJmpPntUp
     bne +
-    jmp LD275
-
-*   jsr LD210
+    jmp SpawnBulletVertical
+*   jsr SpawnBulletHorizontal
     lda #an_SamusFireJump
     jmp SetSamusAnim
 
@@ -2430,14 +2433,13 @@ SamusRoll:
     sta SamusDir
     lda #an_SamusRoll
     jsr SetSamusAnim
-*   ldx SamusDir
-    jsr LCCB7
-    jsr LCF2E
+*   jsr SetRunAccelerationToSamusDir
+    jsr SetSamusHorzAccl
     jsr CheckBombLaunch
     lda Joy1Status
     and #$03
     bne +
-    jsr LCFB7
+    jsr ClearHorzData
 *   lda #$02
 LD144:  
     jmp SetSamusData        ;($CD6D)Set Samus control data and animation.
@@ -2549,12 +2551,12 @@ SamusPntUp:
  .scend
 
 FireWeapon:
-LD1EE:  lda Joy1Status
+    lda Joy1Status
     and #$08
-    beq LD210
-    jmp LD275
+    beq SpawnBulletHorizontal
+    bne SpawnBulletVertical
 
-LD1F7:
+CheckIfMisslesCanBeFired:
     ldy #$D0
 *   lda ObjAction,y
         beq +
@@ -2570,9 +2572,10 @@ LD1F7:
     cpy #$D0
 *   rts
 
-LD210:  lda MetroidOnSamus
+SpawnBulletHorizontal:
+    lda MetroidOnSamus
     bne +
-    jsr LD1F7
+    jsr CheckIfMisslesCanBeFired
     bne +
     jsr LD2EB
     jsr LD359
@@ -2580,7 +2583,7 @@ LD210:  lda MetroidOnSamus
     lda #$0C
     sta $030F,y
     ldx SamusDir
-    lda Table99,x   ; get bullet speed
+    lda BulletSpeedTable,x   ; get bullet speed
     sta ObjHorzSpeed,y     ; -4 or 4, depending on Samus' direction
     lda #$00
     sta ObjVertSpeed,y
@@ -2602,20 +2605,22 @@ LD210:  lda MetroidOnSamus
     lsr
     lsr
     ror
-    ora $061F
-    sta $061F
+    ora HasBeamSFX
+    sta HasBeamSFX
     ldx ObjAction,y
     dex
     bne +
     jsr SFX_BulletFire
 *   ldy #$09
-LD26B:  tya
+LD26B:
+    tya
     jmp SetSamusNextAnim
 ; End
 
-LD275:  lda MetroidOnSamus
+SpawnBulletVertical: 
+    lda MetroidOnSamus
     bne +
-    jsr LD1F7
+    jsr CheckIfMisslesCanBeFired
     bne +
     jsr LD2EB
     jsr LD38A
@@ -2628,14 +2633,23 @@ LD275:  lda MetroidOnSamus
     sta ObjHorzSpeed,y
     lda #$01
     sta ObjectOnScreen,y
-    jsr LD340
+ 
+    VerticalMissleToggleCheck:
+        lda MissileToggle
+        beq AfterVerticalMissleToggleCheck
+        cpy #$D0
+        bne AfterVerticalMissleToggleCheck
+        lda #$8F
+        jsr GoSetBulletAnim
+    AfterVerticalMissleToggleCheck:
+
     ldx SamusDir
-    lda Table09,x
+    lda Table09_A,x
     sta $05
     lda ObjAction,y
     and #$01
     tax
-    lda Table09+2,x
+    lda Table09_B,x
     sta $04
     jsr LD306
     lda SamusGear
@@ -2643,8 +2657,8 @@ LD275:  lda MetroidOnSamus
     lsr
     lsr
     ror
-    ora $061F
-    sta $061F
+    ora HasBeamSFX
+    sta HasBeamSFX
     lda ObjAction,y
     cmp #$01
     bne +
@@ -2712,14 +2726,6 @@ SFXMissileLaunch_Inline:
     dec MissileToggle       ; put Samus in "regular fire" mode
     jmp SelectSamusPal      ; update Samus' palette to reflect this
 
-LD340: 
-    lda MissileToggle
-    beq Exit4
-    cpy #$D0
-    bne Exit4
-    lda #$8F
-    bne GoSetBulletAnim
-
 SetBulletAnim:
     sta AnimIndex,y
     sta AnimResetIndex,y
@@ -2767,14 +2773,15 @@ LD38E:
     bpl Exit4       ; branch if Samus doesn't have Ice Beam
     lda #wa_IceBeam
     sta ObjAction,y
-    lda $061F
+    lda HasBeamSFX
     ora #$01
-    sta $061F
+    sta HasBeamSFX
 SFX_BulletFire:
     lda #SFX_BLT_FIRE
-    ORA SQ1SFXFlag
-    STA SQ1SFXFlag
-    RTS             
+    ora SQ1SFXFlag
+    sta SQ1SFXFlag
+    rts 
+
 ; SamusDoor
 ; =========
 
@@ -3106,7 +3113,8 @@ LD5FC:  lda ObjectOnScreen,x
 
 ; bullet < background crash detection
 
-LD609:  jsr GetObjCoords
+LD609:
+    jsr GetObjCoords
     ldy #$00
     lda ($04),y     ; get tile # that bullet touches
     cmp #$A0
@@ -3119,7 +3127,8 @@ LD609:  jsr GetObjCoords
     clc
     jmp IsBlastTile
 
-LD624:  ldx PageIndex
+LD624:
+    ldx PageIndex
     lda ObjHorzSpeed,x
     sta $05
     lda ObjVertSpeed,x
@@ -3127,7 +3136,8 @@ LD624:  ldx PageIndex
     jsr LE8BE
     jsr Bank07_LFD8F
     bcc --
-LD638:  lda $08
+LD638:
+    lda $08
     sta ObjectY,x
     lda $09
     sta ObjectX,x
@@ -3140,7 +3150,8 @@ LD638:  lda $08
 *   sta ObjectHi,x
 *   rts
 
-LD651:  ldy InArea
+LD651: 
+    ldy InArea
     cpy #$10
     beq +
     cmp #$70
@@ -3679,33 +3690,20 @@ UpdateStatues:
         RTS
 .scend
 
-LDA1A:  jsr LDA3D
-    jsr LDA7C
-    txa
-    and #$01
-    tay
-    lda LDA3B,y
-    sta $0363
-    lda $681B,x
-    beq +
-    bmi +
-    lda FrameCount
-    lsr
-    bcc ++    ; only display statue at odd frames
-*   jmp DrawFrame       ; display statue
-
-LDA3D:  lda $0304,x
-    bmi +
+LDA1A:
+LDA3D:
+    lda $0304,x
+    bmi LDA3D_END
     lda #$01
     sta $0304,x
     lda $030F,x
     and #$0F
-    beq +
+    beq LDA3D_END
     inc $0304,x
     dec $030F,x
     lda $030F,x
     and #$0F
-    bne +
+    bne LDA3D_END
     lda $0304,x
     ora #$80
     sta $0304,x
@@ -3724,9 +3722,10 @@ LDA3D:  lda $0304,x
     jsr LDAB0
     pla
     tax
-*   rts
+LDA3D_END:
 
-LDA7C:  lda $030F,x
+LDA7C:
+    lda $030F,x
     sta $036D
     txa
     and #$01
@@ -3747,9 +3746,22 @@ LDA7C:  lda $030F,x
     sta $0683
 *   lda #$00
     sta $0306,x
-    rts
 
-LDAB0:  lda Table0E,y
+    txa
+    and #$01
+    tay
+    lda LDA3B,y
+    sta $0363
+    lda $681B,x
+    beq +
+    bmi +
+    lda FrameCount
+    lsr
+    bcc Exit31    ; only display statue at odd frames
+*   jmp DrawFrame       ; display statue
+
+LDAB0:
+    lda Table0E,y
     sta $05C8
     lda $036C
     asl
@@ -3788,7 +3800,7 @@ LDB53:  STA PowerUpX            ;
 LDB56:  LDA PowerUpNameTable,x      ;
 LDB59:  STA PowerUpHi           ;
 LDB5C:  JSR GetObjCoords        ;($D79F)Find object position in room RAM.
-LDB5F:  LDX ItemIndex           ;Index to proper power up item.
+;LDB5F:  LDX ItemIndex           ;Index to proper power up item.
 LDB61:  LDY #$00            ;Reset index.
 LDB63:  LDA ($04),y         ;Load pointer into room RAM.
 LDB65:  CMP #$A0            ;Is object being placed on top of a solid tile?
@@ -3985,7 +3997,7 @@ LDC66:  RTS             ;
 
 CreateItemID:
 LDC67:  LDA $07             ;Load x map position of item.
-LDC69:  asl
+LDC69:  asl         ; Tag: Mul16 Mul32
         asl
         asl
         asl
@@ -5806,6 +5818,7 @@ LE731:  bne +++++           ;Can't load room, a door is in the way. This has the
                     ;through the door(horizontal scrolling only).
 
 LE733:* lda MapPosY         ;Map pos y.
+        ;lda Mul16Table,y   Mul16
         asl
         asl
         asl
@@ -5916,7 +5929,8 @@ LE7DE:  bne +++
 
 ; object<background crash detection
 
-LE7E6:  jsr MakeCartRAMPtr      ;($E96A)Find object position in room RAM.
+LE7E6:
+    jsr MakeCartRAMPtr      ;($E96A)Find object position in room RAM.
     ldy #$00
     lda ($04),y     ; get tile value
     cmp #$4E
@@ -6043,7 +6057,8 @@ LE89B:  bne +
     lda $01
     jmp LE7DE
 
-LE8BE:  lda ObjectHi,x
+LE8BE:
+    lda ObjectHi,x
     sta $0B
     lda ObjectY,x
     sta $08
@@ -6150,12 +6165,12 @@ LE95F:
 ;-------------------------------------[ Get object coordinates ]------------------------------------
 
 GetObjCoords:
-LD79F:  ldx PageIndex           ;Load index into object RAM to find proper object.
-LD7A1:  lda ObjectY,x           ;
+LD79F:  ldy PageIndex           ;Load index into object RAM to find proper object.
+LD7A1:  lda ObjectY,y           ;
 LD7A4:  sta $02             ;Load and save temp copy of object y coord.
-LD7A6:  lda ObjectX,x           ;
+LD7A6:  lda ObjectX,y           ;
 LD7A9:  sta $03             ;Load and save temp copy of object x coord.
-LD7AB:  lda ObjectHi,x          ;
+LD7AB:  lda ObjectHi,y          ;
 LD7AE:  sta $0B             ;Load and save temp copy of object nametable.
 
 ;------------------------------------[ Object pointer into cart RAM ]-------------------------------
@@ -6656,11 +6671,13 @@ GetEnemyType:
     sta EnDataIndex,x       ;Store index byte.
     rts             ;
 
-Near_LEB4D:  tay             ;Save enemy position data in Y.
+Near_LEB4D:
+    tay                 ;Save enemy position data in Y.
     and #$F0            ;Extract Enemy y position.
     ora #$08            ;Add 8 pixels to y position so enemy is always on screen. 
-    sta EnYRoomPos,x        ;Store enemy y position.
-    tya             ;Restore enemy position data.
+    sta EnYRoomPos,x    ;Store enemy y position.
+    ;lda Mul16Table,y    ;*16 to extract enemy x position.
+    tya
     asl
     asl
     asl
@@ -6743,6 +6760,7 @@ LEB8B:  RTS                     ;
 LEB92:  iny
     lda ($00),y     ; door info byte
     pha
+; TODO: MUL16
     asl
     asl
     asl
@@ -6770,10 +6788,10 @@ LEB92:  iny
     sta $09
     ldy MapPosX
     txa
+    asl     ; Mul16
     asl
     asl
     asl
-    asl       ; * 16
     bcc +
     dey
 *   tya
@@ -6868,6 +6886,7 @@ LEC57:  ldx #$20
     and #$F0
     ora #$08
     sta $072A,x
+    ;lda Mul16Table, y  Mul16
     tya
     asl
     asl
@@ -7162,35 +7181,37 @@ LEE36:  sta PowerUpNameTable,x      ;Store name table Item is located on.
 
 LEE39:  lda #$03            ;Get next data byte(Always #$00).
 LEE3B:  bne GoChooseHandlerRoutine  ;Branch always to exit handler routines.
-    
-PrepareItemID:
-LEE3D:  sta $09             ;Store item type.
-LEE3E:  lda MapPosX         ;
-
-LEE41:  sta $07             ;Store item X coordinate.
-LEE42:  lda MapPosY         ;
-LEE45:  sta $06             ;Store item Y coordinate.
-LEE47:  jmp CreateItemID        ;($DC67)Get unique item ID.
 
 CheckForItem:
-LEE4A:  ldy NumUniqueItems     ;
-LEE4D:  beq +++             ;Samus has no unique items. Load item and exit.
-LEE4F:* lda $07             ;
-LEE51:  cmp NumUniqueItems,y   ;Look for lower byte of unique item.
-LEE54:  bne +               ;
-LEE56:  lda $06             ;Look for upper byte of unique item.
+LEE4A:  ldy NumUniqueItems      ;
+LEE4D:  beq +++                 ;Samus has no unique items. Load item and exit.
+LEE4F:* lda $07                 ;
+LEE51:  cmp NumUniqueItems,y    ;Look for lower byte of unique item.
+LEE54:  bne +                   ;
+LEE56:  lda $06                 ;Look for upper byte of unique item.
 LEE58:  cmp DataSlot,y          ;
-LEE5B:  beq +++             ;Samus already has item. Branch to exit.
-LEE5D:* dey             ;
-LEE5E:  dey             ;
-LEE5F:  bne --              ;Loop until all Samus' unique items are checked.
-LEE61:* clc             ;Samus does not have the item. It will be placed on screen.
-LEE62:* rts             ;
+LEE5B:  beq +++                 ;Samus already has item. Branch to exit.
+LEE5D:* dey                     ;
+LEE5E:  dey                     ;
+LEE5F:  bne --                  ;Loop until all Samus' unique items are checked.
+LEE61:* clc                     ;Samus does not have the item. It will be placed on screen.
+LEE62:* rts 
+
+PrepareItemID:
+    sta $09                     ;Store item type.
+    lda MapPosX                 ;
+
+LEE41:  
+    sta $07                     ;Store item X coordinate.
+    lda MapPosY                 ;
+    sta $06                     ;Store item Y coordinate.
+    jmp CreateItemID            ;($DC67)Get unique item ID.
 
 ;-----------------------------------------------------------------------------------------------------
 
 SpecEnemyHandler:
-LEE63:  ldx #$18
+LEE63:
+    ldx #$18
     lda RandomNumber1
     adc FrameCount
     sta $8A
@@ -9758,9 +9779,10 @@ Table05:
     .byte $3F
 
 ; Table09 - Uninvestigated
-Table09:
+Table09_A:
     .byte $01
     .byte $FF
+Table09_B:
     .byte $EC
     .byte $F0
 
@@ -9771,8 +9793,7 @@ Table08:
     .byte $08
     .byte $F8
 
-; Table99 - Uninvestigated
-Table99:
+BulletSpeedTable:
     .byte $04
     .byte $FC
 
