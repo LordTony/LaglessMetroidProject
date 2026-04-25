@@ -1127,6 +1127,7 @@ LC826:  stx AtEnding            ;Not playing ending scenes.
 LC829:  stx DoorStatus          ;Samus not in door.
 LC82B:  stx SamusDoorData       ;Samus is not inside a door.
 LC82D:  stx UpdtngPrjctl        ;No projectiles need to be updated.
+        sta SamusObjAction 
 
 LC830:* cpx #$65                ;Check to see if more RAM to clear in $7A thru $DE.
 LC832:  bcs +                   ;
@@ -1224,7 +1225,7 @@ IntroMusic_Inline:
         ORA MultiSFXFlag
         STA MultiSFXFlag
 LC8DC:  LDY #sa_FadeIn0         ;
-        STY ObjAction           ;Set Samus status as fading onto screen.
+        STY SamusObjAction      ;Set Samus status as fading onto screen.
         LDX #$00
         STX SamusBlink
         DEX                     ;X = $FF
@@ -1368,7 +1369,7 @@ LC95A:  ldx #$03                ;GameEngine routine to run after delay expires
 LC95C:  jsr SetTimer            ;($C4AA)Set delay timer and game engine routine.
 
 StartDeathCheck:
-LC95F:  lda ObjAction           ;Check is Samus is dead.
+LC95F:  lda SamusObjAction      ;Check is Samus is dead.
 LC962:  cmp #sa_Dead2           ;Is Samus dead?
 LC964:  bne GameEngineExit      ;exit if not.
 LC966:  lda AnimDelay           ;Is Samus still exploding?
@@ -1432,14 +1433,14 @@ LC9D4:  jmp ScreenOff           ;($C439)Turn off screen.
 
 SamusIntro:
 LC9D7:  jsr EraseAllSprites     ;($C1A3)Clear all sprites off screen.
-LC9DA:  ldy ObjAction           ;Load Samus' fade in status.
+LC9DA:  ldy SamusObjAction      ;Load Samus' fade in status.
 LC9DD:  lda Timer3              ;
 LC9E0:  bne +                   ;Branch if Intro still playing.
     
 ;Fade in complete.
 LC9E2:  sta ItemRmMusicSts      ;Make sure item room music is not playing.
 LC9E4:  lda #sa_Begin           ;Samus facing forward and can't be hurt.
-LC9E6:  sta ObjAction           ;
+LC9E6:  sta SamusObjAction      ;
 LC9E8:  jsr StartMusic          ;($D92C)Start main music.
 LC9EB:  jsr SelectSamusPal      ;($CB73)Select proper Samus palette.
 LC9EE:  lda #$03                ;
@@ -1450,7 +1451,7 @@ LC9F2:* cmp #$1F                ;When 310 frames left of intro, display Samus.
 LC9F4:  bcs Exit14              ;Branch if not time to start drawing Samus.
 LC9F6:  cmp SamusFadeTmTbl-20,y ;sa_FadeIn0 is beginning of table.
 LC9F9:  bne +                   ;Every time Timer3 equals one of the entries in the table
-LC9FB:  inc ObjAction           ;below, change the palette used to color Samus.
+LC9FB:  inc SamusObjAction      ;below, change the palette used to color Samus.
 LC9FE:  sty PalDataPending      ;
 LCA00:* lda FrameCount          ;Is game currently on an odd frame?
 LCA02:  lsr                     ;If not, branch to exit.
@@ -1538,13 +1539,16 @@ SFXDoor:
     LDA #SFX_DOOR
 
 Set_TriangleSFXFlag:
-    LDX #$03
-    BNE SFX_SetSoundFlag         
+    ORA TriangleSFXFlag
+    STA TriangleSFXFlag
+    RTS         
 
+; TODO: might not need the ORA because power up music should be alone
 PowerUpMusic:
     LDA #MUS_PWR_UP
-    LDX #$04
-    BNE SFX_SetSoundFlag
+    ORA MultiSFXFlag
+    STA MultiSFXFlag
+    RTS 
 
 MotherBrainMusic:
     LDA #MUS_BOSS
@@ -1554,11 +1558,8 @@ TourianMusic:
     LDA #MUS_TOURIAN
 
 Set_MusicInitFlag:
-    LDX #$05        
-
-SFX_SetSoundFlag:          
-    ORA NoiseSFXFlag,x 
-    STA NoiseSFXFlag,x 
+    ORA MusicInitFlag
+    STA MusicInitFlag
     RTS                
 
 ;SilenceMusic:                  ;The sound flags are stored in memory
@@ -1695,7 +1696,7 @@ SFX_SetSoundFlag:
 ;LCC0B:  BNE SFX_SetSoundFlag    ;
 
 GoSamusHandler:
-    LDX ObjAction               ;
+    LDX SamusObjAction          ;
     BMI SamusStand              ;Branch if Samus is standing.
     BEQ SamusStand
     LDA GoSamusHandlerTable_LoBytes - 1, x    ; Adding the -1 because SamusStand is already taken care of. Doesn't need to be in the list
@@ -1730,7 +1731,7 @@ LCC50:  BCS +                   ;If so, branch.
 LCC52:  STA SamusDir            ;1=left, 0=right.
 LCC54:* TAX                     ;
 LCC55:  LDA ActionTable,x       ;Load proper Samus status from table below.
-LCC58:  STA ObjAction           ;Save Samus status.
+LCC58:  STA SamusObjAction      ;Save Samus status.
 LCC5B:* LDA Joy1Change          ;
 LCC5D:  ORA Joy1Retrig          ;Check if fire was just pressed or needs to retrigger.
 LCC5F:  ASL                     ;
@@ -1739,10 +1740,10 @@ LCC62:  JSR FireWeapon          ;($D1EE)Shoot left/right.
 LCC65:* BIT Joy1Change          ;Check if jump was just pressed.
 LCC67:  BPL +                   ;Branch if JUMP not pressed.
 LCC69:  LDA #sa_Jump            ;
-LCC6B:  STA ObjAction           ;Set Samus status as jumping.
+LCC6B:  STA SamusObjAction      ;Set Samus status as jumping.
 LCC6E:* LDA #$04                ;Prepare to set animation delay to 4 frames.
 LCC70:  JSR SetSamusData        ;($CD6D)Set Samus control data and animation.
-LCC73:  LDX ObjAction           ;
+LCC73:  LDX SamusObjAction      ;
 LCC76:  CPX #sa_Door            ;Is Samus inside a door, dead or pointing up and jumping?
 LCC78:  BCS SetSamusExplodeExit ;If so, branch to exit.
 
@@ -1936,7 +1937,7 @@ LCD4B:
 
 IsScrewAttackActive:
 LCD9C:  SEC             ;Assume screw attack is not active.
-LCD9D:  LDY ObjAction           ;
+LCD9D:  LDY SamusObjAction           ;
 LCDA0:  DEY             ;Is Samus running?
 LCDA1:  BNE ScrewAttackExit              ;If not, branch to exit.
 LCDA3:  LDA SamusGear           ;
@@ -2058,7 +2059,7 @@ LCE83:  rts
 ;----------------------------------------[ Is Samus dead ]-------------------------------------------
 
 IsSamusDead:
-LCE84:  lda ObjAction           ;
+LCE84:  lda SamusObjAction      ;
 LCE87:  cmp #sa_Dead            ;
 LCE89:  beq Exit3           ;Samus is dead. Zero flag is set.
 LCE8B:  cmp #sa_Dead2           ;
@@ -2120,7 +2121,7 @@ LCEE6:* lda #$00            ;Samus is dead.
 LCEE8:  sta HealthLo            ;
 LCEEB:  sta HealthHi            ;Set health to #$00.
 LCEEE:  lda #sa_Dead            ;
-LCEF0:  sta ObjAction           ;Death handler.
+LCEF0:  sta SamusObjAction      ;Death handler.
 
 SFX_SamusDie_Inline:
         lda #SFX_SMS_DIE
@@ -2190,7 +2191,7 @@ SFXSamusWalk_Inline2:
 
 ClearHrztAnimData:
 LCF5D:  JSR NoHorzMoveNoDelay   ;($CF81)Clear horizontal movement and animation delay data.
-        STY ObjAction           ;Samus is standing.
+        STY SamusObjAction      ;Samus is standing.
         LDA Joy1Status          ;
         AND #$08                ;Is The up button being pressed?
         BNE +                   ;If so, branch.
@@ -2207,7 +2208,7 @@ SetSamusNextAnim:
 
 SetSamusPntUp:
 LCF77:* LDA #sa_PntUp           ;
-        STA ObjAction           ;Samus is pointing up.
+        STA SamusObjAction      ;Samus is pointing up.
         LDA #an_SamusPntUp      ;
         JSR SetSamusAnim        ;($CF6B)Set new animation values.
 
@@ -2257,7 +2258,7 @@ AfterSamusJumpSet:
         STA SamusJmpDsplcmnt
         LDA #$FC
         STA ObjVertSpeed
-        LDX ObjAction
+        LDX SamusObjAction
         DEX
         BNE +                   ; branch if Samus is standing still
         LDA SamusGear
@@ -2306,7 +2307,7 @@ LD055:
     iny
 *   cpy SamusDir
     beq +++
-    lda ObjAction
+    lda SamusObjAction
     cmp #sa_PntJump
     bne +
     lda AnimResetIndex
@@ -2332,7 +2333,7 @@ LD055:
     LDA #an_SamusJmpPntUp
     STA AnimResetIndex
     LDA #sa_PntJump      ; "jumping & pointing up" handler
-    STA ObjAction
+    STA SamusObjAction
 *   JSR LD09C
     LDA SamusInLava
     BEQ +
@@ -2343,7 +2344,7 @@ LD055:
 
 *   LDA SamusGravity
     BNE ++
-    LDA ObjAction
+    LDA SamusObjAction
     CMP #sa_PntJump
     BNE +
     JSR SetSamusPntUp
@@ -2390,7 +2391,7 @@ SFX_SamusBall:
     rts
 
 *   lda #sa_Stand
-    sta ObjAction
+    sta SamusObjAction
 SetSamusRollExit:
     rts
 
@@ -2504,7 +2505,7 @@ SamusPntUp:
     and #$08     ; UP still pressed?
     bne +      ; branch if yes
     lda #sa_Stand   ; stand handler
-    sta ObjAction
+    sta SamusObjAction
 *   lda Joy1Status
     and #$07    ; DOWN, LEFT, RIGHT pressed?
     beq ++    ; branch if no
@@ -2514,7 +2515,7 @@ SamusPntUp:
     sta SamusDir
 *   tax
     lda ActionTable,x
-    sta ObjAction
+    sta SamusObjAction
 *   lda Joy1Change
     ora Joy1Retrig
     asl
@@ -2523,10 +2524,10 @@ SamusPntUp:
 *   bit Joy1Change
     bpl +      ; branch if JUMP not pressed
     lda #sa_PntJump
-    sta ObjAction
+    sta SamusObjAction
 *   lda #$04
     jsr SetSamusData        ;($CD6D)Set Samus control data and animation.
-    ldx ObjAction
+    ldx SamusObjAction
 
  .scope
         CPX #$04
@@ -2667,7 +2668,7 @@ SpawnBulletVertical:
     lda SamusGravity
     beq +
     ldy #$34
-*   lda ObjAction
+*   lda SamusObjAction
     cmp #$01
     beq +
     bne LD26B
@@ -2856,7 +2857,7 @@ CheckDoorDelay:
     beq --     ; branch always
 *   lda SamusDoorData
     and #$0F
-    sta ObjAction
+    sta SamusObjAction
     lda #$00
     sta SamusDoorData
     sta DoorStatus
@@ -3366,7 +3367,7 @@ UpdateElevatorTable_LoByte:
     sta ObjVertSpeed,x
     inc ObjAction,x
     lda #sa_Elevator
-    sta ObjAction
+    sta SamusObjAction
     lda #an_SamusFront
     jsr SetSamusAnim
     lda #128
@@ -3559,7 +3560,7 @@ ElevatorStop:
     lda ScrollY
     bne ++    ; scroll until ScrollY = 0
     lda #sa_Stand
-    sta ObjAction
+    sta SamusObjAction
     jsr StopHorzMovement
     ldx PageIndex   ; #$20
     lda #$01    ; ElevatorIdle
@@ -3741,9 +3742,9 @@ LDA7C:
     lda $0306,x
     beq +
     dec $030F,x
-    lda $0683
+    lda TriangleSFXFlag
     ora #$10
-    sta $0683
+    sta TriangleSFXFlag
 *   lda #$00
     sta $0306,x
 
@@ -4340,7 +4341,7 @@ LDEA7:  cmp #$19            ;After 25 frames, Move on to second part of death
 LDEA9:  bne LDEBC               ;handler, else branch to skip the rest of this code.
 
 LDEAD:  lda #sa_Dead2           ;
-LDEAF:  sta ObjAction         ;Move to next part of the death handler.
+LDEAF:  sta SamusObjAction         ;Move to next part of the death handler.
 LDEB2:  lda #$28            ;
 LDEB4:  sta AnimDelay       ;Set animation delay for 40 frames(.667 seconds).
 LDEB7:  pla                 ;Pull last return address off of the stack.
@@ -4923,25 +4924,82 @@ LE197:  rts             ;
 ;Once a set bit is encountered, the function exits and returns the bit number of the set bit.
 ;The returned value is stored in A. 
 
+;.scope
+;BitScan:
+;    tax
+;    beq _zero            ; if A was 0 → return 8 instead of looping 8 times
+;    ldx #$00
+;    _loop:
+;        lsr                  ; C = next bit
+;        bcs _found
+;        inx
+;        bne _loop            ; won’t wrap before we find a 1-bit
+;
+;    _found:
+;        txa                  ; A = index
+;        rts
+;
+;    _zero:
+;        LDA #$08
+;    BitscanExit:
+;        rts
+;.scend
+
+; Claud Slop
 .scope
 BitScan:
-    tax
-    beq _zero            ; if A was 0 → return 8 instead of looping 8 times
-    ldx #$00
-    _loop:
-        lsr                  ; C = next bit
-        bcs _found
-        inx
-        bne _loop            ; won’t wrap before we find a 1-bit
+    beq _zero               ; input=0 fast exit
 
-    _found:
-        txa                  ; A = index
-        rts
+    tax                     ; 2c  — save original for upper-nibble path
+    and #$0F                ; 2c  — isolate low nibble
+    beq _high               ; 2c  — low nibble empty, answer is in upper nibble
 
-    _zero:
-        LDA #$08
-    BitscanExit:
-        rts
+    ; --- Low nibble has a set bit: table lookup ---
+    tay                     ; 2c
+    lda bst_tab-1,y         ; 4c  — direct answer
+    rts                     ; 6c  total fast path (bit 0 set): ~13 cycles
+
+_high:
+    ; Low nibble was zero. Upper nibble holds the bit.
+    ; Shift A right 4, then look up in the SAME table, add 4 to result.
+    txa                     ; 2c  — restore original value
+    ; ALR = AND #imm + LSR in 2 bytes / 2 cycles (illegal)
+    ; We need to shift right 4. Doing ALR twice cuts cycles vs 4x LSR.
+    ; ALR #$FF = LSR (no masking needed after AND with $F0 already implied)
+    ASR #$F0                ; 2c  — AND #$F0 then LSR → bits 7-4 now in 6-3
+    LSR                     ; 2c  — shift again → bits 7-4 now in 5-2
+    ASR #$FF                ; 2c  — LSR (AND #FF = no-op mask)
+    LSR                     ; 2c  — bits 7-4 now in 3-0 (upper nibble isolated)
+    ; A now = original upper nibble in low position (1-8 range for set bits)
+    tay                     ; 2c
+    lda bst_tab-1,y         ; 4c  — look up bit position within upper nibble
+    adc #$04                ; 2c  — add 4 because we skipped the low nibble
+    rts
+
+_zero:
+    lda #$08                ; 2c
+BitscanExit:
+    rts
+
+; 15-byte lookup table: index = nibble value, value = lowest set bit index
+; Index 0 unused (we never look it up), filled with $FF as a canary
+; For nibble n: bst_tab[n] = position of lowest set bit in n
+bst_tab:
+    .byte 0                 ; 0001 — bit 0
+    .byte 1                 ; 0010 — bit 1
+    .byte 0                 ; 0011 — bit 0
+    .byte 2                 ; 0100 — bit 2
+    .byte 0                 ; 0101 — bit 0
+    .byte 1                 ; 0110 — bit 1
+    .byte 0                 ; 0111 — bit 0
+    .byte 3                 ; 1000 — bit 3
+    .byte 0                 ; 1001 — bit 0
+    .byte 1                 ; 1010 — bit 1
+    .byte 0                 ; 1011 — bit 0
+    .byte 2                 ; 1100 — bit 2
+    .byte 0                 ; 1101 — bit 0
+    .byte 1                 ; 1110 — bit 1
+    .byte 0                 ; 1111 — bit 0
 .scend
 
 ;------------------------------------------[ Scroll door ]-------------------------------------------
@@ -5034,7 +5092,7 @@ LE25C: rts                 ;
 
 LavaAndMoveCheck:
 LE25D:  
-    lda ObjAction           ;
+    lda SamusObjAction           ;
     cmp #sa_Elevator        ;Is Samus on elevator?
     beq +               ;If so, branch.
     cmp #sa_Dead            ;Is Samus Dead
@@ -5128,7 +5186,7 @@ LE2E3:* jsr MoveSamusDown       ;($E4A3)Attempt to move Samus 1 pixel down.
 LE2E6:  bcs +++             ;Branch if Samus successfully moved down 1 pixel.
 
 ;Samus bounce after hitting the ground in ball form.
-LE2E8:  lda ObjAction           ;
+LE2E8:  lda SamusObjAction           ;
 LE2EB:  cmp #sa_Roll            ;Is Samus rolled into a ball?
 LE2ED:  bne +               ;If not, branch.
 LE2EF:  lsr ObjVertSpeed        ;Divide verticle speed by 2.
@@ -5248,7 +5306,7 @@ LE367:  lda #$01            ;Load counter with #$01 so this function will not be
 LE369:  sta ObjectCounter       ;called again.
 LE36C:  lda SamusGravity        ;Is Samus on the ground?
 LE36E:  bne Exit10          ;If not, branch to exit.
-LE370:  lda ObjAction           ;
+LE370:  lda SamusObjAction           ;
 LE373:  cmp #sa_Roll            ;Is Samus rolled into a ball?
 LE375:  beq Exit10          ;If so, branch to exit.
 LE377:  jmp StopHorzMovement        ;($CF55)Stop horizontal movement or play walk SFX if stopped.
@@ -5396,7 +5454,7 @@ LE45E:  and #$07            ;Check if result is a multiple of 8. If so, branch t
 LE460:  bne +               ;Only call crash detection every 8th pixel.
 LE462:  jsr CheckMoveUp         ;($E7A2)Check if Samus obstructed UPWARDS.
     bcc MoveSamusUpExit     ;If so, branch to exit(can't move any further).
-*   lda ObjAction           ;
+*   lda SamusObjAction           ;
     cmp #sa_Elevator        ;Is Samus riding elevator?
     beq +               ;If so, branch.
     jsr SamusOnElevatorOrEnemy  ;($D976)Calculate if Samus standing on elevator or enemy.
@@ -5435,7 +5493,7 @@ MoveSamusDown:
     bne +          ; only call crash detection every 8th pixel
     jsr CheckMoveDown       ; check if Samus obstructed DOWNWARDS
     bcc +++++++  ; exit if yes
-*   lda ObjAction
+*   lda SamusObjAction
     cmp #sa_Elevator    ; is Samus in elevator?
     beq +
     jsr LD976
@@ -5991,13 +6049,13 @@ LE81E:  ldx UpdtngPrjctl
     beq +
     lda ObjAction,x
     eor #$04
-    bne PlaySnd4
+    bne SFXMetal
     lda AnimResetIndex,x
     eor #$91
-    bne PlaySnd4
-*   lda $0683
+    bne SFXMetal
+*   lda TriangleSFXFlag
     ora #$02
-    sta $0683
+    sta TriangleSFXFlag
 *   lda #$04
     sta $030A,y
     bne ClcExit
@@ -6015,7 +6073,6 @@ ClcExit:
     clc
     rts
 
-PlaySnd4:
 SFXMetal:
     lda #SFX_METAL
     ora SQ1SFXFlag
@@ -9504,59 +9561,43 @@ Exit23:
     rts
 
 ; Preconditions
-; X and A must be sound flag state (setup with LAX)
-; Y should be 0 at setup
+; A will be sound flags
+; X will be set to the low bit of the desired jump table
+; A != 0
 ; will pass back the index of Y used in the sound engine
 .scope
     CheckFlagsRedux:
-        beq _NoSound
-        bmi _SFXFlagFound
-        asr #$F0
-        beq _CheckLowNibble
-        lsr
-        lsr
-        lsr
-        tax
-        ldy _SFXHiBitToIndex - 1, x
-        bne _SFXFlagFound       ; branch always 
+        sta CurrentSFXFlags
+        bit CurrentSFXFlags                 ; RoomNumber *should* always be $FF while not in the room gen code 
+        bmi _Highest_Bit_Set
+        bvs _Second_Highest_Bit_Set
+        and #$3F                            ; Mask out the top two bits that were tested alread
+        tay 
+        lda CheckFlagTablePlus1 - 1, y      ; check the rest against a 63 bit table
+    JumpToSoundZone:
+        clc
+        adc IdentityTable, x
+        tay
+        lda SXFInitTables, y
+        sta $E0
+        lda SXFInitTables + 1, y
+        sta $E1
+        jmp ($00E0)
 
-    _CheckLowNibble:
-        ldy _SFXLoBitToIndex,x
+    _Highest_Bit_Set:
+        lda #$00
+        beq JumpToSoundZone
+    
+    _Second_Highest_Bit_Set:
+        lda #$02
+        bne JumpToSoundZone
 
-    _SFXFlagFound:
-        rts
-
-    _NoSound:
-        ldy #$FF
-        rts
-
-    _SFXHiBitToIndex:
-        .byte 6
-        .byte 4
-        .byte 4
-        .byte 2
-        .byte 2 
-        .byte 2 
-        .byte 2
-
-    _SFXLoBitToIndex:
-        .byte 14
-        .byte 14
-        .byte 12
-        .byte 12
-        .byte 10
-        .byte 10
-        .byte 10
-        .byte 10
-        .byte 8
-        .byte 8
-        .byte 8
-        .byte 8
-        .byte 8
-        .byte 8
-        .byte 8
-        .byte 8
-
+    ; 63 bit table since table should be accessed at 
+    CheckFlagTablePlus1:
+        .byte 14, 12, 12, 10, 10, 10, 10, 8, 8, 8, 8, 8, 8, 8, 8
+        .byte 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6
+        .byte 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4
+        .byte 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4
 .scend
 
 ;-----------------------------------------------[ TABLES ]--------------------------------------------
@@ -10063,6 +10104,8 @@ LFFD2:  JMP Startup             ;($C01A)Do preliminary housekeeping.
 .advance $FFFA
 
 ;-----------------------------------------[ Interrupt vectors ]--------------------------------------
+
+; find the end 
 
 .word NMI               ;($C0D9)NMI vector.
 .word RESET_Bank07      ;($FFB0)Reset vector.

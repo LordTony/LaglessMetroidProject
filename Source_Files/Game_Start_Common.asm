@@ -1462,10 +1462,10 @@ _L8B59:  LDA #$12                ;
 _L8B5B:  STA DoorDelay           ;Set DoorDelay to 18 frames(going into door).
 _L8B5D:  LDA SamusDoorData       ;
 _L8B5F:  JSR _Amul16              ;($C2C5)*16. Move scroll toggle data to upper 4 bits.
-_L8B62:  ORA ObjAction           ;Keep Samus action so she will appear the same comming-->
+_L8B62:  ORA SamusObjAction           ;Keep Samus action so she will appear the same comming-->
 _L8B65:  STA SamusDoorData       ;out of the door as she did going in.
 _L8B67:  LDA #$05                ;
-_L8B69:  STA ObjAction           ;Indicate Samus is in a door.
+_L8B69:  STA SamusObjAction           ;Indicate Samus is in a door.
 _L8B6C:* RTS                     ;
 _L8B6D:* JSR _SetDoorEntryInfo    ;($8B53)Save Samus action and set door entry timer.
 _L8B70:  JSR VertRoomCentered    ;($E21B)Room is centered. Toggle scroll.
@@ -1474,7 +1474,9 @@ _SamusInDoor:
 _L8B74:  ORA #$80                ;Set MSB of DoorStatus to indicate Samus has just-->
 _L8B76:  STA DoorStatus          ;entered a door.
 _L8B78:  RTS                     ;
-
+; swaped ObjAction for SamusObjAction on ZP
+nop
+nop
 ;----------------------------------------------------------------------------------------------------
 
 .advance DoorHandler

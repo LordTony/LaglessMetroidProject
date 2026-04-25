@@ -168,6 +168,8 @@ L80F2:  LDA #$00                ;Not used.
 L80F4:  STA SpareMemD7          ;
 
 L80F6:  JMP ScreenOn            ;($C447)Turn screen on.
+; moved MultiSFXFlag to ZP
+nop
 
 ;----------------------------------------------------------------------------------------------------
 
@@ -543,6 +545,8 @@ L82E7:  STA IntroMusRstrt       ;of the title routines.
 
 ExitPrepRestart:
 L82E9:  RTS                     ;Exit the restart intro routine.
+; moved MultiSFXFlag to ZP
+nop
 
 DecIntroCounter:
 L82EA:  DEC IntroMusRstrt       ;One title routine cycle complete. Decrement intro
@@ -1639,6 +1643,9 @@ L8C73:  STA Timer3              ;Set Timer3 time for 120 frames (2 seconds).
 L8C75:  LDA #$18                ;
 L8C77:  STA TitleRoutine        ;Run EnterPassword routine.
 L8C79:  RTS                     ;
+; moved MultiSFXFlag to ZP
+nop
+nop
 
 CalculatePassword:
 L8C7A:  LDA #$00                ;
@@ -2235,6 +2242,9 @@ L910F:  STA SpriteRAM+2         ;
 L9112:  LDA #$50                ;Set data for selection sprite.
 L9114:  STA SpriteRAM+3         ;
 L9117:  RTS                     ;
+; moved TriangleSFXFlag to ZP
+nop
+nop
 
 StartContTbl:
 L9118:  .byte $60               ;Y sprite position for START.
@@ -2434,6 +2444,11 @@ L92AA:  STA SpriteRAM+$A        ;
 L92AD:  LDA CharSelectXTbl,Y    ;Set x-Coord of character selection sprite.
 L92B0:  STA SpriteRAM+$B        ;
 L92B3:* RTS                     ;
+; moved TriangleSFXFlag to ZP
+nop
+nop
+nop
+nop
 
 ;The following data does not appear to be used in the program.
 L92B4:  .byte $21, $20
@@ -3252,6 +3267,8 @@ L9B13:  LDA #$08                ;
 L9B15:  STA ClrChangeCounter    ;Initialize ClrChangeCounter with #$08.
 L9B17:  INC GenByte33           ;
 L9B19:  JMP ScreenOn            ;($C447)Turn screen on.
+; moved MultiSFXFlag to ZP
+nop
 
 ShowEndSamus:
 L9B1C:  JSR LoadEndSamSprts     ;($9C9A)Load end image of Samus.
@@ -5356,7 +5373,10 @@ SilenceMusic_Bank00:
     LDA #MUS_NONE
     ORA NoiseSFXFlag
     STA NoiseSFXFlag
-    RTS 
+    RTS
+    ; moved NoiseSFXFlag to ZP
+    nop
+    nop 
 
 IntroSQ2Data:
 LB000:  .byte $C2               ;

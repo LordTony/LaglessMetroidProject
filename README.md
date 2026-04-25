@@ -21,9 +21,9 @@ The idea here is to attempt to take the Metroid lag as low as possible without a
 The baseline benchmark is Samus standing still in the opening room with 2 of the spikey bois both alive and crawing on the walls.
 
   * Metroid finishes all work for the benchmark frames in **137 to 149** scanlines
-  * Lagless Metroid finishes in **78 to 92** scanlines
-  * Lagless Metroid finishes in **%57 to %62** of the scanlines it takes Metroid
-  * The limit might be something like **75** scanlines, so keep pushing
+  * Lagless Metroid finishes in **72 to 92** scanlines
+  * Lagless Metroid finishes in **%53 to %62** of the scanlines it takes Metroid
+  * The limit might be something like **68** scanlines, so keep pushing
 
 ### Code Progress
 * ChooseRoutine has been removed from bank07 and is now only called from outside
@@ -58,9 +58,9 @@ The baseline benchmark is Samus standing still in the opening room with 2 of the
 * Metroid_Defines - All of the variable names and most of the shared address info aliases
 * Header - NES header
 * Bank00 - Intro/End Game
-* Bank01 - Brinstar
-* Bank02 - Norfair
-* Bank03 - Tourian
+* Bank01 - Brinstar (Starting Zone)
+* Bank02 - Norfair  (Lava Zone)
+* Bank03 - Tourian  (Metroid Zone)
 * Bank04 - Kraid Hideout
 * Bank05 - Ridley Hideout
 * Bank06 - Graphics
@@ -75,6 +75,10 @@ In this project I have painstakingly reworked it to build with the following com
 
 ```
 ./build
+```
+or
+```
+./build && ./mesen assembled_metroid.nes
 ```
 
 ## General Notes
@@ -101,9 +105,12 @@ Now that I've gotten the identity table in, I can't help but wonder if those 256
 The "Visualize Hotspots" lua script can be run and tweaked to find places in the code that are hit more often. It helped me get some big wins.
 
 ## Bugs
+* No password screen shows when you die
 * Starting with a Ridley Password and going up the elevator gets a bugged map
-* Tourian is really broken
+  * It might be that moving memory around doesn't work well with the password system
+  * Oof. All that moving junk to zero page that I did might really come back to bite me in the butt
+* Tourian (Metroid / Mother Brain / Bank03.asm) is really broken
   * Metroid grabbing you can crash the game
   * Shooting metroids with missiles plays the wrong sounds
 * Enemies that fly off the screen tend to stay there and blink if you run behind them (this might be a behavior in the base game. Will need to check)
-* No password screen shows
+* Seeing single 8x8 random sprites pop in from time to time

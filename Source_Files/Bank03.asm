@@ -1101,12 +1101,16 @@ Bank03_L9E75:  STA MthrBrainStatus
 Bank03_L9E77:  LDA #$28
 Bank03_L9E79:  STA $9F
 Bank03_L9E7B:  LDA NoiseSFXFlag
+nop
 Bank03_L9E7E:  ORA #$01
 Bank03_L9E80:  STA NoiseSFXFlag
+nop
 Bank03_L9E83:  JMP $9E2E
 Bank03_L9E86:  LDA #$10
 Bank03_L9E88:  ORA NoiseSFXFlag
+nop
 Bank03_L9E8B:  STA NoiseSFXFlag
+nop
 Bank03_L9E8E:  JSR $A072
 Bank03_L9E91:  INC $9A
 Bank03_L9E93:  JSR $9E43
@@ -1141,9 +1145,11 @@ Bank03_L9ED0:  JMP $9ED6
 Bank03_L9ED3:  LSR $9F
 Bank03_L9ED5:  RTS
 
-Bank03_L9ED6:  LDA $0685
+Bank03_L9ED6:  LDA MusicInitFlag
+nop
 Bank03_L9ED9:  ORA #$04
-Bank03_L9EDB:  STA $0685
+Bank03_L9EDB:  STA MusicInitFlag
+nop
 Bank03_L9EDE:  LDA #$05
 Bank03_L9EE0:  STA MthrBrainStatus
 Bank03_L9EE2:  LDA #$80
@@ -1258,11 +1264,14 @@ Bank03_L9FBB:  STA $4B
 Bank03_L9FBD:  JMP $803F
 Bank03_L9FC0:  LDA #$10
 Bank03_L9FC2:  ORA NoiseSFXFlag
+nop
 Bank03_L9FC5:  STA NoiseSFXFlag
+nop
 Bank03_L9FC8:  LDA $2C
 Bank03_L9FCA:  BNE $9FD9
 Bank03_L9FCC:  LDA #$08
-Bank03_L9FCE:  STA $0300
+Bank03_L9FCE:  STA SamusObjAction
+nop
 Bank03_L9FD1:  LDA #$0A
 Bank03_L9FD3:  STA MthrBrainStatus
 Bank03_L9FD5:  LDA #$01
@@ -1281,9 +1290,11 @@ Bank03_L9FEC:  RTS
 
 Bank03_L9FED:  LDA $9E
 Bank03_L9FEF:  BEQ $A01A
-Bank03_L9FF1:  LDA $0684
+Bank03_L9FF1:  LDA MultiSFXFlag
+nop
 Bank03_L9FF4:  ORA #$02
-Bank03_L9FF6:  STA $0684
+Bank03_L9FF6:  STA MultiSFXFlag
+nop
 Bank03_L9FF9:  INC MotherBrainHits
 Bank03_L9FFB:  LDA MotherBrainHits
 Bank03_L9FFD:  CMP #$20
@@ -1536,9 +1547,11 @@ Bank03_LA205:  STA $010B
 Bank03_LA208:  LDA $2D
 Bank03_LA20A:  AND #$1F
 Bank03_LA20C:  BNE $A216
-Bank03_LA20E:  LDA $0681
+Bank03_LA20E:  LDA SQ1SFXFlag
+nop
 Bank03_LA211:  ORA #$08
-Bank03_LA213:  STA $0681
+Bank03_LA213:  STA SQ1SFXFlag
+nop
 Bank03_LA216:  LDA $010A
 Bank03_LA219:  ORA $010B
 Bank03_LA21C:  BNE $A237
@@ -1547,8 +1560,10 @@ Bank03_LA221:  STA MotherBrainHits
 Bank03_LA223:  LDA #$07
 Bank03_LA225:  STA MthrBrainStatus
 Bank03_LA227:  LDA NoiseSFXFlag
+nop
 Bank03_LA22A:  ORA #$01
 Bank03_LA22C:  STA NoiseSFXFlag
+nop
 Bank03_LA22F:  LDA #$0C
 Bank03_LA231:  STA $2C
 Bank03_LA233:  LDA #$0B

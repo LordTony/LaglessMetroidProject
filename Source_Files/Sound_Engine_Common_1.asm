@@ -1,5 +1,7 @@
 ;SFXdata. The top four entries are used by the noise music player for drum beats.
 
+; SEARCH HxD - 10 01 18 00 01 38
+
 _SFXDatTbl:
     .byte $00               ;Base for drum beat music data.
 _DrumBeat00SFXData:
@@ -91,29 +93,29 @@ _ChooseNextSFXRoutineTbl:
 ; .word _NseContTbl, _NoSound                ;Noise continue SFX (2nd).
 ; .byte CHN_NOISE
 
-_SQ1InitDat:
-  .word _SQ1InitTbl, _SQ1SFXContFlags        ;SQ1 init SFX(5th).
-  .byte CHN_SQ1
+;_SQ1InitDat:
+;  .word _SQ1InitTbl, _SQ1SFXContFlags        ;SQ1 init SFX(5th).
+;  .byte CHN_SQ1
 
-_SQ1ContDat:
-  .word _SQ1ContTbl, _NoSound                ;SQ1 continue SFX(6th).
-  .byte CHN_SQ1
+;_SQ1ContDat:
+;  .word _SQ1ContTbl, _NoSound                ;SQ1 continue SFX(6th).
+;  .byte CHN_SQ1
 
-_TriInitDat:
-  .word _TriInitTbl, _TriSFXContFlags        ;Triangle init SFX(7th).
-  .byte CHN_TRI
+;_TriInitDat:
+;  .word _TriInitTbl, _TriSFXContFlags        ;Triangle init SFX(7th).
+;  .byte CHN_TRI
 
-_TriContDat:
-  .word _TriContTbl, _NoSound                ;Triangle continue SFX(8th).
-  .byte CHN_TRI
+;_TriContDat:
+;  .word _TriContTbl, _NoSound                ;Triangle continue SFX(8th).
+;  .byte CHN_TRI
 
 _MultiInitDat:
   .word _MultiMusInitTbl, _MultiSFXContFlags ;Multi init SFX(3rd).
   .byte CHN_MULTI
 
-_MultiContDat:
-  .word _MultiSFXContTbl, _LoadSQ1Flags      ;Multi continue SFX(4th).
-  .byte CHN_MULTI
+;_MultiContDat:
+;  .word _MultiSFXContTbl, _LoadSQ1Flags      ;Multi continue SFX(4th).
+;  .byte CHN_MULTI
 
 _TmpInitDat:
   .word _MusicInitTbl, _ContinueMusic        ;temp flag Music(10th).
@@ -126,6 +128,7 @@ _MusicInitDat:
 ;----------------------------------------------------------------------------------------------------
 
 ;The tables below contain addresses for SFX handling routines.
+ .advance SXFInitTables
 
 ;Noise Init SFX handling routine addresses:
 _NseInitTbl:
@@ -194,66 +197,49 @@ _TriContTbl:
   .word _SmsBallSFXCont    ;Samus to ball continue SFX.
   .word _BmbLaunchSFXCont  ;Bomb launch continue SFX.
 
+;Multi channel continue SFX handling routine addresses:
+_MultiSFXContTbl:
+  .word _NoSound                        ;No sound.
+  .word _NoSound                        ;No sound.
+  .word _NoSound                        ;No sound.
+  .word _NoSound                        ;No sound.
+  .word _NoSound                        ;No sound.
+  .word _SamusHitSFXContinue            ;Samus hit continue SFX.
+  .word _BossHitSFXContinue             ;Boss hit continue SFX.
+  .word _IncorrectPasswordSFXContinue   ;Incorrect password continue SFX.
+
 ;----------------------------------------------------------------------------------------------------
 _NseSFXInitFlags:
-  ;LDA NoiseSFXFlag        ;Load A with Noise init SFX flags, (1st SFX cycle).
-  ;LDX #<_NseInitDat        ;Lower address byte in ChooseNextSFXRoutineTbl.
-  ;BNE _GotoSFXCheckFlags   ;Branch always.
-  
-  ;1st  SFX cycle $E0=#$BB,$E1=#$B2,$E2=#$22,$E3=#$B3.
   LDA #CHN_NOISE
   STA ChannelType
-  LDY #$00
-  LAX NoiseSFXFlag
-  JSR CheckFlagsRedux
-  BMI _NseSFXContFlags
-  LDA _NseInitTbl, Y
-  LDX _NseInitTbl + 1, Y
-
-_Jump_To_XXYY:
-  STA $E2
-  STX $E3
-  JMP (SFXPtrE2_)
-
+  LDA NoiseSFXFlag
+  BEQ _NseSFXContFlags
+  LDX #0                     ; _NseInitTbl
+  JMP CheckFlagsRedux
 
 _NseSFXContFlags:
-  ;LDA NoiseContSFX        ;Load A with Noise continue flags, (2nd SFX cycle).
-  ;LDX #<_NseContDat        ;Lower address byte in ChooseNextSFXRoutineTbl.
-  ;BNE _GotoSFXCheckFlags   ;Branch always.
-
-  LDY #$00
-  LAX NoiseContSFX
-  JSR CheckFlagsRedux
-  BMI _NoSound_Exit
-  LDA _NseContTbl, Y
-  LDX _NseContTbl + 1, Y
-  bne _Jump_To_XXYY ; Branch always.
+  LDA NoiseContSFX
+  BEQ _NoSound_Exit
+  LDX #14                   ; _NseContTbl
+  JMP CheckFlagsRedux
 
 _NoSound_Exit:
   rts
 
-_SQ1SFXInitFlags:
-  LDA SQ1SFXFlag          ;Load A with SQ1 init flags, (5th SFX cycle).
-  LDX #<_SQ1InitDat        ;Lower address byte in ChooseNextSFXRoutineTbl.
-  BNE _GotoSFXCheckFlags   ;Branch always.
-
-_SQ1SFXContFlags:
-  LDA SQ1ContSFX          ;Load A with SQ1 continue flags, (6th SFX cycle).
-  LDX #<_SQ1ContDat        ;Lower address byte in ChooseNextSFXRoutineTbl.
-
-_GotoSFXCheckFlags:
-  JSR _CheckSFXFlag        ;($B4BD)Checks to see if SFX flags set.     
-  JMP (SFXPtrE2_)         ;if no flag found, Jump to next SFX cycle,
-                                ;else jump to specific SFX handling routine.
 _STriSFXInitFlags:
-  LDA TriangleSFXFlag     ;Load A with Triangle init flags, (7th SFX cycle).
-  LDX #<_TriInitDat        ;Lower address byte in ChooseNextSFXRoutineTbl.
-  BNE _GotoSFXCheckFlags   ;Brach always.
+  LDA #CHN_TRI
+  STA ChannelType
+
+  LDA TriangleSFXFlag
+  BEQ _TriSFXContFlags
+  LDX #62                     ; _TriInitTbl
+  JMP CheckFlagsRedux
 
 _TriSFXContFlags:
-  LDA TriangleContSFX     ;Load A with Triangle continue flags, (8th SFX cycle).
-  LDX #<_TriContDat        ;Lower address byte in ChooseNextSFXRoutineTbl.
-  BNE _GotoSFXCheckFlags   ;Branch always.
+  LDA TriangleContSFX
+  BEQ _NoSound_Exit
+  LDX #78                    ; _TriContTbl
+  JMP CheckFlagsRedux
 
 _LdMultiSFXInitFlags:
   LDA MultiSFXFlag        ;Load A with Multi init flags, (3rd SFX cycle).
@@ -291,12 +277,24 @@ _LdMultiSFXInitFlags:
   JMP (SFXPtrE2_)         ;If no flag found, Jump to next SFX cycle,
                                 ;else jump to specific SFX handling subroutine.
 _MultiSFXContFlags:
-  LDA MultiContSFX        ;Load A with $68C flags (4th SFX cycle).
-  LDX #<_MultiContDat      ;Lower address byte in ChooseNextSFXRoutineTbl.
-  JMP _GotoSFXCheckFlags   ;($B337)Checks to see if SFX or music flags set.
+  LDA MultiContSFX
+  BEQ _SQ1SFXInitFlags
+  LDX #94                   ; _MultiSFXContTbl
+  JMP CheckFlagsRedux
 
-_LoadSQ1Flags:
-  JMP _SQ1SFXInitFlags      ;($B329)Check for SQ1 init flags.
+_SQ1SFXInitFlags:
+  LDA #CHN_SQ1
+  STA ChannelType
+  LDA SQ1SFXFlag
+  BEQ _SQ1SFXContFlags
+  LDX #30                    ; _SQ1InitTbl
+  JMP CheckFlagsRedux
+
+_SQ1SFXContFlags:
+  LDA SQ1ContSFX
+  BEQ _NoSound_Exit
+  LDX #46                    ; _SQ1ContTbl
+  JMP CheckFlagsRedux
 
 ;----------------------------------------------------------------------------------------------------
 
@@ -330,9 +328,9 @@ _LoadSFXData:
 _LoadSFXRegisters:
   LDA (SFXPtrE2),Y        ;Load A with SFX data byte.
   STA (SFXPtrE0),Y        ;Store A in SFX register.
-  ;INY                     ;
-  ;LDA (SFXPtrE2),Y        ;Load A with SFX data byte.
-  ;STA (SFXPtrE0),Y        ;Store A in SFX register.
+  INY                     ;
+  LDA (SFXPtrE2),Y        ;Load A with SFX data byte.
+  STA (SFXPtrE0),Y        ;Store A in SFX register.
 
   INY                     ;
   CPY #$04                ;channel are loaded one after the other (the loop
@@ -402,7 +400,6 @@ _ClearSFXFlags:
 * LDA #$00                ;
   STA NoiseSFXFlag        ;
   STA SQ1SFXFlag          ;
-  STA SQ2SFXFlag          ;Clear all SFX flags.
   STA TriangleSFXFlag     ;
   STA MultiSFXFlag        ;
   STA MusicInitFlag       ;
@@ -550,61 +547,35 @@ _CheckSFXFlag:
   STA $E0
 
   ;Y is zero at this point
-  lax CurrentSFXFlags
-
-_CheckSFXFlagRefactor:
+  lda CurrentSFXFlags
   beq _NoSound
-  bmi _SFXFlagFound
-  asr #$F0
-  beq _CheckLowNibble
-  lsr
-  lsr
-  lsr
-  tax
-  ldy _SFXHiBitToIndex - 1, x
-  bne _SFXFlagFound       ; branch always 
+  bit CurrentSFXFlags                 ; RoomNumber *should* always be $FF while not in the room gen code 
+  bmi _Highest_Bit_Set
+  bvs _Second_Highest_Bit_Set
+  and #$3F                            ; Mask out the top two bits that were tested alread
+  tax 
+  ldy CheckFlagTablePlus1 - 1, x      ; check the rest against a 63 bit table
 
-_CheckLowNibble:
-  ldy _SFXLoBitToIndex,x
+  _SFXFlagFound:
+    lda (SFXPtrE0),Y        ;This routine stores the starting address of the
+    sta SFXPtrE2LB          ;specific SFX handling routine for the SFX flag 
+    iny                     ;found.  The address is stored in registers
+    lda (SFXPtrE0),Y        ;$E2 and $E3.
+    sta SFXPtrE2UB          ;
 
-_SFXFlagFound:
-  lda (SFXPtrE0),Y        ;This routine stores the starting address of the
-  sta SFXPtrE2LB          ;specific SFX handling routine for the SFX flag 
-  iny                     ;found.  The address is stored in registers
-  lda (SFXPtrE0),Y        ;$E2 and $E3.
-  sta SFXPtrE2UB          ;
+  _NoSound:
+    rts
 
-_NoSound:
-  rts
+  _Highest_Bit_Set:
+      ldy #$00
+      beq _SFXFlagFound
+    
+  _Second_Highest_Bit_Set:
+      ldy #$02
+      bne _SFXFlagFound
 
-_SFXHiBitToIndex:
-    .byte 6
-    .byte 4
-    .byte 4
-    .byte 2
-    .byte 2 
-    .byte 2 
-    .byte 2
-
-_SFXLoBitToIndex:
-    .byte 14
-    .byte 14
-    .byte 12
-    .byte 12
-    .byte 10
-    .byte 10
-    .byte 10
-    .byte 10
-    .byte 8
-    .byte 8
-    .byte 8
-    .byte 8
-    .byte 8
-    .byte 8
-    .byte 8
-    .byte 8
-
-;-----------------------------------[ SFX Handling Routines ]---------------------------------------
+    
+    ;-----------------------------------[ SFX Handling Routines ]---------------------------------------
 
 ;The following table is used by the SpitFlamesSFXContinue routine to change the volume
 ;on the SFX.  It starts out quiet, then becomes louder then goes quiet again.
@@ -1587,17 +1558,6 @@ _MultiMusInitTbl:
   .word _SmsHitSFXStart    ;Samus hit init SFX.
   .word _BossHitSFXStart   ;Boss hit init SFX.
   .word _BadPswrdSFXStart  ;Incorrect password init SFX.
-
-;Multi channel continue SFX handling routine addresses:
-_MultiSFXContTbl:
-  .word _NoSound                        ;No sound.
-  .word _NoSound                        ;No sound.
-  .word _NoSound                        ;No sound.
-  .word _NoSound                        ;No sound.
-  .word _NoSound                        ;No sound.
-  .word _SamusHitSFXContinue            ;Samus hit continue SFX.
-  .word _BossHitSFXContinue             ;Boss hit continue SFX.
-  .word _IncorrectPasswordSFXContinue   ;Incorrect password continue SFX.
 
 ;Music handling routine addresses:
 _MusicInitTbl:

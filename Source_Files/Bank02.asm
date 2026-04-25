@@ -709,8 +709,10 @@ Bank02_L9B1F:  LDA #$03
 Bank02_L9B21:  STA $85
 Bank02_L9B23:  JSR $8021
 Bank02_L9B26:  LDA NoiseSFXFlag
+nop
 Bank02_L9B29:  ORA #$04
 Bank02_L9B2B:  STA NoiseSFXFlag
+nop
 Bank02_L9B2E:  LDA $0405,X
 Bank02_L9B31:  AND #$01
 Bank02_L9B33:  TAY 

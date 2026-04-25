@@ -290,13 +290,14 @@
 .alias EndTimerLo       $010A   ;Lower byte of end game escape timer.
 .alias EndTimerHi       $010B   ;Upper byte of end game escape timer.
 
-.alias MissileToggle    $010E   ;0=fire bullets, 1=fire missiles.
+.alias MissileToggle    $010E   ;0=fire bullets, 1=fire missiles.           ; Use 9 times in bank 7
 
 .alias SpriteRAM        $0200   ;Through $02FF. Sprite RAM.
 
 ;-----------------------------------------[ Object RAM ]---------------------------------------------
 
 ;Samus RAM.
+.alias SamusObjAction   $42     ;ZP for specifically samus' ObjAction  
 .alias ObjAction        $0300   ;Status of object. 0=object slot not in use.
 .alias ObjRadY          $0301   ;Distance in pixels from object center to top or bottom.
 .alias ObjRadX          $0302   ;Distance in pixels from object center to left or right side.
@@ -491,21 +492,19 @@
 .alias ScrewAtkSFXData  $0678   ;Contains extra data for screw attack SFX
 .alias SQ1SFXPeriodLow  $0679   ;Period low data for processing multi SFX routines
 
-; HERE HERE HERE 
-.alias NoiseSFXFlag     $0680   ;Initialization flags for noise SFX
-.alias SQ1SFXFlag       $0681   ;Initialization flags for SQ1 SFX
+; HERE HERE HERE - Change these to zero page for speed and size
+.alias NoiseSFXFlag     $3B     ;Initialization flags for noise SFX
+.alias SQ1SFXFlag       $3C     ;Initialization flags for SQ1 SFX
 .alias SQ2SFXFlag       $0682   ;Initialization flags for SQ2 SFX(never used)
-.alias TriangleSFXFlag  $0683   ;Initialization flags for triangle SFX
-.alias MultiSFXFlag     $0684   ;Initialization flags for SFX and some music
-
-.alias MusicInitFlag    $0685   ;Music init flags
+.alias TriangleSFXFlag  $3D     ;Initialization flags for triangle SFX
+.alias MultiSFXFlag     $3E     ;Initialization flags for SFX and some music
+.alias MusicInitFlag    $3F     ;Music init flags
 
 .alias NoiseContSFX     $0688   ;Continuation flags for noise SFX
 .alias SQ1ContSFX       $0689   ;Continuation flags for SQ1 SFX
 .alias SQ2ContSFX       $068A   ;Continuation flags for SQ2 SFX (never used)
 .alias TriangleContSFX  $068B   ;Continuation flags for Triangle SFX
 .alias MultiContSFX     $068C   ;Continuation flags for Multi SFX
-
 .alias CurrentMusic     $068D   ;Stores the flag of the current music being played 
 
 .alias PowerUpType      $0748   ;Holds the byte describing what power-up is on name table.
@@ -883,7 +882,8 @@
 .alias MacroUpperRight          $AFD2
 .alias MacroUpperLeft           $B017
 .alias SoundEngineOrg           $B200
-.alias SoundEngineEntryPoint    $B3D8
+.alias SXFInitTables            $B29D
+.alias SoundEngineEntryPoint    $B3CC
 .alias StructPointerTable_Hi    $BF56
 .alias StructPointerTable_Lo    $BF88
 .alias InterruptVectors         $BFFA
