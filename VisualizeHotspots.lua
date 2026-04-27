@@ -3,7 +3,7 @@
 --Type "emu." to show a list of all available API function
 
 watch_addresses = {
-	{ s = 0xB4CC, e = 0xB4E4 }
+	{ s = 0xBA15, e = 0xBA61 }
 }
 ignore_regions = {
 	{ s = 0xC0C2, e = 0xC0C9 } 

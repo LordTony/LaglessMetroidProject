@@ -1239,9 +1239,21 @@ _DivideTriePeriods:
 
 ;--------------------------------------[ End SFX routines ]-------------------------------------
 
-_LoadSQ1SQ2Periods:
+_LoadSQ1SQ2Channels:
+  LDX #$00                ;Load SQ1 channel data.
+  JSR _WriteSQCntrl0       ;($BA41)Write Cntrl0 data.
+  INX                     ;Load SQ2 channel data.
+  JSR _WriteSQCntrl0       ;($BA41)Write Cntrl0 data.
+  RTS                     ;
+
+_WriteSQCntrl0:
+  LDA SQ1VolumeCntrl,X    ;Load SQ channel volume data. If zero, branch to exit.
+  BEQ +++++               ;
+  STA VolCntrlAddress     ;
+
+;  JSR _LoadSQ1SQ2Periods   ;($BA08)Load SQ1 and SQ2 control information.
   LDA WrtMultiChnDat      ;If a Multi channel data does not need to be
-  BEQ +                   ;loaded, branch to exit.
+  BEQ _After_LoadSQ1SQ2Periods  ;loaded, branch to exit.
   LDA #$00                ;
   STA WrtMultiChnDat      ;Clear multi channel data write flag.
   LDA MusicSQ1Sweep       ;
@@ -1256,20 +1268,8 @@ _LoadSQ1SQ2Periods:
   STA SQ2Cntrl2           ;Loads SQ2 channel addresses $4005, $4006, $4007.
   LDA MusicSQ2PeriodHi    ;
   STA SQ2Cntrl3           ;
-* RTS                     ;
 
-_LoadSQ1SQ2Channels:
-  LDX #$00                ;Load SQ1 channel data.
-  JSR _WriteSQCntrl0       ;($BA41)Write Cntrl0 data.
-  INX                     ;Load SQ2 channel data.
-  JSR _WriteSQCntrl0       ;($BA41)Write Cntrl0 data.
-  RTS                     ;
-
-_WriteSQCntrl0:
-  LDA SQ1VolumeCntrl,X    ;Load SQ channel volume data. If zero, branch to exit.
-  BEQ +++++               ;
-  STA VolCntrlAddress     ;
-  JSR _LoadSQ1SQ2Periods   ;($BA08)Load SQ1 and SQ2 control information.
+_After_LoadSQ1SQ2Periods:
   LDA SQ1VolumeData,X     ;
   CMP #$10                ;If sound channel is not currently
   BEQ +++++++             ;playing sound, branch.
@@ -1279,17 +1279,19 @@ _WriteSQCntrl0:
   INY                     ;*2(2 byte address to find voulume control data).
   INY                     ;
   BNE -                   ;Keep decrementing until desired address is found.
+
 * LDA _VolCntrlPtrTbl,Y    ;Base is $BCB0.
   STA $EC                 ;Volume data address low byte.
   LDA _VolCntrlPtrTbl+1,Y  ;Base is $BCB1.
   STA $ED                 ;Volume data address high byte.
   LDY SQ1VolumeIndex,X    ;Index to desired volume data.
   LDA ($EC),Y             ;Load desired volume for current channel into
+
   STA Cntrl0Data          ;Cntrl0Data.
-  CMP #$FF                ;If last entry in volume table is #$FF, restore
-  BEQ _MusicBranch05       ;volume to its original level after done reading
-  CMP #$F0                ;Volume data. If #$F0 is last entry, turn sound
-  BEQ _MusicBranch06       ;off on current channel until next note.
+  CMP #$F0                ;If last entry in volume table is #$FF, restore
+  BEQ _MusicBranch06      ;volume to its original level after done reading
+  ;CMP #$F0               ;Volume data. If #$F0 is last entry, turn sound
+  BCS _MusicBranch05      ;off on current channel until next note.
   LDA SQ1DutyEnvelope,X   ;Remove duty cycle data For current channel and
   AND #$F0                ;add this frame of volume data and store results 
   ORA Cntrl0Data          ;in Cntrl0Data.
@@ -1381,10 +1383,10 @@ _LdNextChnlIndexDat:
   BEQ ----                ;Branch if music has reached the end.
   TAY                     ;Transfer music data index to Y (base=$BE77) .
   CMP #$FF                ;
-  BEQ +                   ;At end of loop? If yes, branch.
+  BEQ _RepeatMusicLoop    ;At end of loop? If yes, branch.
   AND #$C0                ;
   CMP #$C0                ;At beginnig of new loop? if yes, branch.
-  BEQ ++                  ;
+  BEQ _StartNewMusicLoop  ;
   JMP _LoadMusicChannel    ;($BB1C)Load music data into channel.
 
 _RepeatMusicLoop:
@@ -1661,24 +1663,24 @@ _Music00Init:
 
 ;The following address table provides starting addresses of the volume data tables below:
 _VolCntrlPtrTbl:
-  .word _VolumeDataTbl1, _VolumeDataTbl2, _VolumeDataTbl3, _VolumeDataTbl4
-  .word _VolumeDataTbl5
+  .word _VolumeDataTbl_0, _VolumeDataTbl_1, _VolumeDataTbl_2, _VolumeDataTbl_3
+  .word _VolumeDataTbl_4
 
-_VolumeDataTbl1:
+_VolumeDataTbl_0:
   .byte $01, $02, $02, $03, $03, $04, $05, $06, $07, $08, $FF
 
-_VolumeDataTbl2:
+_VolumeDataTbl_1:
   .byte $02, $04, $05, $06, $07, $08, $07, $06, $05, $FF
 
-_VolumeDataTbl3:
+_VolumeDataTbl_2:
   .byte $00, $0D, $09, $07, $06, $05, $05, $05, $04, $04, $FF
 
-_VolumeDataTbl4:
+_VolumeDataTbl_3:
   .byte $02, $06, $07, $07, $07, $06, $06, $06, $06, $05, $05, $05, $04, $04, $04, $03
   .byte $03, $03, $03, $02, $03, $03, $03, $03, $03, $02, $02, $02, $02, $02, $02, $02
   .byte $02, $02, $02, $01, $01, $01, $01, $01, $F0
 
-_VolumeDataTbl5:
+_VolumeDataTbl_4:
   .byte $0A, $0A, $09, $08, $07, $06, $05, $04, $03, $02, $07, $07, $06, $05, $04, $04
   .byte $03, $02, $02, $02, $05, $05, $05, $04, $03, $02, $02, $02, $01, $01, $04, $04
   .byte $03, $02, $01, $02, $02, $01, $01, $01, $02, $02, $02, $01, $01, $F0 

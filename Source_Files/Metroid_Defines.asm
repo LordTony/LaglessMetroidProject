@@ -63,10 +63,10 @@
 .alias MMCReg0Cntrl     $25     ;Stores bits to be loaded into MMC1 Register 0.
 .alias SwitchUprBits    $28     ;Used to store bits 3 and 4 for MMC1 register 3.  Bits
                                 ;3 and 4 should always be 0 under normal conditions.
-.alias TimerDelay       $29     ;Count down from 9 to 0. Decremented every frame.
+.alias Timer2Delay       $29     ;Count down from 9 to 0. Decremented every frame.
 .alias Timer1           $2A     ;Decremented every frame after set.
 .alias Timer2           $2B     ;Decremented every frame after set.
-.alias Timer3           $2C     ;Decremented every 10 frames after set.
+; unused                $2C     ;Used to be timer3 
 .alias FrameCount       $2D     ;Increments every frame(overflows every 256 frames).
 .alias RandomNumber1    $2E     ;Random numbers used     
 .alias RandomNumber2    $2F     ;throughout the game.
@@ -97,25 +97,15 @@
                                 ;RAM conatins a completed room in it, the entire contents
                                 ;of the room RAM is loaded into the PPU. 
 
-; These are now unused
-; $3B, $3C, $3D, $3E, $3F, $40, $41, $42, $43, $44, $45, $46, $47, $48
+; Zero paged some items used in the sound routines
+.alias NoiseSFXFlag     $3B     ;Initialization flags for noise SFX
+.alias SQ1SFXFlag       $3C     ;Initialization flags for SQ1 SFX
+.alias TriangleSFXFlag  $3D     ;Initialization flags for triangle SFX
+.alias MultiSFXFlag     $3E     ;Initialization flags for SFX and some music
+.alias MusicInitFlag    $3F     ;Music init flags
 
-;.alias RoomPtrTable     $3B     ;start of room pointer table.
-;.alias RoomPtrTableLB   $3B     ;start of room pointer table, lower byte.
-;.alias RoomPtrTableUB   $3C     ;start of room pointer table, upper byte.
-;
-;.alias StructPtrTable   $3D     ;start of structure pointer table.
-;.alias StructPtrTableLB $3D     ;start of structure pointer table, lower byte.
-;.alias StructPtrTableUB $3E     ;start of structure pointer table, upper byte.
-;
-;                                ;These are now unused
-;.alias MacroPtr         $3F     ;Pointer into macro definitions.
-;.alias MacroPtrLB       $3F     ;Pointer into macro definitions, lower byte.
-;.alias MacroPtrUB       $40     ;Pointer into macro definitions, upper byte.
-;
-;.alias EnemyAnimPtr     $47     ;EnemyAnimIndexTbl pointer.
-;.alias EnemyAnimPtrLB   $47     ;EnemyAnimIndexTbl pointer, lower byte.
-;.alias EnemyAnimPtrUB   $48     ;EnemyAnimIndexTbl pointer, upper byte.
+; These are now unused
+;$41, $42, $43, $44, $45, $46, $47, $48
 
 .alias ScrollDir        $49     ;0=Up, 1=Down, 2=Left, 3=Right.
 
@@ -181,6 +171,8 @@
 .alias InArea           $74     ;#$10(or #$00)=Brinstar, #$11=Norfair, #$12=Kraid hideout,
                                 ;#$13=Tourian, #$14=Ridley hideout.
 
+.alias ChannelType      $75     ;Stores channel type being processed(0,1,2,3 or 4)
+
 .alias PalToggle        $76
 
 .alias ItemRmMusicSts   $79     ;#$00=Item room music not playing. 
@@ -245,19 +237,23 @@
 .alias CrossDataIndex   $C6     ;#$00 thru #$04. Index to find cross sprite data.
 .alias DrawCross        $C7     ;#$01=Draw cross on screen during crosshairs routine.
 .alias SpriteLoadPend   $C8     ;Set to #$00 after sprite RAM load complete.
-.alias SpareMemC9       $C9     ;Written to in title routine, but never accessed.
-.alias SpareMemCB       $CB     ;Written to in title routine, but never accessed.
-.alias SpareMemCC       $CC     ;Written to in title routine, but never accessed.
-.alias SpareMemCD       $CD     ;Written to in title routine, but never accessed.
-.alias SpareMemCE       $CE     ;Written to in title routine, but never accessed.
-.alias SpareMemCF       $CF     ;Written to in title routine, but never accessed.
+
+.alias SamusJmpDsplcmnt $C9   ;Number of pixels vertically displaced from jump point.
+.alias VertCntrNonLinr  $CB   ;Verticle movement counter. Exponential change in speed.
+.alias HorzCntrLinear   $CE   ;Horizontal movement counter. Linear change in speed.
+.alias SamusGravity     $CF   ;Value used in calculating vertical acceleration on Samus.
+
 .alias AlwaysZero       $D0     ;Spare me that can be relied on to always be zero.
 .alias SpareMemD1       $D1     ;Written to in title routine, but never accessed.
-.alias SpareMemD2       $D2     ;Written to in title routine, but never accessed.
-.alias SpareMemD3       $D3     ;Written to in title routine, but never accessed.
+.alias CurrentSFXFlags  $D1     ;Stores flags of SFX currently being processed.
+
+.alias SamusHorzAccel   $D2   ;Value used in calculating horizontal acceleration on Samus.
+.alias SamusHorzSpdMax  $D3   ;Used to calc maximum horizontal speed Samus can reach.
+
 .alias SpareMemD7       $D7     ;Written to in title routine, but never accessed.
 .alias IntroMusRstrt    $D8     ;After all title routines run twice, restarts intro music.
 
+; 
 .alias SFXPtrE0         $E0     ;Pointer used by SFX routines.
 .alias SFXPtrE0LB       $E0     ;Pointer used by SFX routines, lower byte.
 .alias SFXPtrE0UB       $E1     ;Pointer used by SFX routines, upper byte.
@@ -268,13 +264,33 @@
 .alias SFXPtrE4         $E4     ;Pointer used by SFX routines.
 .alias SFXPtrE4LB       $E4     ;Pointer used by SFX routines, lower byte.
 .alias SFXPtrE4UB       $E5     ;Pointer used by SFX routines, upper byte.
+; used in sound         $E6
+; used in sound         $E7
+; unused                $E8
+; unused                $E9
+
+.alias Cntrl0Data       $EA     ;Temp storage for data of first address sound channel
+.alias VolCntrlAddress  $EB     ;Desired address number in VolumeCntrlAdressTbl
+; unused                $EC
+; unused                $ED
+; unused                $EF
 
 .alias ABStatus         $F0     ;Stores A and B button status in AreaInit. Never used.
-;                       $F7
+.alias HorzCntrNonLinr  $F1   ;Horizontal movement counter. Exponential change in speed.
+.alias VertCntrLinear   $F2   ;Verticle movement counter. Linear change in speed.
+.alias NARPASSWORD      $F3   ;0 = invinsible Samus not active, 1 = invinsible Samus active.
+.alias JustInBailey     $F4   ;0 = Samus has suit, 1 = Samus is without suit.
+; unused                $F5
+; unused                $F6
+; unused                $F7
+; unused                $F8
+; unused                $F9
 
 .alias MirrorCntrl      $FA     ;If bit 3 is set, PPU set to horizontal mirroring
                                 ;else if bit 3 is clear, PPU is set to vertical
                                 ;mirroring. No other bits seem to matter.
+
+.alias MissileToggle    $FB   ;0=fire bullets, 1=fire missiles.       
 
 .alias ScrollY          $FC     ;Y value loaded into scroll register. 
 .alias ScrollX          $FD     ;X value loaded into scroll register.
@@ -288,16 +304,18 @@
 .alias PowerUpDelay     $0109   ;Initiate power up music and delay after item pickup.
 
 .alias EndTimerLo       $010A   ;Lower byte of end game escape timer.
-.alias EndTimerHi       $010B   ;Upper byte of end game escape timer.
-
-.alias MissileToggle    $010E   ;0=fire bullets, 1=fire missiles.           ; Use 9 times in bank 7
+.alias EndTimerHi       $010B   ;Upper byte of end game escape timer.    ; Use 9 times in bank 7
 
 .alias SpriteRAM        $0200   ;Through $02FF. Sprite RAM.
 
 ;-----------------------------------------[ Object RAM ]---------------------------------------------
 
+; TODO: good candidates for ZP
+; ObjectY (32), ObjectX (23), SamusGravity (14), SamusHorzAccel (10), SamusHit (10), VertCntrLinear (9), HorzCntrLinear (6), SamusJmpDsplcmnt (6)
+
 ;Samus RAM.
-.alias SamusObjAction   $42     ;ZP for specifically samus' ObjAction  
+.alias SamusObjAction   $40     ;moved from $0300
+
 .alias ObjAction        $0300   ;Status of object. 0=object slot not in use.
 .alias ObjRadY          $0301   ;Distance in pixels from object center to top or bottom.
 .alias ObjRadX          $0302   ;Distance in pixels from object center to left or right side.
@@ -313,14 +331,6 @@
 .alias ObjectHi         $030C   ;0=Object on nametable 0, 1=Object on nametable 3.
 .alias ObjectY          $030D   ;Object y position in room(not actual screen position).
 .alias ObjectX          $030E   ;Object x position in room(not actual screen position).
-.alias SamusJmpDsplcmnt $030F   ;Number of pixels vertically displaced from jump point.
-.alias VertCntrNonLinr  $0310   ;Verticle movement counter. Exponential change in speed.
-.alias HorzCntrNonLinr  $0311   ;Horizontal movement counter. Exponential change in speed.
-.alias VertCntrLinear   $0312   ;Verticle movement counter. Linear change in speed.
-.alias HorzCntrLinear   $0313   ;Horizontal movement counter. Linear change in speed.
-.alias SamusGravity     $0314   ;Value used in calculating vertical acceleration on Samus.
-.alias SamusHorzAccel   $0315   ;Value used in calculating horizontal acceleration on Samus.
-.alias SamusHorzSpdMax  $0316   ;Used to calc maximum horizontal speed Samus can reach.
 
 ;Elevator RAM.
 .alias ElevatorStatus   $0320   ;#$01=Elevator present, #$00=Elevator not present.
@@ -372,8 +382,6 @@
 
 ;---------------------------------[ Sound Engine Memory Addresses ]----------------------------------
 
-.alias Cntrl0Data       $EA     ;Temp storage for data of first address sound channel
-.alias VolCntrlAddress  $EB     ;Desired address number in VolumeCntrlAdressTbl
 
 .alias MusicSQ1PrdLow   $0600   ;Loaded into SQ1Cntrl2 when playing music
 .alias MusicSQ1PrdHi    $0601   ;Loaded into SQ1Cntrl3 when playing music
@@ -453,14 +461,11 @@
 
 .alias ThisSoundChannel $064B   ;Least sig. byte of current channel(00,04,08 or 0C)
 
-.alias CurrentSFXFlags  $D1   ;Stores flags of SFX currently being processed.
+.alias NoiseInUse       $0652     ;Noise in use? (Not used)
+.alias SQ1InUse         $0653     ;1=SQ1 channel being used by SFX, 0=not in use
+.alias SQ2InUse         $0654     ;2=SQ2 channel being used by SFX, 0=not in use
+.alias TriangleInUse    $0655     ;3=Triangle channel being used by SFX, 0=not in use
 
-.alias NoiseInUse       $0652   ;Noise in use? (Not used)
-.alias SQ1InUse         $0653   ;1=SQ1 channel being used by SFX, 0=not in use
-.alias SQ2InUse         $0654   ;2=SQ2 channel being used by SFX, 0=not in use
-.alias TriangleInUse    $0655   ;3=Triangle channel being used by SFX, 0=not in use
-
-.alias ChannelType      $75     ;Stores channel type being processed(0,1,2,3 or 4)
 .alias CrntMusicRepeat  $065D   ;Stores flags of music to repeat
 .alias MusicInitIndex   $065E   ;index for loading $62B thru $637(base=$BD31).
 
@@ -491,14 +496,6 @@
 
 .alias ScrewAtkSFXData  $0678   ;Contains extra data for screw attack SFX
 .alias SQ1SFXPeriodLow  $0679   ;Period low data for processing multi SFX routines
-
-; HERE HERE HERE - Change these to zero page for speed and size
-.alias NoiseSFXFlag     $3B     ;Initialization flags for noise SFX
-.alias SQ1SFXFlag       $3C     ;Initialization flags for SQ1 SFX
-.alias SQ2SFXFlag       $0682   ;Initialization flags for SQ2 SFX(never used)
-.alias TriangleSFXFlag  $3D     ;Initialization flags for triangle SFX
-.alias MultiSFXFlag     $3E     ;Initialization flags for SFX and some music
-.alias MusicInitFlag    $3F     ;Music init flags
 
 .alias NoiseContSFX     $0688   ;Continuation flags for noise SFX
 .alias SQ1ContSFX       $0689   ;Continuation flags for SQ1 SFX
@@ -671,8 +668,6 @@
 .alias PasswordChar16   $69B0   ;
 .alias PasswordChar17   $69B1   ;
 
-.alias NARPASSWORD      $69B2   ;0 = invinsible Samus not active, 1 = invinsible Samus active.
-.alias JustInBailey     $69B3   ;0 = Samus has suit, 1 = Samus is without suit.
 .alias ItemHistory      $69B4   ;Thru $6A73. Unique item history saved game data (not used).
 
 ;---------------------------------------[ More enemy RAM ]-------------------------------------------

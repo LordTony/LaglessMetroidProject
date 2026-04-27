@@ -62,7 +62,7 @@ L805A:  .word EnterPassword     ;($9147)User enters password.
 L805C:  .word DisplayPassword   ;($9359)After game over, display password on screen.
 L805E:  .word WaitForSTART      ;($9394)Wait for START when showing password.
 L8060:  .word StartContScrn     ;($90BA)Displays START/Continue screen.
-L8062:  .word GameOverScrn       ;($939E)Displays "GAME OVER".
+L8062:  .word GameOverScrn      ;($939E)Displays "GAME OVER".
 L8064:  .word EndGame           ;($9AA7)Show ending of the game.
 L8066:  .word SetTimer          ;($C4AA)Set delay timer.
 
@@ -70,8 +70,8 @@ L8066:  .word SetTimer          ;($C4AA)Set delay timer.
 
 ClearSpareMem:
 L8068:  LDA #$00                ;
-L806A:  STA SpareMemCB          ;Clears two memory addresses not used by the game.
-L806C:  STA SpareMemC9          ;
+L806A:  STA VertCntrNonLinr     ;
+L806C:  STA SamusJmpDsplcmnt    ;
 
 IncTitleRoutine:
 L806E:  INC TitleRoutine        ;Increment to next title routine.
@@ -79,20 +79,21 @@ L8070:  RTS                     ;
 
 InitAfterReset:
 L8071:  LDY #$02                ;
-L8073:  STY SpareMemCF          ;
-L8075:  STY SpareMemCC          ;
 L8077:  DEY                     ;
-L8078:  STY SpareMemCE          ;Not used.
 L807A:  STY SpareMemD1          ;
 L807C:  DEY                     ;
+L8075:  STY HorzCntrNonLinr     ;
+L8078:  STY HorzCntrLinear      ;
+L8073:  STY SamusGravity        ;
 L807D:  STY AlwaysZero          ;
-L807F:  STY SpareMemCD          ;
-L8081:  STY SpareMemD3          ;
+L807F:  STY VertCntrLinear      ;
+L8081:  STY SamusHorzSpdMax     ;
 
 L8083:  STY NARPASSWORD         ;Set NARPASSWORD not active.
+nop
 
-L8086:  STY SpareMemCB          ;Not used.
-L8088:  STY SpareMemC9          ;
+L8086:  STY VertCntrNonLinr     ;
+L8088:  STY SamusJmpDsplcmnt    ;
 
 L808A:  LDA #$02                ;
 L808C:  STA IntroMusRstrt       ;Title rountines cycle twice before restart of music.
@@ -178,8 +179,8 @@ L80F9:  LDA PPUCNT0ZP           ;
 L80FB:  AND #$FE                ;Switch to name table 0 or 2.
 L80FD:  STA PPUCNT0ZP           ;
 
-L80FF:  LDA #$08                ;Loads Timer3 with #$08. Delays Fade in routine.
-L8101:  STA Timer3              ;Delays fade in by 80 frames (1.3 seconds).
+L80FF:  LDA #$08                ;Loads Timer2 with #$08. Delays Fade in routine.
+L8101:  STA Timer2              ;Delays fade in by 80 frames (1.3 seconds).
 
 L8103:  LSR                     ;
 L8104:  STA PalDataIndex        ;Loads PalDataIndex with #$04
@@ -196,7 +197,7 @@ L8111:  AND #$03                ;data sets in the flash routine.
 L8113:  STA PalDataIndex        ;
 L8115:  JSR LoadPalData         ;($8A8C)Load data into Palettes.
 
-L8118:  LDA Timer3              ;If Timer 3 has not expired, branch
+L8118:  LDA Timer2              ;If Timer 3 has not expired, branch
 L811A:  BNE +                   ;so routine will keep running.
 
 L811C:  LDA PalDataIndex        ;
@@ -207,14 +208,14 @@ L8122:  INC TitleRoutine        ;Increment to next routine.
 L8124:  JSR LoadSparkleData     ;($87AB) Loads data for next routine.
 
 L8127:  LDA #$18                ;Sets Timer 3 for a delay of 240 frames
-L8129:  STA Timer3              ;(4 seconds).
+L8129:  STA Timer2              ;(4 seconds).
 L812B:* RTS                     ;
 
 ;----------------------------------------------------------------------------------------------------
 
 
 METROIDFadeIn:
-L812C:  LDA Timer3              ;Has timer reached 0?
+L812C:  LDA Timer2              ;Has timer reached 0?
 L812E:  BNE +                   ;If not, branch to wait longer.
 
 L8130:  LDA FrameCount          ;Every 16th FrameCount, Change palette.
@@ -225,25 +226,25 @@ L8136:  JSR LoadPalData         ;($8A8C)Load data into Palettes.
 L8139:  BNE +                   ;
 
 L813B:  LDA #$20                ;Set timer delay for METROID flash effect.
-L813D:  STA Timer3              ;Delays flash by 320 frames (5.3 seconds).
+L813D:  STA Timer2              ;Delays flash by 320 frames (5.3 seconds).
 L813F:  INC TitleRoutine        ;
 L8141:* RTS                     ;
 
 ;----------------------------------------------------------------------------------------------------
 
 LoadFlashTimer:
-L8142:  LDA Timer3              ;Has 320 frames passed?
+L8142:  LDA Timer2              ;Has 320 frames passed?
 L8144:  BNE -                   ;If not, exit.
 
 L8146:  LDA #$08                ;
-L8148:  STA Timer3              ;Stores a value of 80 frames in Timer3
+L8148:  STA Timer2              ;Stores a value of 80 frames in Timer2
 L814A:  INC TitleRoutine        ;(1.3 seconds).
 L814C:  RTS                     ;
 
 ;----------------------------------------------------------------------------------------------------
 
 METROIDSparkle:
-L814D:  LDA Timer3              ;Wait until 3 seconds have passed since
+L814D:  LDA Timer2              ;Wait until 3 seconds have passed since
 L814F:  BNE EndSparkle          ;last routine before continuing.
 
 L8151:  LDA IntroSpr0Comp       ;Check if sparkle sprites are done moving.
@@ -272,7 +273,7 @@ L816D:  BNE +                   ;
 
 L816F:  JSR LoadInitSprtDat     ;($8897)Load initial sprite values for crosshair routine.
 L8172:  LDA #$08                ;
-L8174:  STA Timer3              ;Load Timer3 with a delay of 80 frames(1.3 seconds).
+L8174:  STA Timer2              ;Load Timer2 with a delay of 80 frames(1.3 seconds).
 L8176:  STA First4SlowCntr      ;Set counter for slow sprite movement for 8 frames,
 
 L8178:  LDA #$00                ;Set ScndCrshrSprts=#$00
@@ -292,7 +293,7 @@ L8184:  BEQ +                   ;If not, branch.
 
 L8186:  JSR FlashIntroScreen    ;($8AA7)Flash screen white.
 
-L8189:* LDA Timer3              ;Wait 80 frames from last routine
+L8189:* LDA Timer2              ;Wait 80 frames from last routine
 L818B:  BNE EndCrosshairs       ;before running this one.
 
 L818D:  LDA IntroSpr0Comp       ;
@@ -383,6 +384,7 @@ LCB12:  LDA #SUIT_OFF           ;Suit OFF, baby!
 
 LCB14:* STA JustInBailey        ;Store Samus suit status.
 LCB17:  RTS                     ;
+nop
 
 ;Table used by above subroutine to determine ending type.
 AgeTable:
@@ -414,20 +416,20 @@ L8232:  STA PPUCNT0ZP           ;
 
 L8234:  INC TitleRoutine        ;Next routine to run is MessageFadeIn.
 
-L8236:  LDA #$08                ;Set Timer3 for 80 frames(1.33 seconds).
-L8238:  STA Timer3              ;
+L8236:  LDA #$08                ;Set Timer2 for 80 frames(1.33 seconds).
+L8238:  STA Timer2              ;
 
 L823A:  LDA #$06                ;Index to FadeInPalData.
 L823C:  STA FadeDataIndex       ;
 
 L823E:  LDA #$00                ;
-L8240:  STA SpareMemC9          ;Not accessed by game.
+L8240:  STA SamusJmpDsplcmnt    ;
 L8242:  RTS                     ;
 
 ;----------------------------------------------------------------------------------------------------
 
 MessageFadeIn:
-L8243:  LDA Timer3              ;Check if delay timer has expired.  If not, branch
+L8243:  LDA Timer2              ;Check if delay timer has expired.  If not, branch
 L8245:  BNE EndMsgFadeIn        ;to exit, else run this rouine.
 
 L8247:  LDA FrameCount          ;
@@ -441,8 +443,8 @@ L8251:  BNE +                   ;If not, branch.
 L8253:  LDA #$00                ;Clear FadeDataIndex.
 L8255:  STA FadeDataIndex       ;
 
-L8257:  LDA #$30                ;Set Timer3 to 480 frames(8 seconds).
-L8259:  STA Timer3              ;
+L8257:  LDA #$30                ;Set Timer2 to 480 frames(8 seconds).
+L8259:  STA Timer2              ;
 
 L825B:  INC TitleRoutine        ;Next routine is MessageFadeOut.
 L825D:  BNE EndMsgFadeIn        ;Branch always.
@@ -455,7 +457,7 @@ L8262:  RTS                     ;End message fade in routine.
 ;----------------------------------------------------------------------------------------------------
 
 MessageFadeOut:
-L8263:  LDA Timer3              ;Check if delay timer has expired.  If not, branch
+L8263:  LDA Timer2              ;Check if delay timer has expired.  If not, branch
 L8265:  BNE EndMsgFadeOut       ;to exit, else run this rouine.
 
 L8267:  LDA FrameCount          ;
@@ -469,8 +471,8 @@ L8271:  BNE +                   ;If not, branch.
 L8273:  LDA #$06                ;
 L8275:  STA FadeDataIndex       ;Set index to start of fade in data.
 
-L8277:  LDA #$00                ;Not accessed by game.
-L8279:  STA SpareMemCB          ;
+L8277:  LDA #$00                ;
+L8279:  STA VertCntrNonLinr     ;
 
 L827B:  INC TitleRoutine        ;Next routine is DelayIntroReplay.
 L827D:  BNE EndMsgFadeOut       ;Branch always.
@@ -485,7 +487,7 @@ L8282:  RTS                     ;End message fade out routine.
 DelayIntroReplay:
 L8283:  INC TitleRoutine        ;Increment to next routine.
 L8285:  LDA #$10                ;
-L8287:  STA Timer3              ;Set Timer3 for a delay of 160 frames(2.6 seconds).
+L8287:  STA Timer2              ;Set Timer2 for a delay of 160 frames(2.6 seconds).
 L8289:  RTS                     ;
 
 ;----------------------------------------------------------------------------------------------------
@@ -498,10 +500,10 @@ L829A:  .byte $85, $D2, $A9, $10, $85, $2C, $E6, $1F, $60
 ;----------------------------------------------------------------------------------------------------
 
 PrepIntroRestart:
-L82A3:  LDA Timer3              ;Check if delay timer has expired.  If not, branch
+L82A3:  LDA Timer2              ;Check if delay timer has expired.  If not, branch
 L82A5:  BNE ExitPrepRestart     ;to exit, else run this rouine.
 
-L82A7:  STA SpareMemD2          ;Not accessed by game.
+;L82A7:  STA SpareMemD2          ;Not accessed by game.
 L82A9:  STA SpareMemBB          ;Not accessed by game.
 L82AB:  STA IsSamus             ;Clear IsSamus memory address.
 
@@ -521,16 +523,15 @@ L82C0:  STY PalDataIndex        ;
 L82C2:  STY ScrnFlashPalInd     ;Clear all index values from these addresses.
 L82C4:  STY IntroStarOffset     ;
 L82C6:  STY FadeDataIndex       ;
-L82C8:  STY SpareMemCD          ;Not accessed by game.
+L82C8:  STY VertCntrLinear      ;
 L82CA:  STY Joy1Change          ;
 L82CC:  STY Joy1Status          ;Clear addresses that were going to be written to by an
 L82CE:  STY Joy1Retrig          ;unused intro routine.
 L82D0:  STY SpareMemD7          ;Not accessed by game.
-L82D2:  INY                     ;Y=1.
-L82D3:  STY SpareMemCE          ;Not accessed by game.
-L82D5:  INY                     ;Y=2.
-L82D6:  STY SpareMemCC          ;Not accessed by game.
-L82D8:  STY SpareMemCF          ;Not accessed by game.
+L82D3:  STY HorzCntrLinear      ;
+L82D8:  STY SamusGravity        ;
+L82D6:  STY HorzCntrNonLinr     ;
+L82D2:  LDY #$02                ;Y=2.
 
 L82DA:  STY TitleRoutine        ;Next routine sets up METROID fade in delay.
 
@@ -546,6 +547,8 @@ L82E7:  STA IntroMusRstrt       ;of the title routines.
 ExitPrepRestart:
 L82E9:  RTS                     ;Exit the restart intro routine.
 ; moved MultiSFXFlag to ZP
+nop
+nop
 nop
 
 DecIntroCounter:
@@ -1639,7 +1642,7 @@ L8C69:* LDA MultiSFXFlag        ;
 L8C6C:  ORA #$01                ;Set IncorrectPassword SFX flag.
 L8C6E:  STA MultiSFXFlag        ;
 L8C71:  LDA #$0C                ;
-L8C73:  STA Timer3              ;Set Timer3 time for 120 frames (2 seconds).
+L8C73:  STA Timer2              ;Set Timer2 time for 120 frames (2 seconds).
 L8C75:  LDA #$18                ;
 L8C77:  STA TitleRoutine        ;Run EnterPassword routine.
 L8C79:  RTS                     ;
@@ -1666,6 +1669,7 @@ L8C9B:  STA PasswordByte06      ;
 L8C9E:* LDA InArea              ;Store InArea in bits 0 thru 5 in
 L8CA0:  AND #$3F                ;address $6990.
 L8CA2:  LDY JustInBailey        ;
+nop
 L8CA5:  BEQ +                   ;
 L8CA7:  ORA #$80                ;Sets MSB of $6990 is Samus is suitless.
 L8CA9:* STA PasswordByte08      ;
@@ -1706,7 +1710,7 @@ L8CF7:* LDA SamusAgeLo,Y        ;Store SamusAgeLo in $6993,
 L8CFA:  STA PasswordByte0B,Y    ;SamusAgeMid in $6994 and
 L8CFD:  DEY                     ;SamusAe+2 in $6995.
 L8CFE:  BPL -                   ;
-L8D00:* JSR $C000               ;
+L8D00:* JSR RandomNumbers       ;
 L8D03:  LDA RandomNumber1       ;
 L8D05:  AND #$0F                ;Store the value of $2E at $6998
 L8D07:  BEQ -                   ;When any of the 4 LSB are set. (Does not
@@ -1716,6 +1720,7 @@ L8D0F:  JMP LoadPasswordChar    ;($8E6C)Calculate password characters.
 
 LoadPasswordData:
 L8D12:  LDA NARPASSWORD         ;If invincible Samus active, skip
+nop
 L8D15:  BNE +++                 ;further password processing.
 L8D17:  JSR LoadUniqueItems     ;($8BD4)Load unique items from password.
 L8D1A:  JSR LdTanksAndMissiles  ;($8D3D)Calculate number of missiles from password.
@@ -1725,6 +1730,7 @@ L8D22:  AND #$80                ;Samus is not wearing her suit.
 L8D24:  BEQ +                   ;           
 L8D26:  INY                     ;
 L8D27:* STY JustInBailey        ;
+nop
 L8D2A:  LDA PasswordByte08      ;Extract first 5 bits from PasswordByte08
 L8D2D:  AND #$3F                ;and use it to determine starting area.
 L8D2F:  STA InArea              ;
@@ -1816,6 +1822,7 @@ L8DDD:  RTS                     ;
 
 ValidatePassword:
 L8DDE:  LDA NARPASSWORD         ;
+nop
 L8DE1:  BNE ++                  ;If invincible Samus already active, branch.
 L8DE3:  LDY #$0F                ;
 L8DE5:* LDA PasswordChar00,Y    ;
@@ -1825,6 +1832,7 @@ L8DED:  DEY                     ;Samus, else continue to process password.
 L8DEE:  BPL -                   ;
 L8DF0:  LDA #$01                ;
 L8DF2:  STA NARPASSWORD         ;
+nop
 L8DF5:  BNE ++                  ;
 L8DF7:* JSR UnscramblePassword  ;($8E4E)Unscramble password.
 L8DFA:  JSR PasswordChecksum    ;($8E21)Calculate password checksum.
@@ -2262,7 +2270,7 @@ L912C:  STA PalDataPending      ;Change palette.
 L912E:  LDA #$00                ;
 L9130:  STA InputRow            ;Sets character select cursor to
 L9133:  STA InputColumn         ;upper left character (0).
-L9136:  STA Timer3              ;
+L9136:  STA Timer2              ;
 L9138:  LDA #$00                ;
 L913A:  STA PasswordCursor      ;Sets password cursor to password character 0.
 L913D:  LDY #$00                ;
@@ -2285,11 +2293,11 @@ L915F:  LDA #$A8                ;Lower byte of PPU string.
 L9161:  JSR WritePPUByte        ;($C36B)Write byte to PPU.
 L9164:  LDA #$0F                ;PPU string length.
 L9166:  JSR WritePPUByte        ;($C36B)Write byte to PPU.
-L9169:  LDA Timer3              ;
+L9169:  LDA Timer2              ;
 L916B:  BEQ +                   ;
 L916D:  LDA #$59                ;
 L916F:  STA $02                 ;Writes 'ERROR TRY AGAIN' on the screen
-L9171:  LDA #$87                ;if Timer3 is anything but #$00.
+L9171:  LDA #$87                ;if Timer2 is anything but #$00.
 L9173:  STA $03                 ;
 L9175:  JMP ++                  ;
 L9178:* LDA #$68                ;
@@ -2535,12 +2543,13 @@ L9348:  STA SamusAgeHi          ;
 L934B:  STA SamusStat01         ;
 L934E:  STA AtEnding            ;
 L9351:  STA JustInBailey        ;
+nop
 L9354:  LDA #$02                ;
 L9356:  STA SwitchPending       ;Prepare to switch to Brinstar memory page.
 L9358:  RTS                     ;
 
 DisplayPassword:
-L9359:  LDA Timer3              ;Wait for "GAME OVER" to be displayed
+L9359:  LDA Timer2              ;Wait for "GAME OVER" to be displayed
 L935B:  BNE $9324               ;for 160 frames (2.6 seconds).
 L935D:  JSR ClearAll            ;($909F)Turn off screen, erase sprites and nametables.
 L9360:  LDX #$7F                ;Low byte of start of PPU data.
@@ -2584,8 +2593,8 @@ L93A3:  LDY #$93                ;High byte of start of PPU data.
 L93A5:  JSR PreparePPUProcess   ;($9449)Clears screen and writes "GAME OVER".
 L93A8:  JSR InitGFX7            ;($C6D6)Loads the font for the password.
 L93AB:  JSR NmiOn               ;($C487)Turn on the nonmaskable interrupt.
-L93AE:  LDA #$10                ;Load Timer3 with a delay of 160 frames
-L93B0:  STA Timer3              ;(2.6 seconds) for displaying "GAME OVER".
+L93AE:  LDA #$10                ;Load Timer2 with a delay of 160 frames
+L93B0:  STA Timer2              ;(2.6 seconds) for displaying "GAME OVER".
 L93B2:  LDA #$19                ;Loads TitleRoutine with 
 L93B4:  STA TitleRoutine        ;DisplayPassword.
 L93B6:  JMP ScreenOn            ;($C447)Turn screen on.
@@ -3204,6 +3213,7 @@ L9A92:* LDA SamusGear           ;
 L9A95:  STA PasswordByte09      ;Store Samus gear data in PasswordByte09.
 L9A98:  LDA #$00                ;
 L9A9A:  LDY JustInBailey        ;
+nop
 L9A9D:  BEQ +                   ;If Samus is wearing suit, branch.  Else
 L9A9F:  LDA #$80                ;load suitless Samus data into PasswordByte08.
 L9AA1:* STA PasswordByte08      ;
@@ -3239,6 +3249,7 @@ L9AD5:  JSR ClearAll            ;($909F)Turn off screen, erase sprites and namet
 L9AD8:  JSR InitEndGFX          ;($C5D0)Prepare to load end GFX.
 L9ADB:  LDA #$04                ;
 L9ADD:  LDY JustInBailey        ;Checks if game was played as suitless
+nop
 L9AE0:  BNE +                   ;Samus.  If so, branch.
 L9AE2:  LDA #$00                ;Loads SpritePtrIndex with #$00(suit on).
 L9AE4:* STA EndingType          ;
@@ -3250,8 +3261,8 @@ L9AEE:  JSR PrepPPUProcess     ;($C20E)Prepare to write to PPU.
 L9AF1:  JSR NmiOn               ;($C487)Turn on non-maskable interrupt.
 L9AF4:  LDA #$20                ;Initiate end game music.
 L9AF6:  STA MultiSFXFlag        ;
-L9AF9:  LDA #$60                ;Loads Timer3 with a delay of 960 frames
-L9AFB:  STA Timer3              ;(16 seconds).
+L9AF9:  LDA #$60                ;Loads Timer2 with a delay of 960 frames
+L9AFB:  STA Timer2              ;(16 seconds).
 L9AFD:  LDA #$36                ;#$36/#$03 = #$12.  Number of sprites
 L9AFF:  STA SpriteByteCntr      ;used to draw end graphic of Samus.
 L9B01:  LDA #$00                ;
@@ -3272,7 +3283,7 @@ nop
 
 ShowEndSamus:
 L9B1C:  JSR LoadEndSamSprts     ;($9C9A)Load end image of Samus.
-L9B1F:  LDA Timer3              ;Once 960 frames (16 seconds) have expired,
+L9B1F:  LDA Timer2              ;Once 960 frames (16 seconds) have expired,
 L9B21:  BNE +                   ;Move to EndSamusFlash routine.
 L9B23:  INC GenByte33           ;
 L9B25:  RTS                     ;
@@ -3302,8 +3313,8 @@ L9B4C:  STA SpritePtrIndex      ;done, this code will calculate the
 L9B4E:  LDA #$36                ;password and choose the proper ending.
 L9B50:  STA SpriteByteCntr      ;
 L9B52:* CMP #$10                ;
-L9B54:  BNE ++                  ;Once flashing Samus is compete, set Timer3
-L9B56:  STA Timer3              ;for a 160 frame(2.6 seconds) delay.
+L9B54:  BNE ++                  ;Once flashing Samus is compete, set Timer2
+L9B56:  STA Timer2              ;for a 160 frame(2.6 seconds) delay.
 L9B58:  LDY #$00                ;
 L9B5A:  LDA EndingType          ;
 L9B5D:  CMP #$04                ;If one of the suitless Samus endings,
@@ -3334,10 +3345,10 @@ PalChangeTable:
 L9B83:  .byte $08, $07, $06, $05, $04, $03, $02, $01, $01, $02, $03, $04, $05, $06, $07, $08
  
 SamusWave:
-L9B93:  LDA Timer3              ;If 160 frame timer from previous routine
+L9B93:  LDA Timer2              ;If 160 frame timer from previous routine
 L9B95:  BNE +                   ;has not expired, branch(waves for 2.6 seconds).
 L9B97:  LDA #$10                ;
-L9B99:  STA Timer3              ;Load Timer3 with 160 frame delay
+L9B99:  STA Timer2              ;Load Timer2 with 160 frame delay
 L9B9B:  LDA #$08                ;(2.6 seconds).
 L9B9D:  STA PalDataPending      ;Change palette
 L9B9F:  INC GenByte33           ;Increment GenByte33
@@ -3367,7 +3378,7 @@ L9BC8:  STA SpriteByteCntr      ;refreshing Samus sprite bytes.
 L9BCA:  JMP LoadWaveSprites     ;($9C7F)Load sprites for waving Samus.
 
 EndFadeOut:
-L9BCD:  LDA Timer3              ;If 160 frame delay from last routine has not
+L9BCD:  LDA Timer2              ;If 160 frame delay from last routine has not
 L9BCF:  BNE ++                  ;yet expired, branch.
 L9BD1:  LDA IsCredits           ;
 L9BD3:  BNE +                   ;Branch always.
@@ -3383,8 +3394,8 @@ L9BE1:  INC PalDataPending      ;incrementing every seventh frame until it does.
 L9BE3:  LDA PalDataPending      ;This creates the fade out effect.
 L9BE5:  CMP #$0C                ;
 L9BE7:  BNE +                   ;
-L9BE9:  LDA #$10                ;After fadeout complete, load Timer3 with 160 frame
-L9BEB:  STA Timer3              ;delay(2.6 seconds) and increment GenByte33.
+L9BE9:  LDA #$10                ;After fadeout complete, load Timer2 with 160 frame
+L9BEB:  STA Timer2              ;delay(2.6 seconds) and increment GenByte33.
 L9BED:  INC GenByte33           ;
 L9BEF:* LDA EndingType          ;
 L9BF2:  CMP #$04                ;If suitless Samus ending, load hand wave sprites,
@@ -3393,11 +3404,11 @@ L9BF6:  JMP LoadEndSamSprts     ;($9C9A)Load end image of Samus.
 L9BF9:* JMP LoadWaveSprites     ;($9C7F)Load sprites for waving Samus.
 
 RollCredits:
-L9BFC:  LDA Timer3              ;If 160 frame timer delay from previous
+L9BFC:  LDA Timer2              ;If 160 frame timer delay from previous
 L9BFE:  BEQ +                   ;routine has expired, branch.
-L9C00:  CMP #$02                ;If not 20 frames left in Timer3, branch to exit.
+L9C00:  CMP #$02                ;If not 20 frames left in Timer2, branch to exit.
 L9C02:  BNE ++++                ;
-L9C04:  JSR ScreenOff           ;($C439)When 20 frames left in Timer3,
+L9C04:  JSR ScreenOff           ;($C439)When 20 frames left in Timer2,
 L9C07:  JSR ClearNameTable0     ;($C16D)clear name table 0 and sprites.
 L9C0A:  JSR EraseAllSprites     ;($C1A3)prepares screen for credits.
 L9C0D:  LDA #$0D                ;

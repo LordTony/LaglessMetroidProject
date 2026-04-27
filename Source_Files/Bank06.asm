@@ -895,6 +895,12 @@ Bank06_LB8B0:  .byte $00, $00, $00, $7C, $00, $00, $00, $00, $00, $00, $00, $7C,
 
 LotsaSpace:
 
+; ~3kb
+; There's so much room for activities!
+
+; make an erase mapper
+; .byte 
+
 ; This just makes it this spot easy to find in a hex editor or a debugger
 .byte $DD, $DD, $DD, $DD, $DD, $DD, $DD, $DD, $DD, $DD, $DD, $DD, $DD, $DD, $DD, $DD
 .byte $DD, $DD, $DD, $DD, $DD, $DD, $DD, $DD, $DD, $DD, $DD, $DD, $DD, $DD, $DD, $DD

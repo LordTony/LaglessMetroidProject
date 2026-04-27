@@ -21,8 +21,8 @@ The idea here is to attempt to take the Metroid lag as low as possible without a
 The baseline benchmark is Samus standing still in the opening room with 2 of the spikey bois both alive and crawing on the walls.
 
   * Metroid finishes all work for the benchmark frames in **137 to 149** scanlines
-  * Lagless Metroid finishes in **72 to 92** scanlines
-  * Lagless Metroid finishes in **%53 to %62** of the scanlines it takes Metroid
+  * Lagless Metroid finishes in **71 to 97** scanlines
+  * Lagless Metroid finishes in **%52 to %62** of the scanlines it takes Metroid
   * The limit might be something like **68** scanlines, so keep pushing
 
 ### Code Progress
@@ -37,8 +37,15 @@ The baseline benchmark is Samus standing still in the opening room with 2 of the
     * This change alone saves about 5-8 scanlines
 * The map generation code has had so many guard rails removed and it is still slow
   * It looks like sometimes we have prevented dropped frames though, so there are pseudo noticable improvements
-* One function in the sound engine was heavily hammered and I think it ended up dropping like 10-12 scanlines from the full frame.
+* One function in the sound engine was heavily hammered and I think it ended up dropping like 18-22 scanlines from every frame
   * So far this was the biggest win of the project
+* Realized months in that some of the easy wins are just from switching over to ZP
+  * Replacing some 0300, and 0600 ram variables with ZP
+* Timer2 was never actually used, but it wasted cycles counting down every frame
+  * Bonus! Got another free ZP address out of that
+* Getting rid of pointer math wherever I can by putting table entries at the same spots in Bank01-Bank05
+  * Breaking up macro tables into hard locations is a good example of this kind of thing
+  * Now I don't need a table that points to another table, but it costs precious wasted bytes
 
 ### TODOs
 * Get rid of the rest of ChooseRoutine. Move it into Bank01-Bank05
@@ -46,6 +53,8 @@ The baseline benchmark is Samus standing still in the opening room with 2 of the
   * Consider placing Mul and Div tables in unused spots in Bank01-Bank05
 * Refactor the common code in Bank01-Bank05
 * Fight a little harder for inlining some of the UpdateSamus code
+* Re-align the $0400 enemy memory so it's grouped by property rather than enemy
+  * x = x+1 (inx) is much cheaper than x = x+16
 
 ## Folder Structure
 
@@ -105,12 +114,10 @@ Now that I've gotten the identity table in, I can't help but wonder if those 256
 The "Visualize Hotspots" lua script can be run and tweaked to find places in the code that are hit more often. It helped me get some big wins.
 
 ## Bugs
-* No password screen shows when you die
+* Running into color palette glitches from time to time
 * Starting with a Ridley Password and going up the elevator gets a bugged map
-  * It might be that moving memory around doesn't work well with the password system
-  * Oof. All that moving junk to zero page that I did might really come back to bite me in the butt
-* Tourian (Metroid / Mother Brain / Bank03.asm) is really broken
-  * Metroid grabbing you can crash the game
-  * Shooting metroids with missiles plays the wrong sounds
+* Tourian (Metroid / Mother Brain / Bank03.asm) might be broken
+  * Shooting metroids with missiles plays the wrong sounds (haven't tested this in a while)
 * Enemies that fly off the screen tend to stay there and blink if you run behind them (this might be a behavior in the base game. Will need to check)
 * Seeing single 8x8 random sprites pop in from time to time
+  * It looks like this is only when the lag frames happen. When the room loads and it tries to place sprites as well.
