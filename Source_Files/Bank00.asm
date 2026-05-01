@@ -1393,6 +1393,7 @@ L8AC9:  AND #$0F                ;Change star palette every 16th frame.
 L8ACB:  BNE +                   ;
 
 L8ACD:  LDA PPUStrIndex         ;
+nop
 L8AD0:  BEQ DoStarPalSwitch     ;Is any other PPU data waiting? If so, exit.
 L8AD2:* RTS                     ;
 
@@ -1674,8 +1675,10 @@ L8CA5:  BEQ +                   ;
 L8CA7:  ORA #$80                ;Sets MSB of $6990 is Samus is suitless.
 L8CA9:* STA PasswordByte08      ;
 L8CAC:  LDA SamusGear           ;
+nop
 L8CAF:  STA PasswordByte09      ;SamusGear stored in $6991.
 L8CB2:  LDA MissileCount        ;
+nop
 L8CB5:  STA PasswordByte0A      ;MissileCount stored in $6992.
 L8CB8:  LDA #$00                ;
 L8CBA:  STA $00                 ;
@@ -1744,8 +1747,10 @@ L8D3C:* RTS                     ;
 LdTanksAndMissiles:
 L8D3D:  LDA PasswordByte09      ;Loads Samus gear.
 L8D40:  STA SamusGear           ;Save Samus gear.
+nop
 L8D43:  LDA PasswordByte0A      ;Loads current number of missiles.
 L8D46:  STA MissileCount        ;Save missile count.
+nop
 L8D49:  LDA #$00                ;
 L8D4B:  STA $00                 ;
 L8D4D:  STA $02                 ;
@@ -1801,6 +1806,7 @@ L8DB1:  CMP #$06                ;Ensure the Tank Count does not exceed 6
 L8DB3:  BCC +                   ;tanks. Then stores the number of
 L8DB5:  LDA #$06                ;energy tanks found in TankCount.
 L8DB7:* STA TankCount           ;
+nop
 L8DBA:  LDA #$00                ;
 L8DBC:  LDY $02                 ;
 L8DBE:  BEQ ++                  ;Branch if no missiles found.
@@ -1818,6 +1824,7 @@ L8DD4:  ADC #$4B                ;
 L8DD6:  BCC ++                  ;
 L8DD8:* LDA #$FF                ;If number of missiles exceeds 255, it stays at 255.
 L8DDA:* STA MaxMissiles         ;
+nop
 L8DDD:  RTS                     ;
 
 ValidatePassword:
@@ -2287,6 +2294,7 @@ L9150:  JMP CheckPassword       ;($8C5E)Check if password is correct.
 L9153:* LDX #$01                ;
 L9155:  STX PPUDataPending      ;Prepare to write the password screen data to PPU.
 L9157:  LDX PPUStrIndex         ;
+nop
 L915A:  LDA #$21                ;Upper byte of PPU string.
 L915C:  JSR WritePPUByte        ;($C36B)Write byte to PPU.
 L915F:  LDA #$A8                ;Lower byte of PPU string.
@@ -2532,9 +2540,13 @@ InitializeStats:
 L932B:  LDA #$00                ;
 L932D:  STA SamusStat00         ;
 L9330:  STA TankCount           ;
+nop
 L9333:  STA SamusGear           ;
+nop
 L9336:  STA MissileCount        ;
+nop
 L9339:  STA MaxMissiles         ;
+nop
 L933C:  STA KraidStatueStat     ;Set all of Samus' stats to 0 when starting new game.
 L933F:  STA RidlyStatueStat     ;
 L9342:  STA SamusAgeLo          ;
@@ -3183,33 +3195,39 @@ L9A4A:* STA UnqItmHist,Y        ;
 L9A4D:  INY                     ;Erase Unique item history.
 L9A4E:  BNE -                   ;
 L9A50:  LDA SamusGear           ;
+nop
 L9A53:  AND #$10                ;
 L9A55:  BEQ +                   ;If Samus does not have Maru Mari, branch.
 L9A57:  LDA #$01                ;Else load Maru Mari data into PasswordByte00.
 L9A59:  STA PasswordByte00      ;
 L9A5C:* LDA SamusGear           ;
+nop
 L9A5F:  AND #$01                ;
 L9A61:  BEQ +                   ;If Samus does not have bombs, branch.
 L9A63:  LDA PasswordByte00      ;Else load bomb data into PasswordByte00.
 L9A66:  ORA #$40                ;
 L9A68:  STA PasswordByte00      ;
 L9A6B:* LDA SamusGear           ;
+nop
 L9A6E:  AND #$20                ;
 L9A70:  BEQ +                   ;If Samus does not have varia suit, branch.
 L9A72:  LDA #$08                ;Else load varia suit data into PasswordByte01.
 L9A74:  STA PasswordByte01      ;
 L9A77:* LDA SamusGear           ;
+nop
 L9A7A:  AND #$02                ;
 L9A7C:  BEQ +                   ;If Samus does not have high jump, branch.
 L9A7E:  LDA #$01                ;Else load high jump data into PasswordByte03.
 L9A80:  STA PasswordByte03      ;
 L9A83:* LDA SamusGear           ;
+nop
 L9A86:  AND #$10                ;If Samus does not have Maru Mari, branch.
 L9A88:  BEQ +                   ;Else load screw attack data into PasswordByte03.
 L9A8A:  LDA PasswordByte03      ;A programmer error?  Should check for screw
 L9A8D:  ORA #$04                ;attack data.
 L9A8F:  STA PasswordByte03      ;
 L9A92:* LDA SamusGear           ;
+nop
 L9A95:  STA PasswordByte09      ;Store Samus gear data in PasswordByte09.
 L9A98:  LDA #$00                ;
 L9A9A:  LDY JustInBailey        ;
@@ -4513,6 +4531,7 @@ WritePalStringByte:
     DEC $05                 ;Decrement counter byte.
     BNE WritePalStringByte  ;If more bytes to write, branch to write another byte.
     STX PPUStrIndex         ;Store total length, in bytes, of PPUDataString.
+nop
     INY                     ;Move to next data byte(should be #$00).
 
 *   LDX PPUStrIndex         ;X now contains current length of PPU data string.

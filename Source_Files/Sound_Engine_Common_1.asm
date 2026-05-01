@@ -1,6 +1,6 @@
 ;SFXdata. The top four entries are used by the noise music player for drum beats.
 
-; SEARCH HxD - 10 01 18 00 01 38
+; SEARCH HxD - 00 10 01 18 00 01 38
 
 _SFXDatTbl:
     .byte $00               ;Base for drum beat music data.

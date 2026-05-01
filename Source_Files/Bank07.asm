@@ -2007,7 +2007,6 @@ LCDBF:
     jmp LCD6B
 
 CheckHealthStatus:
-LCDFA:
     lda SamusHit            ;
     and #$20            ;Has Samus been hit?
     beq +++             ;If not, branch to check if still blinking from recent hit.
@@ -2032,7 +2031,7 @@ SFX_SamusHit_Inline:
     sta DmgPushDir
 *   lda #$FD
     sta ObjVertSpeed
-    lda #$38            ;Samus is hit. Store Samus hit gravity.
+    lda #$38                ;Samus is hit. Store Samus hit gravity.
     sta SamusGravity        ;
     jsr IsSamusDead
     bne +
@@ -2095,13 +2094,13 @@ LCE83:  rts
 IsSamusDead:
 LCE84:  lda SamusObjAction      ;
 LCE87:  cmp #sa_Dead            ;
-LCE89:  beq Exit3           ;Samus is dead. Zero flag is set.
+LCE89:  beq Exit3               ;Samus is dead. Zero flag is set.
 LCE8B:  cmp #sa_Dead2           ;
 LCE8D:  beq Exit3               ;
 LCE8F:  cmp #$FF                ;Samus not dead. Clear zero flag.
 
 Exit3:  
-LCE91:  rts             ;Exit for routines above and below.
+LCE91:  rts                     ;Exit for routines above and below.
 
 ;----------------------------------------[ Subtract health ]-----------------------------------------
 
@@ -2180,7 +2179,7 @@ LCF0C:  LDA HealthHiChange      ;Amount to add to HealthHi.
 LCF0E:  JSR Base10Add           ;($C3DA)Perform base 10 addition.
 LCF11:  STA HealthHi            ;Save results.
 
-LCF14:  lax TankCount           ;
+LCF14:  ldx TankCount           ;
 LCF17:  lda Mul16Table, x
 LCF1A:  ORA #$0F            ;Set lower 4 bits.
 LCF1C:  CMP HealthHi            ;
@@ -3135,7 +3134,8 @@ LD5E4:  lda #$1D
 *   sta ObjAction,x
 Exit5:  rts
 
-LD5FC:  lda ObjectOnScreen,x
+LD5FC:
+    lda ObjectOnScreen,x
     lsr
     bcs Exit5
 *   lda #$00
@@ -3518,7 +3518,8 @@ LD8A3:
 *   lda #$01
     jmp AnimDrawObject
 
-LD8BF:  lda $030F,x
+LD8BF:
+    lda $030F,x
     tay
     cmp #$8F    ; Leads-To-Ending elevator?
     bne +
@@ -3641,7 +3642,8 @@ D99A:
     inc SamusOnElevator     ;Samus is standing on elevator.
 *   rts
 
-LD9BA:  lda $10
+LD9BA:
+    lda $10
     and #$02
     bne +
     ldy $11
@@ -3653,7 +3655,8 @@ LD9BA:  lda $10
     ora $10
     ora #$40
     sta SamusHit
-Exit8:  rts
+Exit8:
+    rts
 
 ; UpdateStatues
 ; =============
@@ -3854,7 +3857,7 @@ LDB82:  JSR DrawFrame           ;($DE4A)Display special item.
 
 LDB85:  PLA             ;Restore sprite page position byte.
 LDB86:  CMP SpritePagePos       ;Was power up item successfully drawn?
-LDB88:  BEQ Exit9           ;If not, branch to exit.
+LDB88:  BEQ Exit31           ;If not, branch to exit.
 LDB8A:  TAX             ;Store sprite page position in x.
 LDB8B:  LDY ItemIndex           ;Load index to proper power up data slot.
 LDB8D:  LDA PowerUpType,y       ;Reload power up type data.
@@ -3876,7 +3879,7 @@ LDBA6:  LDX #$00            ;Index to object 0(Samus).
 LDBA8:  LDY #$40            ;Index to object 1(power up).
 LDBAA:  JSR AreObjectsTouching      ;($DC7F)Determine if Samus is touching power up.
 LDBAD:  PLA             ;Restore power up type byte.
-LDBAE:  BCS Exit9           ;Carry clear=Samus touching power up. Carry set=not touching.
+LDBAE:  BCS Exit31           ;Carry clear=Samus touching power up. Carry set=not touching.
 
 LDBB0:  TAY             ;Store power-up type byte in Y.
 LDBB1:  JSR PowerUpMusic        ;($CBF9)Power up obtained! Play power up music.
@@ -3912,28 +3915,26 @@ LDB34:  BPL MakeBitMaskLoop
 
 LDBDD:  ORA SamusGear           ;
 LDBE0:  STA SamusGear           ;Update Samus gear with new beam weapon.
+
 LDBE3:* LDA #$FF            ;
 LDBE5:  STA PowerUpDelay        ;Initiate delay while power up music plays.
 LDBE8:  STA PowerUpType,x       ;Clear out item data from RAM.
 LDBEB:  LDY ItemRmMusicSts     ;Is Samus not in an item room?
-LDBED:  BEQ +               ;If not, branch.
+LDBED:  BEQ LDBF1               ;If not, branch.
 LDBEF:  LDY #$01            ;Restart item room music after special item music is done.
 LDBF1:* STY ItemRmMusicSts     ;
 LDBF3:  JMP SelectSamusPal      ;($CB73)Set Samus new palette.
-
-Exit9:
-LDBF6:  RTS             ;Exit for multiple routines above.
 
 MissileEnergyPickup:
 LDBF7:* BEQ EnergyTankPickup    ;Branch if item is an energy tank.
 LDBF9:  LDA #$05            ;
 LDBFB:  JSR AddToMaxMissiles        ;($DD97)Increase missile capacity by 5.
-LDBFE:  BNE ---             ;Branch always.
+LDBFE:  BNE LDBE3             ;Branch always.
 
 EnergyTankPickup:
 LDC00:* LDA TankCount           ;
 LDC03:  CMP #$06            ;Has Samus got 6 energy tanks?
-LDC05:  BEQ +               ;If so, she can't have any more.
+LDC05:  BEQ LDC0A               ;If so, she can't have any more.
 LDC07:  INC TankCount           ;Otherwise give her a new tank.
 LDC0A:* LDA TankCount           ;
 LDC0D:  asl
@@ -3944,7 +3945,7 @@ LDC10:  ORA #$09            ;
 LDC12:  STA HealthHi            ;Set new tank count. Upper health digit set to 9.
 LDC15:  LDA #$99            ;Max out low health digit.
 LDC17:  STA HealthLo            ;Health is now FULL!
-LDC1A:  BNE -----           ;Branch always.
+LDC1A:  BNE LDBE3           ;Branch always.
 
 ;It is possible for the current nametable in the PPU to not be the actual nametable the special item
 ;is on so this function checks for the proper location of the special item so the item ID can be
@@ -4157,7 +4158,12 @@ LDCFC:
     BMI LDD75
     JSR LF74B
     STA $00
-    JSR $80B0
+
+;inlined $80B0
+    LDY EnDataIndex,X
+    LDA $977B,Y
+    ASL              
+
     AND #$20
     STA EnDataIndex,x
     LDA #$05
@@ -4190,7 +4196,8 @@ LDCFC:
     LSR $00
     BCS --
 
-LDD5B:  ldx PageIndex
+LDD5B:
+    ldx PageIndex
     lda InArea
     cmp #$13
     beq ++
@@ -4205,7 +4212,8 @@ LDD5B:  ldx PageIndex
     sty MaxEnergyPickup
     bne -----
 
-LDD75:  jsr PowerUpMusic
+LDD75:
+    jsr PowerUpMusic
     lda InArea
     and #$0F
     sta MiniBossKillDly
@@ -4645,7 +4653,8 @@ LE00A:  clc             ;If a portion of the object is outside the sceen
 LE00B:  adc $10             ;boundaries, treat object as if the whole thing is
 LE00D:  cmp #$F0            ;not visible.
 LE00F:  bcc +++             ;
-LE011:  clc             ;Causes next statement to branch always.
+        dex
+        rts
 LE012:* bcc +               ;
 LE014:  lda $09             ;If object is on same name table as the current one in
 LE016:  cmp $10             ;the PPU, check if part of object is out of screen 
@@ -4655,15 +4664,16 @@ LE01B:* rts             ;
 
 HorzScrollCheck:
 LE01C:  lda $06             ;
-LE01E:  eor PPUCNT0ZP           ;Check if object is on different name table as current
+LE01E:  eor PPUCNT0ZP       ;Check if object is on different name table as current
 LE020:  and #$01            ;name table active in PPU.
 LE022:  beq +               ;If not, branch.
 LE024:  bcs ++              ;If carry is still set, sprite is not in screen boundaries.
 LE026:  lda $09             ;
-LE028:  clc             ;If a portion of the object is outside the sceen
+;LE028:  clc                ;If a portion of the object is outside the sceen
 LE029:  adc $0E             ;boundaries, treat object as if the whole thing is
 LE02B:  bcc +++             ;not visible.
-LE02D:  clc             ;Causes next statement to branch always.
+        dex
+        rts
 LE02E:* bcc +               ;
 LE030:  lda $09             ;If object is on same name table as the current one in
 LE032:  cmp $0E             ;the PPU, check if part of object is out of screen 
@@ -4675,29 +4685,37 @@ LE037:* rts             ;
 
 ;move to next frame of enemy's animation. Basically the same as UpdateObjAnim, only for enemies.
 
-UpdateEnemyAnim:
-LE094:  ldx PageIndex           ;Load index to desired enemy.
-LE096:  ldy EnStatus,x          ;
-LE099:  cpy #$05            ;Is enemy in the process of dying?
-LE09B:  beq +++             ;If so, branch to exit.
-LE09D:  ldy EnAnimDelay,x       ;
-LE0A0:  beq +               ;Check if current anumation frame is ready to be updated.
-LE0A2:  dec EnAnimDelay,x       ;Not ready to update. decrement delay timer and
-LE0A5:  bne +++             ;branch to exit.
-LE0A7:* sta EnAnimDelay,x           ;Save new animation delay value.
-LE0AA:  ldy EnAnimIndex,x           ;Load enemy animation index.
-LE0AD:* lda EnemyAnimIndexTbl,y     ;Get animation data.
-LE0AF:  cmp #$FF                    ;End of animation?
-LE0B1:  beq ++                      ;If so, branch to reset animation.
-LE0B3:  sta EnAnimFrame,x       ;Store current animation frame data.
-LE0B6:  iny             ;Increment to next animation data index.
-LE0B7:  tya             ;
-LE0B8:  sta EnAnimIndex,x       ;Save new animation index.
-LE0BB:* rts             ;
+.scope
+    UpdateEnemyAnim:
+        LE094: ldx PageIndex               ;Load index to desired enemy.
+        LE096: ldy EnStatus,x              ;
+        LE099: cpy #$05                    ;Is enemy in the process of dying?
+        LE09B: beq UpdateEnemyAnimExit     ;If so, branch to exit.
+        LE09D: ldy EnAnimDelay,x           ;
+        LE0A0: beq _saveAnimDelay          ;Check if current anumation frame is ready to be updated.
+        LE0A2: dec EnAnimDelay,x           ;Not ready to update. decrement delay timer and
+        LE0A5: bne UpdateEnemyAnimExit     ;branch to exit.
 
-LE0BC:* ldy EnResetAnimIndex,x      ;reset animation index.
-LE0BF:  bcs ---             ;Branch always.
+    _saveAnimDelay:
+        LE0A7: sta EnAnimDelay,x           ;Save new animation delay value.
+        LE0AA: ldy EnAnimIndex,x           ;Load enemy animation index.
 
+    _getNextAnimData:
+        LE0AD: lda EnemyAnimIndexTbl,y     ;Get animation data.
+        LE0AF: cmp #$FF                    ;End of animation?
+        LE0B1: beq _resetAnimation         ;If so, branch to reset animation.
+        LE0B3: sta EnAnimFrame,x           ;Store current animation frame data.
+        LE0B6: iny                         ;Increment to next animation data index.
+        LE0B7: tya                         ;
+        LE0B8: sta EnAnimIndex,x           ;Save new animation index.
+
+    UpdateEnemyAnimExit:
+        LE0BB: rts                          ;
+
+    _resetAnimation:
+        LE0BC: ldy EnResetAnimIndex,x       ;reset animation index.
+        LE0BF: bcs _getNextAnimData         ;Branch always.
+.scend
 ;---------------------------------------[ Display status bar ]---------------------------------------
 
 ;Displays Samus' status bar components.
@@ -6003,7 +6021,8 @@ IsWalkableTile:
     Exit16:
     rts
 
-LE81E:  ldx UpdtngPrjctl
+LE81E:
+    ldx UpdtngPrjctl
     beq ClcExit
     ldx #$06
 *   lda $05
@@ -6451,93 +6470,19 @@ SelectRoomRAM:
 ;------------------------[ Initialize room RAM and associated attribute table ]-----------------------
 
 InitTables:
-ldy #$C0            ; steps from #$C0 to #$FF so about #$39
-ldx RoomPal         ;Index into table below (Lowest 2 bits).
-cmp #$60
-bne FillRoomRAM_64
-
-FillRoomRAM_60:
-    .scope
-        lda #$FF
-        _loop:              ; Fill $6000 - $63C0 with #$FF
-            sta $5F40,y     ;
-            sta $5F80,y     ;
-            sta $5FC0,y     ;
-            sta $6000,y     ;
-            sta $6040,y     ;
-            sta $6080,y     ;
-            sta $60C0,y     ;
-            sta $6100,y     ;
-            sta $6140,y     ;
-            sta $6180,y     ;
-            sta $61C0,y     ;
-            sta $6200,y     ;
-            sta $6240,y     ;
-            sta $6280,y     ;
-            sta $62C0,y     ;
-            iny
-        bne _loop
-        lda ATDataTable,x   ;Load attribute table data from table below.
-        ldy #$F8            ;Low byte of start of all attribute tables.
-        _loop2:
-            sta $62C8,y         ;$67C0 - $67C7
-            sta $62D0,y         ;$67C8 - $67CF
-            sta $62D8,y         ;$67D0 - $67D7
-            sta $62E0,y         ;$67D8 - $67EF
-            sta $62E8,y         ;$67E0 - $67E7
-            sta $62F0,y         ;$67E8 - $67FF
-            sta $62F8,y         ;$67F0 - $67F7
-            sta $6300,y         ;$67F8 - $67FF
-            iny
-        bne _loop2
-        jmp DrawRoom
-    .scend
-
-FillRoomRAM_64:
-    lda #$FF
-    .scope
-        _loop:              ; Fill $6400 - $67C0 with #$FF
-            sta $6340,y
-            sta $6380,y
-            sta $63C0,y
-            sta $6400,y
-            sta $6440,y
-            sta $6480,y
-            sta $64C0,y
-            sta $6500,y
-            sta $6540,y
-            sta $6580,y
-            sta $65C0,y
-            sta $6600,y
-            sta $6640,y
-            sta $6680,y
-            sta $66C0,y
-            iny
-        bne _loop
-        lda ATDataTable,x   ;Load attribute table data from table below.
-        ldy #$F8            ;Low byte of start of all attribute tables.
-        _loop2:
-            sta $66C8,y         ;$67C0 - $67C7
-            sta $66D0,y         ;$67C8 - $67CF
-            sta $66D8,y         ;$67D0 - $67D7
-            sta $66E0,y         ;$67D8 - $67EF
-            sta $66E8,y         ;$67E0 - $67E7
-            sta $66F0,y         ;$67E8 - $67FF
-            sta $66F8,y         ;$67F0 - $67F7
-            sta $6700,y         ;$67F8 - $67FF
-            iny
-        bne _loop2
-        beq DrawRoom            ;($EAAA)Load room contents into room RAM.
-     .scend
+    ldy #$06
+    jsr ROMSwitch               ; Switch to Bank06
+    jsr DoRoomRamClear          ; Call this routine which exists only in Bank06
+    ldy CurrentBank             
+    jsr ROMSwitch               ; Switch back to whatever bank we were on
+    ldy #$00
+    beq DrawRoom                ; Always branch
 
 ;---------------------------------------[ Draw room object ]-----------------------------------------
 
 DrawObject:
-LEA6C:  sta $0E                 ;($C2BF)/16. Lower nibble contains object y position.   
-        lsr
-        lsr
-        lsr
-        lsr
+LEA6C:  sta $0E                 ;($C2BF)/16. Lower nibble contains object y position.
+        lda Div16Table, x
 LEA70:  
     bne UpdateCartPointerYPosition      ;Skip y position calculation loop as y position=0
                                         ;does not need to be calculated.
@@ -6555,19 +6500,17 @@ UpdateCartPointerYPosition:
     clc
     adc CartRAMPtrUB
     sta CartRAMWorkPtrUB
-
     lda CartRamMulOffsetLoTable,x
     sta CartRAMWorkPtrLB
 
 UpdateCartPointerXPosition:
-LEA80:  lda ScreenXPos          ;Reload object position byte.
+LEA80:  lda $0E                 ;Reload object position byte.
 LEA82:  and #$0F                ;Remove y position upper nibble.
 LEA84:  asl                     ;Each x unit is 2 tiles.
 LEA85:  adc CartRAMWorkPtrLB    ;
 LEA87:  sta CartRAMWorkPtrLB    ;Add x position to room RAM work pointer.
 LEA89:  bcc SetupStructPtr      ;If carry occurred, increment high byte of room RAM work
 LEA8B:  inc CartRAMWorkPtrUB    ;pointer, else branch to draw object.
-
 ;CartRAMWorkPtr now points to the object's starting location (upper left corner)
 ;on the room RAM which will eventually be loaded into a name table.
 
@@ -6582,11 +6525,8 @@ LEA99:  lda StructPointerTable_Lo ,x    ; Low byte of 16-bit structure ptr.
 LEA9B:  sta StructPtrLB                 ;
 LEA9E:  lda StructPointerTable_Hi, x    ; High byte of 16-bit structure ptr.
 LEAA0:  sta StructPtrUB                 ;
-
-; replacing a jsr
-LEAA2:  
-    ldy #$00
-    jmp DrawStruct          ;($EF8C)Draw one structure.
+        ldy #$00
+        jmp DrawStruct          ;($EF8C)Draw one structure.
 
 AddToRoomPtr:
     lda #$03            ;Move to next set of structure data.
@@ -6600,9 +6540,10 @@ AddToRoomPtr:
 
 ;The following function draws a room in the room RAM which is eventually loaded into a name table.
 
+; Start if the draw room
 DrawRoom:
                             ;Zero index. Y = 0 here
-LEAAC:  lda (RoomPtr),y     ;Load byte of room data. 
+LEAAC:  lax (RoomPtr),y     ;Load byte of room data. 
 LEAAE:  cmp #$FF            ;Is it #$FF(end-of-room)?
 LEAB0:  beq EndOfRoom       ;If so, branch to exit.
 LEAB6:  cmp #$FD            ;is A=#$FD(end-of-objects)?
@@ -6612,6 +6553,7 @@ LEACC:  sta $00             ;Store room pointer in $0000.
 LEACE:  lda RoomPtr+1       ;
 LEAD0:  sta $01             ;
         inc $00
+; End of Draw Room
         jmp AfterDrawRoom
 
 ;----------------------------------------------------------------------------------------------------
@@ -6624,9 +6566,8 @@ EnemyLoop:
     sta $00             ; A is added to the 16 bit address stored in $0000.
     bcc LEAD7           ;
     inc $01             ;
-
-; TODO: See if you can figure out how to make y always zero
-LEAD7:  ldy #$00
+LEAD7:
+    ldy #$00
 
 AfterDrawRoom:
     lda ($00),y             ;Get first byte of enemy/door data.
@@ -6799,7 +6740,8 @@ LEB8B:  RTS                     ;
     jsr LEB92
 *   jmp EnemyLoop    ; do next room object
 
-LEB92:  iny
+LEB92:
+    iny
     lda ($00),y     ; door info byte
     pha
 ; TODO: MUL16
@@ -6869,7 +6811,8 @@ LEB92:  iny
     jsr LEC09
     bne ----       ; branch always
 
-LEC09:  lda ElevatorStatus
+LEC09:
+    lda ElevatorStatus
     bne +      ; exit if elevator already present
     iny
     lda ($00),y
@@ -7268,7 +7211,8 @@ LEE63:
     sta $6BE4
 *   jmp ChooseHandlerRoutine    ;($EDD6)Exit handler routines.
 
-LEE86:  lda $B0,x
+LEE86:
+    lda $B0,x
     bne +
     txa
     adc $8A
@@ -7284,11 +7228,13 @@ LEE86:  lda $B0,x
 *   rts
 
 ElevatorHandler:
-LEEA1:  jsr LEC09
+LEEA1:
+    jsr LEC09
     bne --              ;Branch always.
 
 CannonHandler:
-LEEA6:  jsr $95B1
+LEEA6:  
+    jsr $95B1
     lda #$02
 *   jmp ChooseHandlerRoutine    ;($EDD6)Exit handler routines.
 
@@ -7304,7 +7250,8 @@ LEEAE:  jsr $95B4
     sta MthrBrainStatus
     lda #$00
     sta MotherBrainHits
-LEEC6:  lda #$01
+LEEC6:  
+    lda #$01
     bne -
 
 ZeebetiteHandler:
@@ -7335,7 +7282,8 @@ LEEF4:
     jmp ChooseHandlerRoutine    ;($EDD6)Exit handler routines.
 
 PaletteHandler:
-LEEFA:  lda ScrollDir
+LEEFA:
+    lda ScrollDir
     sta $91
     bne LEEC6
 
@@ -7356,33 +7304,44 @@ LEF09:  clc             ;
 *   rts             ;
 
 ;----------------------------------[ Draw structure routines ]----------------------------------------
+.scope
+
+.alias _StructIndex         $10
+.alias _MacrosLeftInRow     $0E
+.alias _CloseToAttrTable    $30
 
 DoAnotherMacro:
-LEF72:  dec $0E                     ;Have all macros been drawn on this row?
+LEF72:  dec _MacrosLeftInRow        ;Have all macros been drawn on this row?
 LEF74:  bne SetupMacroRam           ;If not, branch to draw another macro.
-LEF76:  lda ScreenYPos              ;Load struct index.
 
-AdvanceRow:
-LEF78:  sec                         ;Since carry bit is set,
-LEF79:  adc StructPtrLB             ;addition will be one more than expected.
-LEF7B:  sta StructPtrLB             ;Update the struct pointer.
-LEF7D:  bcc UpdateCartRamPtr
+    LEF76:  lda _StructIndex            ;Load struct index.
 
-IncStructPtrUB:
-LEF7F:  inc StructPtrUB         ;Update high byte of struct pointer if carry occured.
-LEF83:  clc                     ;
+    AdvanceRow:
+    LEF78:  sec                         ;Since carry bit is set,
+    LEF79:  adc StructPtrLB             ;addition will be one more than expected.
+    LEF7B:  sta StructPtrLB             ;Update the struct pointer.
+    LEF7D:  bcc UpdateCartRamPtr
 
-UpdateCartRamPtr:
-LEF81:  lda CartRAMWorkPtrLB        ;
-LEF84:  adc #$40                    ;Advance to next macro row in room RAM(two tile rows).
-LEF86:  sta CartRAMWorkPtrLB        ;
-LEF88:  bcc DrawStruct              ;Begin drawing next structure row.
+    IncStructPtrUB:
+    LEF7F:  inc StructPtrUB         ;Update high byte of struct pointer if carry occured.
+    LEF83:  clc                     ;
 
-IncCartRAMWorkPtrUB:
+    UpdateCartRamPtr:
+    LEF81:  lda CartRAMWorkPtrLB        ;
+    LEF84:  adc #$40                    ;Advance to next macro row in room RAM(two tile rows).
+    LEF86:  sta CartRAMWorkPtrLB        ;
+    LEF88:  bcc DrawStruct              ;Begin drawing next structure row.
+
+    IncCartRAMWorkPtrUB:
         inc CartRAMWorkPtrUB        ;Increment high byte of pointer if necessary.
 
-DrawStruct:                     ;Reset struct index.
-LEF8E:  sty ScreenYPos          ;
+; Entry point from outside
+DrawStruct:
+        ldx CartRAMWorkPtrUB
+        stx $27
+        lda Is_63_or_67_Table-$60, x    ; just caching
+        sta _CloseToAttrTable
+LEF8E:  sty _StructIndex        ;Reset struct index. y == 0 here
 LEF90:  lax (StructPtr), y      ;Load data byte.
 LEF94:  bmi DrawStructExit      ;If so, branch to exit.
 
@@ -7390,14 +7349,12 @@ LEF94:  bmi DrawStructExit      ;If so, branch to exit.
 ;A = number of 2x2 tile macros to draw horizontally.
 
 DrawStructRow:
-LEF19:  sta $0E      ;Store horizontal macro count.
+LEF19:  sta _MacrosLeftInRow      ;Store horizontal macro count.
 LEF1D:  ;($C2BF)/16. Upper nibble contains x coord offset(if any).
-        asr #$F0
-        lsr
-        lsr
-        lsr
+        lda Div16Table, x
+        clc
 LEF21:  adc CartRAMWorkPtrLB      ;Add x coord offset to CartRAMWorkPtr and save in $00.
-LEF23:  sta $00                 ;
+LEF23:  sta $26                     ;
 
 SetupMacroRam:
 ;High byte of current location in room RAM.
@@ -7406,59 +7363,57 @@ SetupMacroRam:
 ;been reached.  If so, branch to check lower byte as well.
 ;If not at end of room RAM, branch to draw macro.
 
-  lda CartRAMWorkPtrUB
-  sta $01
-  and #$03
-  cmp #$03
-  bne DrawMacro
+  lda $30
+  beq DrawMacro
 
 CheckForAttrTable:
-LEF38:  lda $00             ;Low byte of current nametable address.
+LEF38:  lda $26             ;Low byte of current nametable address.
 LEF3A:  cmp #$A0            ;Reached attrib table?
 LEF3C:  bcs DrawStructExit  ;If not, branch to draw the macro.
 
 DrawMacro:
-LEF3F:  inc ScreenYPos             ;Increase struct data index.
-LEF41:  ldy ScreenYPos             ;Load struct data index into Y.
+LEF3F:  inc _StructIndex        ;Increase struct data index.
+LEF41:  ldy _StructIndex        ;Load struct data index into Y.
 LEF43:  lax (StructPtr),y       ;Get macro number. StructPtr = $35
 ;The following table is used to draw macros in room RAM. Each macro is 2 x 2 tiles.
 ;The following table contains the offsets required to place the tiles in each macro.
 
     LDA MacroUpperRight, x
     LDY #$20
-    STA ($00),Y
+    STA ($26),Y
 
     LDA MacroUpperLeft, x
     iny
-    STA ($00),Y
+    STA ($26),Y
 
     LDA MacroLowerLeft, x
     LDY #$01
-    STA ($00),Y
+    STA ($26),Y
 
     LDA MacroLowerRight, x
     DEY                             ; Doing it like this so Y is 0 when we get out of here
-    STA ($00),Y
+    STA ($26),Y
 
 ; Update attribute if changed
         lda ObjectPal
         eor RoomPal
 LEFA2:  bne UpdateAttrib            ;If so, no need to modify the attribute table, exit.
 AfterUpdateAttr:
-    LDA $00
+    LDA $26
     ADC #$02
-    STA $00
+    STA $26
 LEF63:  and #$1F                    ;Still room left in current row?
 LEF65:  bne DoAnotherMacro          ;If yes, branch to do another macro.
 
 ;End structure row early to prevent it from wrapping on to the next row..
-LEF67:  lda ScreenYPos             ;Struct index.
-LEF6A:  adc ScreenXPos  ;Add number of macros remaining in current row.
-LEF6D:  sbc #$00            ;-1 from macros remaining in current row.
-LEF6F:  jmp AdvanceRow          ;($EF78)Move to next row of structure.
+LEF67:  lda _StructIndex        ;Struct index.
+LEF6A:  adc _MacrosLeftInRow    ;Add number of macros remaining in current row.
+LEF6D:  sbc #$00                ;-1 from macros remaining in current row.
+LEF6F:  bne AdvanceRow          ;($EF78)Move to next row of structure.
 
 DrawStructExit:
     jmp AddToRoomPtr
+
 ;---------------------------------[ Update attribute table bits ]------------------------------------
 
 ;The following routine updates attribute bits for one 2x2 tile section on the screen.
@@ -7467,11 +7422,11 @@ DrawStructExit:
 UpdateAttrib:
 ;Figure out cart RAM address of the byte containing the relevant bits.
 
-lda $01          
+lda $27          
 and #$03         
 tax                   
 
-lda $00          
+lda $26          
 lsr              
 lsr              
 ora CartRamMulOffsetLoTable,x   ; $00, $40, $80, $C0
@@ -7486,7 +7441,7 @@ LEFC0:  sta $02             ;
 
 ldx #$00    ; X = 0
 lda #$02    ; A = 2, used as BIT mask for bit1
-bit $00     ; V = bit6 of $00, Z = (bit1 of $00 == 0)?
+bit $26     ; V = bit6 of $00, Z = (bit1 of $00 == 0)?
 beq +       ; if bit1 = 0, skip first increment
 inx         ; bit1 = 1 → X += 1
 *   bvc +       ; if bit6 = 0, skip high-bit contribution
@@ -7502,7 +7457,7 @@ inx
 ;Where each box represents a macro(2x2 tiles).
 
 ;The following code clears the old attribute table bits and sets the new ones.
-    LEFD5:* lda $01             ;Load high byte of work pointer in room RAM.
+    LEFD5:* lda $27             ;Load high byte of work pointer in room RAM.
     LEFD7:  anc #$04            ;
     LEFD9:  ora #$63            ;Choose proper attribute table associated with the
     LEFDB:  sta $03             ;current room RAM.
@@ -7520,6 +7475,8 @@ inx
     jmp AfterUpdateAttr
 
 ;----------------------------------------------------------------------------------------------------
+
+.scend
 
 ; Collision detection
 ; ===============
@@ -7566,7 +7523,9 @@ LF034:
         cmp #wa_Missile
         bne ++
     *   jsr LF149
-        jsr LF32A
+        bcs +
+        jsr LF279
+        jsr LF2BF
     *   lda IdentityTable+16, y
         tay
         bne ---
@@ -7915,11 +7874,6 @@ Exit22:
 LF329: 
     rts             ;Return for routine above and below.
 
-LF32A:  
-    bcs Exit22
-    jsr LF279
-    jmp LF2BF
-
 LF332:  
     lda $10
     eor #$03
@@ -7938,9 +7892,13 @@ LF338:
 ; UpdateEnemies
 ; =============
 
+; SpareMemB7 is used as a cache to store PageIndex right shifted 4 times
+
 UpdateEnemies:
 LF345:  
     ldx #$50            ;Load x with #$50
+    lda #$05
+    sta SpareMemB7 
     jsr DoOneEnemy      ;($F352)
     ldx #$40            ;Load x with #$50
     jsr DoOneEnemy      ;($F352)
@@ -7960,7 +7918,7 @@ LF352:
     cpy #$03
     bcs ChooseEnemySubroutine_SkipPageIndexLoad
 ; inlined what used to be jsr LF37F
-    lda $0405,x
+    lda EnAttr_05,x
     and #$02
     bne ChooseEnemySubroutine_SkipPageIndexLoad
     lda EnYRoomPos,x     ; Y coord
@@ -7974,33 +7932,37 @@ LF352:
     lda EnRadX,x
     sta $09
     jsr IsObjectVisible     ;Determine if object is within the screen boundaries.
-    txa
     bne ChooseEnemySubroutine
-EXIT24:    
+EXIT24:
+    dec SpareMemB7
     rts
 
 ChooseEnemySubroutine:
 *   ldx PageIndex
 ChooseEnemySubroutine_SkipPageIndexLoad:
-*   lda $0405,x
+*   lda EnAttr_05,x
     asl
     rol
     tay
-    txa
-    lsr
-    lsr
-    lsr
-    lsr
+    lda SpareMemB7
     eor FrameCount
     lsr
     tya
     ror
     ror
-    sta $0405,x
+    sta EnAttr_05,x
 
     ldy EnStatus,x
     sty $81
     beq EXIT24
+    dec SpareMemB7
+    cpy #$07
+    bcc DoEnemySubroutine
+KillObject_Duplicate:
+    lda #$00
+    sta EnStatus,x
+    rts
+DoEnemySubroutine:
     lda DoOneEnemyTableHiByte - 1, y    ; -1 is because we already handled the 0 case
     sta CodePtr + 1                     ; Don't need to waste 2 bytes for the exit routine
     lda DoOneEnemyTableLoByte - 1, y
@@ -8009,13 +7971,13 @@ ChooseEnemySubroutine_SkipPageIndexLoad:
 
 ; TODO; $F40D seems like it just jumps to $95E5, look into that
 DoOneEnemyTableHiByte:
-    .byte >LF3BE, >LF3E6, >LF40D, >LF43E, >LF483, >LF4EE, >KillObject
+    .byte >LF3BE, >LF3E6, >LF40D, >LF43E, >LF483, >LF4EE
 
 DoOneEnemyTableLoByte:
-    .byte <LF3BE, <LF3E6, <LF40D, <LF43E, <LF483, <LF4EE, <KillObject
+    .byte <LF3BE, <LF3E6, <LF40D, <LF43E, <LF483, <LF4EE
 
 LF3BE:
-    lda $0405,x
+    lda EnAttr_05,x
     asl
     bmi LF40D
     lda #$00
@@ -8025,7 +7987,12 @@ LF3BE:
     jsr LF6B9
     jsr LF75B
     jsr LF682
-    jsr $80B0
+
+;inlined $80B0
+    LDY EnDataIndex,X
+    LDA $977B,Y
+    ASL              
+
     asl
     asl
     asl
@@ -8190,7 +8157,12 @@ LF4EE:
     and #$3F
     sta EnStatus,x
     pha
-    jsr $80B0
+
+;inlined $80B0
+    LDY EnDataIndex,X
+    LDA $977B,Y
+    ASL              
+
     and #$20
     beq +
     pla
@@ -8207,7 +8179,8 @@ LF518:
     sta EnStatus,x
     rts
 
-LF51E:  lda ScrollDir
+LF51E:
+    lda ScrollDir
     ldx PageIndex
     cmp #$02
     bcc ++
@@ -8236,7 +8209,12 @@ LF536:  lda EnSpecialAttribs,x
     jsr LF515
     lda #$40
     sta $040D,x
-    jsr $80B0
+
+;inlined $80B0
+    LDY EnDataIndex,X
+    LDA $977B,Y
+    ASL              
+
     and #$20
     beq +
     lda #$05
@@ -8244,7 +8222,11 @@ LF536:  lda EnSpecialAttribs,x
     jmp $95A8
 *   rts
 
-*   jsr $80B0
+;inlined $80B0
+*   LDY EnDataIndex,X
+    LDA $977B,Y
+    ASL              
+
     and #$20
     bne ---
     jsr SFXMetal
@@ -8282,7 +8264,12 @@ SFX_BigEnemyHit_Inline:
     sta TriangleSFXFlag
 
 *   ldx PageIndex
-    jsr $80B0
+
+;inlined $80B0
+    LDY EnDataIndex,X
+    LDA $977B,Y
+    ASL              
+
     and #$20
     beq +
     lda $040E,x
@@ -8296,7 +8283,12 @@ SFX_BigEnemyHit_Inline:
     sta $040C,x
     asl
     bmi +
-    jsr $80B0
+
+;inlined $80B0
+*   LDY EnDataIndex,X
+    LDA $977B,Y
+    ASL              
+
     and #$20
     bne +
     ldy $040E,x
@@ -8397,7 +8389,8 @@ LF699:  jsr LF844
     bne -
 Exit12: rts
 
-LF6B9:  lda #$00
+LF6B9:
+    lda #$00
     sta $82
     jsr LF74B
     tay
@@ -8573,7 +8566,12 @@ SFXEnemyRegen_Inline:
     iny
     lda ($00),y
     sta $0408,x
-    jsr $80B0
+
+;inlined $80B0
+*   LDY EnDataIndex,X
+    LDA $977B,Y
+    ASL              
+
     bpl ++
     lda #$00
     sta EnCounter,x
@@ -9009,7 +9007,12 @@ LFAFF:
     jmp KillObject          ;($FA18)Free enemy data slot.
 
 LFB7B:
-    jsr $80B0
+
+;inlined $80B0
+*   LDY EnDataIndex,X
+    LDA $977B,Y
+    ASL              
+
     ror $0405,x
     lda EnemyInitDelayTbl,y     ;($96BB)Load initial delay for enemy movement.
     sta EnDelay,x       ;
@@ -10081,6 +10084,28 @@ IdentityTable:
     .byte $e0, $e1, $e2, $e3, $e4, $e5, $e6, $e7, $e8, $e9, $ea, $eb, $ec, $ed, $ee, $ef
     .byte $f0, $f1, $f2, $f3, $f4, $f5, $f6, $f7, $f8, $f9, $fa, $fb, $fc, $fd, $fe, $ff
     .byte $00, $01, $02, $03, $04, $05, $06, $07, $08, $09, $0a, $0b, $0c, $0d, $0e, $0f    ; Overflow a bit so catch +16 past $ff
+
+Div16Table:
+    .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+    .byte $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01
+    .byte $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02
+    .byte $03, $03, $03, $03, $03, $03, $03, $03, $03, $03, $03, $03, $03, $03, $03, $03
+    .byte $04, $04, $04, $04, $04, $04, $04, $04, $04, $04, $04, $04, $04, $04, $04, $04
+    .byte $05, $05, $05, $05, $05, $05, $05, $05, $05, $05, $05, $05, $05, $05, $05, $05
+    .byte $06, $06, $06, $06, $06, $06, $06, $06, $06, $06, $06, $06, $06, $06, $06, $06
+    .byte $07, $07, $07, $07, $07, $07, $07, $07, $07, $07, $07, $07, $07, $07, $07, $07
+    .byte $08, $08, $08, $08, $08, $08, $08, $08, $08, $08, $08, $08, $08, $08, $08, $08
+    .byte $09, $09, $09, $09, $09, $09, $09, $09, $09, $09, $09, $09, $09, $09, $09, $09
+    .byte $0A, $0A, $0A, $0A, $0A, $0A, $0A, $0A, $0A, $0A, $0A, $0A, $0A, $0A, $0A, $0A
+    .byte $0B, $0B, $0B, $0B, $0B, $0B, $0B, $0B, $0B, $0B, $0B, $0B, $0B, $0B, $0B, $0B
+    .byte $0C, $0C, $0C, $0C, $0C, $0C, $0C, $0C, $0C, $0C, $0C, $0C, $0C, $0C, $0C, $0C
+    .byte $0D, $0D, $0D, $0D, $0D, $0D, $0D, $0D, $0D, $0D, $0D, $0D, $0D, $0D, $0D, $0D
+    .byte $0E, $0E, $0E, $0E, $0E, $0E, $0E, $0E, $0E, $0E, $0E, $0E, $0E, $0E, $0E, $0E
+    .byte $0F, $0F, $0F, $0F, $0F, $0F, $0F, $0F, $0F, $0F, $0F, $0F, $0F, $0F, $0F, $0F
+
+; Dangerous table should be index at -$60
+Is_63_or_67_Table:
+    .byte $00, $00, $00, $01, $00, $00, $00, $01, $00
 
 ;-----------------------------------------------[ RESET ]--------------------------------------------
 

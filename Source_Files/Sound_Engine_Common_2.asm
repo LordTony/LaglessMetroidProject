@@ -1,5 +1,7 @@
 ;----------------------------------------------------------------------------------------------------
 
+; Search HxD - C8 B0 38 3A
+
 _ItmRmTriData:
   .byte $C8               ;
   .byte $B0               ;3/32 seconds   +
@@ -329,7 +331,7 @@ _InitializeMusic_Bank00:
   LDA CurrentSFXFlags     ;Load current SFX flags and store CurrentMusic address.
   nop                     ;TODO - Get rid of this
   STA CurrentMusic        ;
-
+  nop
   LDA MusicInitIndex      ;Get the index for the music data to start.
   TAY                     ;
   LDA _InitMusicIndexTbl,Y ;($BBFA)Find index for music in InitMusicInitIndexTbl.
@@ -358,4 +360,5 @@ _InitializeMusic_Bank00:
   STA NoiseMusicIdxIdx    ;
   RTS                     ;
 
+; Search HxD - 06 8D 3B 06 60
 ;----------------------------------------------------------------------------------------------------

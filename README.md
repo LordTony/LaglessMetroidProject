@@ -21,7 +21,7 @@ The idea here is to attempt to take the Metroid lag as low as possible without a
 The baseline benchmark is Samus standing still in the opening room with 2 of the spikey bois both alive and crawing on the walls.
 
   * Metroid finishes all work for the benchmark frames in **137 to 149** scanlines
-  * Lagless Metroid finishes in **71 to 97** scanlines
+  * Lagless Metroid finishes in **71 to 92** scanlines
   * Lagless Metroid finishes in **%52 to %62** of the scanlines it takes Metroid
   * The limit might be something like **68** scanlines, so keep pushing
 
@@ -115,9 +115,10 @@ The "Visualize Hotspots" lua script can be run and tweaked to find places in the
 
 ## Bugs
 * Running into color palette glitches from time to time
+  * When running from a zone with one palette into a zone with another, I think it just doesn't set the palette
 * Starting with a Ridley Password and going up the elevator gets a bugged map
 * Tourian (Metroid / Mother Brain / Bank03.asm) might be broken
   * Shooting metroids with missiles plays the wrong sounds (haven't tested this in a while)
-* Enemies that fly off the screen tend to stay there and blink if you run behind them (this might be a behavior in the base game. Will need to check)
 * Seeing single 8x8 random sprites pop in from time to time
   * It looks like this is only when the lag frames happen. When the room loads and it tries to place sprites as well.
+  * Seeing sprits wrap around the screen quite often.

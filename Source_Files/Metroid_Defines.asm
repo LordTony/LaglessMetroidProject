@@ -61,18 +61,20 @@
 .alias CurrentBank      $23     ;0 thru 7. current memory page in lower memory block.
 .alias SwitchPending    $24     ;Switch memory page. Page #=SwitchPending-1.
 .alias MMCReg0Cntrl     $25     ;Stores bits to be loaded into MMC1 Register 0.
+;unused                 $26
+;unused                 $27
 .alias SwitchUprBits    $28     ;Used to store bits 3 and 4 for MMC1 register 3.  Bits
                                 ;3 and 4 should always be 0 under normal conditions.
-.alias Timer2Delay       $29     ;Count down from 9 to 0. Decremented every frame.
+.alias Timer2Delay      $29     ;Count down from 9 to 0. Decremented every frame.
 .alias Timer1           $2A     ;Decremented every frame after set.
 .alias Timer2           $2B     ;Decremented every frame after set.
-; unused                $2C     ;Used to be timer3 
+.alias SamusGear        $2C     ;Stores power-up items Samus has. Used to be timer3 
 .alias FrameCount       $2D     ;Increments every frame(overflows every 256 frames).
 .alias RandomNumber1    $2E     ;Random numbers used     
 .alias RandomNumber2    $2F     ;throughout the game.
-.alias ObjectPalTimes4  $30     ;never accessed / unused.
+;unused                 $30
 .alias GamePaused       $31     ;#$00=Game running, #$01=Game paused.
-
+;unused                 $32
 .alias RoomPtr          $33     ;Room pointer.
 .alias RoomPtrLB        $33     ;Room pointer, lower byte.
 .alias RoomPtrUB        $34     ;Room pointer, upper byte.
@@ -103,9 +105,11 @@
 .alias TriangleSFXFlag  $3D     ;Initialization flags for triangle SFX
 .alias MultiSFXFlag     $3E     ;Initialization flags for SFX and some music
 .alias MusicInitFlag    $3F     ;Music init flags
-
+.alias CurrentMusic     $41     ;Stores the flag of the current music being played
+.alias SamusInLava      $42     ;#$01=Samus in lava, #$00=She is not.
+.alias PalToggle        $43
 ; These are now unused
-;$41, $42, $43, $44, $45, $46, $47, $48
+; $44, $45, $46, $47, $48
 
 .alias ScrollDir        $49     ;0=Up, 1=Down, 2=Left, 3=Right.
 
@@ -124,6 +128,7 @@
 .alias SamusScrX        $51     ;Samus x position on screen.
 .alias SamusScrY        $52     ;Samus y position on screen.
 .alias WalkSoundDelay   $53
+;used in statue loading $54
 .alias IsSamus          $55     ;1=Samus object being accessed, 0=not Samus.
 .alias DoorStatus       $56     ;0=Not in door, 1=In right door, 2=In left door, 3=Scroll up
                                 ;4=Scroll down, 5=Exit door, MSB set=Door entered. If value
@@ -145,7 +150,7 @@
 .alias DoorDelay        $59     ;Number of frames to delay when Samus entering/exiting doors.
 .alias RoomNumber       $5A     ;Room number currently being loaded.
 .alias SpritePagePos    $5B     ;Index into sprite RAM used to load object sprite data.
-.alias SamusInLava      $64     ;#$01=Samus in lava, #$00=She is not.
+; used $5C - $64                ;Some routing eor $5C,x oer $5D,x where x == #$06 and counts down
 .alias ObjectCounter    $65     ;Counts such things as object explosion time.
 .alias ObjectPal        $67     ;Attrib. table info for room object(#$00 thru #$03).
 .alias RoomPal          $68
@@ -168,12 +173,14 @@
 .alias SamusBlink       $70
 .alias UpdtngPrjctl     $71     ;#$01=Projectile update in process. #$00=not in process.
 .alias DmgPushDir       $72     ;#$00=Push Samus left when hit, #$01=Push right, #$FF=No push. 
+; used in damage push   $73
 .alias InArea           $74     ;#$10(or #$00)=Brinstar, #$11=Norfair, #$12=Kraid hideout,
                                 ;#$13=Tourian, #$14=Ridley hideout.
 
 .alias ChannelType      $75     ;Stores channel type being processed(0,1,2,3 or 4)
 
-.alias PalToggle        $76
+; unused                $76
+; used in damage push   $77
 
 .alias ItemRmMusicSts   $79     ;#$00=Item room music not playing. 
                                 ;#$01=Play item room music.
@@ -195,6 +202,13 @@
 .alias ClrChangeCounter $82     ;When=#$00, change end Samus sprite colors.
 .alias WaveSpritePtr    $83     ;Address pointer to Samus hand waving sprites in end.
 .alias WaveSpriteCntr   $84     ;Stores length of wave sprite data (#$10).
+; used                  $85
+; used                  $86
+; used                  $87
+; used                  $88
+; unused                $89
+; unused                $90
+; used in door routine  $91
 
 ;----------------------------------------------------------------------------------------------------
 
@@ -216,6 +230,16 @@
                                 ;#$08=Initialize mother brain,
                                 ;#$09, #$0A=Mother brain already dead.
 .alias MotherBrainHits  $99     ;Number of times mother brain has been hit. Dies at #$20.
+
+
+;used in bank 3         $9A
+;used in bank 3         $9B
+;used in bank 3         $9C
+;used in bank 3         $9D
+;used in bank 3         $9E
+;used in bank 3         $9F
+
+; TODO: Check on $90 - $B6 State unknown
 
 .alias SpareMemB7       $B7     ;Written to in title routine and accessed by unsed routine.
 .alias SpareMemB8       $B8     ;Written to in title routine and accessed by unsed routine.
@@ -266,25 +290,25 @@
 .alias SFXPtrE4UB       $E5     ;Pointer used by SFX routines, upper byte.
 ; used in sound         $E6
 ; used in sound         $E7
-; unused                $E8
+.alias PPUStrIndex      $E8     ;# of bytes of data in PPUDataString. #$4F bytes max.
 ; unused                $E9
 
 .alias Cntrl0Data       $EA     ;Temp storage for data of first address sound channel
 .alias VolCntrlAddress  $EB     ;Desired address number in VolumeCntrlAdressTbl
-; unused                $EC
-; unused                $ED
-; unused                $EF
+; used in sound         $EC
+; used in sound         $ED
+.alias HasBeamSFX       $EF   ;Bit 7 set=has long beam, bit 0 set=has ice beam
 
-.alias ABStatus         $F0     ;Stores A and B button status in AreaInit. Never used.
+.alias ABStatus         $F0   ;Stores A and B button status in AreaInit. Never used.
 .alias HorzCntrNonLinr  $F1   ;Horizontal movement counter. Exponential change in speed.
 .alias VertCntrLinear   $F2   ;Verticle movement counter. Linear change in speed.
 .alias NARPASSWORD      $F3   ;0 = invinsible Samus not active, 1 = invinsible Samus active.
 .alias JustInBailey     $F4   ;0 = Samus has suit, 1 = Samus is without suit.
-; unused                $F5
-; unused                $F6
-; unused                $F7
-; unused                $F8
-; unused                $F9
+.alias TankCount        $F5   ;Number of energy tanks.
+.alias MissileCount     $F6   ;Stores current number of missiles.
+.alias MaxMissiles      $F7   ;Maximum amount of missiles Samus can carry
+.alias HealthLo         $F8   ;Lower health digit in upper 4 bits.
+.alias HealthHi         $F9   ;Upper health digit in lower 4 bits
 
 .alias MirrorCntrl      $FA     ;If bit 3 is set, PPU set to horizontal mirroring
                                 ;else if bit 3 is clear, PPU is set to vertical
@@ -297,8 +321,6 @@
 .alias PPUCNT1ZP        $FE     ;Data byte to be loaded into PPU control register 1.
 .alias PPUCNT0ZP        $FF     ;Data byte to be loaded into PPU control register 0.
 
-.alias HealthLo         $0106   ;Lower health digit in upper 4 bits.
-.alias HealthHi         $0107   ;Upper health digit in lower 4 bits
                                 ;# of full tanks in upper 4 bits.
 .alias MiniBossKillDly  $0108   ;Initiate power up music and delay after Kraid/Ridley killed.
 .alias PowerUpDelay     $0109   ;Initiate power up music and delay after item pickup.
@@ -353,19 +375,19 @@
 
 .alias EnYRoomPos       $0400   ;Enemy y position in room.(not actual screen position).
 .alias EnXRoomPos       $0401   ;Enemy x position in room.(not actual screen position).
-;                       $0402
-;                       $0403
-;                       $0404
-;                       $0405
+.alias EnAttr_02        $0402
+.alias EnAttr_03        $0403
+.alias EnAttr_04        $0404
+.alias EnAttr_05        $0405
 .alias EnCounter        $0406   ;Counts such things as explosion time.
-;                       $0407
-;                       $0408
+.alias EnAttr_07        $0407
+.alias EnAttr_08        $0408
 .alias EnDelay          $0409   ;Delay counter between enemy actions.
-;                       $040A
+.alias EnAttr_0A        $040A
 .alias EnHitPoints      $040B   ;Current hit points of enemy.
-;                       $040C
-;                       $040D
-;                       $040E
+.alias EnAttr_0C        $040C
+.alias EnAttr_0D        $040D
+.alias EnAttr_0E        $040E
 .alias EnSpecialAttribs $040F   ;Bit 7 set=tough version of enemy, bit 6 set=mini boss.
 
 ;----------------------------------------------------------------------------------------------------
@@ -406,8 +428,6 @@
 .alias TriHiPercentage  $0615   ;Stores percent to change period high by each frame 
 .alias PercentDiff      $0616   ;if=5, percent=1/5(20%), if=0A, percent=1/10(10%), etc
 .alias DivideData       $0617   ;Used in DivideTrianglePeriods
-
-.alias HasBeamSFX       $061F   ;Bit 7 set=has long beam, bit 0 set=has ice beam
 
 ;The following addresses are loaded into $0640 thru $0643 when those 
 ;addresses decrement to zero.  These addresses do not decrement.
@@ -502,7 +522,6 @@
 .alias SQ2ContSFX       $068A   ;Continuation flags for SQ2 SFX (never used)
 .alias TriangleContSFX  $068B   ;Continuation flags for Triangle SFX
 .alias MultiContSFX     $068C   ;Continuation flags for Multi SFX
-.alias CurrentMusic     $068D   ;Stores the flag of the current music being played 
 
 .alias PowerUpType      $0748   ;Holds the byte describing what power-up is on name table.
 .alias PowerUpYCoord    $0749   ;Y coordinate of the power-up.
@@ -523,8 +542,6 @@
 .alias TileInfo3        $0784   ;
 .alias TileInfo4        $0785   ;
 .alias TileInfo5        $0786   ;
-
-.alias PPUStrIndex      $07A0   ;# of bytes of data in PPUDataString. #$4F bytes max.
 
 ;$07A1 thru $07F0 contain a byte string of data to be written the the PPU. The first
 ;byte in the string is the upper address byte of the starting point in the PPU to write
@@ -591,10 +608,6 @@
 .alias SamusDataIndex   $6875   ;Index for Samus saved game stats(not used). #$00, #$10, #$20.
 
 .alias SamusStat00      $6876   ;Unused memory address for storing Samus info.
-.alias TankCount        $6877   ;Number of energy tanks.
-.alias SamusGear        $6878   ;Stores power-up items Samus has.
-.alias MissileCount     $6879   ;Stores current number of missiles.
-.alias MaxMissiles      $687A   ;Maximum amount of missiles Samus can carry
 .alias KraidStatueStat  $687B   ;bit 0 set, the statues blink, 
 .alias RidlyStatueStat  $687C   ;bit 7 set, statues are up.
 .alias SamusAgeLo       $687D   ;Low byte of Samus' age.
@@ -879,8 +892,8 @@
 .alias SoundEngineOrg           $B200
 .alias SXFInitTables            $B29D
 .alias SoundEngineEntryPoint    $B3CC
-.alias StructPointerTable_Hi    $BF56
-.alias StructPointerTable_Lo    $BF88
+.alias StructPointerTable_Hi    $BF0F
+.alias StructPointerTable_Lo    $BF41
 .alias InterruptVectors         $BFFA
 
 ;----------------------------------------------------------------------------------------------------
