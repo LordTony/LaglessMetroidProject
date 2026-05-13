@@ -1,0 +1,749 @@
+Room Number: $00
+Default Palette: $08
+.byte $40, $01, $08
+.byte $48, $01, $08
+.byte $50, $03, $08
+.byte $5F, $03, $08
+
+Room Number: $01
+Default Palette: $08
+.byte $07, $02, $08
+.byte $87, $02, $08
+
+Room Number: $02
+Default Palette: $0C
+.byte $00, $0B, $0C
+.byte $0E, $0B, $0C
+.byte $50, $0B, $0C
+.byte $5E, $0B, $0C
+.byte $A0, $0B, $0C
+.byte $AE, $0B, $0C
+
+Room Number: $03
+Default Palette: $08
+.byte $00, $0B, $0C
+.byte $02, $09, $0C
+.byte $0E, $0B, $0C
+.byte $50, $0B, $0C
+.byte $56, $0A, $0C
+.byte $5F, $03, $08
+.byte $8B, $0A, $0C
+.byte $8E, $0B, $0C
+.byte $92, $0A, $0C
+.byte $A0, $0B, $0C
+.byte $C7, $09, $0C
+.byte $DE, $0B, $0C
+
+Room Number: $04
+Default Palette: $0C
+.byte $00, $0B, $0C
+.byte $04, $0A, $0C
+.byte $0E, $0B, $0C
+.byte $47, $09, $0C
+.byte $50, $03, $08
+.byte $5E, $0B, $0C
+.byte $80, $0B, $0C
+.byte $82, $0A, $0C
+.byte $9C, $0A, $0C
+.byte $AE, $0B, $0C
+.byte $B6, $0A, $0C
+.byte $C0, $0B, $0C
+
+Room Number: $05
+Default Palette: $0C
+.byte $00, $0B, $0C
+.byte $0E, $0B, $0C
+.byte $15, $09, $0C
+.byte $50, $03, $08
+.byte $57, $0A, $0C
+.byte $5F, $03, $08
+.byte $80, $0B, $0C
+.byte $82, $0A, $0C
+.byte $8B, $0A, $0C
+.byte $8E, $0B, $0C
+.byte $B0, $0B, $0C
+.byte $C6, $09, $0C
+.byte $CE, $0B, $0C
+
+Room Number: $06
+Default Palette: $0C
+.byte $00, $0B, $0C
+.byte $0E, $0B, $0C
+.byte $12, $0A, $0C
+.byte $37, $0A, $0C
+.byte $50, $0B, $0C
+.byte $5E, $0B, $0C
+.byte $73, $0A, $0C
+.byte $8A, $0A, $0C
+.byte $A0, $0B, $0C
+.byte $AE, $0B, $0C
+.byte $B6, $09, $0C
+
+Room Number: $07
+Default Palette: $0C
+.byte $00, $0D, $0C
+.byte $08, $0D, $0C
+.byte $54, $06, $0C
+.byte $5A, $06, $0C
+.byte $67, $07, $0C
+.byte $A0, $0B, $0C
+.byte $AE, $0B, $0C
+.byte $C2, $06, $0C
+.byte $CD, $06, $0C
+.byte $D2, $00, $08
+.byte $D6, $00, $08
+
+Room Number: $08
+Default Palette: $0C
+.byte $08, $1E, $0C
+.byte $0C, $1E, $0C
+.byte $38, $1E, $0C
+.byte $4C, $1E, $0C
+.byte $78, $1E, $0C
+.byte $8C, $1E, $0C
+.byte $B8, $1E, $0C
+.byte $CC, $1E, $0C
+
+Room Number: $09
+Default Palette: $0C
+.byte $00, $35, $04
+.byte $20, $36, $04
+.byte $28, $36, $04
+.byte $2F, $36, $04
+.byte $35, $1D, $0C
+.byte $3B, $1D, $0C
+.byte $55, $0B, $0C
+.byte $5A, $0B, $0C
+.byte $C5, $16, $00
+.byte $D0, $37, $0C
+
+Room Number: $0A
+Default Palette: $00
+.byte $00, $14, $00
+.byte $08, $14, $00
+.byte $0F, $15, $00
+.byte $10, $15, $00
+.byte $14, $15, $00
+.byte $25, $08, $0C
+.byte $50, $14, $00
+.byte $58, $0C, $00
+.byte $5F, $04, $08
+.byte $60, $14, $00
+.byte $70, $13, $00
+.byte $80, $14, $00
+.byte $88, $14, $00
+.byte $90, $16, $00
+.byte $99, $16, $00
+.byte $B3, $15, $00
+.byte $BC, $15, $00
+
+Room Number: $0B
+Default Palette: $00
+.byte $00, $15, $00
+.byte $01, $16, $00
+.byte $08, $16, $00
+.byte $0F, $15, $00
+.byte $4F, $15, $00
+.byte $50, $04, $08
+.byte $80, $16, $00
+.byte $87, $02, $08
+.byte $89, $16, $00
+
+Room Number: $0C
+Default Palette: $08
+.byte $00, $1B, $08
+.byte $08, $1B, $08
+.byte $10, $1A, $08
+.byte $50, $03, $08
+.byte $80, $1A, $08
+.byte $82, $19, $08
+.byte $BC, $19, $08
+.byte $C0, $1A, $08
+.byte $C6, $1B, $08
+.byte $D1, $00, $08
+.byte $D9, $00, $08
+
+Room Number: $0D
+Default Palette: $08
+.byte $00, $1B, $08
+.byte $08, $1B, $08
+.byte $1E, $1A, $08
+.byte $5F, $03, $08
+.byte $8C, $19, $08
+.byte $8E, $1A, $08
+.byte $B7, $1A, $08
+.byte $C2, $1A, $08
+.byte $CE, $1A, $08
+.byte $D0, $00, $08
+.byte $D7, $00, $08
+
+Room Number: $0E
+Default Palette: $08
+.byte $00, $1B, $08
+.byte $08, $1B, $08
+.byte $AC, $19, $08
+.byte $B4, $19, $08
+.byte $B8, $1A, $08
+.byte $D0, $00, $08
+.byte $D8, $00, $08
+
+Room Number: $0F
+Default Palette: $0C
+.byte $00, $1B, $08
+.byte $08, $1B, $08
+.byte $59, $06, $0C
+.byte $92, $19, $08
+.byte $AC, $19, $08
+.byte $BB, $19, $08
+.byte $C0, $06, $0C
+.byte $D0, $00, $08
+.byte $D8, $00, $08
+
+Room Number: $10
+Default Palette: $08
+.byte $00, $17, $08
+.byte $10, $17, $08
+.byte $20, $17, $08
+.byte $30, $17, $08
+.byte $40, $17, $08
+.byte $50, $03, $08
+.byte $5F, $03, $08
+.byte $90, $1A, $08
+.byte $80, $17, $08
+.byte $86, $2E, $08
+.byte $97, $34, $08
+.byte $9E, $1A, $08
+.byte $C0, $1A, $08
+.byte $CE, $1A, $08
+.byte $D2, $12, $08
+.byte $D8, $12, $08
+
+Room Number: $11
+Default Palette: $0C
+.byte $00, $0B, $0C
+.byte $02, $06, $0C
+.byte $0E, $0B, $0C
+.byte $50, $0B, $0C
+.byte $52, $06, $0C
+.byte $5E, $0B, $0C
+.byte $A0, $0B, $0C
+.byte $A2, $06, $0C
+.byte $AE, $0B, $0C
+
+Room Number: $12
+Default Palette: $0C
+.byte $00, $0B, $0C
+.byte $02, $11, $04
+.byte $0A, $11, $04
+.byte $50, $03, $08
+.byte $80, $0B, $0C
+.byte $82, $0A, $0C
+.byte $D0, $37, $0C
+
+Room Number: $13
+Default Palette: $0C
+.byte $00, $11, $04
+.byte $07, $10, $0C
+.byte $0E, $0B, $0C
+.byte $5F, $03, $08
+.byte $8A, $09, $0C
+.byte $8E, $0B, $0C
+.byte $D0, $37, $0C
+
+Room Number: $14
+Default Palette: $04
+.byte $00, $35, $04
+.byte $D0, $37, $0C
+
+Room Number: $15
+Default Palette: $0C
+.byte $00, $37, $0C
+.byte $90, $1F, $04
+.byte $96, $1F, $04
+.byte $AA, $05, $0C
+.byte $AC, $1F, $04
+.byte $BA, $10, $0C
+.byte $C4, $05, $0C
+.byte $D0, $37, $0C
+
+Room Number: $16
+Default Palette: $04
+.byte $00, $35, $04
+.byte $B0, $1F, $04
+.byte $B6, $05, $0C
+.byte $B8, $05, $0C
+.byte $BC, $1F, $04
+.byte $C6, $1F, $04
+.byte $D4, $00, $08
+
+Room Number: $17
+Default Palette: $0C
+.byte $00, $11, $04
+.byte $08, $10, $0C
+.byte $4A, $1E, $0C
+.byte $6B, $1E, $0C
+.byte $8C, $1E, $0C
+.byte $A6, $15, $00
+.byte $B3, $1D, $0C
+.byte $B9, $1D, $0C
+.byte $C3, $0C, $00
+.byte $C8, $0C, $00
+.byte $D0, $37, $0C
+
+Room Number: $18
+Default Palette: $04
+.byte $00, $0B, $0C
+.byte $01, $11, $04
+.byte $09, $32, $04
+.byte $0E, $0B, $0C
+.byte $50, $03, $08
+.byte $5F, $03, $08
+.byte $64, $0D, $0C
+.byte $66, $20, $04
+.byte $80, $1F, $04
+.byte $84, $20, $04
+.byte $88, $20, $04
+.byte $8C, $1E, $0C
+.byte $A6, $20, $05
+.byte $B0, $0B, $0C
+.byte $BE, $0B, $0C
+.byte $E6, $20, $04
+
+Room Number: $19
+Default Palette: $04
+.byte $00, $10, $0C
+.byte $04, $1F, $04
+.byte $08, $1F, $04
+.byte $0C, $33, $04
+.byte $12, $31, $0C
+.byte $44, $1F, $04
+.byte $48, $1F, $04
+.byte $84, $1F, $04
+.byte $88, $1F, $04
+.byte $D0, $1F, $04
+.byte $D4, $1F, $04
+.byte $D8, $10, $0C
+
+Room Number: $1A
+Default Palette: $08
+.byte $00, $28, $08
+.byte $01, $2D, $08
+.byte $09, $2D, $08
+.byte $50, $04, $08
+.byte $80, $28, $08
+.byte $81, $14, $00
+.byte $95, $15, $00
+.byte $D0, $2D, $08
+.byte $D8, $2D, $08
+
+Room Number: $1B
+Default Palette: $00
+.byte $00, $14, $00
+.byte $04, $15, $00
+.byte $08, $14, $00
+.byte $0A, $15, $00
+.byte $97, $06, $0C
+.byte $A0, $0B, $0C
+.byte $A6, $15, $00
+.byte $A8, $15, $00
+.byte $AE, $0B, $0C
+.byte $B4, $06, $0C
+.byte $BA, $06, $0C
+.byte $C2, $06, $0C
+.byte $D2, $00, $08
+.byte $D6, $00, $08
+
+Room Number: $1C
+Default Palette: $00
+.byte $00, $15, $00
+.byte $01, $0D, $0C
+.byte $09, $0E, $04
+.byte $2A, $23, $04
+.byte $37, $22, $0C
+.byte $4D, $0E, $04
+.byte $50, $03, $08
+.byte $6A, $16, $00
+.byte $6D, $0E, $04
+.byte $80, $14, $00
+.byte $87, $02, $08
+.byte $89, $14, $00
+
+Room Number: $1D
+Default Palette: $04
+.byte $00, $0E, $04
+.byte $08, $0E, $04
+.byte $44, $0E, $04
+.byte $84, $0F, $04
+.byte $94, $0E, $04
+.byte $B0, $0E, $04
+.byte $B8, $0E, $04
+
+Room Number: $1E
+Default Palette: $04
+.byte $00, $0E, $04
+.byte $02, $2A, $04
+.byte $07, $25, $04
+.byte $08, $0E, $04
+.byte $10, $0E, $04
+.byte $12, $2A, $04
+.byte $17, $25, $04
+.byte $18, $0E, $04
+.byte $50, $03, $08
+.byte $5F, $03, $08
+.byte $74, $26, $04
+.byte $78, $26, $04
+.byte $80, $0E, $04
+.byte $88, $0E, $04
+.byte $C0, $24, $04
+.byte $CC, $24, $04
+.byte $D4, $00, $08
+
+Room Number: $1F
+Default Palette: $04
+.byte $00, $27, $04
+.byte $08, $27, $04
+.byte $10, $24, $04
+.byte $50, $03, $08
+.byte $80, $24, $04
+.byte $A6, $26, $04
+.byte $B0, $0E, $04
+.byte $CA, $26, $04
+.byte $D8, $0E, $04
+
+Room Number: $20
+Default Palette: $04
+.byte $00, $27, $04
+.byte $08, $27, $04
+.byte $1C, $24, $04
+.byte $20, $24, $04
+.byte $5F, $03, $08
+.byte $8C, $24, $04
+.byte $BA, $26, $04
+.byte $C4, $26, $04
+.byte $C8, $0E, $04
+.byte $D0, $0E, $04
+
+Room Number: $21
+Default Palette: $04
+.byte $00, $0E, $04
+.byte $08, $0E, $04
+.byte $30, $0E, $04
+.byte $38, $0E, $04
+.byte $A7, $26, $04
+.byte $B0, $24, $04
+.byte $B6, $24, $04
+.byte $BC, $24, $04
+.byte $C4, $05, $0C
+.byte $D4, $27, $04
+.byte $DA, $00, $08
+
+Room Number: $22
+Default Palette: $04
+.byte $00, $0E, $04
+.byte $08, $0E, $04
+.byte $30, $0E, $04
+.byte $37, $25, $04
+.byte $48, $2A, $04
+.byte $4C, $2A, $04
+.byte $68, $0E, $04
+.byte $78, $0E, $04
+.byte $A3, $26, $04
+.byte $B0, $0E, $04
+.byte $B8, $0E, $04
+
+Room Number: $23
+Default Palette: $08
+.byte $00, $27, $04
+.byte $08, $27, $04
+.byte $63, $29, $04
+.byte $73, $28, $08
+.byte $8B, $29, $04
+.byte $9B, $28, $08
+.byte $C0, $26, $04
+.byte $C6, $26, $04
+.byte $D0, $0E, $04
+.byte $D8, $00, $08
+.byte $D9, $0E, $04
+.byte $DE, $05, $0C
+
+Room Number: $24
+Default Palette: $04
+.byte $00, $0E, $04
+.byte $08, $0E, $04
+.byte $40, $2B, $00
+.byte $48, $2B, $00
+.byte $50, $0E, $04
+.byte $53, $20, $04
+.byte $58, $0E, $04
+.byte $5B, $20, $04
+.byte $60, $2B, $00
+.byte $68, $13, $00
+.byte $70, $27, $04
+.byte $78, $27, $04
+.byte $80, $2B, $00
+.byte $88, $2B, $00
+.byte $90, $27, $04
+.byte $98, $27, $04
+.byte $A0, $13, $00
+.byte $A8, $2B, $00
+.byte $B0, $0E, $04
+.byte $B8, $0E, $04
+
+Room Number: $25
+Default Palette: $08
+.byte $00, $27, $04
+.byte $05, $27, $04
+.byte $0A, $0E, $04
+.byte $23, $24, $04
+.byte $4A, $13, $00
+.byte $52, $24, $04
+.byte $59, $20, $04
+.byte $5A, $0E, $04
+.byte $6A, $2B, $00
+.byte $79, $0E, $04
+.byte $89, $2B, $00
+.byte $90, $28, $08
+.byte $94, $06, $0C
+.byte $98, $0E, $04
+.byte $A8, $13, $00
+.byte $B0, $0E, $04
+.byte $B8, $0E, $04
+
+Room Number: $26
+Default Palette: $04
+.byte $00, $0E, $04
+.byte $08, $27, $04
+.byte $40, $2B, $00
+.byte $50, $0E, $04
+.byte $56, $20, $04
+.byte $60, $2B, $00
+.byte $68, $2C, $00
+.byte $80, $27, $04
+.byte $8B, $24, $04
+.byte $D0, $00, $08
+.byte $D8, $00, $08
+
+Room Number: $27
+Default Palette: $0C
+.byte $00, $0B, $0C
+.byte $02, $11, $04
+.byte $09, $11, $04
+.byte $50, $04, $08
+.byte $80, $0B, $0C
+.byte $82, $1E, $0C
+.byte $B6, $1D, $0C
+.byte $B7, $1D, $0C
+.byte $C2, $09, $0C
+.byte $C8, $1D, $0C
+.byte $D0, $37, $0C
+
+Room Number: $28
+Default Palette: $00
+.byte $00, $2D, $08
+.byte $08, $2D, $08
+.byte $0F, $28, $08
+.byte $5F, $03, $08
+.byte $87, $14, $00
+.byte $8F, $28, $08
+.byte $9A, $15, $00
+.byte $C3, $26, $04
+.byte $D0, $2D, $08
+.byte $D8, $2D, $08
+
+Room Number: $29
+Default Palette: $08
+.byte $00, $2D, $08
+.byte $08, $2D, $08
+.byte $C2, $26, $04
+.byte $C7, $26, $04
+.byte $C9, $26, $04
+.byte $D0, $2D, $08
+.byte $D8, $2D, $08
+
+Room Number: $2A
+Default Palette: $00
+.byte $00, $35, $04
+.byte $68, $21, $08
+.byte $78, $15, $00
+.byte $95, $15, $00
+.byte $A0, $0B, $0C
+.byte $AE, $0B, $0C
+.byte $BB, $15, $00
+.byte $C2, $06, $0C
+.byte $D2, $00, $08
+.byte $D6, $00, $08
+
+Room Number: $2B
+Default Palette: $08
+.byte $00, $30, $00
+.byte $01, $1A, $08
+.byte $02, $30, $00
+.byte $03, $1A, $08
+.byte $05, $1C, $08
+.byte $0A, $1B, $08
+.byte $0F, $30, $00
+.byte $10, $30, $00
+.byte $14, $30, $00
+.byte $1F, $30, $00
+.byte $2C, $18, $08
+.byte $35, $18, $08
+.byte $41, $19, $08
+.byte $44, $2F, $08
+.byte $45, $18, $08
+.byte $46, $2F, $08
+.byte $50, $04, $08
+.byte $53, $19, $08
+.byte $5F, $04, $08
+.byte $64, $1C, $08
+.byte $65, $1C, $08
+.byte $68, $2F, $08
+.byte $80, $15, $00
+.byte $81, $19, $08
+.byte $8D, $19, $08
+.byte $9C, $19, $08
+.byte $9F, $15, $00
+.byte $C0, $30, $00
+.byte $D1, $00, $08
+.byte $D7, $00, $08
+.byte $DF, $30, $00
+
+Room Number: $2C
+Default Palette: $00
+.byte $00, $16, $00
+.byte $07, $16, $00
+.byte $0E, $16, $00
+.byte $1F, $15, $00
+.byte $20, $15, $00
+.byte $40, $30, $00
+.byte $5F, $04, $08
+.byte $80, $16, $00
+.byte $87, $02, $08
+.byte $89, $16, $00
+.byte $A0, $15, $00
+.byte $AF, $15, $00
+
+Room Number: $2D
+Default Palette: $0C
+.byte $00, $0B, $0C
+.byte $0E, $0B, $0C
+.byte $50, $03, $08
+.byte $5E, $0B, $0C
+.byte $80, $0B, $0C
+.byte $AE, $0B, $0C
+.byte $D0, $0B, $0C
+
+Room Number: $2E
+Default Palette: $0C
+.byte $B0, $1E, $0C
+.byte $B4, $1E, $0C
+.byte $B8, $1E, $0C
+.byte $CC, $1E, $0C
+
+Room Number: $2F
+Default Palette: $0C
+.byte $00, $1E, $0C
+.byte $04, $1E, $0C
+.byte $08, $1E, $0C
+.byte $0C, $1E, $0C
+.byte $38, $1E, $0C
+.byte $40, $1E, $0C
+.byte $44, $1E, $0C
+.byte $4C, $1E, $0C
+
+Possible savings of 115 bytes
+These 14 rooms:
+[('$00', '4 bytes'), ('$01', '2 bytes'), ('$02', '6 bytes'), ('$06', '11 bytes'), ('$08', '8 bytes'), ('$0C', '11 bytes'), ('$0D', '11 bytes'), ('$0E', '7 bytes'), ('$10', '16 bytes'), ('$11', '9 bytes'), ('$1D', '7 bytes'), ('$22', '11 bytes'), ('$2E', '4 bytes'), ('$2F', '8 bytes')]
+
+struct counts (ordered by count)
+[('$07', 1), ('$08', 1), ('$2E', 1), ('$34', 1), ('$32', 1), ('$33', 1), ('$31', 1), ('$23', 1), ('$22', 1), ('$0F', 1), ('$2C', 1), ('$21', 1), ('$01', 2), ('$12', 2), ('$29', 2), ('$36', 3), ('$0C', 3), ('$25', 3), ('$1C', 3), ('$18', 3), ('$2F', 3), ('$0D', 4), ('$35', 4), ('$2A', 4), ('$02', 5), ('$13', 5), ('$10', 5), ('$17', 6), ('$05', 6), ('$1D', 7), ('$04', 7), ('$11', 7), ('$28', 7), ('$09', 8), ('$37', 8), ('$20', 9), ('$30', 9), ('$1B', 10), ('$2B', 10), ('$14', 12), ('$2D', 12), ('$16', 13), ('$19', 13), ('$24', 13), ('$26', 14), ('$0A', 15), ('$06', 15), ('$1A', 15), ('$1F', 15), ('$27', 15), ('$03', 21), ('$00', 22), ('$1E', 25), ('$15', 25), ('$0E', 46), ('$0B', 60)]
+
+struct counts (ordered by key)
+[('$00', 22), ('$01', 2), ('$02', 5), ('$03', 21), ('$04', 7), ('$05', 6), ('$06', 15), ('$07', 1), ('$08', 1), ('$09', 8), ('$0A', 15), ('$0B', 60), ('$0C', 3), ('$0D', 4), ('$0E', 46), ('$0F', 1), ('$10', 5), ('$11', 7), ('$12', 2), ('$13', 5), ('$14', 12), ('$15', 25), ('$16', 13), ('$17', 6), ('$18', 3), ('$19', 13), ('$1A', 15), ('$1B', 10), ('$1C', 3), ('$1D', 7), ('$1E', 25), ('$1F', 15), ('$20', 9), ('$21', 1), ('$22', 1), ('$23', 1), ('$24', 13), ('$25', 3), ('$26', 14), ('$27', 15), ('$28', 7), ('$29', 2), ('$2A', 4), ('$2B', 10), ('$2C', 1), ('$2D', 12), ('$2E', 1), ('$2F', 3), ('$30', 9), ('$31', 1), ('$32', 1), ('$33', 1), ('$34', 1), ('$35', 4), ('$36', 3), ('$37', 8)]
+
+Structs: Rooms they are used
+Room# $01: {'$00'}
+Room# $07: {'$07'}
+Room# $36: {'$09'}
+Room# $08: {'$0A'}
+Room# $17: {'$10'}
+Room# $2E: {'$10'}
+Room# $34: {'$10'}
+Room# $12: {'$10'}
+Room# $32: {'$18'}
+Room# $33: {'$19'}
+Room# $31: {'$19'}
+Room# $23: {'$1C'}
+Room# $22: {'$1C'}
+Room# $0F: {'$1D'}
+Room# $29: {'$23'}
+Room# $2C: {'$26'}
+Room# $21: {'$2A'}
+Room# $1C: {'$2B'}
+Room# $18: {'$2B'}
+Room# $2F: {'$2B'}
+Room# $0C: {'$0A', '$17'}
+Room# $2A: {'$1E', '$22'}
+Room# $25: {'$1E', '$22'}
+Room# $30: {'$2B', '$2C'}
+Room# $0D: {'$07', '$1C', '$18'}
+Room# $1D: {'$27', '$09', '$17'}
+Room# $13: {'$24', '$0A', '$25'}
+Room# $2D: {'$29', '$28', '$1A'}
+Room# $2B: {'$24', '$26', '$25'}
+Room# $02: {'$01', '$1C', '$2C', '$0B'}
+Room# $35: {'$14', '$2A', '$09', '$16'}
+Room# $10: {'$15', '$17', '$13', '$19'}
+Room# $1F: {'$19', '$18', '$15', '$16'}
+Room# $05: {'$23', '$21', '$15', '$16'}
+Room# $20: {'$24', '$26', '$18', '$25'}
+Room# $28: {'$23', '$28', '$1A', '$25'}
+Room# $0A: {'$06', '$12', '$04', '$05', '$03'}
+Room# $16: {'$1C', '$2C', '$0B', '$09', '$0A'}
+Room# $14: {'$1B', '$1A', '$1C', '$28', '$0A'}
+Room# $1B: {'$2B', '$0C', '$0D', '$0F', '$0E'}
+Room# $1A: {'$2B', '$0C', '$0D', '$10', '$0E'}
+Room# $19: {'$2B', '$0C', '$0D', '$0F', '$0E'}
+Room# $11: {'$27', '$18', '$12', '$17', '$13'}
+Room# $09: {'$06', '$27', '$04', '$05', '$03', '$13'}
+Room# $06: {'$1B', '$07', '$2A', '$11', '$25', '$0F'}
+Room# $1E: {'$27', '$18', '$17', '$2F', '$2E', '$08'}
+Room# $04: {'$2B', '$27', '$1A', '$2C', '$0B', '$0A'}
+Room# $24: {'$21', '$1F', '$20', '$26', '$25', '$1E'}
+Room# $37: {'$27', '$15', '$12', '$17', '$13', '$14', '$09'}
+Room# $27: {'$21', '$24', '$1F', '$20', '$26', '$25', '$23'}
+Room# $26: {'$21', '$29', '$1F', '$20', '$22', '$28', '$1E', '$23'}
+Room# $15: {'$1B', '$2B', '$1A', '$2A', '$1C', '$17', '$0B', '$2C', '$28', '$0A'}
+Room# $0E: {'$1D', '$21', '$24', '$1F', '$20', '$1C', '$22', '$26', '$25', '$1E', '$23'}
+Room# $00: {'$1B', '$07', '$2B', '$21', '$0C', '$2A', '$16', '$0D', '$26', '$1E', '$0F', '$23', '$0E'}
+Room# $0B: {'$1B', '$06', '$07', '$02', '$27', '$18', '$2A', '$11', '$12', '$04', '$05', '$03', '$13', '$2D', '$09'}
+Room# $03: {'$00', '$18', '$0C', '$1F', '$12', '$20', '$0D', '$04', '$05', '$03', '$1C', '$10', '$13', '$2D', '$1E', '$28'}
+
+Struct Combos
+('$50', '$03', '$08', ' -> ', '$5F', '$03', '$08'): 4
+('$00', '$0B', '$0C', ' -> ', '$0E', '$0B', '$0C'): 4
+('$A0', '$0B', '$0C', ' -> ', '$AE', '$0B', '$0C'): 4
+('$00', '$1B', '$08', ' -> ', '$08', '$1B', '$08'): 4
+('$00', '$0E', '$04', ' -> ', '$08', '$0E', '$04'): 4
+('$B0', '$0E', '$04', ' -> ', '$B8', '$0E', '$04'): 4
+('$0E', '$0B', '$0C', ' -> ', '$50', '$0B', '$0C'): 3
+('$80', '$0B', '$0C', ' -> ', '$82', '$0A', '$0C'): 3
+('$D2', '$00', '$08', ' -> ', '$D6', '$00', '$08'): 3
+('$D0', '$00', '$08', ' -> ', '$D8', '$00', '$08'): 3
+('$D0', '$2D', '$08', ' -> ', '$D8', '$2D', '$08'): 3
+('$00', '$27', '$04', ' -> ', '$08', '$27', '$04'): 3
+('$50', '$0B', '$0C', ' -> ', '$5E', '$0B', '$0C'): 2
+('$5E', '$0B', '$0C', ' -> ', '$A0', '$0B', '$0C'): 2
+('$8B', '$0A', '$0C', ' -> ', '$8E', '$0B', '$0C'): 2
+('$50', '$03', '$08', ' -> ', '$5E', '$0B', '$0C'): 2
+('$5E', '$0B', '$0C', ' -> ', '$80', '$0B', '$0C'): 2
+('$08', '$1E', '$0C', ' -> ', '$0C', '$1E', '$0C'): 2
+('$0C', '$1E', '$0C', ' -> ', '$38', '$1E', '$0C'): 2
+('$B8', '$1E', '$0C', ' -> ', '$CC', '$1E', '$0C'): 2
+('$80', '$16', '$00', ' -> ', '$87', '$02', '$08'): 2
+('$87', '$02', '$08', ' -> ', '$89', '$16', '$00'): 2
+('$00', '$0B', '$0C', ' -> ', '$02', '$11', '$04'): 2
+('$0E', '$0B', '$0C', ' -> ', '$50', '$03', '$08'): 2
+('$C2', '$06', '$0C', ' -> ', '$D2', '$00', '$08'): 2
+('$08', '$0E', '$04', ' -> ', '$30', '$0E', '$04'): 2
+('$00', '$2D', '$08', ' -> ', '$08', '$2D', '$08'): 2
+

@@ -410,32 +410,6 @@ Bank06_L99B0:  .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00,
 
 ;----------------------------------------------------------------------------------------------------
 
-;Brinstar room tile patterns.
-GFXBrinstar1:
-Bank06_L9DA0:  .byte $3E, $7F, $FF, $70, $07, $FF, $FC, $1E, $00, $06, $1F, $00, $00, $07, $D0, $1E
-Bank06_L9DB0:  .byte $18, $FE, $C1, $0F, $E0, $82, $1F, $80, $00, $1E, $C1, $0F, $E0, $82, $1F, $80
-Bank06_L9DC0:  .byte $C1, $FF, $3F, $98, $C3, $FF, $7E, $1F, $00, $C1, $20, $18, $03, $8F, $7E, $1F
-Bank06_L9DD0:  .byte $E3, $FF, $C6, $0E, $30, $87, $03, $FC, $63, $FF, $06, $0E, $30, $87, $03, $FC
-Bank06_L9DE0:  .byte $7F, $7F, $7F, $7F, $7F, $7F, $7F, $7F, $73, $73, $73, $73, $73, $73, $73, $73
-Bank06_L9DF0:  .byte $58, $58, $58, $58, $58, $58, $58, $58, $58, $58, $58, $58, $58, $58, $58, $58
-Bank06_L9E00:  .byte $00, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $00, $FF, $FF, $FF, $00, $00, $FF, $FF
-Bank06_L9E10:  .byte $FF, $00, $FF, $00, $00, $FF, $00, $00, $FF, $00, $FF, $00, $00, $FF, $00, $00
-Bank06_L9E20:  .byte $0C, $32, $7F, $5F, $E1, $BF, $F8, $8E, $00, $00, $06, $1C, $20, $07, $38, $00
-Bank06_L9E30:  .byte $00, $0C, $0E, $9E, $0D, $9E, $F7, $59, $00, $00, $06, $0C, $00, $18, $04, $40
-Bank06_L9E40:  .byte $B9, $1E, $C6, $F4, $3C, $F0, $40, $80, $39, $1E, $C6, $34, $3C, $F0, $40, $80
-Bank06_L9E50:  .byte $7F, $FF, $79, $43, $5E, $1F, $0B, $06, $20, $33, $40, $40, $00, $01, $00, $00
-Bank06_L9E60:  .byte $86, $11, $01, $81, $41, $43, $5E, $80, $9E, $2F, $3F, $9F, $DF, $DF, $DE, $80
-Bank06_L9E70:  .byte $08, $04, $24, $22, $02, $04, $4C, $38, $38, $7C, $5C, $DE, $FE, $7C, $7C, $38
-Bank06_L9E80:  .byte $3C, $7E, $47, $DA, $49, $E2, $5C, $D5, $3C, $46, $03, $9A, $41, $E2, $5C, $C5
-Bank06_L9E90:  .byte $3C, $7E, $E2, $5B, $92, $47, $3A, $A3, $3C, $62, $C2, $1B, $82, $47, $3A, $A3
-Bank06_L9EA0:  .byte $CA, $8A, $A0, $20, $AA, $BA, $55, $0F, $8A, $00, $20, $20, $20, $3A, $15, $0F
-Bank06_L9EB0:  .byte $53, $51, $05, $04, $55, $5D, $AA, $F0, $51, $00, $04, $04, $04, $5C, $A8, $F0
-Bank06_L9EC0:  .byte $06, $01, $10, $10, $00, $00, $00, $01, $0E, $3F, $2F, $6F, $7F, $7F, $7F, $3F
-Bank06_L9ED0:  .byte $00, $8C, $92, $42, $42, $C6, $DC, $80, $00, $BC, $8E, $DE, $DE, $DE, $DC, $80
-Bank06_L9EE0:  .byte $07, $12, $48, $48, $09, $18, $30, $00, $07, $72, $B8, $B9, $FA, $FB, $73, $01
-
-;----------------------------------------------------------------------------------------------------
-
 ;More Brinstar room tile patterns.
 GFXBrinstar2:
 Bank06_L9EF0:  .byte $36, $67, $C0, $C0, $C0, $C0, $80, $40, $00, $00, $1F, $1E, $39, $33, $0D, $1C
@@ -820,7 +794,7 @@ Bank06_LB460:  .byte $02, $02, $02, $FE, $00, $00, $00, $FF, $FE, $0E, $FE, $FE,
 Bank06_LB470:  .byte $73, $FD, $3B, $A0, $C0, $E0, $60, $80, $00, $00, $00, $1F, $10, $17, $14, $14
 Bank06_LB480:  .byte $E8, $9C, $7C, $1C, $44, $58, $5C, $5C, $00, $04, $0C, $FC, $24, $B8, $BC, $BC
 Bank06_LB490:  .byte $E0, $E7, $A0, $2F, $73, $7C, $00, $00, $17, $10, $1F, $0F, $33, $7C, $00, $00
-Bank06_LB4A0:  .byte $58, $D4, $14, $DC, $EC, $D8, $00, $00, $B8, $34, $F4, $DC, $EC, $D8, $00, $00
+Bank06_LB4A0:  .byte $58, $D4, $14, $DC, $EC, $D8, $00, $00, $B8, $34, $F4, $DC, $EC, $D8, $00, $00; slight interleave into next table
 
 ;----------------------------------------------------------------------------------------------------
 
@@ -919,8 +893,8 @@ ClearTablesPtr_Hi:
 ; col #   $00, $01, $02, $03, $04, $05, $06, $07, $08, $09, $0A, $0B, $0C, $0D, $0E, $0F      
 Brinstar_ClearTable:           
     .byte $02, $02, $02, $06, $06, $02, $06, $02, $00, $05, $02, $02, $02, $02, $02, $02
-    .byte $02, $02, $02, $04, $05, $02, $02, $05, $02, $02, $02, $02, $02, $02, $02, $02
-    .byte $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02
+    .byte $06, $02, $02, $04, $05, $02, $02, $05, $02, $02, $02, $02, $02, $02, $02, $02
+    .byte $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $00, $00
 
 Norfair_ClearTable:
     .byte $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02
@@ -952,26 +926,22 @@ DoRoomRamClear:
     sta CodePtr+1
 
     ldy RoomNumber
-    lda (CodePtr), y
-    ldx #$00                ; if the lowest bit is set, mark a zp variable (SpareMemB7)
-    clc                     ; This tells us if we should skip the attribute table reset
-    ror                     ; when clearing this room
-    bcc +
-        inx
-    * stx SpareMemB7 
-    tax
-    lda ClearRoomRamJumpTable_Lo,x
-    sta CodePtr
-    lda ClearRoomRamJumpTable_Hi,x
-    sta CodePtr+1
-    lda CartRAMPtrUB        ; Setup A with the CartRAMPtrUB (#$60 or #$64) before the jump
-    jmp (CodePtr)
+    lda (CodePtr), y            ; if the lowest bit is set, mark a zp variable (SpareMemB7)
+    lsr            
+    tax            
+    lda #$00       
+    rol            
+    sta SpareMemB7
+    lda CartRAMPtrUB
+    cpx #$01
+    beq DoFullClear
+    bcc DoClearExit
+    cpx #$02
+    beq DoHorizontalClearTrampoline
+    jmp DoVerticalClear
 
-ClearRoomRamJumpTable_Lo:
-    .byte <DoClearExit, <DoFullClear, <DoHorizontalClear, <DoVerticalClear 
-
-ClearRoomRamJumpTable_Hi:
-    .byte >DoClearExit, >DoFullClear, >DoHorizontalClear, >DoVerticalClear 
+DoHorizontalClearTrampoline:
+    jmp DoHorizontalClear
 
 ; might be able to skip attribute writes in many of the rooms
 DoClearExit:
@@ -981,144 +951,104 @@ DoClearExit:
     * jmp AttributeWrite_67C0_to_67FF
 
 DoFullClear:
-    ldy #$C0            ; steps from #$C0 to #$FF so about #$39
     cmp #$60
     bne FillRoomRAM_64_Full
 
-FillRoomRAM_60_Full:
-    .scope
-        lda #$FF
-        _loop:              ; Fill $6000 - $63C0 with #$FF
-            sta $5F40,y     ;
-            sta $5F80,y     ;
-            sta $5FC0,y     ;
-            sta $6000,y     ;
-            sta $6040,y     ;
-            sta $6080,y     ;
-            sta $60C0,y     ;
-            sta $6100,y     ;
-            sta $6140,y     ;
-            sta $6180,y     ;
-            sta $61C0,y     ;
-            sta $6200,y     ;
-            sta $6240,y     ;
-            sta $6280,y     ;
-            sta $62C0,y     ;
-            iny
-        bne _loop
+    FillRoomRAM_60_Full:
+        jsr ClearRoom_Box_6000
+        jsr ClearRoom_Left_And_Right_Columns_6000
+        jsr ClearRoom_Top_And_Bottom_Rows_6000
+
+        .scope
+            ldy #$03
+            _loop:
+                ; Upper left corner
+                sta $6000, y
+                sta $6020, y
+                sta $6040, y
+                sta $6060, y
+
+                ; Upper right corner
+                sta $601C, y
+                sta $603C, y
+                sta $605C, y
+                sta $607C, y
+
+                ; Bottom left corner
+                sta $6340, y
+                sta $6360, y
+                sta $6380, y
+                sta $63A0, y
+
+                ; top right corner
+                sta $635C, y
+                sta $637C, y
+                sta $639C, y
+                sta $63BC, y
+
+                dey
+                bpl _loop
+        .scend
         jmp AttributeWrite_63C0_to_63FF
-    .scend
 
 FillRoomRAM_64_Full:
-    lda #$FF
+    jsr ClearRoom_Box_6400
+    jsr ClearRoom_Left_And_Right_Columns_6400
+    jsr ClearRoom_Top_And_Bottom_Rows_6400
     .scope
-        _loop:              ; Fill $6400 - $67C0 with #$FF
-            sta $6340,y
-            sta $6380,y
-            sta $63C0,y
-            sta $6400,y
-            sta $6440,y
-            sta $6480,y
-            sta $64C0,y
-            sta $6500,y
-            sta $6540,y
-            sta $6580,y
-            sta $65C0,y
-            sta $6600,y
-            sta $6640,y
-            sta $6680,y
-            sta $66C0,y
-            iny
-        bne _loop
-        jmp AttributeWrite_67C0_to_67FF
-.scend
+        ldy #$03
+        _loop:
+            ; Upper left corner
+            sta $6400, y
+            sta $6420, y
+            sta $6440, y
+            sta $6460, y
+
+            ; Upper right corner
+            sta $641C, y
+            sta $643C, y
+            sta $645C, y
+            sta $647C, y
+
+            ; Bottom left corner
+            sta $6740, y
+            sta $6760, y
+            sta $6780, y
+            sta $67A0, y
+
+            ; top right corner
+            sta $675C, y
+            sta $677C, y
+            sta $679C, y
+            sta $67BC, y
+
+            dey
+            bpl _loop
+    .scend
+    jmp AttributeWrite_67C0_to_67FF
 
 ; Skips doing top 2 and bottom 2 columns
 DoHorizontalClear:
-    ldy #$E0
     cmp #$60
     bne FillRoomRAM_64_Horizontal
 
-FillRoomRAM_60_Horizontal:
-    .scope
-        lda #$FF
-        _loop:
-            sta $6080 - $E0,y     ;
-            sta $60A0 - $E0,y     ;
-            sta $60C0 - $E0,y     ;
-            sta $60E0 - $E0,y     ;
-
-            sta $6100 - $E0,y     ;
-            sta $6120 - $E0,y     ;
-            sta $6140 - $E0,y     ;
-            sta $6160 - $E0,y     ;
-            sta $6180 - $E0,y     ;
-            sta $61A0 - $E0,y     ;
-            sta $61C0 - $E0,y     ;
-            sta $61E0 - $E0,y     ;
-
-            sta $6200 - $E0,y     ;
-            sta $6220 - $E0,y     ;
-            sta $6240 - $E0,y     ;
-            sta $6260 - $E0,y     ;
-            sta $6280 - $E0,y     ;
-            sta $62A0 - $E0,y     ;
-            sta $62C0 - $E0,y     ;
-            sta $62E0 - $E0,y     ;
-
-            sta $6300 - $E0,y     ;
-            sta $6320 - $E0,y     ;
-
-            iny
-        bne _loop
+    FillRoomRAM_60_Horizontal:
+        jsr ClearRoom_Box_6000
+        jsr ClearRoom_Left_And_Right_Columns_6000
         jmp AttributeWrite_63C0_to_63FF
-    .scend
 
 FillRoomRAM_64_Horizontal:
-    lda #$FF
-    .scope
-        _loop:
-            sta $6480 - $E0,y     ;
-            sta $64A0 - $E0,y     ;
-            sta $64C0 - $E0,y     ;
-            sta $64E0 - $E0,y     ;
-
-            sta $6500 - $E0,y     ;
-            sta $6520 - $E0,y     ;
-            sta $6540 - $E0,y     ;
-            sta $6560 - $E0,y     ;
-            sta $6580 - $E0,y     ;
-            sta $65A0 - $E0,y     ;
-            sta $65C0 - $E0,y     ;
-            sta $65E0 - $E0,y     ;
-
-            sta $6600 - $E0,y     ;
-            sta $6620 - $E0,y     ;
-            sta $6640 - $E0,y     ;
-            sta $6660 - $E0,y     ;
-            sta $6680 - $E0,y     ;
-            sta $66A0 - $E0,y     ;
-            sta $66C0 - $E0,y     ;
-            sta $66E0 - $E0,y     ;
-
-            sta $6700 - $E0,y     ;
-            sta $6720 - $E0,y     ;
-            iny
-        bne _loop
-        jmp AttributeWrite_67C0_to_67FF
-.scend
-
-
-FillRoomRAM_64_Vertical_Trampoline:
-    jmp FillRoomRAM_64_Vertical
+    jsr ClearRoom_Box_6400
+    jsr ClearRoom_Left_And_Right_Columns_6400
+    jmp AttributeWrite_67C0_to_67FF
 
 DoVerticalClear:
-    ldy #$E8
     cmp #$60
-    bne FillRoomRAM_64_Vertical_Trampoline
-FillRoomRAM_60_Vertical:
-    .scope
-        lda #$FF
+    bne FillRoomRAM_64_Vertical
+
+    FillRoomRAM_60_Vertical:
+        jsr ClearRoom_Box_6000
+        jsr ClearRoom_Top_And_Bottom_Rows_6000
 
         ; Clear door tiles
         ; Left door hole
@@ -1149,137 +1079,62 @@ FillRoomRAM_60_Vertical:
         sta $61E2 + $1A
         sta $61E3 + $1A
 
-        _loop:
-            sta $6004 - $E8,y     ;
-            sta $6024 - $E8,y     ;
-            sta $6044 - $E8,y    ;
-            sta $6064 - $E8,y     ;
-            sta $6084 - $E8,y     ;
-            sta $60A4 - $E8,y     ;
-            sta $60C4 - $E8,y     ;
-            sta $60E4 - $E8,y     ;
-
-            sta $6104 - $E8,y     ;
-            sta $6124 - $E8,y     ;
-            sta $6144 - $E8,y     ;
-            sta $6164 - $E8,y     ;
-            sta $6184 - $E8,y     ;
-            sta $61A4 - $E8,y     ;
-            sta $61C4 - $E8,y     ;
-            sta $61E4 - $E8,y     ;
-
-            sta $6204 - $E8,y     ;
-            sta $6224 - $E8,y     ;
-            sta $6244 - $E8,y     ;
-            sta $6264 - $E8,y     ;
-            sta $6284 - $E8,y     ;
-            sta $62A4 - $E8,y     ;
-            sta $62C4 - $E8,y     ;
-            sta $62E4 - $E8,y     ;
-
-            sta $6304 - $E8,y     ;
-            sta $6324 - $E8,y     ;
-            sta $6344 - $E8,y     ;
-            sta $6364 - $E8,y     ;
-            sta $6384 - $E8,y     ;
-            sta $63A4 - $E8,y     ;
-
-            iny
-        bne _loop
         jmp AttributeWrite_63C0_to_63FF
-    .scend
 
 FillRoomRAM_64_Vertical:
-    lda #$FF
-    .scope
+    jsr ClearRoom_Box_6400
+    jsr ClearRoom_Top_And_Bottom_Rows_6400
 
-        ; Clear door tiles
-        ; Left door hole
-        sta $6542
-        sta $6543
-        sta $6562
-        sta $6563
-        sta $6582
-        sta $6583
-        sta $65A2
-        sta $65A3
-        sta $65C2
-        sta $65C3
-        sta $65E2
-        sta $65E3
+    ; Clear door tiles
+    ; Left door hole
+    sta $6542
+    sta $6543
+    sta $6562
+    sta $6563
+    sta $6582
+    sta $6583
+    sta $65A2
+    sta $65A3
+    sta $65C2
+    sta $65C3
+    sta $65E2
+    sta $65E3
 
-        ; Right door hole
-        sta $6542 + $1A
-        sta $6543 + $1A
-        sta $6562 + $1A
-        sta $6563 + $1A
-        sta $6582 + $1A
-        sta $6583 + $1A
-        sta $65A2 + $1A
-        sta $65A3 + $1A
-        sta $65C2 + $1A
-        sta $65C3 + $1A
-        sta $65E2 + $1A
-        sta $65E3 + $1A
+    ; Right door hole
+    sta $6542 + $1A
+    sta $6543 + $1A
+    sta $6562 + $1A
+    sta $6563 + $1A
+    sta $6582 + $1A
+    sta $6583 + $1A
+    sta $65A2 + $1A
+    sta $65A3 + $1A
+    sta $65C2 + $1A
+    sta $65C3 + $1A
+    sta $65E2 + $1A
+    sta $65E3 + $1A
 
-        _loop:
-            sta $6404 - $E8,y     ;
-            sta $6424 - $E8,y     ;
-            sta $6444 - $E8,y     ;
-            sta $6464 - $E8,y     ;
-            sta $6484 - $E8,y     ;
-            sta $64A4 - $E8,y     ;
-            sta $64C4 - $E8,y     ;
-            sta $64E4 - $E8,y     ;
-
-            sta $6504 - $E8,y     ;
-            sta $6524 - $E8,y     ;
-            sta $6544 - $E8,y     ;
-            sta $6564 - $E8,y     ;
-            sta $6584 - $E8,y     ;
-            sta $65A4 - $E8,y     ;
-            sta $65C4 - $E8,y     ;
-            sta $65E4 - $E8,y     ;
-
-            sta $6604 - $E8,y     ;
-            sta $6624 - $E8,y     ;
-            sta $6644 - $E8,y     ;
-            sta $6664 - $E8,y     ;
-            sta $6684 - $E8,y     ;
-            sta $66A4 - $E8,y     ;
-            sta $66C4 - $E8,y     ;
-            sta $66E4 - $E8,y     ;
-
-            sta $6704 - $E8,y     ;
-            sta $6724 - $E8,y     ;
-            sta $6744 - $E8,y     ;
-            sta $6764 - $E8,y     ;
-            sta $6784 - $E8,y     ;
-            sta $67A4 - $E8,y     ;
-            iny
-        bne _loop
-        jmp AttributeWrite_67C0_to_67FF
-.scend
+    jmp AttributeWrite_67C0_to_67FF
 
 ; Ophis macro to help unroll loops
 ; Will call sta on 16 continuous bytes in memory
-.macro sta_16x
+.macro sta_16_bytes
     sta _1
-    sta _1 + 1
-    sta _1 + 2
-    sta _1 + 3
-    sta _1 + 4
-    sta _1 + 5
-    sta _1 + 6
-    sta _1 + 7
-    sta _1 + 8
-    sta _1 + 9
-    sta _1 + 10
-    sta _1 + 11
-    sta _1 + 12
-    sta _1 + 13
-    sta _1 + 14
-    sta _1 + 15
+    sta _1 + $01
+    sta _1 + $02
+    sta _1 + $03
+    sta _1 + $04
+    sta _1 + $05
+    sta _1 + $06
+    sta _1 + $07
+    sta _1 + $08
+    sta _1 + $09
+    sta _1 + $0A
+    sta _1 + $0B
+    sta _1 + $0C
+    sta _1 + $0D
+    sta _1 + $0E
+    sta _1 + $0F
 .macend
 
 AttributeWrite_63C0_to_63FF:
@@ -1290,10 +1145,10 @@ AttributeWrite_63C0_to_63FF:
         rts
 
     ResetAttrTable_63C0:
-        `sta_16x $63C0
-        `sta_16x $63D0
-        `sta_16x $63E0
-        `sta_16x $63F0
+        `sta_16_bytes $63C0
+        `sta_16_bytes $63D0
+        `sta_16_bytes $63E0
+        `sta_16_bytes $63F0
 
         ; Door spots on the opposite name table
         rts
@@ -1305,18 +1160,242 @@ AttributeWrite_67C0_to_67FF:
     beq ResetAttrTable_67C0
         rts
 
-    ResetAttrTable_67C0:
-        `sta_16x $67C0
-        `sta_16x $67D0
-        `sta_16x $67E0
-        `sta_16x $67F0
+ResetAttrTable_67C0:
+    `sta_16_bytes $67C0
+    `sta_16_bytes $67D0
+    `sta_16_bytes $67E0
+    `sta_16_bytes $67F0
 
-        ; Door spots on the opposite name table
-         rts
+    rts
 
-; Search HxD - BB BB BB BB
-.byte $BB, $BB, $BB, $BB
+.macro clear_box_row
+    sta _1 + $04
+    sta _1 + $05
+    sta _1 + $06
+    sta _1 + $07
+    sta _1 + $08
+    sta _1 + $09
+    sta _1 + $0A
+    sta _1 + $0B
+    sta _1 + $0C
+    sta _1 + $0D
+    sta _1 + $0E
+    sta _1 + $0F
+    sta _1 + $10
+    sta _1 + $11
+    sta _1 + $12
+    sta _1 + $13
+    sta _1 + $14
+    sta _1 + $15
+    sta _1 + $16
+    sta _1 + $17
+    sta _1 + $18
+    sta _1 + $19
+    sta _1 + $1A
+    sta _1 + $1B
+.macend
 
+ClearRoom_Box_6400:
+    lda #$FF
+    `clear_box_row $6480
+    `clear_box_row $64A0
+    `clear_box_row $64C0
+    `clear_box_row $64E0
+
+    `clear_box_row $6500
+    `clear_box_row $6520
+    `clear_box_row $6540
+    `clear_box_row $6560
+    `clear_box_row $6580
+    `clear_box_row $65A0
+    `clear_box_row $65C0
+    `clear_box_row $65E0
+
+    `clear_box_row $6600
+    `clear_box_row $6620
+    `clear_box_row $6640
+    `clear_box_row $6660
+    `clear_box_row $6680
+    `clear_box_row $66A0
+    `clear_box_row $66C0
+    `clear_box_row $66E0
+
+    `clear_box_row $6700
+    `clear_box_row $6720
+    `clear_box_row $6740
+    `clear_box_row $6760
+    `clear_box_row $6780
+    `clear_box_row $67A0
+    rts
+
+.scope
+ClearRoom_Left_And_Right_Columns_6000:
+    ldy #$04
+    _left_col_loop:
+
+        sta $6080, y
+        sta $60A0, y
+        sta $60C0, y
+        sta $60E0, y
+
+        sta $6100, y
+        sta $6120, y
+        sta $6140, y
+        sta $6160, y
+        sta $6180, y
+        sta $61A0, y
+        sta $61C0, y
+        sta $61E0, y
+
+        sta $6200, y
+        sta $6220, y
+        sta $6240, y
+        sta $6260, y
+        sta $6280, y
+        sta $62A0, y
+        sta $62C0, y
+        sta $62E0, y
+
+        sta $6300, y
+        sta $6320, y
+
+        dey
+        bpl _left_col_loop
+
+    ldy #$04
+    _right_col_loop:
+
+        sta $609C, y
+        sta $60BC, y
+        sta $60DC, y
+        sta $60FC, y
+
+        sta $611C, y
+        sta $613C, y
+        sta $615C, y
+        sta $617C, y
+        sta $619C, y
+        sta $61BC, y
+        sta $61DC, y
+        sta $61FC, y
+
+        sta $621C, y
+        sta $623C, y
+        sta $625C, y
+        sta $627C, y
+        sta $629C, y
+        sta $62BC, y
+        sta $62DC, y
+        sta $62FC, y
+
+        sta $631C, y
+        sta $633C, y
+        dey
+        bpl _right_col_loop
+    rts
+.scend
+
+.scope
+ClearRoom_Left_And_Right_Columns_6400:
+    ldy #$04
+    _left_col_loop:
+
+        sta $6480, y
+        sta $64A0, y
+        sta $64C0, y
+        sta $64E0, y
+
+        sta $6500, y
+        sta $6520, y
+        sta $6540, y
+        sta $6560, y
+        sta $6580, y
+        sta $65A0, y
+        sta $65C0, y
+        sta $65E0, y
+
+        sta $6600, y
+        sta $6620, y
+        sta $6640, y
+        sta $6660, y
+        sta $6680, y
+        sta $66A0, y
+        sta $66C0, y
+        sta $66E0, y
+
+        sta $6700, y
+        sta $6720, y
+        dey
+        bpl _left_col_loop
+
+    ldy #$04
+    _right_col_loop:
+
+        sta $649C, y
+        sta $64BC, y
+        sta $64DC, y
+        sta $64FC, y
+
+        sta $651C, y
+        sta $653C, y
+        sta $655C, y
+        sta $657C, y
+        sta $659C, y
+        sta $65BC, y
+        sta $65DC, y
+        sta $65FC, y
+
+        sta $661C, y
+        sta $663C, y
+        sta $665C, y
+        sta $667C, y
+        sta $669C, y
+        sta $66BC, y
+        sta $66DC, y
+        sta $66FC, y
+
+        sta $671C, y
+        sta $673C, y
+        dey
+        bpl _right_col_loop
+    rts
+.scend
+
+.scope
+    ClearRoom_Top_And_Bottom_Rows_6000:
+        ldy #$17
+        _loop:
+            sta $6004, y
+            sta $6024, y
+            sta $6044, y
+            sta $6064, y
+
+            sta $6344, y
+            sta $6364, y
+            sta $6384, y
+            sta $63A4, y
+            dey
+            bpl _loop
+        rts
+.scend
+
+.scope
+    ClearRoom_Top_And_Bottom_Rows_6400:
+        ldy #$17
+        _loop:
+            sta $6404, y
+            sta $6424, y
+            sta $6444, y
+            sta $6464, y
+
+            sta $6744, y
+            sta $6764, y
+            sta $6784, y
+            sta $67A4, y
+            dey
+            bpl _loop
+        rts
+.scend
 ;----------------------------------------------------------------------------------------------------
 
 RESET_Bank06:

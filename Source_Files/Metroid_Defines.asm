@@ -273,11 +273,19 @@
 
 .alias SamusHorzAccel   $D2   ;Value used in calculating horizontal acceleration on Samus.
 .alias SamusHorzSpdMax  $D3   ;Used to calc maximum horizontal speed Samus can reach.
-
+; used, but isolated    $D4     ; D4, D5, and D6 are set, used, and then are completely free afterwards
+; used, but isolated    $D5
+; used, but isolated    $D6
 .alias SpareMemD7       $D7     ;Written to in title routine, but never accessed.
 .alias IntroMusRstrt    $D8     ;After all title routines run twice, restarts intro music.
+; unused                $D9
+; unused                $DA
+; unused                $DB
+; unused                $DC
+; unused                $DD
+; unused                $DE
+; unused                $DF
 
-; 
 .alias SFXPtrE0         $E0     ;Pointer used by SFX routines.
 .alias SFXPtrE0LB       $E0     ;Pointer used by SFX routines, lower byte.
 .alias SFXPtrE0UB       $E1     ;Pointer used by SFX routines, upper byte.
@@ -873,34 +881,32 @@
 .alias AreaRoutine              $95C3
 .alias EnemyHitPointTbl         $962B
 .alias EnemyInitDelayTbl        $96BB
-.alias DecSpriteYCoord          $9893
-.alias NMIScreenWrite           $9A07
 .alias EndGamePalWrite          $9F54
 .alias MemuByte                 $95E4
-.alias CopyMap                  $A93E
 .alias EnemyAnimIndexTbl        $AC85
 .alias EnemyFramePtrTbl_Hi      $AD0F
 .alias EnemyFramePtrTbl_Lo      $ADA6
 .alias EnemyPlacePtrTbl_Hi      $AEB6
 .alias EnemyPlacePtrTbl_Lo      $AEDC
 .alias RoomPointerTable_Hi      $AEEC
-.alias RoomPointerTable_Lo      $AF1A
-.alias MacroLowerRight          $AF48
-.alias MacroLowerLeft           $AF8d
-.alias MacroUpperRight          $AFD2
-.alias MacroUpperLeft           $B017
+.alias RoomPointerTable_Lo      $AF1C
+.alias MacroLowerRight          $AF4C
+.alias MacroLowerLeft           $AF91
+.alias MacroUpperRight          $AFD6
+.alias MacroUpperLeft           $B01B
 .alias SoundEngineOrg           $B200
 .alias SXFInitTables            $B29D
 .alias SoundEngineEntryPoint    $B3CC
 .alias StructPointerTable_Hi    $BF0F
-.alias StructPointerTable_Lo    $BF41
+.alias StructPointerTable_Lo    $BF50
 .alias InterruptVectors         $BFFA
 
 ;----------------------------------------------------------------------------------------------------
 
-.alias WorldMapRAM      $7000   ;Thru $73FF. The map is 1Kb in size (1024 bytes).
-
-.alias SamusData        $77FE   ;Thru $782D. Samus saved game data (not used).
+.alias WorldMapRAM              $7000   ;Thru $73FF. The map is 1Kb in size (1024 bytes).
+.alias ClearRoom_Box_6000       $7400
+.alias IdentityTable            $7E00
+.alias SamusData                $77FE   ;Thru $782D. Samus saved game data (not used).
 
 ;-----------------------------------------[ MMC Registers ]------------------------------------------
 

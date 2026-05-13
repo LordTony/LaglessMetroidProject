@@ -5,6 +5,7 @@
 ;------------------------------------------[ Graphics data ]-----------------------------------------
 
 ;Norfair enemy tile patterns.
+GFXNorfairEnemies:
 Bank02_L8D60:  .byte $38, $7C, $A6, $FA, $BE, $FA, $6C, $38, $30, $6C, $06, $FA, $BA, $D2, $0C, $38
 Bank02_L8D70:  .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
 Bank02_L8D80:  .byte $03, $FF, $1F, $3F, $3F, $7F, $7F, $FF, $00, $00, $04, $08, $00, $00, $00, $00
@@ -71,6 +72,7 @@ Bank02_L9140:  .byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $00, $00, $00, $00,
 Bank02_L9150:  .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
 
 ;Tourian enemy tile patterns.
+GFXTourianEnemies:
 Bank02_L9160:  .byte $00, $00, $00, $00, $00, $00, $00, $01, $00, $00, $00, $00, $01, $03, $06, $0D
 Bank02_L9170:  .byte $00, $00, $00, $00, $00, $00, $98, $64, $00, $00, $00, $7E, $C3, $00, $00, $00
 Bank02_L9180:  .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $80, $C0, $60, $30
@@ -277,12 +279,14 @@ Bank02_L95D7:  .byte $16           ;Samus start x coord on world map.
 Bank02_L95D8:  .byte $0D           ;Samus start y coord on world map.
 Bank02_L95D9:  .byte $6E           ;Samus start verticle screen position.
 
-Bank02_L95DA:  .byte $01, $00, $03, $77, $53, $57, $55, $59, $5B, $4F
+Bank02_L95DA:  .byte $01, $00
+Bank02_L95DC:  .byte $03
+Bank02_L95DD:  .byte $77, $53, $57, $55, $59, $5B, $4F
 
 .advance MemuByte
     .byte $32
 
-Bank02_L95E5:  LDA $6B02,X
+Bank02_L95E5:  LDA EnDataIndex,X
 Bank02_L95E8:  JSR $8024
 
 Bank02_L95EB:  .word $98D3
@@ -302,6 +306,7 @@ Bank02_L9605:  .word $9AE9
 Bank02_L9607:  .word $9B64
 Bank02_L9609:  .word $9833
 
+.advance $960B
 Bank02_L960B:  .byte $28, $28, $28, $28, $30, $30, $00, $00, $00, $00, $00, $00, $75, $75, $84, $82
 
 Bank02_L961B:  .byte $00, $00, $11, $11, $13, $18, $35, $35, $41, $41, $4B, $4B, $00, $00, $00, $00
@@ -328,6 +333,7 @@ Bank02_L96BB:  .byte $10, $01, $01, $01, $10, $10, $01, $08, $09, $10, $01, $10,
 
 Bank02_L96CB:  .byte $12, $14, $00, $00, $00, $00, $02, $02, $00, $04, $06, $09, $0E, $10, $12, $00
 
+.advance $96DB
 Bank02_L96DB:  .word $97E7, $97E7, $97E7, $97E7, $97E7, $97EA, $97ED, $97ED
 Bank02_L96EB:  .word $97ED, $97ED, $97ED, $97ED, $97ED, $97ED, $97ED, $97ED
 Bank02_L96FB:  .word $97ED, $97ED, $97ED, $97ED, $97ED, $97ED, $97ED, $97ED
@@ -346,6 +352,7 @@ Bank02_L977B:  .byte $4C, $4C, $01, $00, $00, $00, $00, $40, $00, $64, $44, $44,
 Bank02_L978B:  .byte $00, $00, $00, $00, $4D, $4D, $53, $57, $00, $00, $00, $00, $00, $00, $00, $00
 Bank02_L979B:  .byte $08, $F8, $00, $00, $00, $00, $08, $F8, $00, $00, $00, $F8 
 
+.advance $97A7
 Bank02_L97A7:  .word $97F7, $9806, $9815, $9824, $9B9E, $9BA3, $9BA8, $9BAD
 Bank02_L97B7:  .word $9BB2, $9BB7, $9BBC, $9BC1, $9BC6, $9BCB, $9BD0, $9BD5
 Bank02_L97C7:  .word $9BDA, $9BDA, $9BDA, $9BDA, $9BDA
@@ -495,7 +502,7 @@ Bank02_L9949:  JSR $98F4
 Bank02_L994C:  LDA #$03
 Bank02_L994E:  JMP $8000
 Bank02_L9951:  JMP $8006
-Bank02_L9954:  STA $6B02,X
+Bank02_L9954:  STA EnDataIndex,X
 Bank02_L9957:  LDA $040B,X
 Bank02_L995A:  PHA 
 Bank02_L995B:  JSR $802A

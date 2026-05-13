@@ -5,6 +5,7 @@
 ;------------------------------------------[ Graphics data ]-----------------------------------------
 
 ;Samus end tile patterns.
+GFXEndingSamus:
 Bank04_L8D60:  .byte $00, $00, $00, $00, $01, $01, $03, $03, $00, $00, $00, $00, $00, $00, $00, $00
 Bank04_L8D70:  .byte $00, $00, $3C, $FF, $FF, $BD, $5A, $24, $00, $00, $00, $20, $00, $42, $E7, $FF
 Bank04_L8D80:  .byte $00, $00, $00, $00, $00, $01, $01, $03, $00, $00, $00, $00, $00, $00, $0C, $1C
@@ -88,23 +89,8 @@ Bank04_L9250:  .byte $00, $80, $80, $C0, $C0, $C0, $C0, $00, $00, $00, $00, $00,
 Bank04_L9260:  .byte $07, $07, $0F, $08, $07, $0F, $07, $00, $03, $00, $00, $07, $08, $00, $00, $00
 Bank04_L9270:  .byte $00, $00, $00, $00, $00, $00, $00, $00, $F0, $F0, $70, $78, $38, $78, $7C, $1E
 
-;Unused tile patterns.
-Bank04_L9280:  .byte $F2, $64, $0F, $DA, $8D, $5B, $10, $10, $FB, $70, $01, $C0, $8D, $58, $10, $10
-Bank04_L9290:  .byte $90, $40, $20, $80, $B0, $70, $5C, $60, $EF, $3E, $18, $80, $00, $10, $5C, $60
-Bank04_L92A0:  .byte $B8, $38, $30, $80, $80, $60, $20, $18, $A0, $A4, $66, $C6, $3E, $0C, $20, $18
-Bank04_L92B0:  .byte $30, $27, $2D, $38, $2A, $5E, $70, $40, $10, $00, $01, $00, $12, $20, $00, $00
-Bank04_L92C0:  .byte $0A, $40, $40, $51, $78, $C4, $C2, $90, $31, $3D, $3B, $2C, $06, $3B, $3D, $6F
-Bank04_L92D0:  .byte $00, $08, $10, $80, $42, $00, $2E, $5A, $F9, $B1, $40, $60, $3E, $0E, $82, $92
-Bank04_L92E0:  .byte $00, $00, $00, $00, $00, $0C, $0E, $0C, $00, $00, $00, $0C, $1E, $13, $15, $16
-Bank04_L92F0:  .byte $00, $01, $01, $00, $00, $08, $04, $12, $00, $00, $00, $06, $0F, $07, $03, $09
-Bank04_L9300:  .byte $5D, $23, $54, $2B, $24, $1E, $0F, $04, $5D, $23, $55, $2B, $20, $1C, $0F, $04
-Bank04_L9310:  .byte $01, $A7, $06, $0B, $4A, $D6, $2C, $F0, $59, $F1, $52, $FB, $6A, $D6, $2C, $F0
-Bank04_L9320:  .byte $EC, $F5, $7C, $99, $42, $60, $38, $0F, $CE, $D5, $70, $9D, $47, $68, $38, $0F
-Bank04_L9330:  .byte $AF, $73, $36, $26, $0C, $1C, $78, $C0, $AF, $73, $76, $A6, $4C, $1C, $78, $C0
-Bank04_L9340:  .byte $69, $2C, $0E, $77, $D4, $B4, $E2, $00, $03, $01, $00, $70, $F0, $F0, $E0, $00
-Bank04_L9350:  .byte $69, $2C, $0E, $37, $14, $04, $02, $00, $03, $01, $00, $30, $10, $00, $00, $00
-
 ;Misc. tile patterns.
+GFXMiscTiles:
 Bank04_L9360:  .byte $FF, $FF, $C0, $C0, $CF, $CB, $CC, $CC, $00, $00, $1F, $3F, $3F, $38, $3B, $3B
 Bank04_L9370:  .byte $FC, $FC, $0C, $0C, $CC, $4C, $CC, $CC, $00, $04, $EC, $FC, $FC, $3C, $BC, $BC
 Bank04_L9380:  .byte $CB, $CF, $C0, $C0, $FF, $FF, $00, $00, $3B, $30, $3F, $1F, $7F, $FF, $00, $00
@@ -279,12 +265,14 @@ Bank04_L95D7:  .byte $07           ;Samus start x coord on world map.
 Bank04_L95D8:  .byte $14           ;Samus start y coord on world map.
 Bank04_L95D9:  .byte $6E           ;Samus start verticle screen position.
 
-Bank04_L95DA:  .byte $06, $00, $03, $43, $00, $00, $00, $00, $00, $00
+Bank04_L95DA:  .byte $06, $00
+Bank04_L95DC:  .byte $03
+Bank04_L95DD:  .byte $43, $00, $00, $00, $00, $00, $00
 
 .advance MemuByte
     .byte $64
 
-Bank04_L95E5:  LDA $6B02,X
+Bank04_L95E5:  LDA EnDataIndex,X
 Bank04_L95E8:  JSR $8024
 
 Bank04_L95EB:  .word $991C
@@ -304,6 +292,7 @@ Bank04_L9605:  .word $95CB
 Bank04_L9607:  .word $95CB
 Bank04_L9609:  .word $95CB
 
+.advance $960B
 Bank04_L960B:  .byte $27, $27, $29, $29, $2D, $2B, $31, $2F, $33, $33, $41, $41, $48, $48, $50, $4E
 
 Bank04_L961B:  .byte $6D, $6F, $00, $00, $00, $00, $64, $64, $64, $64, $00, $00, $00, $00, $00, $00
@@ -330,7 +319,7 @@ Bank04_L96BB:  .byte $08, $08, $01, $01, $01, $01, $10, $08, $10, $00, $00, $01,
 
 Bank04_L96CB:  .byte $00, $03, $00, $06, $08, $0C, $00, $0A, $0E, $11, $13, $00, $00, $00, $00, $00
 
-
+.advance $96DB
 Bank04_L96DB:  .word $97E9, $97EC, $97EF, $97EF, $97EF, $97EF, $97EF, $97EF
 Bank04_L96EB:  .word $97EF, $97EF, $97EF, $97EF, $97EF, $97F2, $97F5, $9809
 Bank04_L96FB:  .word $981D, $981D, $981D, $981D, $981D, $981D, $981D, $981D
@@ -349,6 +338,7 @@ Bank04_L977B:  .byte $64, $6C, $21, $01, $04, $00, $4C, $40, $04, $00, $00, $40,
 Bank04_L978B:  .byte $00, $00, $5F, $62, $64, $64, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
 Bank04_L979B:  .byte $0C, $F4, $00, $00, $00, $00, $00, $00, $F4, $00, $00, $00
 
+.advance $97A7
 Bank04_L97A7:  .word $98C9, $98D8, $98E7, $98F6, $9C4A, $9C4F, $9C54, $9C59
 Bank04_L97B7:  .word $9C5E, $9C63, $9C68, $9C6D, $9C72, $9C77, $9C7C, $9C81
 Bank04_L97C7:  .word $9C86, $9C86, $9C86, $9C86, $9C86
@@ -665,7 +655,7 @@ Bank04_L9B3B:  RTS
 
 Bank04_L9B3C:  LDY $6AF4,X
 Bank04_L9B3F:  BEQ $9B67
-Bank04_L9B41:  LDA $6B02,X
+Bank04_L9B41:  LDA EnDataIndex,X
 Bank04_L9B44:  CMP #$0A
 Bank04_L9B46:  BEQ $9B4C
 Bank04_L9B48:  CMP #$09
@@ -700,7 +690,7 @@ Bank04_L9B7F:  TAY
 Bank04_L9B80:  LDA $9BCB,Y
 Bank04_L9B83:  STA $04
 Bank04_L9B85:  LDA $9BDA,Y
-Bank04_L9B88:  STA $6B02,X
+Bank04_L9B88:  STA EnDataIndex,X
 Bank04_L9B8B:  TYA 
 Bank04_L9B8C:  PLP 
 Bank04_L9B8D:  ROL 

@@ -79,7 +79,9 @@ L8070:  RTS                     ;
 
 InitAfterReset:
 L8071:  LDY #$02                ;
+        STY IntroMusRstrt 
 L8077:  DEY                     ;
+;DEBUG_NARPASS_HACK:  STY NARPASSWORD         ; While debugging the game, play with narpass always
 L807A:  STY SpareMemD1          ;
 L807C:  DEY                     ;
 L8075:  STY HorzCntrNonLinr     ;
@@ -90,14 +92,8 @@ L807F:  STY VertCntrLinear      ;
 L8081:  STY SamusHorzSpdMax     ;
 
 L8083:  STY NARPASSWORD         ;Set NARPASSWORD not active.
-nop
-
 L8086:  STY VertCntrNonLinr     ;
 L8088:  STY SamusJmpDsplcmnt    ;
-
-L808A:  LDA #$02                ;
-L808C:  STA IntroMusRstrt       ;Title rountines cycle twice before restart of music.
-
 L808E:  STY SpareMemB7          ;Not used.
 L8090:  STY SpareMemB8          ;
 
@@ -107,6 +103,7 @@ L8096:  STY IntroStarOffset     ;Reset index into IntroStarPntr table.
 L8098:  STY FadeDataIndex       ;Reset index into fade out palette data.
 
 L809A:  STY GenPtr00LB          ;Set $0000 to point to address $6000.
+        jsr CreateRoomEraseFunction
 L809C:  LDX #>RoomRAMA          ;
 
 RAM6000LoadLoop:
@@ -151,9 +148,9 @@ L80D4:  STA MultiSFXFlag        ;Initiates intro music.
 L80D7:  JSR ScreenOff           ;($C439)Turn screen off.
 L80DA:  JSR ClearNameTables     ;($C158)Erase name table data.
 
-L80DD:  LDX #$F4                ;Lower address of PPU information.
-L80DF:  LDY #$82                ;Upper address of PPU information.
-L80E1:  JSR PrepPPUProcess     ;($C20E) Writes background of intro screen to name tables.
+L80DD:  LDX #<L82F4             ;Lower address of PPU information.
+L80DF:  LDY #>L82F4             ;Upper address of PPU information.
+L80E1:  JSR PrepPPUProcess      ;($C20E) Writes background of intro screen to name tables.
 
 L80E4:  LDA #$01                ;
 L80E6:  STA PalDataPending      ;Prepare to load palette data.
@@ -169,8 +166,6 @@ L80F2:  LDA #$00                ;Not used.
 L80F4:  STA SpareMemD7          ;
 
 L80F6:  JMP ScreenOn            ;($C447)Turn screen on.
-; moved MultiSFXFlag to ZP
-nop
 
 ;----------------------------------------------------------------------------------------------------
 
@@ -384,7 +379,6 @@ LCB12:  LDA #SUIT_OFF           ;Suit OFF, baby!
 
 LCB14:* STA JustInBailey        ;Store Samus suit status.
 LCB17:  RTS                     ;
-nop
 
 ;Table used by above subroutine to determine ending type.
 AgeTable:
@@ -406,8 +400,6 @@ Bank00_Amul16:
     asl
     asl
     rts
-
-.advance $822E
 
 ChangeIntroNT:
 L822E:  LDA PPUCNT0ZP           ;
@@ -492,13 +484,6 @@ L8289:  RTS                     ;
 
 ;----------------------------------------------------------------------------------------------------
 
-;Unused intro routines. Perhaps from the FDS version of the game.
-
-L828A:  .byte $A5, $2C, $D0, $14, $A5, $B7, $D0, $10, $A5, $B8, $29, $0F, $D0, $0A, $A9, $01
-L829A:  .byte $85, $D2, $A9, $10, $85, $2C, $E6, $1F, $60
-
-;----------------------------------------------------------------------------------------------------
-
 PrepIntroRestart:
 L82A3:  LDA Timer2              ;Check if delay timer has expired.  If not, branch
 L82A5:  BNE ExitPrepRestart     ;to exit, else run this rouine.
@@ -546,10 +531,6 @@ L82E7:  STA IntroMusRstrt       ;of the title routines.
 
 ExitPrepRestart:
 L82E9:  RTS                     ;Exit the restart intro routine.
-; moved MultiSFXFlag to ZP
-nop
-nop
-nop
 
 DecIntroCounter:
 L82EA:  DEC IntroMusRstrt       ;One title routine cycle complete. Decrement intro
@@ -624,6 +605,7 @@ L840C:  .byte $23, $A0, $20     ;PPU address and string length.
 L840F:  .byte $8A, $8B, $8A, $8B, $8A, $8B, $8A, $8B, $8A, $8B, $8A, $8B, $8A, $8B, $8A, $8B
 L841F:  .byte $8A, $8B, $8A, $8B, $8A, $8B, $8A, $8B, $8A, $8B, $8A, $8B, $8A, $8B, $8A, $8B
 
+
 ;Writes some blank spaces in row $20A0 (6th row from top).
 IntroRow0_6:
 L842F:  .byte $20, $A8, $4F     ;PPU address and string length.
@@ -693,6 +675,7 @@ L852B:  .byte $FF, $FF
 IntroAttrib1_0:
 L852D:  .byte $27, $C0, $20     ;PPU address and string length.
 L8530:  .byte $00, $00, $00, $00, $00, $00, $00, $00, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
+L8768:  ; Interleaving tables here since 16 "$FF" bytes are used in more than 1 spot
 L8540:  .byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
 
 ;Writes row $27E0 (24th row from top).
@@ -801,12 +784,6 @@ L871D:  .byte $00               ;End PPU string write.
 
 ;----------------------------------------------------------------------------------------------------
 
-;Not used.
-L871E:  .byte $46, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
-L872E:  .byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $20, $00, $00, $00, $00, $00, $00
-L873E:  .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
-L874E:  .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00 
-
 ;----------------------------------------------------------------------------------------------------
 
 ;The following error message is diplayed if the player enters an incorrect password.
@@ -816,15 +793,9 @@ L8759:  .byte $0E, $1B, $1B, $18, $1B, $FF, $1D, $1B, $22, $FF, $0A, $10, $0A, $
 ;If the error message above is not being displayed on the password 
 ;screen, the following fifteen blanks spaces are used to cover it up.
 ;              _    _    _    _    _    _    _    _    _    _    _    _    _    _    _
-L8768:  .byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
+;L8768:  .byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
 
-;----------------------------------------------------------------------------------------------------
-
-;Not used.
-L8777:  .byte $79, $87, $00, $00, $00, $00, $00, $00, $01, $00, $00, $00, $00, $00, $02, $00
-L8787:  .byte $00, $03, $00, $00, $00, $00, $00, $00, $01, $00, $00, $00, $00, $00, $02, $00
-L8797:  .byte $00, $03, $A1, $87, $A2, $87, $A5, $87, $A8, $87, $00, $18, $CC, $00, $18, $CD
-L87A7:  .byte $00, $18, $CE, $00 
+; ^-- above line was moved to make some space
 
 ;----------------------------------------------------------------------------------------------------
 
@@ -1393,7 +1364,6 @@ L8AC9:  AND #$0F                ;Change star palette every 16th frame.
 L8ACB:  BNE +                   ;
 
 L8ACD:  LDA PPUStrIndex         ;
-nop
 L8AD0:  BEQ DoStarPalSwitch     ;Is any other PPU data waiting? If so, exit.
 L8AD2:* RTS                     ;
 
@@ -1543,7 +1513,7 @@ L8BB6:  lsr
 L8BB9:  STA $05                 ;Shifts 5 MSBs to LSBs of item # and saves results in $05.
 L8BBB:  asl
         asl
-        asl               ;($C2C6)Multiply by 8.
+        asl                     ;($C2C6)Multiply by 8.
 L8BBE:  STA $02                 ;Restores 5 MSBs of item # and drops 3 LSBs; saves in $02.
 L8BC0:  TXA                     ;
 L8BC1:  SEC                     ;
@@ -1647,9 +1617,6 @@ L8C73:  STA Timer2              ;Set Timer2 time for 120 frames (2 seconds).
 L8C75:  LDA #$18                ;
 L8C77:  STA TitleRoutine        ;Run EnterPassword routine.
 L8C79:  RTS                     ;
-; moved MultiSFXFlag to ZP
-nop
-nop
 
 CalculatePassword:
 L8C7A:  LDA #$00                ;
@@ -1670,15 +1637,12 @@ L8C9B:  STA PasswordByte06      ;
 L8C9E:* LDA InArea              ;Store InArea in bits 0 thru 5 in
 L8CA0:  AND #$3F                ;address $6990.
 L8CA2:  LDY JustInBailey        ;
-nop
 L8CA5:  BEQ +                   ;
 L8CA7:  ORA #$80                ;Sets MSB of $6990 is Samus is suitless.
 L8CA9:* STA PasswordByte08      ;
 L8CAC:  LDA SamusGear           ;
-nop
 L8CAF:  STA PasswordByte09      ;SamusGear stored in $6991.
 L8CB2:  LDA MissileCount        ;
-nop
 L8CB5:  STA PasswordByte0A      ;MissileCount stored in $6992.
 L8CB8:  LDA #$00                ;
 L8CBA:  STA $00                 ;
@@ -1723,7 +1687,6 @@ L8D0F:  JMP LoadPasswordChar    ;($8E6C)Calculate password characters.
 
 LoadPasswordData:
 L8D12:  LDA NARPASSWORD         ;If invincible Samus active, skip
-nop
 L8D15:  BNE +++                 ;further password processing.
 L8D17:  JSR LoadUniqueItems     ;($8BD4)Load unique items from password.
 L8D1A:  JSR LdTanksAndMissiles  ;($8D3D)Calculate number of missiles from password.
@@ -1733,7 +1696,6 @@ L8D22:  AND #$80                ;Samus is not wearing her suit.
 L8D24:  BEQ +                   ;           
 L8D26:  INY                     ;
 L8D27:* STY JustInBailey        ;
-nop
 L8D2A:  LDA PasswordByte08      ;Extract first 5 bits from PasswordByte08
 L8D2D:  AND #$3F                ;and use it to determine starting area.
 L8D2F:  STA InArea              ;
@@ -1747,10 +1709,8 @@ L8D3C:* RTS                     ;
 LdTanksAndMissiles:
 L8D3D:  LDA PasswordByte09      ;Loads Samus gear.
 L8D40:  STA SamusGear           ;Save Samus gear.
-nop
 L8D43:  LDA PasswordByte0A      ;Loads current number of missiles.
 L8D46:  STA MissileCount        ;Save missile count.
-nop
 L8D49:  LDA #$00                ;
 L8D4B:  STA $00                 ;
 L8D4D:  STA $02                 ;
@@ -1806,7 +1766,6 @@ L8DB1:  CMP #$06                ;Ensure the Tank Count does not exceed 6
 L8DB3:  BCC +                   ;tanks. Then stores the number of
 L8DB5:  LDA #$06                ;energy tanks found in TankCount.
 L8DB7:* STA TankCount           ;
-nop
 L8DBA:  LDA #$00                ;
 L8DBC:  LDY $02                 ;
 L8DBE:  BEQ ++                  ;Branch if no missiles found.
@@ -1824,12 +1783,10 @@ L8DD4:  ADC #$4B                ;
 L8DD6:  BCC ++                  ;
 L8DD8:* LDA #$FF                ;If number of missiles exceeds 255, it stays at 255.
 L8DDA:* STA MaxMissiles         ;
-nop
 L8DDD:  RTS                     ;
 
 ValidatePassword:
 L8DDE:  LDA NARPASSWORD         ;
-nop
 L8DE1:  BNE ++                  ;If invincible Samus already active, branch.
 L8DE3:  LDY #$0F                ;
 L8DE5:* LDA PasswordChar00,Y    ;
@@ -1839,7 +1796,6 @@ L8DED:  DEY                     ;Samus, else continue to process password.
 L8DEE:  BPL -                   ;
 L8DF0:  LDA #$01                ;
 L8DF2:  STA NARPASSWORD         ;
-nop
 L8DF5:  BNE ++                  ;
 L8DF7:* JSR UnscramblePassword  ;($8E4E)Unscramble password.
 L8DFA:  JSR PasswordChecksum    ;($8E21)Calculate password checksum.
@@ -2215,8 +2171,8 @@ L90B7:  JMP VBOffAndHorzWr      ;($C47D)Set PPU for horizontal write and turn of
 
 StartContScrn:
 L90BA:  JSR ClearAll            ;($909F)Turn off screen, erase sprites and nametables.
-L90BD:  LDX #$84                ;Low address for PPU write.
-L90BF:  LDY #$99                ;High address for PPU write.
+L90BD:  LDX #<L9984             ;Low address for PPU write.
+L90BF:  LDY #>L9984             ;High address for PPU write.
 L90C1:  JSR PreparePPUProcess   ;($9449)Clears screen and writes "START CONTINUE".
 L90C4:  LDY #$00                ;
 L90C6:  STY StartContinue       ;Set selection sprite at START.
@@ -2257,9 +2213,6 @@ L910F:  STA SpriteRAM+2         ;
 L9112:  LDA #$50                ;Set data for selection sprite.
 L9114:  STA SpriteRAM+3         ;
 L9117:  RTS                     ;
-; moved TriangleSFXFlag to ZP
-nop
-nop
 
 StartContTbl:
 L9118:  .byte $60               ;Y sprite position for START.
@@ -2267,8 +2220,8 @@ L9119:  .byte $78               ;Y sprite position for CONTINUE.
 
 LoadPswdScreen:
 L911A:  JSR ClearAll            ;($909F)Turn off screen, erase sprites and nametables.
-L911D:  LDX #$E3                ;Loads PPU with info to display
-L911F:  LDY #$99                ;PASS WORD PLEASE.
+L911D:  LDX #<L99E3                ;Loads PPU with info to display
+L911F:  LDY #>L99E3                ;PASS WORD PLEASE.
 L9121:  JSR PreparePPUProcess   ;($9449)Load "PASSWORD PLEASE" on screen.
 L9124:  JSR InitGFX7            ;($C6D6)Loads the font for the password.
 L9127:  JSR DispInpChars        ;($940B)Write password character to screen.
@@ -2294,7 +2247,6 @@ L9150:  JMP CheckPassword       ;($8C5E)Check if password is correct.
 L9153:* LDX #$01                ;
 L9155:  STX PPUDataPending      ;Prepare to write the password screen data to PPU.
 L9157:  LDX PPUStrIndex         ;
-nop
 L915A:  LDA #$21                ;Upper byte of PPU string.
 L915C:  JSR WritePPUByte        ;($C36B)Write byte to PPU.
 L915F:  LDA #$A8                ;Lower byte of PPU string.
@@ -2303,14 +2255,14 @@ L9164:  LDA #$0F                ;PPU string length.
 L9166:  JSR WritePPUByte        ;($C36B)Write byte to PPU.
 L9169:  LDA Timer2              ;
 L916B:  BEQ +                   ;
-L916D:  LDA #$59                ;
+L916D:  LDA #<L8759             ;
 L916F:  STA $02                 ;Writes 'ERROR TRY AGAIN' on the screen
-L9171:  LDA #$87                ;if Timer2 is anything but #$00.
+L9171:  LDA #>L8759             ;if Timer2 is anything but #$00.
 L9173:  STA $03                 ;
 L9175:  JMP ++                  ;
-L9178:* LDA #$68                ;
+L9178:* LDA #<L8768             ;
 L917A:  STA $02                 ;
-L917C:  LDA #$87                ;
+L917C:  LDA #>L8768             ;
 L917E:  STA $03                 ;Writes the blank lines that cover
 L9180:* LDY #$00                ;the message 'ERROR TRY AGAIN'.
 L9182:* LDA ($02),Y             ;
@@ -2460,11 +2412,6 @@ L92AA:  STA SpriteRAM+$A        ;
 L92AD:  LDA CharSelectXTbl,Y    ;Set x-Coord of character selection sprite.
 L92B0:  STA SpriteRAM+$B        ;
 L92B3:* RTS                     ;
-; moved TriangleSFXFlag to ZP
-nop
-nop
-nop
-nop
 
 ;The following data does not appear to be used in the program.
 L92B4:  .byte $21, $20
@@ -2540,13 +2487,9 @@ InitializeStats:
 L932B:  LDA #$00                ;
 L932D:  STA SamusStat00         ;
 L9330:  STA TankCount           ;
-nop
 L9333:  STA SamusGear           ;
-nop
 L9336:  STA MissileCount        ;
-nop
 L9339:  STA MaxMissiles         ;
-nop
 L933C:  STA KraidStatueStat     ;Set all of Samus' stats to 0 when starting new game.
 L933F:  STA RidlyStatueStat     ;
 L9342:  STA SamusAgeLo          ;
@@ -2555,17 +2498,16 @@ L9348:  STA SamusAgeHi          ;
 L934B:  STA SamusStat01         ;
 L934E:  STA AtEnding            ;
 L9351:  STA JustInBailey        ;
-nop
 L9354:  LDA #$02                ;
 L9356:  STA SwitchPending       ;Prepare to switch to Brinstar memory page.
 L9358:  RTS                     ;
 
 DisplayPassword:
 L9359:  LDA Timer2              ;Wait for "GAME OVER" to be displayed
-L935B:  BNE $9324               ;for 160 frames (2.6 seconds).
+L935B:  BNE L9324               ;for 160 frames (2.6 seconds).
 L935D:  JSR ClearAll            ;($909F)Turn off screen, erase sprites and nametables.
-L9360:  LDX #$7F                ;Low byte of start of PPU data.
-L9362:  LDY #$93                ;High byte of start of PPU data.
+L9360:  LDX #<L937F             ;Low byte of start of PPU data.
+L9362:  LDY #>L937F             ;High byte of start of PPU data.
 L9364:  JSR PreparePPUProcess   ;($9449)Clears screen and writes "PASS WORD".
 L9367:  JSR InitGFX7            ;($C6D6)Loads the font for the password.
 L936A:  JSR CalculatePassword   ;($8C7A)Calculates the password.
@@ -2600,8 +2542,8 @@ L939D:* RTS                     ;
 
 GameOverScrn:
 L939E:  JSR ClearAll            ;($909F)Turn off screen, erase sprites and nametables.
-L93A1:  LDX #$B9                ;Low byte of start of PPU data.
-L93A3:  LDY #$93                ;High byte of start of PPU data.
+L93A1:  LDX #<L93B9             ;Low byte of start of PPU data.
+L93A3:  LDY #>L93B9             ;High byte of start of PPU data.
 L93A5:  JSR PreparePPUProcess   ;($9449)Clears screen and writes "GAME OVER".
 L93A8:  JSR InitGFX7            ;($C6D6)Loads the font for the password.
 L93AB:  JSR NmiOn               ;($C487)Turn on the nonmaskable interrupt.
@@ -2689,7 +2631,6 @@ L9443:  .byte $22, $64          ;bytes to start writing to the name table, respe
 L9445:  .byte $22, $A4          ;
 L9447:  .byte $22, $E4          ;
 
-
 PreparePPUProcess:
 L9449:  STX $00                 ;Lower byte of pointer to PPU string
 L944B:  STY $01                 ;Upper byte of pointer to PPU string
@@ -2741,17 +2682,6 @@ Bank00_TwosCompliment:
     CLC
     ADC #$01
     RTS
-.advance $949F
-
-L949F:  .byte $20, $DA, $94, $A5, $06, $9D, $3D, $68, $A5, $07, $9D, $3C, $68, $68, $A8, $60
-L94AF:  .byte $98, $48, $20, $C5, $C2, $A8, $B9, $4D, $68, $85, $0B, $B9, $4C, $68, $85, $0A
-L94BF:  .byte $20, $DA, $94, $A5, $06, $9D, $34, $68, $A5, $07, $9D, $33, $68, $B9, $42, $68
-L94CF:  .byte $48, $8A, $4A, $A8, $68, $99, $39, $68, $68, $A8, $60, $A9, $FF, $85, $01, $85
-L94DF:  .byte $02, $85, $03, $38, $A5, $0A, $E9, $E8, $85, $0A, $A5, $0B, $E9, $03, $85, $0B
-L94EF:  .byte $E6, $03, $B0, $F0, $A5, $0A, $69, $E8, $85, $0A, $A5, $0B, $69, $03, $85, $0B
-L94FF:  .byte $A5, $0A, $38, $E9, $64, $E6, $02, $B0, $FA, $C6, $0B, $10, $F5, $69, $64, $38
-L950F:  .byte $E9, $0A, $E6, $01, $B0, $FA, $69, $0A, $85, $06, $A5, $01, $20, $C5, $C2, $05
-L951F:  .byte $06, $85, $06, $A5, $03, $20, $C5, $C2, $05, $02, $85, $07, $60
 
 ;----------------------------------------------------------------------------------------------------
 
@@ -2767,6 +2697,32 @@ AddYToPtr02:
 *   RTS                     ;
 
 ;----------------------------------------------------------------------------------------------------
+
+
+;Brinstar room tile patterns.
+; Moved from Bank06
+GFXBrinstar1:
+    .byte $3E, $7F, $FF, $70, $07, $FF, $FC, $1E, $00, $06, $1F, $00, $00, $07, $D0, $1E
+    .byte $18, $FE, $C1, $0F, $E0, $82, $1F, $80, $00, $1E, $C1, $0F, $E0, $82, $1F, $80
+    .byte $C1, $FF, $3F, $98, $C3, $FF, $7E, $1F, $00, $C1, $20, $18, $03, $8F, $7E, $1F
+    .byte $E3, $FF, $C6, $0E, $30, $87, $03, $FC, $63, $FF, $06, $0E, $30, $87, $03, $FC
+    .byte $7F, $7F, $7F, $7F, $7F, $7F, $7F, $7F, $73, $73, $73, $73, $73, $73, $73, $73
+    .byte $58, $58, $58, $58, $58, $58, $58, $58, $58, $58, $58, $58, $58, $58, $58, $58
+    .byte $00, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $00, $FF, $FF, $FF, $00, $00, $FF, $FF
+    .byte $FF, $00, $FF, $00, $00, $FF, $00, $00, $FF, $00, $FF, $00, $00, $FF, $00, $00
+    .byte $0C, $32, $7F, $5F, $E1, $BF, $F8, $8E, $00, $00, $06, $1C, $20, $07, $38, $00
+    .byte $00, $0C, $0E, $9E, $0D, $9E, $F7, $59, $00, $00, $06, $0C, $00, $18, $04, $40
+    .byte $B9, $1E, $C6, $F4, $3C, $F0, $40, $80, $39, $1E, $C6, $34, $3C, $F0, $40, $80
+    .byte $7F, $FF, $79, $43, $5E, $1F, $0B, $06, $20, $33, $40, $40, $00, $01, $00, $00
+    .byte $86, $11, $01, $81, $41, $43, $5E, $80, $9E, $2F, $3F, $9F, $DF, $DF, $DE, $80
+    .byte $08, $04, $24, $22, $02, $04, $4C, $38, $38, $7C, $5C, $DE, $FE, $7C, $7C, $38
+    .byte $3C, $7E, $47, $DA, $49, $E2, $5C, $D5, $3C, $46, $03, $9A, $41, $E2, $5C, $C5
+    .byte $3C, $7E, $E2, $5B, $92, $47, $3A, $A3, $3C, $62, $C2, $1B, $82, $47, $3A, $A3
+    .byte $CA, $8A, $A0, $20, $AA, $BA, $55, $0F, $8A, $00, $20, $20, $20, $3A, $15, $0F
+    .byte $53, $51, $05, $04, $55, $5D, $AA, $F0, $51, $00, $04, $04, $04, $5C, $A8, $F0
+    .byte $06, $01, $10, $10, $00, $00, $00, $01, $0E, $3F, $2F, $6F, $7F, $7F, $7F, $3F
+    .byte $00, $8C, $92, $42, $42, $C6, $DC, $80, $00, $BC, $8E, $DE, $DE, $DE, $DC, $80
+    .byte $07, $12, $48, $48, $09, $18, $30, $00, $07, $72, $B8, $B9, $FA, $FB, $73, $01
 
 ;The following table points to the palette data used in this bank.
 
@@ -3020,8 +2976,7 @@ L9889:  RTS                     ;Return A/time.
 
 ;This function decrements the y coordinate of the 40 intro star sprites.
 
-.advance DecSpriteYCoord
-
+DecSpriteYCoord:
 L988A:  LDA TitleRoutine        ;
 L988C:  CMP #$1D                ;
 L988E:  BCS ++                  ;If the end game is playing, branch to exit.
@@ -3071,12 +3026,6 @@ L9920:  .byte $0F, $CC, $62, $18, $1F, $CD, $22, $38, $22, $CE, $A3, $5F, $53, $
 L9930:  .byte $48, $CC, $E3, $94, $37, $CD, $A3, $B3, $6F, $CE, $A3, $DC, $78, $CF, $22, $FE 
 L9940:  .byte $83, $CC, $62, $0B, $9F, $CD, $23, $26, $A0, $CE, $62, $39, $BD, $CF, $A2, $1C
 L9950:  .byte $07, $CC, $E3, $A4, $87, $CD, $63, $5D, $5A, $CE, $62, $4F, $38, $CF, $23, $85
-
-;----------------------------------------------------------------------------------------------------
-
-;Not used.
-L9960:  .byte $3F, $00, $20, $02, $20, $1B, $3A, $02, $20, $21, $01, $02, $2C, $30, $27, $02
-L9970:  .byte $26, $31, $17, $02, $16, $19, $27, $02, $16, $20, $27
 
 ;----------------------------------------------------------------------------------------------------
 
@@ -3150,7 +3099,7 @@ L9A06:  .byte $00               ;End PPU string write.
 
 ;----------------------------------------[ Ending routines ]-----------------------------------------
 
-.advance NMIScreenWrite
+NMIScreenWrite:
 
 ;The following routine is accessed via the NMI routine every frame.
 L9A07:  LDA TitleRoutine        ;
@@ -3195,43 +3144,36 @@ L9A4A:* STA UnqItmHist,Y        ;
 L9A4D:  INY                     ;Erase Unique item history.
 L9A4E:  BNE -                   ;
 L9A50:  LDA SamusGear           ;
-nop
 L9A53:  AND #$10                ;
 L9A55:  BEQ +                   ;If Samus does not have Maru Mari, branch.
 L9A57:  LDA #$01                ;Else load Maru Mari data into PasswordByte00.
 L9A59:  STA PasswordByte00      ;
 L9A5C:* LDA SamusGear           ;
-nop
 L9A5F:  AND #$01                ;
 L9A61:  BEQ +                   ;If Samus does not have bombs, branch.
 L9A63:  LDA PasswordByte00      ;Else load bomb data into PasswordByte00.
 L9A66:  ORA #$40                ;
 L9A68:  STA PasswordByte00      ;
 L9A6B:* LDA SamusGear           ;
-nop
 L9A6E:  AND #$20                ;
 L9A70:  BEQ +                   ;If Samus does not have varia suit, branch.
 L9A72:  LDA #$08                ;Else load varia suit data into PasswordByte01.
 L9A74:  STA PasswordByte01      ;
 L9A77:* LDA SamusGear           ;
-nop
 L9A7A:  AND #$02                ;
 L9A7C:  BEQ +                   ;If Samus does not have high jump, branch.
 L9A7E:  LDA #$01                ;Else load high jump data into PasswordByte03.
 L9A80:  STA PasswordByte03      ;
 L9A83:* LDA SamusGear           ;
-nop
 L9A86:  AND #$10                ;If Samus does not have Maru Mari, branch.
 L9A88:  BEQ +                   ;Else load screw attack data into PasswordByte03.
 L9A8A:  LDA PasswordByte03      ;A programmer error?  Should check for screw
 L9A8D:  ORA #$04                ;attack data.
 L9A8F:  STA PasswordByte03      ;
 L9A92:* LDA SamusGear           ;
-nop
 L9A95:  STA PasswordByte09      ;Store Samus gear data in PasswordByte09.
 L9A98:  LDA #$00                ;
 L9A9A:  LDY JustInBailey        ;
-nop
 L9A9D:  BEQ +                   ;If Samus is wearing suit, branch.  Else
 L9A9F:  LDA #$80                ;load suitless Samus data into PasswordByte08.
 L9AA1:* STA PasswordByte08      ;
@@ -3267,15 +3209,14 @@ L9AD5:  JSR ClearAll            ;($909F)Turn off screen, erase sprites and namet
 L9AD8:  JSR InitEndGFX          ;($C5D0)Prepare to load end GFX.
 L9ADB:  LDA #$04                ;
 L9ADD:  LDY JustInBailey        ;Checks if game was played as suitless
-nop
 L9AE0:  BNE +                   ;Samus.  If so, branch.
 L9AE2:  LDA #$00                ;Loads SpritePtrIndex with #$00(suit on).
 L9AE4:* STA EndingType          ;
 L9AE7:  ASL                     ;Loads SpritePtrIndex with #$08(suitless).
 L9AE8:  STA SpritePtrIndex      ;
-L9AEA:  LDX #$52                ;Loads the screen where Samus stands on
-L9AEC:  LDY #$A0                ;the surface of the planet in end of game.
-L9AEE:  JSR PrepPPUProcess     ;($C20E)Prepare to write to PPU.
+L9AEA:  LDX #<LA052             ;Loads the screen where Samus stands on
+L9AEC:  LDY #>LA052             ;the surface of the planet in end of game.
+L9AEE:  JSR PrepPPUProcess      ;($C20E)Prepare to write to PPU.
 L9AF1:  JSR NmiOn               ;($C487)Turn on non-maskable interrupt.
 L9AF4:  LDA #$20                ;Initiate end game music.
 L9AF6:  STA MultiSFXFlag        ;
@@ -3296,8 +3237,6 @@ L9B13:  LDA #$08                ;
 L9B15:  STA ClrChangeCounter    ;Initialize ClrChangeCounter with #$08.
 L9B17:  INC GenByte33           ;
 L9B19:  JMP ScreenOn            ;($C447)Turn screen on.
-; moved MultiSFXFlag to ZP
-nop
 
 ShowEndSamus:
 L9B1C:  JSR LoadEndSamSprts     ;($9C9A)Load end image of Samus.
@@ -4004,7 +3943,7 @@ LA1B9:  .byte $00               ;End PPU string write.
 ;It is used to locate the start of the PPU strings below.
 
 EndMsgStrngTbl0:
-LA1BA:  .word $A1C2, $A1EB, $A20F, $A240
+LA1BA:  .word LA1C2, LA1EB, LA20F, LA240 
 
 ;Writes end message on name table 0 in row $2060 (4th row from top).
 LA1C2:  .byte $20, $6D, $08     ;PPU address and string length.
@@ -4422,25 +4361,25 @@ LA53D:  .byte $00               ;End PPU block write.
 
 WorldMap:
 LA53E:  .byte ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___
-LA55E:  .byte ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, $08, ___, $08, ___, ___, ___, ___, ___, ___, $08, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___
-LA57E:  .byte ___, ___, ___, $2C, $2B, $27, $15, $15, $16, $14, $13, $04, ___, $06, $08, $0A, $1A, $29, $29, $28, $2D, ___, ___, ___, ___, ___, ___, ___, ___, ___, $08, ___
+LA55E:  .byte ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, $2E, ___, $2E, ___, ___, ___, ___, ___, ___, $2E, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___
+LA57E:  .byte ___, ___, ___, $2C, $2B, $27, $15, $15, $16, $14, $13, $04, ___, $06, $08, $0A, $1A, $29, $29, $28, $2D, ___, ___, ___, ___, ___, ___, ___, ___, ___, $2E, ___
 LA59E:  .byte ___, $0E, ___, $01, ___, ___, ___, ___, ___, ___, ___, $06, ___, $03, $1F, $23, $25, $24, $26, $20, $1E, $1F, $21, $21, $07, $22, $1D, $1B, $21, $20, $04, ___
 LA5BE:  .byte ___, $10, ___, $0E, ___, ___, ___, ___, ___, ___, ___, $06, ___, $06, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, $02, ___
 LA5DE:  .byte ___, $10, ___, $0B, ___, ___, $08, $0A, $1A, $29, $28, $04, ___, $06, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, $08, $0A, $1A, $29, $29, $28, $04, ___
-LA5FE:  .byte ___, $10, ___, $0B, ___, ___, ___, ___, ___, ___, ___, $06, ___, $06, ___, ___, ___, ___, $08, ___, ___, ___, $08, ___, ___, ___, ___, ___, ___, ___, $06, ___
+LA5FE:  .byte ___, $10, ___, $0B, ___, ___, ___, ___, ___, ___, ___, $06, ___, $06, ___, ___, ___, ___, $2E, ___, ___, ___, $2E, ___, ___, ___, ___, ___, ___, ___, $06, ___
 LA61E:  .byte ___, $10, ___, $0F, $11, $13, $14, $14, $13, $12, $0D, $03, $00, $05, $0C, $0E, $0E, $0D, $10, $0C, $0F, $0D, $10, $0C, $0E, $1B, $0F, $0E, $0F, $0D, $04, ___
-LA63E:  .byte ___, $10, ___, ___, ___, ___, ___, ___, ___, ___, $0C, $06, ___, $06, ___, ___, ___, ___, $11, ___, ___, ___, $06, ___, ___, ___, ___, ___, ___, ___, $08, ___
+LA63E:  .byte ___, $10, ___, ___, ___, ___, ___, ___, ___, ___, $0C, $06, ___, $06, ___, ___, ___, ___, $11, ___, ___, ___, $06, ___, ___, ___, ___, ___, ___, ___, $2F, ___
 LA65E:  .byte ___, $10, ___, ___, ___, ___, ___, ___, ___, ___, $0C, $06, ___, $06, ___, ___, ___, ___, $11, $0A, $1A, $28, $04, ___, $06, ___, ___, ___, ___, ___, $06, ___
-LA67E:  .byte ___, $10, ___, ___, ___, ___, ___, ___, ___, ___, $0C, $06, ___, $06, ___, ___, ___, ___, $08, ___, ___, ___, $08, ___, $08, $1B, $06, $19, $19, $2A, $0B, ___
+LA67E:  .byte ___, $10, ___, ___, ___, ___, ___, ___, ___, ___, $0C, $06, ___, $06, ___, ___, ___, ___, $2F, ___, ___, ___, $2F, ___, $08, $1B, $06, $19, $19, $2A, $0B, ___
 LA69E:  .byte ___, $0F, $04, $03, $02, $05, $06, $07, $08, $09, $0A, $06, ___, $03, $12, $14, $15, $14, $07, $16, $15, $13, $0B, ___, $0C, $07, $19, $19, $19, $2A, $0E, ___
-LA6BE:  .byte ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, $06, ___, $08, ___, ___, ___, ___, ___, ___, ___, ___, $01, ___, $0A, $1B, $04, $0F, $06, $2A, $0E, ___
+LA6BE:  .byte ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, $06, ___, $2F, ___, ___, ___, ___, ___, ___, ___, ___, $01, ___, $0A, $1B, $04, $0F, $06, $2A, $0E, ___
 LA6DE:  .byte ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, $06, ___, $06, ___, ___, ___, ___, ___, ___, ___, ___, $02, ___, $06, ___, ___, ___, ___, ___, $09, ___
 LA6FE:  .byte ___, $08, $17, $09, $14, $13, $18, $12, $14, $19, $13, $04, ___, $08, $1D, $1F, $06, $1F, $19, $1E, $1E, $1C, $03, $28, $29, $29, $29, $2B, $29, $2A, $0E, ___
-LA71E:  .byte ___, ___, ___, ___, ___, ___, $06, ___, ___, ___, ___, $08, ___, $08, $1D, $1F, $1E, $19, $07, $19, $19, $2C, $06, $06, $2B, $2B, $1A, $1A, $1A, $2A, $0B, ___
+LA71E:  .byte ___, ___, ___, ___, ___, ___, $06, ___, ___, ___, ___, $2F, ___, $08, $1D, $1F, $1E, $19, $07, $19, $19, $2C, $06, $06, $2B, $2B, $1A, $1A, $1A, $2A, $0B, ___
 LA73E:  .byte ___, ___, ___, ___, ___, ___, $06, ___, $0B, ___, ___, $0B, ___, $06, $07, $04, $0F, $10, $0B, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, $09, ___
 LA75E:  .byte ___, ___, ___, ___, ___, ___, $06, ___, $07, $17, $18, $0C, ___, $08, $21, $25, $25, $22, $03, $21, $25, $20, $00, $27, $2C, $2C, $06, $04, $0F, $10, $0E, ___
 LA77E:  .byte ___, ___, ___, ___, ___, ___, $03, $1C, $07, $17, $18, $0C, ___, $0A, $21, $23, $25, $22, $03, $21, $24, $24, $24, $23, $23, $06, $24, $25, $22, $11, $2D, ___
-LA79E:  .byte ___, ___, ___, ___, ___, ___, $08, $01, $07, $17, $18, $0C, ___, $09, ___, ___, ___, $06, $06, ___, ___, ___, ___, ___, ___, $07, $26, $25, $22, $0B, $2D, ___
+LA79E:  .byte ___, ___, ___, ___, ___, ___, $2F, $01, $07, $17, $18, $0C, ___, $09, ___, ___, ___, $06, $06, ___, ___, ___, ___, ___, ___, $07, $26, $25, $22, $0B, $2D, ___
 LA7BE:  .byte ___, $0B, ___, ___, ___, ___, ___, $02, $0B, ___, ___, $08, ___, $0A, $12, $14, $13, $03, $12, $15, $13, $0D, $12, $14, $06, $14, $18, $15, $19, $07, $09, ___
 LA7DE:  .byte ___, $09, $17, $1C, $10, $19, $18, $03, $13, $10, $18, $0C, ___, $06, ___, ___, ___, $09, $04, $0F, $10, $0B, ___, ___, $08, $12, $16, $16, $16, $13, $0E, ___
 LA7FE:  .byte ___, $0A, $17, $1C, $1C, $1C, $18, $03, $13, $19, $12, $0B, ___, $00, ___, ___, $0B, $08, $12, $19, $19, $07, ___, ___, $08, $05, ___, ___, ___, ___, $06, ___
@@ -4454,9 +4393,7 @@ LA8DE:  .byte ___, ___, ___, ___, ___, ___, ___, ___, $1D, $1B, $17, $18, $0C, _
 LA8FE:  .byte ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, $0B, ___, $0C, $16, $18, $17, $18, $17, $0F, $17, $17, $1A, $1A, $17, $1B, $1B, $17, $19, $09, ___
 LA91E:  .byte ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___
 
-.advance CopyMap
-
-; TODO - copy the map faster, can eat into the unused data
+CopyMap:
 LA93E:  LDA #<WorldMap          ;
 LA940:  STA GenPtr00LB          ;Source pointer for map data.
 LA942:  LDA #>WorldMap          ;
@@ -4531,7 +4468,6 @@ WritePalStringByte:
     DEC $05                 ;Decrement counter byte.
     BNE WritePalStringByte  ;If more bytes to write, branch to write another byte.
     STX PPUStrIndex         ;Store total length, in bytes, of PPUDataString.
-nop
     INY                     ;Move to next data byte(should be #$00).
 
 *   LDX PPUStrIndex         ;X now contains current length of PPU data string.
@@ -4546,46 +4482,6 @@ Bank00_SeparateControlBits:
     AND #$3F                ;
     STA $05                 ;Extract counter bits and save them for use above.
     JMP NextPPUByte         ;($C36E)
-
-.advance $A9C1
-
-;Unused tile patterns.
-LA9C1:  .byte $7F, $3F, $1F, $80, $0F, $08, $88, $12, $80, $C0, $E0, $E0, $EF, $E8, $E8, $FC
-LA9D1:  .byte $FC, $FC, $F8, $1C, $DC, $58, $5C, $48, $04, $0C, $18, $1C, $DC, $18, $1C, $0F
-LA9E1:  .byte $00, $9F, $3F, $7F, $DB, $00, $00, $E0, $E0, $FF, $FF, $FF, $DB, $00, $00, $DC
-LA9F1:  .byte $18, $EC, $F4, $F8, $6C, $00, $00, $1C, $18, $FC, $FC, $FC, $6C, $00, $00, $FF
-LAA01:  .byte $FF, $C0, $C0, $CF, $CB, $CC, $CC, $00, $00, $1F, $3F, $3F, $38, $3B, $3B, $FC
-LAA11:  .byte $FC, $0C, $0C, $CC, $4C, $CC, $CC, $00, $04, $EC, $FC, $FC, $3C, $BC, $BC, $CB
-LAA21:  .byte $CF, $C0, $C0, $FF, $FF, $00, $00, $3B, $30, $3F, $1F, $7F, $FF, $00, $00, $4C
-LAA31:  .byte $CC, $0C, $0C, $FC, $FC, $00, $00, $3C, $3C, $FC, $EC, $FC, $FC, $00, $00, $FE
-LAA41:  .byte $82, $82, $82, $82, $FE, $00, $00, $00, $7E, $56, $56, $7E, $FE, $00, $00, $20
-LAA51:  .byte $00, $00, $18, $20, $00, $00, $18, $1C, $F7, $3C, $18, $1C, $F7, $3C, $18, $E2
-LAA61:  .byte $80, $10, $20, $00, $00, $80, $00, $E2, $98, $2C, $5E, $7E, $3C, $98, $00, $7E
-LAA71:  .byte $00, $7E, $00, $7E, $00, $7E, $00, $6E, $00, $6E, $00, $6E, $00, $6E, $00, $10
-LAA81:  .byte $F4, $08, $04, $C5, $24, $23, $05, $E8, $F8, $0E, $E6, $F7, $37, $2E, $FD, $00
-LAA91:  .byte $5F, $20, $48, $D7, $88, $18, $80, $3F, $3F, $E0, $C7, $CF, $B8, $98, $7F, $F8
-LAAA1:  .byte $10, $10, $10, $D7, $08, $00, $EF, $F8, $10, $30, $B7, $F7, $30, $DF, $EF, $FF
-LAAB1:  .byte $00, $08, $08, $EF, $08, $10, $EF, $FF, $00, $18, $DB, $FF, $38, $F7, $EF, $FF
-LAAC1:  .byte $7F, $3F, $5F, $4F, $07, $03, $01, $00, $B0, $C0, $E0, $F0, $F8, $FC, $FE, $FE
-LAAD1:  .byte $FE, $FE, $FA, $FA, $FE, $FE, $FE, $00, $1A, $06, $0A, $1A, $3E, $7E, $FE, $01
-LAAE1:  .byte $03, $07, $4F, $5F, $27, $7F, $00, $FF, $FF, $FF, $FF, $FF, $E7, $FF, $00, $7E
-LAAF1:  .byte $BE, $DA, $EA, $F6, $CA, $FC, $00, $FE, $FE, $FA, $FA, $FE, $CE, $FE, $00, $CF
-LAB01:  .byte $BF, $70, $60, $C4, $C8, $C0, $C0, $47, $BF, $70, $27, $4B, $57, $5F, $DF, $CC
-LAB11:  .byte $F4, $38, $18, $0C, $0C, $0C, $0C, $CC, $F4, $38, $98, $CC, $EC, $EC, $EC, $C0
-LAB21:  .byte $C0, $60, $70, $BF, $CF, $00, $00, $DF, $CF, $67, $70, $BF, $4F, $00, $00, $0C
-LAB31:  .byte $0C, $18, $38, $F4, $CC, $00, $00, $EC, $CC, $98, $38, $F4, $CC, $00, $00, $FF
-LAB41:  .byte $FF, $C0, $DF, $D0, $D0, $DF, $C0, $00, $00, $3F, $3F, $35, $35, $20, $3F, $FC
-LAB51:  .byte $FC, $0C, $EC, $2C, $2C, $EC, $0C, $00, $04, $FC, $FC, $5C, $5C, $1C, $FC, $FF
-LAB61:  .byte $00, $00, $E4, $00, $CF, $00, $00, $7F, $00, $00, $E3, $00, $BF, $00, $00, $FC
-LAB71:  .byte $00, $00, $F9, $00, $87, $00, $00, $FC, $00, $00, $F7, $00, $67, $00, $00, $FE
-LAB81:  .byte $02, $02, $02, $FE, $00, $00, $7F, $00, $FE, $0E, $FE, $FE, $00, $00, $00, $7F
-LAB91:  .byte $40, $40, $40, $7F, $00, $00, $FE, $00, $3F, $30, $3F, $7F, $00, $00, $00, $40
-LABA1:  .byte $40, $40, $7F, $00, $00, $00, $FF, $3F, $30, $3F, $7F, $00, $00, $FF, $FF, $02
-LABB1:  .byte $02, $02, $FE, $00, $00, $00, $FF, $FE, $0E, $FE, $FE, $00, $00, $FF, $FF, $FF
-LABC1:  .byte $FF, $C0, $D0, $C0, $C0, $C0, $C0, $00, $00, $3F, $27, $3F, $3F, $3F, $3F, $FC
-LABD1:  .byte $FC, $0C, $4C, $0C, $0C, $0C, $0C, $00, $04, $FC, $9C, $FC, $FC, $FC, $FC, $C0
-LABE1:  .byte $C0, $D0, $C0, $FF, $FF, $00, $00, $3F, $3F, $27, $3F, $3F, $7F, $00, $00, $0C
-LABF1:  .byte $0C, $4C, $0C, $FC, $FC, $00, $00, $FC, $FC, $9C, $FC, $FC, $FC, $00, $00
 
 ;----------------------------------------------------------------------------------------------------
 
@@ -5381,32 +5277,11 @@ LAF00:  .byte $B2               ;7/32 seconds
 LAF01:  .byte $07               ;Drumbeat 02
 LAF02:  .byte $00               ;End of end music.
 
-;Unused tile patterns.
-LAF03:  .byte $80, $40, $20, $10, $88, $00, $00, $00, $00, $00, $00, $00, $80, $04, $00, $02
-LAF13:  .byte $02, $00, $00, $00, $00, $07, $03, $03, $03, $01, $00, $00, $00, $84, $C4, $42
-LAF23:  .byte $62, $21, $31, $11, $11, $80, $C0, $C0, $E0, $E0, $F0, $F0, $F0, $00, $00, $00
-LAF33:  .byte $00, $00, $00, $00, $01, $00, $00, $00, $00, $01, $01, $03, $03, $11, $11, $31
-LAF43:  .byte $21, $63, $62, $C4, $84, $F0, $F0, $F0, $E0, $E0, $E0, $C0, $80, $01, $13, $16
-LAF53:  .byte $2C, $78, $B3, $EC, $F0, $07, $1F, $1E, $3C, $78, $F0, $E0, $00, $08, $10, $20
-LAF63:  .byte $40, $80, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $82, $CC, $4E
-LAF73:  .byte $4C, $40, $4C, $4C, $4C, $82, $CC, $CE, $CC, $C0, $CC, $CC, $CC, $00, $00, $00
-LAF83:  .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
-LAF93:  .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
-LAFA3:  .byte $01, $03, $06, $0C, $18, $00, $00, $00, $00, $00, $01, $03, $07, $0F, $3C, $E0
-LAFB3:  .byte $84, $08, $30, $60, $E0, $00, $02, $1F, $7A, $F4, $C8, $98, $10, $19, $31, $33
-LABC3:  .byte $63, $63, $67, $E7, $E7, $06, $0E, $0C, $1C, $1C, $18, $18, $18, $C0, $C0, $80
-LAFD3:  .byte $80, $80, $00, $00, $00, $30, $30, $60, $60, $60, $E0, $E0, $E0, $C7, $C7, $C7
-LAFE3:  .byte $C7, $C7, $C7, $C7, $C7, $38, $38, $38, $38, $38, $38, $38, $38, $20, $20, $20
-LAFF3:  .byte $20, $20, $20, $20
-
 SilenceMusic_Bank00:
     LDA #MUS_NONE
     ORA NoiseSFXFlag
     STA NoiseSFXFlag
     RTS
-    ; moved NoiseSFXFlag to ZP
-    nop
-    nop 
 
 IntroSQ2Data:
 LB000:  .byte $C2               ;
@@ -5725,6 +5600,74 @@ LB132:  .byte $B4               ;7/8 Seconds    + Repeat 32 times.
 LB133:  .byte $04               ;Drumbeat 01    +
 LB134:  .byte $FF               ;
 
+;Brinstar enemy tile patterns.
+; Moved from Bank01
+GFXBrinstarEnemies:
+    .byte $03, $0F, $05, $32, $D1, $48, $12, $24, $01, $02, $02, $11, $48, $20, $00, $00
+    .byte $E0, $F0, $EC, $DE, $92, $8D, $A0, $3C, $C0, $00, $0C, $02, $01, $0C, $02, $00
+    .byte $00, $00, $F8, $3E, $1F, $0F, $0F, $0E, $00, $00, $00, $08, $04, $00, $00, $00
+    .byte $18, $30, $6C, $7C, $5C, $78, $70, $21, $00, $00, $0C, $1C, $1C, $38, $30, $3C
+    .byte $18, $30, $60, $60, $40, $40, $40, $01, $00, $00, $00, $00, $00, $00, $00, $3C
+    .byte $00, $01, $00, $00, $03, $04, $48, $3C, $00, $01, $00, $03, $0C, $08, $10, $03
+    .byte $48, $2F, $B3, $4D, $32, $CC, $84, $6F, $48, $28, $AF, $3D, $78, $CD, $B6, $6F
+    .byte $00, $50, $00, $C8, $74, $34, $90, $38, $00, $00, $B0, $E8, $74, $BC, $18, $18
+    .byte $3C, $7F, $FF, $FF, $FF, $7E, $7B, $3D, $3C, $7F, $FF, $FC, $D1, $50, $69, $0E
+    .byte $00, $00, $C0, $E0, $B0, $08, $07, $87, $00, $00, $C0, $60, $B0, $68, $73, $B2
+    .byte $01, $00, $1C, $0F, $07, $03, $0F, $3F, $01, $00, $10, $08, $04, $00, $08, $20
+    .byte $80, $C0, $F8, $C8, $88, $32, $51, $68, $0C, $10, $A0, $06, $01, $32, $11, $00
+    .byte $00, $01, $21, $33, $3B, $1F, $9F, $FF, $00, $01, $20, $12, $08, $00, $80, $20
+    .byte $00, $00, $08, $98, $B8, $F0, $F2, $FE, $00, $00, $08, $90, $20, $00, $02, $04
+    .byte $81, $A5, $E7, $00, $00, $24, $18, $24, $81, $A5, $E7, $42, $66, $C3, $66, $18
+    .byte $00, $24, $1B, $1F, $3B, $44, $5B, $3F, $BD, $9B, $E4, $C0, $C4, $98, $83, $C7
+    .byte $00, $20, $60, $C3, $CC, $60, $20, $00, $0A, $0F, $0F, $1C, $13, $0F, $0F, $0A
+    .byte $00, $00, $00, $00, $E0, $00, $00, $00, $40, $E8, $FA, $FF, $1F, $FA, $E8, $40
+    .byte $1E, $1C, $18, $3A, $36, $60, $00, $00, $00, $00, $00, $02, $06, $00, $03, $00
+    .byte $43, $C6, $FE, $F8, $F6, $A9, $21, $20, $38, $00, $00, $00, $66, $AD, $F9, $20
+    .byte $73, $DE, $EF, $F8, $F6, $A9, $21, $20, $38, $1E, $0F, $00, $66, $AD, $F9, $20
+    .byte $03, $02, $30, $7E, $70, $D0, $6C, $1D, $04, $30, $48, $00, $80, $11, $30, $21
+    .byte $61, $30, $1E, $81, $28, $FF, $FF, $F1, $61, $32, $1E, $81, $F8, $FF, $FF, $F9
+    .byte $B8, $D0, $6C, $36, $9E, $0C, $C0, $E8, $FC, $FC, $7E, $36, $BE, $0C, $E0, $F8
+    .byte $1F, $0F, $07, $03, $01, $0E, $1F, $3F, $07, $03, $03, $01, $00, $06, $17, $13
+    .byte $C3, $66, $9E, $DE, $EF, $F7, $73, $B9, $DA, $66, $DE, $C6, $E3, $61, $25, $B9
+    .byte $0F, $03, $07, $0F, $1D, $00, $01, $03, $08, $00, $04, $08, $10, $00, $01, $02
+    .byte $60, $51, $32, $88, $C8, $F8, $C0, $00, $0C, $11, $32, $00, $04, $02, $12, $20
+    .byte $78, $33, $65, $26, $19, $00, $04, $02, $00, $00, $04, $46, $80, $90, $14, $0A
+    .byte $1C, $C8, $A4, $64, $18, $00, $20, $40, $00, $00, $25, $62, $80, $88, $26, $40
+    .byte $00, $02, $0D, $17, $2D, $62, $6D, $2E, $83, $C5, $F2, $E0, $C2, $81, $8C, $CE
+    .byte $00, $40, $B0, $E8, $B4, $46, $B6, $74, $C1, $A3, $4F, $07, $43, $81, $31, $73
+    .byte $00, $00, $00, $00, $00, $20, $73, $DF, $00, $00, $0A, $0F, $1F, $14, $11, $18
+    .byte $00, $00, $00, $00, $00, $00, $12, $C0, $00, $00, $40, $E8, $FA, $FF, $70, $00
+    .byte $24, $3C, $5A, $DB, $66, $99, $5A, $24, $00, $00, $42, $C3, $66, $00, $00, $42
+    .byte $00, $00, $44, $EE, $B2, $82, $84, $40, $04, $38, $54, $EE, $B2, $80, $00, $00
+    .byte $00, $00, $0C, $04, $62, $12, $1F, $01, $00, $B0, $50, $78, $9C, $6C, $20, $00
+    .byte $38, $72, $C5, $73, $72, $6F, $22, $00, $40, $82, $05, $23, $42, $07, $1E, $00
+    .byte $C3, $E0, $7C, $8F, $C7, $F3, $72, $00, $E3, $F0, $7E, $8F, $C7, $F2, $71, $01
+    .byte $F0, $E8, $3C, $9C, $80, $18, $1C, $00, $F0, $E8, $3C, $9E, $42, $5A, $5C, $00
+    .byte $3B, $7D, $7B, $7D, $7E, $FF, $FF, $00, $31, $3D, $3B, $1C, $6E, $37, $79, $00
+    .byte $F9, $B9, $50, $E0, $7C, $8C, $E0, $00, $F9, $B1, $40, $60, $3C, $8E, $C2, $02
+    .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+    .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+    .byte $60, $71, $30, $18, $0C, $00, $00, $00, $62, $72, $37, $93, $81, $7E, $34, $06
+    .byte $00, $01, $00, $08, $1C, $30, $70, $60, $02, $02, $07, $83, $91, $7E, $74, $66
+    .byte $26, $31, $10, $1C, $18, $0C, $00, $00, $C6, $C0, $60, $60, $20, $30, $18, $08
+    .byte $5E, $2C, $20, $3C, $24, $18, $00, $00, $87, $C3, $42, $42, $42, $66, $24, $24
+    .byte $00, $00, $00, $00, $0B, $27, $73, $DF, $0A, $0F, $1F, $34, $0B, $07, $11, $18
+    .byte $00, $00, $00, $00, $00, $8C, $F2, $E0, $40, $E8, $FA, $FF, $60, $80, $30, $00
+    .byte $00, $00, $1C, $3E, $3E, $3E, $1C, $00, $00, $1C, $26, $69, $55, $53, $32, $1C
+    .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+    .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+    .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+    .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+    .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+    .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+    .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+    .byte $1D, $1D, $1D, $1D, $1D, $1D, $1D, $1D, $0F, $0F, $0F, $0F, $0F, $0F, $0F, $0F
+    .byte $F8, $F8, $F8, $F8, $F8, $F8, $F8, $F8, $A0, $A0, $A0, $A0, $A0, $A0, $A0, $A0
+    .byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
+    .byte $00, $00, $00, $00, $00, $00, $00, $00, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
+    .byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $00, $00, $00, $00, $00, $00, $00, $00
+    .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+
 ;----------------------------------------------------------------------------------------------------
 
 .advance SoundEngineOrg
@@ -5799,6 +5742,94 @@ LB134:  .byte $FF               ;
     .include "Sound_Engine_Common_2.asm"
 .scend
 
+; 7400 - 7A30
+; will clear shared spaces the needs to be cleared
+; for any kind of room
+
+.scope
+
+CreateRoomEraseFunction:
+    lda #$A9                    ; Start the program with "LDA #$FF" ($A9 $FF)
+    sta ClearRoom_Box_6000
+    lda #$FF
+    sta ClearRoom_Box_6000 + $01
+
+    lda #>ClearRoom_Box_6000
+    sta $D5
+    lda #<ClearRoom_Box_6000 + $02
+    sta $D4                     ; destination pointer low byte, still starts at #$02
+    ldx #$80                    ; low byte of starting address ($6080)
+    lda #$60
+    sta $D6                     ; high byte of starting address
+    _loop:
+        ; Skip if lower 5 bits of X are $00-$03 or $1C-$1F
+        txa
+        and #$1F
+        cmp #$04
+        bcc _skip
+        cmp #$1C
+        bcs _skip
+
+        ldy #$00
+        lda #$8D                ; Absolute STA opcode
+        sta ($D4), y
+        iny
+        txa
+        sta ($D4), y
+        iny
+        lda $D6
+        sta ($D4), y
+        inc $D4
+        inc $D4
+        inc $D4
+        lda $D4
+        cmp #$03
+        bcs _skip
+        inc $D5                 ; $D4 wrapped, bump destination page
+
+    _skip:
+        inx
+        bne +
+            inc $D6
+        *   lda $D6
+        cmp #$63
+        bcc _loop               ; high byte < $63, keep going
+        txa
+        cmp #$40
+        bcc _loop               ; high byte = $63 but X < $40, keep going
+        ; write rts
+        lda #$60
+        sta $7A32
+.scend 
+
+.scope
+CreateIdentityTable:
+    ldx #$00
+
+    _main:
+        txa
+        sta IdentityTable,x
+        inx
+        bne _main
+        ldx #$0F
+
+    _upper:
+        txa
+        sta $7F00,x
+        dex
+        bpl _upper
+
+        ldx #$F0
+
+    _lower:
+        txa
+        sta $7D00,x
+        inx
+        bne _lower
+    rts
+.scend 
+
+.byte $BB, $BB, $BB
 ;--------------------------------------------------------------------------------------------------
 
 RESET_Bank00:

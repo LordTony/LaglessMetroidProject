@@ -3619,7 +3619,7 @@ LD976:
 *   lda EnStatus,x
     cmp #$04
     bne +
-    jsr LF152
+    jsr GetXEnemyRoomPosition_07_09_0B
     jsr DistFromEn0ToObj1
     jsr LF1FA
     bcs +
@@ -4052,8 +4052,18 @@ LDC7E:  RTS             ;
 ;-----------------------------------------------------------------------------------------------------
 
 AreObjectsTouching:
-LDC7F:  JSR GetObject1CoordData
-LDC82:  JSR GetObject0CoordData
+LDC7F:
+    JSR GetObject1CoordData
+LDC82:
+GetObject0CoordData:
+    lda ObjectY,x
+    sta $07
+    lda ObjectX,x
+    sta $09
+    lda ObjectHi,x
+    eor PPUCNT0ZP
+    and #$01
+    sta $0B
 
 DistFromObj0ToObj1:
     lda ObjRadY,x
@@ -5784,12 +5794,12 @@ LE626:
 *   dec ObjectX
     sec
     rts
-.scend
 
 ResetDoorDataCopy:
     lda #$00
     sta SamusDoorData
     rts
+.scend
 
 ; crash with object on the left
 
@@ -5933,11 +5943,11 @@ LE783:
     sta $02
     lda #$08
     sta $04
-    jsr LE792
+    jsr GetXEnemyRoomPosition_09_08_0B
     lda EnRadX,x
     jmp LE7BD
 
-LE792:
+GetXEnemyRoomPosition_09_08_0B:
     lda EnXRoomPos,x
     sta $09     ; X coord
     lda EnYRoomPos,x
@@ -6165,7 +6175,7 @@ LE8FC:
     sbc EnRadX,x
 LE904:
     sta $03
-    jsr LE792
+    jsr GetXEnemyRoomPosition_09_08_0B
     ldy EnRadY,x
     jmp LE89B
 
@@ -6437,12 +6447,12 @@ LEA2B:  lda RoomNumber              ;Room number.
 LEA2D:  cmp #$FE                    ;
         bcs Exit18
 LEA2F:  beq GoDrawRoom              ;A == #$FF | Branch if empty place holder byte found in room data.
-LEA35:  cmp #$F0                    ;
+LEA35:  cmp #$F0                    
 LEA37:  bcs AttribTableWrite        ;Branch if time to write PPU attribute table data.
 LEA39:  jsr UpdateRoomSpriteInfo    ;($EC9B)Update which sprite belongs on which name table.
 LEA3C:  jsr ScanForItems            ;($ED98)Set up any special items.
 
-SetupFromRoomStart:
+SetupFromRoomStart:                 ; start_counting_stuff_addr in BuildRoomAnalyzer.lua
 LEA3F:  ldy RoomNumber              ;Room number to load.
 LEA43:  lda RoomPointerTable_Lo,y   ;Low byte of 16-bit room pointer.
 LEA45:  sta RoomPtrLB               ;Base copied from $959A to $3B.
@@ -6470,13 +6480,13 @@ SelectRoomRAM:
 ;------------------------[ Initialize room RAM and associated attribute table ]-----------------------
 
 InitTables:
-    ldy #$06
+    ldy #$06                    ; erase_start_addr in BuildRoomAnalyzer.lua
     jsr ROMSwitch               ; Switch to Bank06
     jsr DoRoomRamClear          ; Call this routine which exists only in Bank06
     ldy CurrentBank             
     jsr ROMSwitch               ; Switch back to whatever bank we were on
-    ldy #$00
-    beq DrawRoom                ; Always branch
+    ldy #$00                    ; erase_end_addr in BuildRoomAnalyzer.lua
+    beq DrawRoom                ; Always branch 
 
 ;---------------------------------------[ Draw room object ]-----------------------------------------
 
@@ -6526,7 +6536,7 @@ LEA9B:  sta StructPtrLB                 ;
 LEA9E:  lda StructPointerTable_Hi, x    ; High byte of 16-bit structure ptr.
 LEAA0:  sta StructPtrUB                 ;
         ldy #$00
-        jmp DrawStruct          ;($EF8C)Draw one structure.
+        jmp DrawStruct          ;($EF8C)Draw one structure.     ; count_struct_addr in BuildRoomAnalyzer.lua
 
 AddToRoomPtr:
     lda #$03            ;Move to next set of structure data.
@@ -6554,11 +6564,11 @@ LEACE:  lda RoomPtr+1       ;
 LEAD0:  sta $01             ;
         inc $00
 ; End of Draw Room
-        jmp AfterDrawRoom
+        jmp AfterDrawRoom   ; print_stuff_addr_1 in BuildRoomAnalyzer.lua  (Room end no enemies path)
 
 ;----------------------------------------------------------------------------------------------------
 
-EnemyLoop:
+EnemyLoop:              ; print_stuff_addr_2 in BuildRoomAnalyzer.lua  (Room end, setup enemies)
 ; TODO: Something funny happens when I try to optimize this
 ; AddToPtr00:
     clc                 ;
@@ -7311,8 +7321,10 @@ LEF09:  clc             ;
 .alias _CloseToAttrTable    $30
 
 DoAnotherMacro:
-LEF72:  dec _MacrosLeftInRow        ;Have all macros been drawn on this row?
-LEF74:  bne SetupMacroRam           ;If not, branch to draw another macro.
+; ======= OLD WAY ========
+;LEF72:  dec _MacrosLeftInRow        ;Have all macros been drawn on this row?
+;LEF74:  bne SetupMacroRam           ;If not, branch to draw another macro.
+; ===== END OLD WAY ======
 
     LEF76:  lda _StructIndex            ;Load struct index.
 
@@ -7337,7 +7349,7 @@ LEF74:  bne SetupMacroRam           ;If not, branch to draw another macro.
 
 ; Entry point from outside
 DrawStruct:
-        ldx CartRAMWorkPtrUB
+        ldx CartRAMWorkPtrUB        ; count_row_addr in BuildRoomAnalyzer.lua
         stx $27
         lda Is_63_or_67_Table-$60, x    ; just caching
         sta _CloseToAttrTable
@@ -7354,6 +7366,7 @@ LEF1D:  ;($C2BF)/16. Upper nibble contains x coord offset(if any).
         lda Div16Table, x
         clc
 LEF21:  adc CartRAMWorkPtrLB      ;Add x coord offset to CartRAMWorkPtr and save in $00.
+        and #$FE
 LEF23:  sta $26                     ;
 
 SetupMacroRam:
@@ -7372,7 +7385,7 @@ LEF3A:  cmp #$A0            ;Reached attrib table?
 LEF3C:  bcs DrawStructExit  ;If not, branch to draw the macro.
 
 DrawMacro:
-LEF3F:  inc _StructIndex        ;Increase struct data index.
+LEF3F:  inc _StructIndex        ;Increase struct data index.        ; count_macro_addr in BuildRoomAnalyzer.lua
 LEF41:  ldy _StructIndex        ;Load struct data index into Y.
 LEF43:  lax (StructPtr),y       ;Get macro number. StructPtr = $35
 ;The following table is used to draw macros in room RAM. Each macro is 2 x 2 tiles.
@@ -7402,14 +7415,23 @@ AfterUpdateAttr:
     LDA $26
     ADC #$02
     STA $26
-LEF63:  and #$1F                    ;Still room left in current row?
-LEF65:  bne DoAnotherMacro          ;If yes, branch to do another macro.
 
-;End structure row early to prevent it from wrapping on to the next row..
-LEF67:  lda _StructIndex        ;Struct index.
-LEF6A:  adc _MacrosLeftInRow    ;Add number of macros remaining in current row.
-LEF6D:  sbc #$00                ;-1 from macros remaining in current row.
-LEF6F:  bne AdvanceRow          ;($EF78)Move to next row of structure.
+; ======= OLD WAY ========
+;LEF63:  and #$1F                    ;Still room left in current row?
+;LEF65:  bne DoAnotherMacro          ;If yes, branch to do another macro.
+;
+;;End structure row early to prevent it from wrapping on to the next row..
+;LEF67:  lda _StructIndex        ;Struct index.
+;LEF6A:  adc _MacrosLeftInRow    ;Add number of macros remaining in current row.
+;LEF6D:  sbc #$00                ;-1 from macros remaining in current row.
+;LEF6F:  bne AdvanceRow          ;($EF78)Move to next row of structure.
+; ===== END OLD WAY ======
+
+; ======= NEW WAY ========
+LEF72:  dec _MacrosLeftInRow        ;Have all macros been drawn on this row?
+LEF74:  bne SetupMacroRam           ;If not, branch to draw another macro.
+LEF65:  beq DoAnotherMacro          ;If yes, branch to do another macro.
+; ===== END NEW WAY ======
 
 DrawStructExit:
     jmp AddToRoomPtr
@@ -7552,7 +7574,7 @@ LF09F:
     beq +          ; branch if not
     cmp #$03
 *   beq NextEnemy      ; next slot
-    jsr LF152
+    jsr GetXEnemyRoomPosition_07_09_0B
     lda EnStatus,x
     cmp #$05
     beq ++++
@@ -7592,7 +7614,7 @@ NextEnemy:
     jmp LF09F
 
 *   ldx #$00
-    jsr GetObject0CoordData
+    jsr GetSamusCoordData_07_09_0B
     ldy #$60
 *   lda EnStatus,y
     beq +
@@ -7629,7 +7651,7 @@ DistFromObj0ToEn1:
     ldy #$00
     jsr IsSamusDead
     beq ++++
-    jsr GetObject1CoordData
+    jsr GetSamusCoordData_06_08_0A
     ldx #$F0
 *   lda ObjAction,x
     cmp #$07
@@ -7657,7 +7679,7 @@ LF149:
     
     jmp LF1FA
 
-LF152:  
+GetXEnemyRoomPosition_07_09_0B:  
     lda EnYRoomPos,x
     sta $07  ; Y coord
     lda EnXRoomPos,x
@@ -7668,16 +7690,26 @@ LF152:
     sta $0B
     rts
 
-GetObject0CoordData:
-LF172:
-    lda ObjectY,x
+GetSamusCoordData_07_09_0B:
+    lda ObjectY
     sta $07
-    lda ObjectX,x
+    lda ObjectX
     sta $09
-    lda ObjectHi,x
+    lda ObjectHi
     eor PPUCNT0ZP
     and #$01
     sta $0B
+    rts
+
+GetSamusCoordData_06_08_0A:
+    lda ObjectY
+    sta $06
+    lda ObjectX
+    sta $08
+    lda ObjectHi
+    eor PPUCNT0ZP
+    and #$01
+    sta $0A
     rts
 
 GetObject1CoordData:
@@ -8193,7 +8225,8 @@ LF51E:
     ldx PageIndex
     rts
 
-LF536:  lda EnSpecialAttribs,x
+LF536:
+    lda EnSpecialAttribs,x
     sta $0A
     lda $0404,x
     and #$20
@@ -8684,6 +8717,7 @@ Bank07_LF870:
     lda $0083,y
     jmp LF690
 
+; TODO: Can inline this
 LF8E8:
     ldy #$60
     clc
@@ -8718,7 +8752,7 @@ LF8F8:
 ; TODO: Can inline some of this
 LF91D:
     ldx PageIndex
-    jsr LE792
+    jsr GetXEnemyRoomPosition_09_08_0B
     tya
     tax
     jsr Bank07_LFD8F
@@ -8881,7 +8915,7 @@ Bank07_LFA1E:
     lda $0402,x
     sta $04
 LFA41:
-    jsr LE792
+    jsr GetXEnemyRoomPosition_09_08_0B
     jsr Bank07_LFD8F
     bcc KillObject          ;($FA18)Free enemy data slot.
 LFA49:
@@ -8915,7 +8949,7 @@ LFA7D:
 
 LFA91:
     jsr KillObject          ;($FA18)Free enemy data slot.
-    lda $95DC           ;TODO - Link this up symbolically
+    lda $95DC               ;TODO - Link this up symbolically   ; $95DC == #$03 always
     jsr DoSomethingToAnimationIndecies
     jmp LF97C
 
@@ -8987,8 +9021,8 @@ LFAFF:
     lda #$0C
     sta EnRadY,x
     ldy #$00
-    jsr GetObject1CoordData
-    jsr LF152
+    jsr GetSamusCoordData_06_08_0A
+    jsr GetXEnemyRoomPosition_07_09_0B
     jsr DistFromEn0ToObj1
     jsr LF1FA
     bcc Exit13
@@ -9057,7 +9091,8 @@ Bank07_LFBB9:
     beq Exit13
     jmp DoSomethingToAnimationIndecies
 
-Bank07_LFBCA:  ldx PageIndex
+Bank07_LFBCA:
+    ldx PageIndex
     jsr LF844
     lda $965B,y
     cmp EnResetAnimIndex,x
@@ -9483,7 +9518,7 @@ LFF3C:
     asr #$03
     sta $0B
     ldy #$00
-    jsr GetObject1CoordData
+    jsr GetSamusCoordData_06_08_0A
     lda #$04
     clc
     adc ObjRadY
@@ -9613,7 +9648,9 @@ NorfairGFXTable:
     .byte $16, $19, $09, $08, $07, $05, $04
 
 TourianGFXTable:
-    .byte $16, $19, $1C, $1A, $0E, $0D, $0C, $0B, $0A, $05
+    .byte $16, $19, $1C, $1A, $0E
+    ;$0D, ; Getting rid of the Japanese font
+    .byte $0C, $0B, $0A, $05
 
 KraidGFXTable:
     .byte $16, $19, $11, $10, $0F, $0A, $05, $04
@@ -9638,105 +9675,106 @@ MetroidData:
 ;byte 5-6: data length (16-bit).
 
 GFXInfo:
-;[SPR]Samus, items. Entry 0.
+;[SPR]Samus, items. Entry $00.
 LC6E0:  .byte $06
 LC6E1:  .word GFXSuitedSamus, $0000, $09A0
 
-;[SPR]Samus in ending. Entry 1.
+;[SPR]Samus in ending. Entry $01.
 LC6E7:  .byte $04
-LC6E8:  .word $8D60, $0000, $0520
+LC6E8:  .word GFXEndingSamus, $0000, $0520
 
-;[BGR]Partial font, "The End". Entry 2.
+;[BGR]Partial font, "The End". Entry $02.
 LC6EE:  .byte $01
-LC6EF:  .word $8D60, $1000, $0400
+LC6EF:  .word GFXTheEndFont, $1000, $0400
 
-;[BGR]Brinstar rooms. Entry 3.
-LC6F5:  .byte $06
+;[BGR]Brinstar rooms. Entry $03.
+LC6F5:  .byte $00
 LC6F6:  .word GFXBrinstar1, $1000, $0150
 
-;[BGR]Misc. objects. Entry 4.
+;[BGR]Misc. objects. Entry $04.
 LC6FC:  .byte $05
-LC6FD:  .word $8D60, $1200, $0450
+LC6FD:  .word GFXMiscObjects1, $1200, $0450
 
-;[BGR]More Brinstar rooms. Entry 5.
+;[BGR]More Brinstar rooms. Entry $05.
 LC703:  .byte $06
 LC704:  .word GFXBrinstar2, $1800, $0800
 
-;[SPR]Brinstar enemies. Entry 6.
-LC70A:  .byte $01
-LC70B:  .word $9160, $0C00, $0400
+;[SPR]Brinstar enemies. Entry $06.
+LC70A:  .byte $00
+LC70B:  .word GFXBrinstarEnemies, $0C00, $0400
 
-;[BGR]Norfair rooms. Entry 7.
+;[BGR]Norfair rooms. Entry $07.
 LC711:  .byte $06
 LC712:  .word GFXNorfair1, $1000, $0260
 
-;[BGR]More Norfair rooms. Entry 8.
+;[BGR]More Norfair rooms. Entry $08.
 LC718:  .byte $06
 LC719:  .word GFXNorfair2, $1700, $0070
 
-;[SPR]Norfair enemies. Entry 9.
+;[SPR]Norfair enemies. Entry $09.
 LC71F:  .byte $02
-LC720:  .word $8D60, $0C00, $0400
+LC720:  .word GFXNorfairEnemies, $0C00, $0400
 
-;[BGR]Tourian rooms. Entry 10.
+;[BGR]Tourian rooms. Entry $0A.
 LC726:  .byte $06
 LC727:  .word GFXTourian1, $1000, $02E0
 
-LC72D:  .byte $06           ;[BGR]More Tourian rooms. Entry 11.
+LC72D:  .byte $06           ;[BGR]More Tourian rooms. Entry $0B.
 LC72E:  .word GFXTourian2, $1200, $0600
 
-LC734:  .byte $06           ;[BGR]Mother Brain room. Entry 12.
+LC734:  .byte $06           ;[BGR]Mother Brain room. Entry $0C.
 LC735:  .word GFXMthrBrnRoom, $1900, $0090
 
-LC73B:  .byte $05           ;[BGR]Misc. object. Entry 13.
-LC73C:  .word $91B0, $1D00, $0300
+; This is now unused
+LC73B:  .byte $05           ;[BGR]Misc. object. Entry $0D.
+LC73C:  .word GFXGameOverJapaneseFont, $1D00, $0300
 
-LC742:  .byte $02           ;[SPR]Tourian enemies. Entry 14.
-LC743:  .word $9160, $0C00, $0400
+LC742:  .byte $02           ;[SPR]Tourian enemies. Entry $0E.
+LC743:  .word GFXTourianEnemies, $0C00, $0400
 
-LC749:  .byte $06           ;[BGR]More Tourian rooms. Entry 15.
+LC749:  .byte $06           ;[BGR]More Tourian rooms. Entry $0F.
 LC74A:  .word GFXTourian3, $1700, $00C0
 
-LC750:  .byte $04           ;[BGR]Misc. object and fonts. Entry 16.
-LC751:  .word $9360, $1E00, $0200
+LC750:  .byte $04           ;[BGR]Misc. object and fonts. Entry $10.
+LC751:  .word GFXMiscTiles, $1E00, $0200
 
-LC757:  .byte $03               ;[SPR]Miniboss I enemies. Entry 17.
-LC758:  .word $8D60, $0C00, $0400
+LC757:  .byte $03               ;[SPR]Miniboss I enemies. Entry $11.
+LC758:  .word GFXKraidEnemies, $0C00, $0400
 
-LC75E:  .byte $06               ;[BGR]More Tourian Rooms. Entry 18.
+LC75E:  .byte $06               ;[BGR]More Tourian Rooms. Entry $12.
 LC75F:  .word GFXTourian4, $1700, $00C0
 
-LC765:  .byte $03           ;[SPR]Miniboss II enemies. Entry 19.
-LC766:  .word $9160, $0C00, $0400
+LC765:  .byte $03           ;[SPR]Miniboss II enemies. Entry $13.
+LC766:  .word GFXRidleyEnemies, $0C00, $0400
 
-LC76C:  .byte $06           ;[SPR]Inrto/End sprites. Entry 20.
+LC76C:  .byte $06           ;[SPR]Inrto/End sprites. Entry $14.
 LC76D:  .word GFXIntroEnd, $0C00, $0100
 
-LC773:  .byte $06           ;[BGR]Title. Entry 21.
+LC773:  .byte $06           ;[BGR]Title. Entry $15.
 LC774:  .word GFXMetroidTitle, $1400, $0500
 
-LC77A:  .byte $06           ;[BGR]Solid tiles.      Entry 22.
+LC77A:  .byte $06           ;[BGR]Solid tiles.      Entry $16.
 LC77B:  .word GFXBlankTiles, $1FC0, $0040
 
-LC781:  .byte $06           ;[BGR]Complete font.        Entry 23.
+LC781:  .byte $06           ;[BGR]Complete font.        Entry $17.
 LC782:  .word GFXFont, $1000, $0400
 
-LC788:  .byte $06           ;[BGR]Complete font.        Entry 24.
+LC788:  .byte $06           ;[BGR]Complete font.        Entry $18.
 LC789:  .word GFXFont, $0A00, $00A0
 
-LC78F:  .byte $06           ;[BGR]Solid tiles.      Entry 25.
+LC78F:  .byte $06           ;[BGR]Solid tiles.      Entry $19.
 LC790:  .word GFXBlankTiles, $0FC0, $0040
 
-LC796:  .byte $06           ;[BGR]Complete font.        Entry 26.
+LC796:  .byte $06           ;[BGR]Complete font.        Entry $1A.
 LC797:  .word GFXFont, $1D00, $02A0
 
-;[SPR]Suitless Samus.           Entry 27.
+;[SPR]Suitless Samus.           Entry $1B.
 LC79D:  .byte $06
 LC79E:  .word GFXSuitlesSamus, $0000, $07B0
 
-;[BGR]Exclaimation point.       Entry 28.
+;[BGR]Exclaimation point.       Entry $1C.
 LC7A4:  .byte $06
-LC7A5:  .word $9890, $1F40, $0010
+LC7A5:  .word GFXExPoint, $1F40, $0010
 
 
 ;The following table marks the time remaining in Timer2 when a palette change should occur during
@@ -10062,28 +10100,6 @@ Table15: .byte $02, $FE             ; Table15 is just $02, $FE. They are interwo
 
 Mul16Table:
     .byte $00, $10, $20, $30, $40, $50, $60, $70, $80, $90, $A0, $B0, $C0, $D0, $E0, $F0
-
-; TODO - Need to align the identity table to a memory page for maxium cycle gains
-;        Test out if aligning to #$00 or #$F0 is better. There are way more -16s in the code
-    .byte $f0, $f1, $f2, $f3, $f4, $f5, $f6, $f7, $f8, $f9, $fa, $fb, $fc, $fd, $fe, $ff
-IdentityTable:
-    .byte $00, $01, $02, $03, $04, $05, $06, $07, $08, $09, $0a, $0b, $0c, $0d, $0e, $0f
-    .byte $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $1a, $1b, $1c, $1d, $1e, $1f
-    .byte $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $2a, $2b, $2c, $2d, $2e, $2f
-    .byte $30, $31, $32, $33, $34, $35, $36, $37, $38, $39, $3a, $3b, $3c, $3d, $3e, $3f
-    .byte $40, $41, $42, $43, $44, $45, $46, $47, $48, $49, $4a, $4b, $4c, $4d, $4e, $4f
-    .byte $50, $51, $52, $53, $54, $55, $56, $57, $58, $59, $5a, $5b, $5c, $5d, $5e, $5f
-    .byte $60, $61, $62, $63, $64, $65, $66, $67, $68, $69, $6a, $6b, $6c, $6d, $6e, $6f
-    .byte $70, $71, $72, $73, $74, $75, $76, $77, $78, $79, $7a, $7b, $7c, $7d, $7e, $7f
-    .byte $80, $81, $82, $83, $84, $85, $86, $87, $88, $89, $8a, $8b, $8c, $8d, $8e, $8f
-    .byte $90, $91, $92, $93, $94, $95, $96, $97, $98, $99, $9a, $9b, $9c, $9d, $9e, $9f
-    .byte $a0, $a1, $a2, $a3, $a4, $a5, $a6, $a7, $a8, $a9, $aa, $ab, $ac, $ad, $ae, $af
-    .byte $b0, $b1, $b2, $b3, $b4, $b5, $b6, $b7, $b8, $b9, $ba, $bb, $bc, $bd, $be, $bf
-    .byte $c0, $c1, $c2, $c3, $c4, $c5, $c6, $c7, $c8, $c9, $ca, $cb, $cc, $cd, $ce, $cf
-    .byte $d0, $d1, $d2, $d3, $d4, $d5, $d6, $d7, $d8, $d9, $da, $db, $dc, $dd, $de, $df
-    .byte $e0, $e1, $e2, $e3, $e4, $e5, $e6, $e7, $e8, $e9, $ea, $eb, $ec, $ed, $ee, $ef
-    .byte $f0, $f1, $f2, $f3, $f4, $f5, $f6, $f7, $f8, $f9, $fa, $fb, $fc, $fd, $fe, $ff
-    .byte $00, $01, $02, $03, $04, $05, $06, $07, $08, $09, $0a, $0b, $0c, $0d, $0e, $0f    ; Overflow a bit so catch +16 past $ff
 
 Div16Table:
     .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00

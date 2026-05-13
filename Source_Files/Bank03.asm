@@ -5,6 +5,7 @@
 ;------------------------------------------[ Graphics data ]-----------------------------------------
 
 ;Kraid hideout enemy tile patterns.
+GFXKraidEnemies:
 Bank03_L8D60:  .byte $03, $0F, $05, $32, $D1, $48, $12, $24, $01, $02, $02, $11, $48, $20, $00, $00
 Bank03_L8D70:  .byte $E0, $F0, $EC, $DE, $92, $8D, $A0, $3C, $C0, $00, $0C, $02, $01, $0C, $02, $00
 Bank03_L8D80:  .byte $00, $80, $58, $38, $70, $23, $83, $CD, $00, $00, $18, $3C, $7C, $38, $30, $00
@@ -67,10 +68,11 @@ Bank03_L9100:  .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00,
 Bank03_L9110:  .byte $0F, $1C, $88, $80, $00, $00, $10, $10, $CF, $30, $90, $90, $30, $E0, $D0, $90
 Bank03_L9120:  .byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
 Bank03_L9130:  .byte $00, $00, $00, $00, $00, $00, $00, $00, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
-Bank03_L9140:  .byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $00, $00, $00, $00, $00, $00, $00, $00
+Bank03_L9140:  .byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $00, $00, $00, $00, $00, $00, $00, $00    ; interleave with the next table
 Bank03_L9150:  .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
 
 ;Ridley hideout enemy tile patterns.
+GFXRidleyEnemies:
 Bank03_L9160:  .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
 Bank03_L9170:  .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
 Bank03_L9180:  .byte $00, $00, $08, $31, $7A, $DA, $19, $FD, $00, $00, $00, $21, $5A, $DA, $99, $FD
@@ -251,12 +253,15 @@ Bank03_L95D7:  .byte $03           ;Samus start x coord on world map.
 Bank03_L95D8:  .byte $04           ;Samus start y coord on world map.
 Bank03_L95D9:  .byte $6E           ;Samus start verticle screen position.
 
-Bank03_L95DA:  .byte $06, $00, $03, $21, $00, $00, $00, $00, $00, $10
+Bank03_L95DA:  .byte $06, $00
+
+Bank03_L95DC:  .byte $03
+Bank03_L95DD:  .byte $21, $00, $00, $00, $00, $00, $10
 
 .advance MemuByte
     .byte $00   ; Only set to 0 in bank 3 when there is a memu
 
-Bank03_L95E5:  LDA $6B02,X
+Bank03_L95E5:  LDA EnDataIndex,X
 
     cmp #$02
     bcc Bank03_LessThan2_Jump
@@ -304,6 +309,7 @@ Bank03_L96BB:  .byte $01, $01, $00, $00, $01, $00, $00, $00, $00, $00, $00, $00,
 
 Bank03_L96CB:  .byte $00, $02, $00, $00, $04, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
 
+.advance $96DB
 Bank03_L96DB:  .word $97D5, $97D5, $97D5, $97D5, $97D5, $97D5, $97D5, $97D5
 Bank03_L96EB:  .word $97D5, $97D5, $97D5, $97D5, $97D5, $97D5, $97D5, $97D5
 Bank03_L96FB:  .word $97D5, $97D5, $97D5, $97D5, $97D5, $97D5, $97D5, $97D5
@@ -322,6 +328,7 @@ Bank03_L977B:  .byte $50, $50, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00,
 Bank03_L978B:  .byte $00, $00, $26, $26, $26, $26, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
 Bank03_L979B:  .byte $0C, $F4, $00, $00, $00, $00, $00, $00, $F4, $00, $00, $00
 
+.advance $97A7
 Bank03_L97A7:  .word $97D5, $97D5, $97D8, $97DB, $A32B, $A330, $A337, $A348
 Bank03_L97B7:  .word $A359, $A36A, $A37B, $A388, $A391, $A3A2, $A3B3, $A3C4
 Bank03_L97C7:  .word $A3D5, $A3DE, $A3E7, $A3F0, $A3F9
@@ -535,7 +542,7 @@ Bank03_L999C:  LDY #$01
 Bank03_L999E:  STY $92
 Bank03_L99A0:  LDA $6B
 Bank03_L99A2:  BMI $99AB
-Bank03_L99A4:  LDA $6B02,X
+Bank03_L99A4:  LDA EnDataIndex,X
 Bank03_L99A7:  ORA #$A2
 Bank03_L99A9:  STA $6B
 Bank03_L99AB:  JMP $97E2
@@ -1505,7 +1512,7 @@ Bank03_LA19B:  RTS
 Bank03_LA19C:  LDA #$01
 Bank03_LA19E:  STA $6AF4,X
 Bank03_LA1A1:  LDA #$04
-Bank03_LA1A3:  STA $6B02,X
+Bank03_LA1A3:  STA EnDataIndex,X
 Bank03_LA1A6:  LDA #$00
 Bank03_LA1A8:  STA $040F,X
 Bank03_LA1AB:  STA $0404,X
