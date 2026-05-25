@@ -867,6 +867,12 @@ Bank06_LB8B0:  .byte $00, $00, $00, $7C, $00, $00, $00, $00, $00, $00, $00, $7C,
 
 ;----------------------------------------------------------------------------------------------------
 
+ATDataTable:
+    .byte %00000000, %00000000, %00000000, %00000000
+    .byte %01010101, %01010101, %01010101, %01010101
+    .byte %10101010, %10101010, %10101010, %10101010
+    .byte %11111111, %11111111, %11111111, %11111111
+
 ; Clear Tables are all just doing to be $2D memory addresses apart
 
 ClearTablesPtr_Lo:
@@ -1136,6 +1142,7 @@ FillRoomRAM_64_Vertical:
     sta _1 + $0E
     sta _1 + $0F
 .macend
+
 
 AttributeWrite_63C0_to_63FF:
     ldx RoomPal         ;Index into table below (Lowest 2 bits).

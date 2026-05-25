@@ -279,6 +279,7 @@ Bank02_L95D7:  .byte $16           ;Samus start x coord on world map.
 Bank02_L95D8:  .byte $0D           ;Samus start y coord on world map.
 Bank02_L95D9:  .byte $6E           ;Samus start verticle screen position.
 
+.advance $95DA
 Bank02_L95DA:  .byte $01, $00
 Bank02_L95DC:  .byte $03
 Bank02_L95DD:  .byte $77, $53, $57, $55, $59, $5B, $4F

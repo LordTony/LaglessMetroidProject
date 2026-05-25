@@ -108,8 +108,9 @@
 .alias CurrentMusic     $41     ;Stores the flag of the current music being played
 .alias SamusInLava      $42     ;#$01=Samus in lava, #$00=She is not.
 .alias PalToggle        $43
+.alias ShouldUpdateAttrs $44
 ; These are now unused
-; $44, $45, $46, $47, $48
+; $45, $46, $47, $48
 
 .alias ScrollDir        $49     ;0=Up, 1=Down, 2=Left, 3=Right.
 
@@ -152,6 +153,7 @@
 .alias SpritePagePos    $5B     ;Index into sprite RAM used to load object sprite data.
 ; used $5C - $64                ;Some routing eor $5C,x oer $5D,x where x == #$06 and counts down
 .alias ObjectCounter    $65     ;Counts such things as object explosion time.
+; used $66
 .alias ObjectPal        $67     ;Attrib. table info for room object(#$00 thru #$03).
 .alias RoomPal          $68
 .alias TempX            $69
@@ -898,7 +900,7 @@
 .alias SXFInitTables            $B29D
 .alias SoundEngineEntryPoint    $B3CC
 .alias StructPointerTable_Hi    $BF0F
-.alias StructPointerTable_Lo    $BF50
+.alias StructPointerTable_Lo    $BF60
 .alias InterruptVectors         $BFFA
 
 ;----------------------------------------------------------------------------------------------------

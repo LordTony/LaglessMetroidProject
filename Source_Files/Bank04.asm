@@ -265,6 +265,7 @@ Bank04_L95D7:  .byte $07           ;Samus start x coord on world map.
 Bank04_L95D8:  .byte $14           ;Samus start y coord on world map.
 Bank04_L95D9:  .byte $6E           ;Samus start verticle screen position.
 
+.advance $95DA
 Bank04_L95DA:  .byte $06, $00
 Bank04_L95DC:  .byte $03
 Bank04_L95DD:  .byte $43, $00, $00, $00, $00, $00, $00
@@ -1230,29 +1231,71 @@ Bank04_LA33D:  .byte $02, $A0, $02, $B1, $31, $85, $37, $FF
 ;Room #$04
 Bank04_LA345:  .byte $00           ;Attribute table data.
 ;Room object data:
-Bank04_LA346:  .byte $00, $06, $00, $07, $06, $00, $0B, $10, $00, $0E, $06, $00, $22, $08, $04, $2A
-Bank04_LA356:  .byte $09, $04, $35, $0D, $00, $50, $03, $08, $57, $06, $00, $5F, $03, $08, $80, $0D
-Bank04_LA366:  .byte $00, $8C, $0D, $00, $8E, $06, $00, $90, $06, $00, $92, $08, $04, $BE, $06, $00
-Bank04_LA376:  .byte $CD, $09, $04, $D0, $06, $00, $FD
+.byte $00, $06, $00 
+.byte $07, $06, $00
+.byte $0B, $10, $00
+.byte $0E, $06, $00
+.byte $22, $08, $04
+.byte $2A, $09, $04
+.byte $35, $0D, $00
+.byte $50, $03, $08
+.byte $57, $06, $00
+.byte $5F, $03, $08
+.byte $80, $0D, $00
+.byte $8C, $0D, $00
+.byte $8E, $06, $00
+.byte $90, $06, $00
+.byte $92, $08, $04
+.byte $BE, $06, $00
+.byte $CD, $09, $04
+.byte $D0, $06, $00
+.byte $FD
 ;Room enemy/door data:
 Bank04_LA37D:  .byte $02, $A0, $02, $B1, $41, $85, $25, $21, $83, $C8, $FF
 
 ;Room #$05
 Bank04_LA388:  .byte $00           ;Attribute table data.
 ;Room object data:
-Bank04_LA389:  .byte $00, $10, $00, $0C, $10, $00, $14, $08, $04, $40, $10, $00, $4C, $10, $00, $6B
-Bank04_LA399:  .byte $09, $04, $7C, $10, $00, $80, $10, $00, $94, $08, $04, $BC, $10, $00, $C0, $10
-Bank04_LA3A9:  .byte $00, $DB, $09, $04, $FD
+.byte $00, $10, $00
+.byte $0C, $10, $00
+.byte $14, $08, $04
+.byte $40, $10, $00
+.byte $4C, $10, $00
+.byte $6B, $09, $04
+.byte $7C, $10, $00
+.byte $80, $10, $00
+.byte $94, $08, $04
+.byte $BC, $10, $00
+.byte $C0, $10, $00
+.byte $DB, $09, $04
+.byte $FD
 ;Room enemy/door data:
 Bank04_LA3AE:  .byte $51, $83, $57, $01, $03, $95, $11, $03, $CA, $FF
 
 ;Room #$06
 Bank04_LA3B8:  .byte $00           ;Attribute table data.
 ;Room object data:
-Bank04_LA3B9:  .byte $00, $06, $00, $0E, $06, $00, $12, $08, $04, $17, $0E, $00, $1A, $0D, $00, $27
-Bank04_LA3C9:  .byte $0C, $00, $31, $0E, $00, $36, $11, $00, $39, $07, $00, $50, $03, $08, $59, $0E
-Bank04_LA3D9:  .byte $00, $5F, $03, $08, $80, $10, $00, $84, $10, $00, $88, $10, $00, $8C, $10, $00
-Bank04_LA3E9:  .byte $C0, $10, $00, $C4, $10, $00, $C8, $10, $00, $CC, $10, $00, $FD
+.byte $00, $06, $00
+.byte $0E, $06, $00
+.byte $12, $08, $04 
+.byte $17, $0E, $00 
+.byte $1A, $0D, $00 
+.byte $27, $0C, $00
+.byte $31, $0E, $00
+.byte $36, $11, $00
+.byte $39, $07, $00
+.byte $50, $03, $08
+.byte $59, $0E, $00
+.byte $5F, $03, $08
+.byte $80, $10, $00
+.byte $84, $10, $00
+.byte $88, $10, $00
+.byte $8C, $10, $00
+.byte $C0, $10, $00
+.byte $C4, $10, $00
+.byte $C8, $10, $00
+.byte $CC, $10, $00
+.byte $FD
 ;Room enemy/door data:
 Bank04_LA3F6:  .byte $02, $A1, $02, $B1, $01, $85, $2A, $51, $85, $26, $FF
 

@@ -112,6 +112,8 @@ LC091:  LDA #%00000010          ;Sprites visible = no
                                 ;Display type = color
 LC093:  STA PPUCNT1ZP           ;
 
+LC095:  LDA #$47                ;
+LC097:  STA MirrorCntrl         ;Prepare to set PPU to vertical mirroring.
 LC099:  JSR PrepVertMirror      ;($C4B2)
 
 LC09C:  LDA #$00                ;
@@ -213,9 +215,9 @@ LC0F4:* JSR CheckPalWrite       ;($C1E0)Check if palette data pending.
 CheckPPUWrite:
 LC2CA:  LDA PPUDataPending      ;
 LC2CC:  BEQ AfterCheckPPUWrite  ;If zero no PPU data to write, branch to exit.
-LC2CE:  LDA #$A1                ;           
+LC2CE:  LDA #<PPUDataString     ;           
 LC2D0:  STA $00                 ;Sets up PPU writer to start at address $07A1.
-LC2D2:  LDA #$07                ;
+LC2D2:  LDA #>PPUDataString     ;
 LC2D4:  STA $01                 ;$0000 = ptr to PPU data string ($07A1).
 LC2D6:  JSR ProcessPPUStr       ;($C30C)write it to PPU.
 LC2D9:  LDA #$00                ;
@@ -738,7 +740,7 @@ LC44F:  STA PPUControl0         ;
 LC452:  LDA PPUCNT1ZP           ;Update PPU control registers.
 LC454:  STA PPUControl1         ;
 LC457:  LDA MirrorCntrl         ;
-LC4DB:  JMP SetPPUMirror        ;($C4B6)Set mirroring through MMC1 chip.
+LC459:  JSR PrepPPUMirror       ;($C4D9)Setup vertical or horizontal mirroring.
 
 ExitSub:
 LC45C:  RTS                     ;Exit subroutines.
@@ -800,13 +802,16 @@ LC4B0:  BNE SetMainRoutine      ;Branch always.
 ;-----------------------------------[ PPU mirroring routines ]---------------------------------------
 
 PrepVertMirror:
-LC095:  LDA #$47                ;
-LC097:  STA MirrorCntrl         ;Prepare to set PPU to vertical mirroring.
+LC4B2:  NOP                     ;
+LC4B3:  NOP                     ;Prepare to set PPU for vertical mirroring (again).
+LC4B4:  LDA #$47                ;
 
 SetPPUMirror:
 LC4B6:  LSR                     ;
 LC4B7:  LSR                     ;Move bit 3 to bit 0 position.
-LC4B9:  asr #$03                ;Remove all other bits.
+LC4B8:  LSR                     ;
+LC4B9:  AND #$01                ;Remove all other bits.
+;LC4B9:  asr #$03               ;TODO: Use this to replace "LSR; AND #$01"
 LC4BB:  STA $00                 ;Store at address $00.
 LC4BD:  LDA MMCReg0Cntrl        ;
 LC4BF:  AND #$FE                ;Load MMCReg0Cntrl and remove bit 0.
@@ -823,6 +828,10 @@ LC4D4:  LSR                     ;
 LC4D5:  STA MMC1Reg0            ;
 Exit27:
 LC4D8:  RTS                     ;
+
+PrepPPUMirror:
+LC4D9:  LDA MirrorCntrl         ;Load MirrorCntrl into A.
+LC4DB:  JMP SetPPUMirror        ;($C4B6)Set mirroring through MMC1 chip.
 
 ;-----------------------------[ Switch bank and init bank routines ]---------------------------------
 
@@ -6531,6 +6540,8 @@ LEA8E:  lax (RoomPtr),y                 ;the index into the structure pointer ta
 LEA91:  iny                             ;Move to the next byte of room data which is
 LEA92:  lda (RoomPtr),y                 ;the attrib table info for the structure.
 LEA94:  sta ObjectPal                   ;Save attribute table info.
+        eor RoomPal 
+        sta ShouldUpdateAttrs           ; Will we need to write attribute data?
 LEA99:  lda StructPointerTable_Lo ,x    ; Low byte of 16-bit structure ptr.
 LEA9B:  sta StructPtrLB                 ;
 LEA9E:  lda StructPointerTable_Hi, x    ; High byte of 16-bit structure ptr.
@@ -7316,17 +7327,20 @@ LEF09:  clc             ;
 ;----------------------------------[ Draw structure routines ]----------------------------------------
 .scope
 
-.alias _StructIndex         $10
-.alias _MacrosLeftInRow     $0E
-.alias _CloseToAttrTable    $30
+.alias _PositionInStruct        $10
+.alias _MacrosLeftInRow         $0E
+.alias _CloseToAttrTable        $30
+.alias _RoomDataWritePtr_Hi     $27
+.alias _RoomDataWritePtr_Lo     $26
+.alias _RoomDataWritePtr        $26
 
 DoAnotherMacro:
 ; ======= OLD WAY ========
-;LEF72:  dec _MacrosLeftInRow        ;Have all macros been drawn on this row?
-;LEF74:  bne SetupMacroRam           ;If not, branch to draw another macro.
+LEF72:  dec _MacrosLeftInRow        ;Have all macros been drawn on this row?
+LEF74:  bne SetupMacroRam           ;If not, branch to draw another macro.
 ; ===== END OLD WAY ======
 
-    LEF76:  lda _StructIndex            ;Load struct index.
+    LEF76:  lda _PositionInStruct            ;Load struct index.
 
     AdvanceRow:
     LEF78:  sec                         ;Since carry bit is set,
@@ -7350,10 +7364,14 @@ DoAnotherMacro:
 ; Entry point from outside
 DrawStruct:
         ldx CartRAMWorkPtrUB        ; count_row_addr in BuildRoomAnalyzer.lua
-        stx $27
+        stx _RoomDataWritePtr_Hi
+
+; ======= OLD WAY ========
         lda Is_63_or_67_Table-$60, x    ; just caching
         sta _CloseToAttrTable
-LEF8E:  sty _StructIndex        ;Reset struct index. y == 0 here
+; ===== END OLD WAY ======
+
+LEF8E:  sty _PositionInStruct   ;Reset struct index. y == 0 here
 LEF90:  lax (StructPtr), y      ;Load data byte.
 LEF94:  bmi DrawStructExit      ;If so, branch to exit.
 
@@ -7367,7 +7385,7 @@ LEF1D:  ;($C2BF)/16. Upper nibble contains x coord offset(if any).
         clc
 LEF21:  adc CartRAMWorkPtrLB      ;Add x coord offset to CartRAMWorkPtr and save in $00.
         and #$FE
-LEF23:  sta $26                     ;
+LEF23:  sta _RoomDataWritePtr_Lo 
 
 SetupMacroRam:
 ;High byte of current location in room RAM.
@@ -7376,61 +7394,64 @@ SetupMacroRam:
 ;been reached.  If so, branch to check lower byte as well.
 ;If not at end of room RAM, branch to draw macro.
 
-  lda $30
+; ======= OLD WAY ========
+
+  lda _CloseToAttrTable
   beq DrawMacro
 
 CheckForAttrTable:
-LEF38:  lda $26             ;Low byte of current nametable address.
-LEF3A:  cmp #$A0            ;Reached attrib table?
-LEF3C:  bcs DrawStructExit  ;If not, branch to draw the macro.
+LEF38:  lda _RoomDataWritePtr_Lo    ;Low byte of current nametable address.
+LEF3A:  cmp #$A0                    ;Reached attrib table?
+LEF3C:  bcs DrawStructExit          ;If not, branch to draw the macro.
+
+; ===== END OLD WAY ======
 
 DrawMacro:
-LEF3F:  inc _StructIndex        ;Increase struct data index.        ; count_macro_addr in BuildRoomAnalyzer.lua
-LEF41:  ldy _StructIndex        ;Load struct data index into Y.
+LEF3F:  inc _PositionInStruct   ;Increase struct data index.        ; count_macro_addr in BuildRoomAnalyzer.lua
+LEF41:  ldy _PositionInStruct   ;Load struct data index into Y.
 LEF43:  lax (StructPtr),y       ;Get macro number. StructPtr = $35
 ;The following table is used to draw macros in room RAM. Each macro is 2 x 2 tiles.
 ;The following table contains the offsets required to place the tiles in each macro.
 
     LDA MacroUpperRight, x
     LDY #$20
-    STA ($26),Y
+    STA (_RoomDataWritePtr),Y
 
     LDA MacroUpperLeft, x
     iny
-    STA ($26),Y
+    STA (_RoomDataWritePtr),Y
 
     LDA MacroLowerLeft, x
     LDY #$01
-    STA ($26),Y
+    STA (_RoomDataWritePtr),Y
 
     LDA MacroLowerRight, x
     DEY                             ; Doing it like this so Y is 0 when we get out of here
-    STA ($26),Y
+    STA (_RoomDataWritePtr),Y
 
 ; Update attribute if changed
-        lda ObjectPal
-        eor RoomPal
+        lda ShouldUpdateAttrs
 LEFA2:  bne UpdateAttrib            ;If so, no need to modify the attribute table, exit.
 AfterUpdateAttr:
-    LDA $26
+    LDA _RoomDataWritePtr
     ADC #$02
-    STA $26
+    STA _RoomDataWritePtr
 
 ; ======= OLD WAY ========
-;LEF63:  and #$1F                    ;Still room left in current row?
-;LEF65:  bne DoAnotherMacro          ;If yes, branch to do another macro.
-;
-;;End structure row early to prevent it from wrapping on to the next row..
-;LEF67:  lda _StructIndex        ;Struct index.
-;LEF6A:  adc _MacrosLeftInRow    ;Add number of macros remaining in current row.
-;LEF6D:  sbc #$00                ;-1 from macros remaining in current row.
-;LEF6F:  bne AdvanceRow          ;($EF78)Move to next row of structure.
+LEF63:  and #$1F                    ;Still room left in current row?
+LEF65:  bne DoAnotherMacro          ;If yes, branch to do another macro.
+
+;End structure row early to prevent it from wrapping on to the next row..
+LEF67:  lda _PositionInStruct   ;Struct index.
+LEF6A:  adc _MacrosLeftInRow    ;Add number of macros remaining in current row.
+LEF6D:  sbc #$00                ;-1 from macros remaining in current row.
+LEF6F:  bne AdvanceRow          ;($EF78)Move to next row of structure.
 ; ===== END OLD WAY ======
 
 ; ======= NEW WAY ========
-LEF72:  dec _MacrosLeftInRow        ;Have all macros been drawn on this row?
-LEF74:  bne SetupMacroRam           ;If not, branch to draw another macro.
-LEF65:  beq DoAnotherMacro          ;If yes, branch to do another macro.
+;LEF72:  dec _MacrosLeftInRow        ;Have all macros been drawn on this row?
+;LEF74:  bne SetupMacroRam           ;If not, branch to draw another macro.
+;LEF65:  beq DoAnotherMacro          ;If yes, branch to do another macro.
 ; ===== END NEW WAY ======
 
 DrawStructExit:
@@ -7440,61 +7461,71 @@ DrawStructExit:
 
 ;The following routine updates attribute bits for one 2x2 tile section on the screen.
 
-; HOTSPOT
 UpdateAttrib:
 ;Figure out cart RAM address of the byte containing the relevant bits.
 
-lda $27          
-and #$03         
-tax                   
+    lda _RoomDataWritePtr_Hi         
+    and #$03         
+    tax                   
 
-lda $26          
-lsr              
-lsr              
-ora CartRamMulOffsetLoTable,x   ; $00, $40, $80, $C0
+    lda _RoomDataWritePtr_Lo   
+    lsr              
+    lsr              
+    ora CartRamMulOffsetLoTable,x   ; $00, $40, $80, $C0
 
-LEFB2:  ldx #$07            ;proper attribute byte that corresponds to the
-LEFB4:  sax $03             ;macro that has just been placed in the room RAM.
-LEFB8:  lsr                 ;
-        asr #$71            ;
-LEFBC:  ora $03             ;
-LEFBE:  ora #$C0            ;
-LEFC0:  sta $02             ;
-
-ldx #$00    ; X = 0
-lda #$02    ; A = 2, used as BIT mask for bit1
-bit $26     ; V = bit6 of $00, Z = (bit1 of $00 == 0)?
-beq +       ; if bit1 = 0, skip first increment
-inx         ; bit1 = 1 → X += 1
-*   bvc +       ; if bit6 = 0, skip high-bit contribution
-inx         ; bit6 = 1 → X += 2
-inx
-
-;X now contains which macro attribute table bits to modify:
-;+---+---+
-;| 0 | 1 |
-;+---+---+
-;| 2 | 3 |
-;+---+---+
-;Where each box represents a macro(2x2 tiles).
+    LEFB2:  ldx #$07            ;proper attribute byte that corresponds to the
+    LEFB4:  sax $03             ;macro that has just been placed in the room RAM.
+    LEFB8:  lsr                 ;
+            asr #$71            ;
+    LEFBC:  ora $03             ;
+    LEFBE:  ora #$C0            ;
+    LEFC0:  sta $02             ;
 
 ;The following code clears the old attribute table bits and sets the new ones.
-    LEFD5:* lda $27             ;Load high byte of work pointer in room RAM.
-    LEFD7:  anc #$04            ;
-    LEFD9:  ora #$63            ;Choose proper attribute table associated with the
-    LEFDB:  sta $03             ;current room RAM.
+    lda _RoomDataWritePtr_Hi    ;Load high byte of work pointer in room RAM.
+    anc #$04                    ;
+    ora #$63                    ;Choose proper attribute table associated with the
+    sta $03                     ;current room RAM.
 
-    lda ObjectPal           ; A = 0..3
-    adc IdentityTable, x    ; idx = pal*4 + quadrant (0..15)
-    tax                     ; X = idx
 
-    ; Y will be zero here
+    ldx ObjectPal
+    lda #$02                    ; A = 2, used as BIT mask for bit1
+    bit _RoomDataWritePtr_Lo    ; V = bit6 of $00, Z = (bit1 of $00 == 0)?
+    beq _skip_add_1_to_x        ; if bit1 = 0, skip first increment
+    inx                         ; bit1 = 1 → X += 1
+_skip_add_1_to_x:   
+    bvc _skip_add_2_to_x        ; if bit6 = 0, skip high-bit contribution
+    inx                         ; bit6 = 1 → X += 2
+    inx
+_skip_add_2_to_x:
+
+    ;X now contains which macro attribute table bits to modify:
+    ;+---+---+
+    ;| 0 | 1 |
+    ;+---+---+
+    ;| 2 | 3 |
+    ;+---+---+
+    ;Where each box represents a macro(2x2 tiles).
+
+                            ; Y is always zero here
     lda ($02),y             ; load current attribute byte
     and AttribMask16Table,x ; clear bits for our quadrant
     ora AttrSetBitsTable,x  ; insert new bits for our quadrant
     sta ($02),y             ; store updated attribute byte
 
     jmp AfterUpdateAttr
+
+AttribMask16Table:
+    .byte %11111100, %11110011, %11001111, %00111111
+    .byte %11111100, %11110011, %11001111, %00111111
+    .byte %11111100, %11110011, %11001111, %00111111
+    .byte %11111100, %11110011, %11001111, %00111111
+
+AttrSetBitsTable:
+    .byte %00000000, %00000000, %00000000, %00000000
+    .byte %00000001, %00000100, %00010000, %01000000
+    .byte %00000010, %00001000, %00100000, %10000000
+    .byte %00000011, %00001100, %00110000, %11000000
 
 ;----------------------------------------------------------------------------------------------------
 
@@ -9808,28 +9839,6 @@ RunAnimationTbl:
 RunAccelerationTbl:
     .byte $30           ;Accelerate right.
     .byte $D0           ;Accelerate left.
-
-; 16-entry mask table (4 copies of the original 4 masks).
-; Duplicated because it's used in an "every cycle matters" hot loop
-AttribMask16Table:
-    .byte %11111100, %11110011, %11001111, %00111111
-    .byte %11111100, %11110011, %11001111, %00111111
-    .byte %11111100, %11110011, %11001111, %00111111
-    .byte %11111100, %11110011, %11001111, %00111111
-
-; For each ObjectPal (0..3) and quadrant (0..3):
-; value = ObjectPal << (2*quadrant)
-AttrSetBitsTable:
-    .byte %00000000, %00000000, %00000000, %00000000   ; pal 0
-    .byte %00000001, %00000100, %00010000, %01000000   ; pal 1
-    .byte %00000010, %00001000, %00100000, %10000000   ; pal 2
-    .byte %00000011, %00001100, %00110000, %11000000   ; pal 3
-
-ATDataTable:
-    .byte %00000000, %00000000, %00000000, %00000000
-    .byte %01010101, %01010101, %01010101, %01010101
-    .byte %10101010, %10101010, %10101010, %10101010
-    .byte %11111111, %11111111, %11111111, %11111111
 
 CartRamMulOffsetLoTable:
     .byte $00, $40, $80, $C0   ; low-byte part of X * $40 (X & 3)

@@ -81,7 +81,8 @@ InitAfterReset:
 L8071:  LDY #$02                ;
         STY IntroMusRstrt 
 L8077:  DEY                     ;
-;DEBUG_NARPASS_HACK:  STY NARPASSWORD         ; While debugging the game, play with narpass always
+DEBUG_NARPASS_HACK:
+    STY NARPASSWORD         ; While debugging the game, play with narpass always
 L807A:  STY SpareMemD1          ;
 L807C:  DEY                     ;
 L8075:  STY HorzCntrNonLinr     ;
@@ -91,7 +92,7 @@ L807D:  STY AlwaysZero          ;
 L807F:  STY VertCntrLinear      ;
 L8081:  STY SamusHorzSpdMax     ;
 
-L8083:  STY NARPASSWORD         ;Set NARPASSWORD not active.
+;L8083:  STY NARPASSWORD         ;Set NARPASSWORD not active.
 L8086:  STY VertCntrNonLinr     ;
 L8088:  STY SamusJmpDsplcmnt    ;
 L808E:  STY SpareMemB7          ;Not used.
