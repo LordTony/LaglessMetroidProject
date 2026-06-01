@@ -868,10 +868,7 @@ Bank06_LB8B0:  .byte $00, $00, $00, $7C, $00, $00, $00, $00, $00, $00, $00, $7C,
 ;----------------------------------------------------------------------------------------------------
 
 ATDataTable:
-    .byte %00000000, %00000000, %00000000, %00000000
-    .byte %01010101, %01010101, %01010101, %01010101
-    .byte %10101010, %10101010, %10101010, %10101010
-    .byte %11111111, %11111111, %11111111, %11111111
+    .byte %00000000, %01010101, %10101010, %11111111
 
 ; Clear Tables are all just doing to be $2D memory addresses apart
 
@@ -887,6 +884,26 @@ ClearTablesPtr_Hi:
 ; to be cleared during room transitions. Only places that don't have macros written to
 ; them when the room is drawn need to be filled with empty space
 
+; TODO: Draw the picture of the zones
+; TODO: Make the code actually do what this drawing implies
+;+ -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- +
+;|      |                                   |      |
+;|______|___________________________________|______|
+;|                                                 |
+;|                                                 |
+;|                                                 |
+;|                                                 |
+;|                                                 |
+;|                                                 |
+;|                                                 |
+;|                                                 |
+;|                                                 |
+;|                                                 |
+;|_________________________________________________|
+;|      |                                   |      |
+;|      |                                   |      |
+;+ -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- +
+
 ; $00 = don't clear any tiles + reset attribute table
 ; $01 = don't clear any tiles + skip clearing attribute table 
 ; $02 = full clear + reset attribute table
@@ -899,8 +916,9 @@ ClearTablesPtr_Hi:
 ; col #   $00, $01, $02, $03, $04, $05, $06, $07, $08, $09, $0A, $0B, $0C, $0D, $0E, $0F      
 Brinstar_ClearTable:           
     .byte $02, $02, $02, $06, $06, $02, $06, $02, $00, $05, $02, $02, $02, $02, $02, $02
-    .byte $06, $02, $02, $04, $05, $02, $02, $05, $02, $02, $02, $02, $02, $02, $02, $02
-    .byte $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $00, $00
+    .byte $06, $02, $02, $04, $04, $02, $02, $05, $02, $02, $02, $02, $02, $02, $02, $02
+    .byte $02, $02, $02, $02, $00, $02, $02, $02, $02, $02, $02, $02, $02, $02, $00, $00
+    .byte $00
 
 Norfair_ClearTable:
     .byte $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02
@@ -1123,7 +1141,7 @@ FillRoomRAM_64_Vertical:
     jmp AttributeWrite_67C0_to_67FF
 
 ; Ophis macro to help unroll loops
-; Will call sta on 16 continuous bytes in memory
+; Will call sax on 16 continuous bytes in memory
 .macro sta_16_bytes
     sta _1
     sta _1 + $01
@@ -1144,6 +1162,7 @@ FillRoomRAM_64_Vertical:
 .macend
 
 
+.scope
 AttributeWrite_63C0_to_63FF:
     ldx RoomPal         ;Index into table below (Lowest 2 bits).
     lda ATDataTable,x   ;Load attribute.
@@ -1152,13 +1171,43 @@ AttributeWrite_63C0_to_63FF:
         rts
 
     ResetAttrTable_63C0:
-        `sta_16_bytes $63C0
-        `sta_16_bytes $63D0
-        `sta_16_bytes $63E0
-        `sta_16_bytes $63F0
 
-        ; Door spots on the opposite name table
+        lax RoomPal
+        and #$03
+        tay
+        lda ATDataTable,y
+        `sta_16_bytes $63F0
+        
+        txa
+        lsr 
+        lsr
+        tax
+        and #$03
+        tay
+        lda ATDataTable,y
+        `sta_16_bytes $63E0
+
+        txa
+        lsr 
+        lsr
+        tax
+        and #$03
+        tay
+        lda ATDataTable,y
+        `sta_16_bytes $63D0
+
+        txa
+        lsr 
+        lsr
+        tax
+        and #$03
+        tay
+        lda ATDataTable,y
+        `sta_16_bytes $63C0
+
+    Bank06_RTS:
         rts
+.scend
 
 AttributeWrite_67C0_to_67FF:
     ldx RoomPal         ;Index into table below (Lowest 2 bits).
@@ -1167,13 +1216,44 @@ AttributeWrite_67C0_to_67FF:
     beq ResetAttrTable_67C0
         rts
 
+.scope
 ResetAttrTable_67C0:
-    `sta_16_bytes $67C0
-    `sta_16_bytes $67D0
-    `sta_16_bytes $67E0
+
+    lax RoomPal
+    and #$03
+    tay
+    lda ATDataTable,y
     `sta_16_bytes $67F0
+    
+    txa
+    lsr 
+    lsr
+    tax
+    and #$03
+    tay
+    lda ATDataTable,y
+    `sta_16_bytes $67E0
+
+    txa
+    lsr 
+    lsr
+    tax
+    and #$03
+    tay
+    lda ATDataTable,y
+    `sta_16_bytes $67D0
+
+    txa
+    lsr 
+    lsr
+    tax
+    and #$03
+    tay
+    lda ATDataTable,y
+    `sta_16_bytes $67C0
 
     rts
+.scend
 
 .macro clear_box_row
     sta _1 + $04
@@ -1403,6 +1483,7 @@ ClearRoom_Left_And_Right_Columns_6400:
             bpl _loop
         rts
 .scend
+
 ;----------------------------------------------------------------------------------------------------
 
 RESET_Bank06:

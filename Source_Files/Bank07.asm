@@ -5552,10 +5552,10 @@ MoveSamusDown:
     dec MapPosY
 *   ldx ScrollY
     bne +
-    dec MapPosY     ; decrement MapY
-    jsr GetRoomNum  ; put room # at current map pos in $5A
-    bcs ++   ; if function returns CF = 1, moving up is not possible
-    jsr LE9B7       ; switch to the opposite Name Table
+    dec MapPosY                     ; decrement MapY
+    jsr GetRoomNum                  ; put room # at current map pos in $5A
+    bcs ++                          ; if function returns CF = 1, moving up is not possible
+    jsr SwitchToOppositeNameTable
     ldx #240    ; new Y coord
 *   dex
     jmp LE53F
@@ -5566,7 +5566,7 @@ MoveSamusDown:
 
 ; Attempt to scroll DOWN
 
-    ScrollDown:
+ScrollDown:
     ldx ScrollDir
     dex
     beq +
@@ -5583,7 +5583,7 @@ MoveSamusDown:
 *   ldx ScrollY
     cpx #239
     bne +
-    jsr LE9B7       ; switch to the opposite Name Table
+    jsr SwitchToOppositeNameTable
     ldx #$FF
 *   inx
 LE53F:
@@ -5605,8 +5605,8 @@ CheckForRoomUpdate:
     bne Exit_35
     lax ScrollDir
     and #$02
-    bne CheckRoomUpdate_HorizontalScroll
-    jmp CheckRoomUpdate_VerticalScroll
+    ;bne CheckRoomUpdate_HorizontalScroll
+    beq CheckRoomUpdate_VerticalScroll
 
 ; Check if it's time to update nametable (when scrolling is HORIZONTAL)
 CheckRoomUpdate_HorizontalScroll:
@@ -5829,7 +5829,7 @@ ScrollLeft:
     dec MapPosX     ; decrement MapX
     jsr GetRoomNum  ; put room # at current map pos in $5A
     bcs ++  ; if function returns CF=1, scrolling left is not possible
-    jsr LE9B7       ; switch to the opposite Name Table
+    jsr SwitchToOppositeNameTable
 *   dec ScrollX
     jsr CheckForRoomUpdate       ; check if it's time to update Name Table
     clc
@@ -5858,7 +5858,7 @@ ScrollRight:
     bcs +++   ; if function returns CF=1, scrolling right is not possible
 *   inc ScrollX
     bne +
-    jsr LE9B7                   ; switch to the opposite Name Table
+    jsr SwitchToOppositeNameTable 
 *   jsr CheckForRoomUpdate      ; check if it's time to update Name Table
     clc
     rts
@@ -6309,7 +6309,8 @@ LE98E:  lda $02
     inc $0B
 *   rts
 
-LE9B7:  lda PPUCNT0ZP
+SwitchToOppositeNameTable: 
+    lda PPUCNT0ZP
     eor #$03
     sta PPUCNT0ZP
     rts
@@ -6359,6 +6360,8 @@ Exit18: rts
 
 ;---------------------------------[Write PPU attribute table data ]----------------------------------
 
+; ==== ALERT TODO BUG WARNING ERROR PROBLEM ISSUE =====
+; THE COLOR GITCH IS HERE SOMEWHERE.
 WritePPUAttribTbl:
 LE5E2:  ldx #$C0            ;Low byte of First row of attribute table.
         ror
@@ -6369,7 +6372,6 @@ LE5EE:  stx $02             ;$0002=PPU attrib table starting address.
 
 ; GetNameAddrs:
 .scope
-
     lda PPUCNT0ZP
     eor ScrollDir
     and #$01
@@ -6468,7 +6470,7 @@ LEA45:  sta RoomPtrLB               ;Base copied from $959A to $3B.
 LEA48:  lda RoomPointerTable_Hi,y   ;High byte of 16-bit room pointer.
 LEA4A:  sta RoomPtrUB               ;Base copied from $959B to $3C.
 
-LEA4C:  ldy #$00            ;
+LEA4C:  ldy #$00                    ;
 LEA4E:  lda (RoomPtr),y             ;Y = 0 here. First byte of room data.
 LEA50:  sta RoomPal                 ;store initial palette # to fill attrib table with.
 
@@ -6494,9 +6496,41 @@ InitTables:
     jsr DoRoomRamClear          ; Call this routine which exists only in Bank06
     ldy CurrentBank             
     jsr ROMSwitch               ; Switch back to whatever bank we were on
-    ldy #$00                    ; erase_end_addr in BuildRoomAnalyzer.lua
-    beq DrawRoom                ; Always branch 
 
+.scope
+WriteRoomSpecificAttrPaletteData:
+    ldx RoomNumber 
+    lda RoomAttrTbl_Lo,x
+    sta CodePtr
+    lda RoomAttrTbl_Hi,x
+    sta CodePtr+1
+
+    ldy #$00
+    lda #$60
+    cmp CartRAMPtrUB
+    bne _attr_6700_loop
+    _attr_6300_loop:
+        lax (CodePtr), y
+        beq _end_attr_loop
+        iny
+        lda (CodePtr),y
+        sta $6300, x
+        iny
+        bne _attr_6300_loop
+    
+    _attr_6700_loop:
+        lax (CodePtr), y
+        beq _end_attr_loop
+        iny
+        lda (CodePtr),y
+        sta $6700, x
+        iny
+        bne _attr_6700_loop
+
+    _end_attr_loop:
+        ldy #$00
+        beq DrawRoom                     ; Always branch 
+.scend
 ;---------------------------------------[ Draw room object ]-----------------------------------------
 
 DrawObject:
@@ -6537,11 +6571,6 @@ SetupStructPtr:
                                         ;Y = 0 at this point
 LEA8D:  iny                             ;Move to the next byte of room data which is
 LEA8E:  lax (RoomPtr),y                 ;the index into the structure pointer table.
-LEA91:  iny                             ;Move to the next byte of room data which is
-LEA92:  lda (RoomPtr),y                 ;the attrib table info for the structure.
-LEA94:  sta ObjectPal                   ;Save attribute table info.
-        eor RoomPal 
-        sta ShouldUpdateAttrs           ; Will we need to write attribute data?
 LEA99:  lda StructPointerTable_Lo ,x    ; Low byte of 16-bit structure ptr.
 LEA9B:  sta StructPtrLB                 ;
 LEA9E:  lda StructPointerTable_Hi, x    ; High byte of 16-bit structure ptr.
@@ -6550,10 +6579,11 @@ LEAA0:  sta StructPtrUB                 ;
         jmp DrawStruct          ;($EF8C)Draw one structure.     ; count_struct_addr in BuildRoomAnalyzer.lua
 
 AddToRoomPtr:
-    lda #$03            ;Move to next set of structure data.
+    lda #$02            ;Move to next set of structure data.
     clc                 ;Prepare to add index in A to room pointer.
     adc RoomPtr         ;
     sta RoomPtr         ;
+
     bcc DrawRoom        ;Did carry occur? If not branch to exit.
     inc RoomPtr+1       ;Increment high byte of room pointer if carry occurred.
 
@@ -7361,7 +7391,7 @@ LEF74:  bne SetupMacroRam           ;If not, branch to draw another macro.
     IncCartRAMWorkPtrUB:
         inc CartRAMWorkPtrUB        ;Increment high byte of pointer if necessary.
 
-; Entry point from outside
+; Entry point
 DrawStruct:
         ldx CartRAMWorkPtrUB        ; count_row_addr in BuildRoomAnalyzer.lua
         stx _RoomDataWritePtr_Hi
@@ -7429,9 +7459,6 @@ LEF43:  lax (StructPtr),y       ;Get macro number. StructPtr = $35
     DEY                             ; Doing it like this so Y is 0 when we get out of here
     STA (_RoomDataWritePtr),Y
 
-; Update attribute if changed
-        lda ShouldUpdateAttrs
-LEFA2:  bne UpdateAttrib            ;If so, no need to modify the attribute table, exit.
 AfterUpdateAttr:
     LDA _RoomDataWritePtr
     ADC #$02
@@ -7456,78 +7483,6 @@ LEF6F:  bne AdvanceRow          ;($EF78)Move to next row of structure.
 
 DrawStructExit:
     jmp AddToRoomPtr
-
-;---------------------------------[ Update attribute table bits ]------------------------------------
-
-;The following routine updates attribute bits for one 2x2 tile section on the screen.
-
-UpdateAttrib:
-;Figure out cart RAM address of the byte containing the relevant bits.
-
-    lda _RoomDataWritePtr_Hi         
-    and #$03         
-    tax                   
-
-    lda _RoomDataWritePtr_Lo   
-    lsr              
-    lsr              
-    ora CartRamMulOffsetLoTable,x   ; $00, $40, $80, $C0
-
-    LEFB2:  ldx #$07            ;proper attribute byte that corresponds to the
-    LEFB4:  sax $03             ;macro that has just been placed in the room RAM.
-    LEFB8:  lsr                 ;
-            asr #$71            ;
-    LEFBC:  ora $03             ;
-    LEFBE:  ora #$C0            ;
-    LEFC0:  sta $02             ;
-
-;The following code clears the old attribute table bits and sets the new ones.
-    lda _RoomDataWritePtr_Hi    ;Load high byte of work pointer in room RAM.
-    anc #$04                    ;
-    ora #$63                    ;Choose proper attribute table associated with the
-    sta $03                     ;current room RAM.
-
-
-    ldx ObjectPal
-    lda #$02                    ; A = 2, used as BIT mask for bit1
-    bit _RoomDataWritePtr_Lo    ; V = bit6 of $00, Z = (bit1 of $00 == 0)?
-    beq _skip_add_1_to_x        ; if bit1 = 0, skip first increment
-    inx                         ; bit1 = 1 → X += 1
-_skip_add_1_to_x:   
-    bvc _skip_add_2_to_x        ; if bit6 = 0, skip high-bit contribution
-    inx                         ; bit6 = 1 → X += 2
-    inx
-_skip_add_2_to_x:
-
-    ;X now contains which macro attribute table bits to modify:
-    ;+---+---+
-    ;| 0 | 1 |
-    ;+---+---+
-    ;| 2 | 3 |
-    ;+---+---+
-    ;Where each box represents a macro(2x2 tiles).
-
-                            ; Y is always zero here
-    lda ($02),y             ; load current attribute byte
-    and AttribMask16Table,x ; clear bits for our quadrant
-    ora AttrSetBitsTable,x  ; insert new bits for our quadrant
-    sta ($02),y             ; store updated attribute byte
-
-    jmp AfterUpdateAttr
-
-AttribMask16Table:
-    .byte %11111100, %11110011, %11001111, %00111111
-    .byte %11111100, %11110011, %11001111, %00111111
-    .byte %11111100, %11110011, %11001111, %00111111
-    .byte %11111100, %11110011, %11001111, %00111111
-
-AttrSetBitsTable:
-    .byte %00000000, %00000000, %00000000, %00000000
-    .byte %00000001, %00000100, %00010000, %01000000
-    .byte %00000010, %00001000, %00100000, %10000000
-    .byte %00000011, %00001100, %00110000, %11000000
-
-;----------------------------------------------------------------------------------------------------
 
 .scend
 

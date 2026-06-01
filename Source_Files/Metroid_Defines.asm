@@ -153,8 +153,8 @@
 .alias SpritePagePos    $5B     ;Index into sprite RAM used to load object sprite data.
 ; used $5C - $64                ;Some routing eor $5C,x oer $5D,x where x == #$06 and counts down
 .alias ObjectCounter    $65     ;Counts such things as object explosion time.
-; used $66
-.alias ObjectPal        $67     ;Attrib. table info for room object(#$00 thru #$03).
+; unused                $66
+; unused                $67                    
 .alias RoomPal          $68
 .alias TempX            $69
 .alias TempY            $6A
@@ -885,10 +885,12 @@
 .alias EnemyInitDelayTbl        $96BB
 .alias EndGamePalWrite          $9F54
 .alias MemuByte                 $95E4
-.alias EnemyAnimIndexTbl        $AC85
-.alias EnemyFramePtrTbl_Hi      $AD0F
-.alias EnemyFramePtrTbl_Lo      $ADA6
-.alias EnemyPlacePtrTbl_Hi      $AEB6
+.alias RoomAttrTbl_Hi           $ACB0
+.alias RoomAttrTbl_Lo           $ACE0
+.alias EnemyAnimIndexTbl        $AD14
+.alias EnemyFramePtrTbl_Hi      $AD9E
+.alias EnemyFramePtrTbl_Lo      $AE35
+.alias EnemyPlacePtrTbl_Hi      $AECC
 .alias EnemyPlacePtrTbl_Lo      $AEDC
 .alias RoomPointerTable_Hi      $AEEC
 .alias RoomPointerTable_Lo      $AF1C
