@@ -161,27 +161,6 @@ Bank06_L8990:  .byte $84, $F8, $60, $B6, $F5, $61, $48, $74, $00, $00, $00, $80,
 
 ;----------------------------------------------------------------------------------------------------
 
-;Intro and end tile patterns.
-GFXIntroEnd:
-Bank06_L89A0:  .byte $28, $28, $44, $83, $00, $83, $44, $28, $38, $38, $7C, $FF, $FF, $FF, $7C, $38
-Bank06_L89B0:  .byte $00, $00, $00, $FF, $00, $FF, $00, $00, $00, $00, $00, $FF, $FF, $FF, $00, $00
-Bank06_L89C0:  .byte $00, $00, $00, $E8, $92, $E8, $00, $00, $00, $10, $10, $D0, $EF, $D0, $10, $10
-Bank06_L89D0:  .byte $00, $10, $6C, $D6, $D6, $6C, $10, $00, $10, $92, $54, $AA, $AA, $54, $92, $10
-Bank06_L89E0:  .byte $10, $28, $6C, $92, $6C, $28, $10, $00, $10, $10, $38, $FE, $38, $10, $10, $00
-Bank06_L89F0:  .byte $0C, $1E, $3F, $5F, $BE, $54, $28, $90, $00, $00, $18, $0C, $34, $50, $20, $80
-Bank06_L8A00:  .byte $00, $04, $1A, $24, $24, $58, $20, $00, $01, $46, $3E, $3C, $3C, $7C, $62, $80
-Bank06_L8A10:  .byte $00, $00, $28, $00, $28, $00, $00, $00, $00, $10, $38, $FE, $38, $10, $00, $00
-Bank06_L8A20:  .byte $00, $10, $28, $28, $10, $28, $28, $38, $10, $10, $38, $10, $EE, $10, $38, $38
-Bank06_L8A30:  .byte $28, $28, $28, $28, $28, $28, $28, $28, $38, $38, $38, $38, $38, $38, $38, $38
-Bank06_L8A40:  .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
-Bank06_L8A50:  .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
-Bank06_L8A60:  .byte $00, $00, $00, $18, $18, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
-Bank06_L8A70:  .byte $00, $00, $00, $00, $00, $00, $04, $00, $00, $40, $00, $00, $00, $00, $00, $00
-Bank06_L8A80:  .byte $00, $00, $00, $00, $10, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
-Bank06_L8A90:  .byte $00, $00, $04, $00, $00, $00, $00, $00, $00, $00, $00, $00, $40, $00, $00, $00
-
-;----------------------------------------------------------------------------------------------------
-
 ;METROID title screen tile patterns.
 GFXMetroidTitle:
 Bank06_L8BE0:  .byte $7F, $40, $40, $40, $40, $40, $40, $40, $00, $3F, $3F, $3F, $3F, $3F, $3F, $3F
@@ -395,12 +374,6 @@ Bank06_L9880:  .byte $00, $C0, $00, $80, $90, $B0, $90, $00, $00, $00, $60, $20,
 
 ;----------------------------------------------------------------------------------------------------
 
-;Exclaimation point tile pattern.
-GFXExPoint:
-Bank06_L9890:  .byte $18, $18, $18, $18, $18, $00, $18, $00, $00, $00, $00, $00, $00, $00, $00, $00
-
-;----------------------------------------------------------------------------------------------------
-
 ;Blank tile patterns.
 GFXBlankTiles:
 Bank06_L9980:  .byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
@@ -409,6 +382,32 @@ Bank06_L99A0:  .byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF,
 Bank06_L99B0:  .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
 
 ;----------------------------------------------------------------------------------------------------
+
+;Brinstar room tile patterns.
+GFXBrinstar1:
+    .byte $3E, $7F, $FF, $70, $07, $FF, $FC, $1E, $00, $06, $1F, $00, $00, $07, $D0, $1E
+    .byte $18, $FE, $C1, $0F, $E0, $82, $1F, $80, $00, $1E, $C1, $0F, $E0, $82, $1F, $80
+    .byte $C1, $FF, $3F, $98, $C3, $FF, $7E, $1F, $00, $C1, $20, $18, $03, $8F, $7E, $1F
+    .byte $E3, $FF, $C6, $0E, $30, $87, $03, $FC, $63, $FF, $06, $0E, $30, $87, $03, $FC
+    .byte $7F, $7F, $7F, $7F, $7F, $7F, $7F, $7F, $73, $73, $73, $73, $73, $73, $73, $73
+    .byte $58, $58, $58, $58, $58, $58, $58, $58, $58, $58, $58, $58, $58, $58, $58, $58
+    .byte $00, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $00, $FF, $FF, $FF, $00, $00, $FF, $FF
+    .byte $FF, $00, $FF, $00, $00, $FF, $00, $00, $FF, $00, $FF, $00, $00, $FF, $00, $00
+    .byte $0C, $32, $7F, $5F, $E1, $BF, $F8, $8E, $00, $00, $06, $1C, $20, $07, $38, $00
+    .byte $00, $0C, $0E, $9E, $0D, $9E, $F7, $59, $00, $00, $06, $0C, $00, $18, $04, $40
+    .byte $B9, $1E, $C6, $F4, $3C, $F0, $40, $80, $39, $1E, $C6, $34, $3C, $F0, $40, $80
+    .byte $7F, $FF, $79, $43, $5E, $1F, $0B, $06, $20, $33, $40, $40, $00, $01, $00, $00
+    .byte $86, $11, $01, $81, $41, $43, $5E, $80, $9E, $2F, $3F, $9F, $DF, $DF, $DE, $80
+    .byte $08, $04, $24, $22, $02, $04, $4C, $38, $38, $7C, $5C, $DE, $FE, $7C, $7C, $38
+    .byte $3C, $7E, $47, $DA, $49, $E2, $5C, $D5, $3C, $46, $03, $9A, $41, $E2, $5C, $C5
+    .byte $3C, $7E, $E2, $5B, $92, $47, $3A, $A3, $3C, $62, $C2, $1B, $82, $47, $3A, $A3
+    .byte $CA, $8A, $A0, $20, $AA, $BA, $55, $0F, $8A, $00, $20, $20, $20, $3A, $15, $0F
+    .byte $53, $51, $05, $04, $55, $5D, $AA, $F0, $51, $00, $04, $04, $04, $5C, $A8, $F0
+    .byte $06, $01, $10, $10, $00, $00, $00, $01, $0E, $3F, $2F, $6F, $7F, $7F, $7F, $3F
+    .byte $00, $8C, $92, $42, $42, $C6, $DC, $80, $00, $BC, $8E, $DE, $DE, $DE, $DC, $80
+    .byte $07, $12, $48, $48, $09, $18, $30, $00, $07, $72, $B8, $B9, $FA, $FB, $73, $01
+
+ ;----------------------------------------------------------------------------------------------------
 
 ;More Brinstar room tile patterns.
 GFXBrinstar2:
@@ -452,14 +451,18 @@ Bank06_LA130:  .byte $D4, $D4, $D4, $D4, $D4, $D4, $D4, $D4, $10, $10, $10, $10,
 Bank06_LA140:  .byte $2B, $2B, $2B, $2B, $2B, $2B, $2B, $2B, $08, $08, $08, $08, $08, $08, $08, $08
 Bank06_LA150:  .byte $45, $D7, $FF, $BB, $FF, $EF, $7F, $DD, $00, $00, $00, $44, $02, $50, $88, $22
 Bank06_LA160:  .byte $FF, $77, $DD, $F7, $BE, $EF, $BB, $6E, $24, $88, $22, $48, $45, $10, $46, $B1
-Bank06_LA170:  .byte $E0, $02, $02, $02, $06, $0C, $F8, $00, $00, $00, $00, $00, $00, $00, $00, $00
-Bank06_LA180:  .byte $FC, $04, $FC, $04, $0C, $18, $70, $00, $00, $00, $00, $00, $00, $00, $00, $00
-Bank06_LA190:  .byte $40, $FE, $42, $46, $44, $60, $3E, $00, $00, $00, $00, $00, $00, $00, $00, $00
-Bank06_LA1A0:  .byte $00, $00, $50, $54, $04, $0C, $38, $00, $00, $00, $00, $00, $00, $00, $00, $00
-Bank06_LA1B0:  .byte $40, $40, $40, $78, $44, $40, $40, $00, $00, $00, $00, $00, $00, $00, $00, $00
-Bank06_LA1C0:  .byte $C0, $04, $C4, $04, $04, $0C, $F8, $00, $00, $00, $00, $00, $00, $00, $00, $00
-Bank06_LA1D0:  .byte $7C, $00, $FE, $10, $10, $30, $60, $00, $00, $00, $00, $00, $00, $00, $00, $00
-Bank06_LA1E0:  .byte $7E, $42, $C2, $02, $06, $0C, $78, $00, $00, $00, $00, $00, $00, $00, $00, $00
+
+; unused Katakana characters 
+;Bank06_LA170:  .byte $E0, $02, $02, $02, $06, $0C, $F8, $00, $00, $00, $00, $00, $00, $00, $00, $00
+;Bank06_LA180:  .byte $FC, $04, $FC, $04, $0C, $18, $70, $00, $00, $00, $00, $00, $00, $00, $00, $00
+;Bank06_LA190:  .byte $40, $FE, $42, $46, $44, $60, $3E, $00, $00, $00, $00, $00, $00, $00, $00, $00
+;Bank06_LA1A0:  .byte $00, $00, $50, $54, $04, $0C, $38, $00, $00, $00, $00, $00, $00, $00, $00, $00
+;Bank06_LA1B0:  .byte $40, $40, $40, $78, $44, $40, $40, $00, $00, $00, $00, $00, $00, $00, $00, $00
+;Bank06_LA1C0:  .byte $C0, $04, $C4, $04, $04, $0C, $F8, $00, $00, $00, $00, $00, $00, $00, $00, $00
+;Bank06_LA1D0:  .byte $7C, $00, $FE, $10, $10, $30, $60, $00, $00, $00, $00, $00, $00, $00, $00, $00
+;Bank06_LA1E0:  .byte $7E, $42, $C2, $02, $06, $0C, $78, $00, $00, $00, $00, $00, $00, $00, $00, $00
+
+GFXBrinstar3:
 Bank06_LA1F0:  .byte $3E, $7F, $FF, $70, $07, $FF, $FC, $1E, $00, $06, $1F, $00, $00, $07, $D0, $1E
 Bank06_LA200:  .byte $18, $FE, $C1, $0F, $E0, $82, $1F, $80, $00, $1E, $C1, $0F, $E0, $82, $1F, $80
 Bank06_LA210:  .byte $C1, $FF, $3F, $98, $C3, $FF, $7E, $1F, $00, $C1, $20, $18, $03, $8F, $7E, $1F
@@ -500,14 +503,19 @@ Bank06_LA430:  .byte $00, $00, $00, $00, $00, $00, $00, $00, $80, $80, $90, $10,
 Bank06_LA440:  .byte $00, $00, $00, $00, $00, $C0, $00, $00, $FF, $FF, $FF, $E0, $C0, $00, $C0, $C0
 Bank06_LA450:  .byte $00, $00, $00, $00, $00, $03, $00, $00, $FF, $FF, $FF, $07, $03, $00, $03, $03
 Bank06_LA460:  .byte $00, $10, $20, $20, $00, $20, $00, $00, $3C, $42, $81, $81, $81, $81, $42, $3C
-Bank06_LA470:  .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
-Bank06_LA480:  .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
-Bank06_LA490:  .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
-Bank06_LA4A0:  .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
-Bank06_LA4B0:  .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
-Bank06_LA4C0:  .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
-Bank06_LA4D0:  .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
-Bank06_LA4E0:  .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+
+; Possibly unused
+
+;Bank06_LA470:  .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+;Bank06_LA480:  .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+;Bank06_LA490:  .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+;Bank06_LA4A0:  .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+;Bank06_LA4B0:  .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+;Bank06_LA4C0:  .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+;Bank06_LA4D0:  .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+;Bank06_LA4E0:  .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+
+GFXBrinstar4:
 Bank06_LA4F0:  .byte $FF, $FF, $C0, $C0, $CF, $CB, $CC, $CC, $00, $00, $1F, $3F, $3F, $38, $3B, $3B
 Bank06_LA500:  .byte $FC, $FC, $0C, $0C, $CC, $4C, $CC, $CC, $00, $04, $EC, $FC, $FC, $3C, $BC, $BC
 Bank06_LA510:  .byte $CB, $CF, $C0, $C0, $FF, $FF, $00, $00, $3B, $30, $3F, $1F, $7F, $FF, $00, $00
@@ -526,20 +534,24 @@ Bank06_LA5D0:  .byte $00, $00, $00, $00, $00, $00, $00, $00, $04, $12, $0C, $5A,
 Bank06_LA5E0:  .byte $00, $00, $00, $00, $00, $00, $00, $00, $7E, $AE, $38, $55, $2A, $0C, $22, $08
 Bank06_LA5F0:  .byte $45, $D7, $FF, $FF, $FD, $FF, $BF, $FB, $00, $00, $00, $00, $02, $00, $40, $04
 Bank06_LA600:  .byte $FF, $BB, $FF, $FF, $EF, $FF, $7F, $FD, $00, $44, $00, $00, $10, $00, $80, $02
-Bank06_LA610:  .byte $7E, $42, $C2, $1E, $02, $06, $7C, $00, $00, $00, $00, $00, $00, $00, $00, $00
-Bank06_LA620:  .byte $00, $00, $00, $00, $04, $12, $08, $00, $00, $00, $00, $00, $00, $00, $00, $00
-Bank06_LA630:  .byte $44, $FE, $44, $44, $04, $0C, $78, $00, $00, $00, $00, $00, $00, $00, $00, $00
-Bank06_LA640:  .byte $06, $0C, $38, $F0, $10, $10, $10, $00, $00, $00, $00, $00, $00, $00, $00, $00
-Bank06_LA650:  .byte $FE, $C0, $C0, $FC, $C0, $C0, $FE, $00, $00, $00, $00, $00, $00, $00, $00, $00
-Bank06_LA660:  .byte $FC, $C6, $C6, $CE, $F8, $DC, $CE, $00, $00, $00, $00, $00, $00, $00, $00, $00
-Bank06_LA670:  .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
-Bank06_LA680:  .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
-Bank06_LA690:  .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
-Bank06_LA6A0:  .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
-Bank06_LA6B0:  .byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
-Bank06_LA6C0:  .byte $00, $00, $00, $00, $00, $00, $00, $00, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
-Bank06_LA6D0:  .byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $00, $00, $00, $00, $00, $00, $00, $00
-Bank06_LA6E0:  .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+
+; More katakana and the letters ER then some blank 
+; unused... I think
+
+;Bank06_LA610:  .byte $7E, $42, $C2, $1E, $02, $06, $7C, $00, $00, $00, $00, $00, $00, $00, $00, $00
+;Bank06_LA620:  .byte $00, $00, $00, $00, $04, $12, $08, $00, $00, $00, $00, $00, $00, $00, $00, $00
+;Bank06_LA630:  .byte $44, $FE, $44, $44, $04, $0C, $78, $00, $00, $00, $00, $00, $00, $00, $00, $00
+;Bank06_LA640:  .byte $06, $0C, $38, $F0, $10, $10, $10, $00, $00, $00, $00, $00, $00, $00, $00, $00
+;Bank06_LA650:  .byte $FE, $C0, $C0, $FC, $C0, $C0, $FE, $00, $00, $00, $00, $00, $00, $00, $00, $00
+;Bank06_LA660:  .byte $FC, $C6, $C6, $CE, $F8, $DC, $CE, $00, $00, $00, $00, $00, $00, $00, $00, $00
+;Bank06_LA670:  .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+;Bank06_LA680:  .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+;Bank06_LA690:  .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+;Bank06_LA6A0:  .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+;Bank06_LA6B0:  .byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
+;Bank06_LA6C0:  .byte $00, $00, $00, $00, $00, $00, $00, $00, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
+;Bank06_LA6D0:  .byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $00, $00, $00, $00, $00, $00, $00, $00
+;Bank06_LA6E0:  .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
 
 ;----------------------------------------------------------------------------------------------------
 
@@ -764,37 +776,9 @@ Bank06_LB320:  .byte $01, $01, $01, $01, $01, $01, $01, $01, $70, $70, $70, $70,
 
 ;----------------------------------------------------------------------------------------------------
 
-;More Tourian room tile patterns.
-GFXTourian3:
-Bank06_LB330:  .byte $FF, $FF, $C0, $C0, $CF, $CB, $CC, $CC, $00, $00, $1F, $3F, $3F, $38, $3B, $3B
-Bank06_LB340:  .byte $FC, $FC, $0C, $0C, $CC, $4C, $CC, $CC, $00, $04, $EC, $FC, $FC, $3C, $BC, $BC
-Bank06_LB350:  .byte $CB, $CF, $C0, $C0, $FF, $FF, $00, $00, $3B, $30, $3F, $1F, $7F, $FF, $00, $00
-Bank06_LB360:  .byte $4C, $CC, $0C, $0C, $FC, $FC, $00, $00, $3C, $3C, $FC, $EC, $FC, $FC, $00, $00
-Bank06_LB370:  .byte $FE, $02, $02, $02, $FE, $00, $00, $7F, $00, $FE, $0E, $FE, $FE, $00, $00, $00
-Bank06_LB380:  .byte $7F, $40, $40, $40, $7F, $00, $00, $FE, $00, $3F, $30, $3F, $7F, $00, $00, $00
-Bank06_LB390:  .byte $40, $40, $40, $7F, $00, $00, $00, $FF, $3F, $30, $3F, $7F, $00, $00, $FF, $FF
-Bank06_LB3A0:  .byte $02, $02, $02, $FE, $00, $00, $00, $FF, $FE, $0E, $FE, $FE, $00, $00, $FF, $FF
-Bank06_LB3B0:  .byte $FF, $FF, $C0, $D0, $C0, $C0, $C0, $C0, $00, $00, $3F, $27, $3F, $3F, $3F, $3F
-Bank06_LB3C0:  .byte $FC, $FC, $0C, $4C, $0C, $0C, $0C, $0C, $00, $04, $FC, $9C, $FC, $FC, $FC, $FC
-Bank06_LB3D0:  .byte $C0, $C0, $D0, $C0, $FF, $FF, $00, $00, $3F, $3F, $27, $3F, $3F, $7F, $00, $00
-Bank06_LB3E0:  .byte $0C, $0C, $4C, $0C, $FC, $FC, $00, $00, $FC, $FC, $9C, $FC, $FC, $FC, $00, $00
-
-;----------------------------------------------------------------------------------------------------
-
-;Even more Tourian room tile patterns.
-GFXTourian4:
-Bank06_LB3F0:  .byte $FF, $FF, $C0, $C0, $CF, $CB, $CC, $CC, $00, $00, $1F, $3F, $3F, $38, $3B, $3B
-Bank06_LB400:  .byte $FC, $FC, $0C, $0C, $CC, $4C, $CC, $CC, $00, $04, $EC, $FC, $FC, $3C, $BC, $BC
-Bank06_LB410:  .byte $CB, $CF, $C0, $C0, $FF, $FF, $00, $00, $3B, $30, $3F, $1F, $7F, $FF, $00, $00
-Bank06_LB420:  .byte $4C, $CC, $0C, $0C, $FC, $FC, $00, $00, $3C, $3C, $FC, $EC, $FC, $FC, $00, $00
-Bank06_LB430:  .byte $FE, $02, $02, $02, $FE, $00, $00, $7F, $00, $FE, $0E, $FE, $FE, $00, $00, $00
-Bank06_LB440:  .byte $7F, $40, $40, $40, $7F, $00, $00, $FE, $00, $3F, $30, $3F, $7F, $00, $00, $00
-Bank06_LB450:  .byte $40, $40, $40, $7F, $00, $00, $00, $FF, $3F, $30, $3F, $7F, $00, $00, $FF, $FF
-Bank06_LB460:  .byte $02, $02, $02, $FE, $00, $00, $00, $FF, $FE, $0E, $FE, $FE, $00, $00, $FF, $FF
-Bank06_LB470:  .byte $73, $FD, $3B, $A0, $C0, $E0, $60, $80, $00, $00, $00, $1F, $10, $17, $14, $14
-Bank06_LB480:  .byte $E8, $9C, $7C, $1C, $44, $58, $5C, $5C, $00, $04, $0C, $FC, $24, $B8, $BC, $BC
-Bank06_LB490:  .byte $E0, $E7, $A0, $2F, $73, $7C, $00, $00, $17, $10, $1F, $0F, $33, $7C, $00, $00
-Bank06_LB4A0:  .byte $58, $D4, $14, $DC, $EC, $D8, $00, $00, $B8, $34, $F4, $DC, $EC, $D8, $00, $00; slight interleave into next table
+;Exclaimation point tile pattern.
+GFXExPoint:
+Bank06_L9890:  .byte $18, $18, $18, $18, $18, $00, $18;, $00, $00, $00, $00, $00, $00, $00, $00, $00  interleaved into next table
 
 ;----------------------------------------------------------------------------------------------------
 
@@ -867,622 +851,852 @@ Bank06_LB8B0:  .byte $00, $00, $00, $7C, $00, $00, $00, $00, $00, $00, $00, $7C,
 
 ;----------------------------------------------------------------------------------------------------
 
+BankErasureTablePtr_Hi:
+    .byte >BrinstarRoomErasureTable
+    .byte >NorfairRoomErasureTable
+    .byte >KraidRoomErasureTable
+    .byte >TourianRoomErasureTable
+    .byte >RidleyRoomErasureTable
+
+BankErasureTablePtr_Lo:
+    .byte <BrinstarRoomErasureTable
+    .byte <NorfairRoomErasureTable
+    .byte <KraidRoomErasureTable
+    .byte <TourianRoomErasureTable
+    .byte <RidleyRoomErasureTable
+
+; The Erasure tables here are used to tell what parts of a room need to be erased
+; Special Cases:
+;   $00 erase nothing
+;   $FF erase everything (like normal)
+; Bit Masks
+;   %00000001   Core
+;   %00000010   2nd row from the top
+;   %00000100   Top row and bottom 2 rows
+;   %00001000   Right wall
+;   %00010000   Left wall
+;   %00100000   4 Corners
+;   %01000000   Nothing
+;   %10000000   Nothing
+
+BrinstarRoomErasureTable:
+    .byte %00111011, %11111111, %00000111, %00000111, %00000111, %00000111, %00000111, %00111011, %00000000, %00011101, %00101111, %11111111, %00111011, %00111011, %00111011, %11111111
+    .byte %00000001, %00000111, %00001001, %00010001, %00011001, %00011001, %00011001, %00011001, %00000101, %00011001, %00011011, %00111011, %00111011, %00011001, %00000001, %00001001
+    .byte %00011001, %00011001, %00010001, %00011001, %00000000, %00010001, %00011001, %00011001, %00011001, %00011001, $FF,       %00011011, %11111111, %00000111
+
+NorfairRoomErasureTable:
+    .byte $FF,       $FF,       $FF,       $FF,       $FF,       $FF,       $FF,       $FF,       $FF,       $FF,       $FF,       $FF,       $FF,       $FF,       $FF,       $FF
+    .byte $FF,       $FF,       $FF,       $FF,       $FF,       $FF,       $FF,       $FF,       $FF,       $FF,       $FF,       $FF,       $FF,       $FF,       $FF,       $FF
+    .byte $FF,       $FF,       $FF,       $FF,       $FF,       $FF,       $FF,       $FF,       $FF,       $FF,       $FF,       $FF,       $FF,       $FF
+
+TourianRoomErasureTable:
+    .byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
+    .byte $FF, $FF, $FF, $FF
+
+KraidRoomErasureTable:
+    .byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
+    .byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
+    .byte $FF, $FF, $FF, $FF
+
+RidleyRoomErasureTable:
+    .byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
+    .byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
+    .byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
+
 ATDataTable:
     .byte %00000000, %01010101, %10101010, %11111111
 
-; Clear Tables are all just doing to be $2D memory addresses apart
 
-ClearTablesPtr_Lo:
-    .byte <Brinstar_ClearTable, <Norfair_ClearTable, <Kraid_ClearTable, <Tourian_ClearTable, <Ridley_ClearTable 
-ClearTablesPtr_Hi:
-    .byte >Brinstar_ClearTable, >Norfair_ClearTable, >Kraid_ClearTable, >Tourian_ClearTable, >Ridley_ClearTable 
+; The Erasure tables here are used to tell what parts of a room need to be erased
+; Special Cases:
+;   $00 erase nothing
+;   $FF erase everything (like normal)
+; Bit Masks
+;   %00000001   Core
+;   %00000010   2nd row from the top
+;   %00000100   Top row and bottom 2 rows
+;   %00001000   Right wall
+;   %00010000   Left wall
+;   %00100000   4 Corners
 
 
-; ================================ Decode Clear Tables ================================
-; Each area's rooms have a clear table that says how it should be cleared
-; This is an optimization because lots of time is wasted clearing tiles that don't need
-; to be cleared during room transitions. Only places that don't have macros written to
-; them when the room is drawn need to be filled with empty space
+;InArea: #$10(or #$00)=Brinstar, #$11=Norfair, #$12=Kraid hideout, #$13=Tourian, #$14=Ridley hideout.
+;ScrollDir: 00=Up, 01=Down, 10=Left, 11=Right.
+;Quarter: 00, 01, 10, 11
 
-; TODO: Draw the picture of the zones
-; TODO: Make the code actually do what this drawing implies
-;+ -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- +
-;|      |                                   |      |
-;|______|___________________________________|______|
-;|                                                 |
-;|                                                 |
-;|                                                 |
-;|                                                 |
-;|                                                 |
-;|                                                 |
-;|                                                 |
-;|                                                 |
-;|                                                 |
-;|                                                 |
-;|_________________________________________________|
-;|      |                                   |      |
-;|      |                                   |      |
-;+ -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- +
+; ((Quarter >> 1) ^ ScrollDir) && 01
+;  Q0 x UP = 00         Bottom
+;  Q0 x DN = 01         Top
+;  Q0 x LF = 00         Right
+;  Q0 x RT = 01         Left
 
-; $00 = don't clear any tiles + reset attribute table
-; $01 = don't clear any tiles + skip clearing attribute table 
-; $02 = full clear + reset attribute table
-; $03 = full clear + skip clearing attribute table
-; $04 = 2 top and 2 bottom tile rows skiped + reset attribute table
-; $05 = 2 top and 2 bottom tile rows skiped + skip clearing attribute table
-; $06 = 2 left and 2 right tile rows skiped + reset attribute table
-; $07 = 2 left and 2 right tile rows skiped + skip clearing attribute table
+;  Q2 x UP = 01         Top 
+;  Q2 x DN = 00         Bottom
+;  Q2 x LF = 01         Left
+;  Q2 x RT = 00         Right
 
-; col #   $00, $01, $02, $03, $04, $05, $06, $07, $08, $09, $0A, $0B, $0C, $0D, $0E, $0F      
-Brinstar_ClearTable:           
-    .byte $02, $02, $02, $06, $06, $02, $06, $02, $00, $05, $02, $02, $02, $02, $02, $02
-    .byte $06, $02, $02, $04, $04, $02, $02, $05, $02, $02, $02, $02, $02, $02, $02, $02
-    .byte $02, $02, $02, $02, $00, $02, $02, $02, $02, $02, $02, $02, $02, $02, $00, $00
-    .byte $00
-
-Norfair_ClearTable:
-    .byte $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02
-    .byte $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02
-    .byte $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02
-
-Kraid_ClearTable:
-    .byte $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02
-    .byte $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02
-    .byte $02, $02, $02, $02, $02
-
-Tourian_ClearTable:
-    .byte $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02
-    .byte $02, $02, $02, $02, $02
-
-Ridley_ClearTable:
-    .byte $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02
-    .byte $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02
-    .byte $02, $02, $02, $02, $02
-
-;InArea = #$10(or #$00)=Brinstar, #$11=Norfair, #$12=Kraid hideout, #$13=Tourian, #$14=Ridley hideout.
 DoRoomRamClear:
+
     lda InArea
-    and #%00001111
+    and #$0F
     tax
-    lda ClearTablesPtr_Lo,x
+    lda BankErasureTablePtr_Lo, x
     sta CodePtr
-    lda ClearTablesPtr_Hi,x
-    sta CodePtr+1
-
-    ldy RoomNumber
-    lda (CodePtr), y            ; if the lowest bit is set, mark a zp variable (SpareMemB7)
-    lsr            
-    tax            
-    lda #$00       
-    rol            
-    sta SpareMemB7
-    lda CartRAMPtrUB
-    cpx #$01
-    beq DoFullClear
-    bcc DoClearExit
-    cpx #$02
-    beq DoHorizontalClearTrampoline
-    jmp DoVerticalClear
-
-DoHorizontalClearTrampoline:
-    jmp DoHorizontalClear
-
-; might be able to skip attribute writes in many of the rooms
-DoClearExit:
-    cmp #$60
-    bne + 
-        jmp AttributeWrite_63C0_to_63FF
-    * jmp AttributeWrite_67C0_to_67FF
-
-DoFullClear:
-    cmp #$60
-    bne FillRoomRAM_64_Full
-
-    FillRoomRAM_60_Full:
-        jsr ClearRoom_Box_6000
-        jsr ClearRoom_Left_And_Right_Columns_6000
-        jsr ClearRoom_Top_And_Bottom_Rows_6000
-
-        .scope
-            ldy #$03
-            _loop:
-                ; Upper left corner
-                sta $6000, y
-                sta $6020, y
-                sta $6040, y
-                sta $6060, y
-
-                ; Upper right corner
-                sta $601C, y
-                sta $603C, y
-                sta $605C, y
-                sta $607C, y
-
-                ; Bottom left corner
-                sta $6340, y
-                sta $6360, y
-                sta $6380, y
-                sta $63A0, y
-
-                ; top right corner
-                sta $635C, y
-                sta $637C, y
-                sta $639C, y
-                sta $63BC, y
-
-                dey
-                bpl _loop
-        .scend
-        jmp AttributeWrite_63C0_to_63FF
-
-FillRoomRAM_64_Full:
-    jsr ClearRoom_Box_6400
-    jsr ClearRoom_Left_And_Right_Columns_6400
-    jsr ClearRoom_Top_And_Bottom_Rows_6400
-    .scope
-        ldy #$03
-        _loop:
-            ; Upper left corner
-            sta $6400, y
-            sta $6420, y
-            sta $6440, y
-            sta $6460, y
-
-            ; Upper right corner
-            sta $641C, y
-            sta $643C, y
-            sta $645C, y
-            sta $647C, y
-
-            ; Bottom left corner
-            sta $6740, y
-            sta $6760, y
-            sta $6780, y
-            sta $67A0, y
-
-            ; top right corner
-            sta $675C, y
-            sta $677C, y
-            sta $679C, y
-            sta $67BC, y
-
-            dey
-            bpl _loop
-    .scend
-    jmp AttributeWrite_67C0_to_67FF
-
-; Skips doing top 2 and bottom 2 columns
-DoHorizontalClear:
-    cmp #$60
-    bne FillRoomRAM_64_Horizontal
-
-    FillRoomRAM_60_Horizontal:
-        jsr ClearRoom_Box_6000
-        jsr ClearRoom_Left_And_Right_Columns_6000
-        jmp AttributeWrite_63C0_to_63FF
-
-FillRoomRAM_64_Horizontal:
-    jsr ClearRoom_Box_6400
-    jsr ClearRoom_Left_And_Right_Columns_6400
-    jmp AttributeWrite_67C0_to_67FF
-
-DoVerticalClear:
-    cmp #$60
-    bne FillRoomRAM_64_Vertical
-
-    FillRoomRAM_60_Vertical:
-        jsr ClearRoom_Box_6000
-        jsr ClearRoom_Top_And_Bottom_Rows_6000
-
-        ; Clear door tiles
-        ; Left door hole
-        sta $6142
-        sta $6143
-        sta $6162
-        sta $6163
-        sta $6182
-        sta $6183
-        sta $61A2
-        sta $61A3
-        sta $61C2
-        sta $61C3
-        sta $61E2
-        sta $61E3
-
-        ; Right door hole
-        sta $6142 + $1A
-        sta $6143 + $1A
-        sta $6162 + $1A
-        sta $6163 + $1A
-        sta $6182 + $1A
-        sta $6183 + $1A
-        sta $61A2 + $1A
-        sta $61A3 + $1A
-        sta $61C2 + $1A
-        sta $61C3 + $1A
-        sta $61E2 + $1A
-        sta $61E3 + $1A
-
-        jmp AttributeWrite_63C0_to_63FF
-
-FillRoomRAM_64_Vertical:
-    jsr ClearRoom_Box_6400
-    jsr ClearRoom_Top_And_Bottom_Rows_6400
-
-    ; Clear door tiles
-    ; Left door hole
-    sta $6542
-    sta $6543
-    sta $6562
-    sta $6563
-    sta $6582
-    sta $6583
-    sta $65A2
-    sta $65A3
-    sta $65C2
-    sta $65C3
-    sta $65E2
-    sta $65E3
-
-    ; Right door hole
-    sta $6542 + $1A
-    sta $6543 + $1A
-    sta $6562 + $1A
-    sta $6563 + $1A
-    sta $6582 + $1A
-    sta $6583 + $1A
-    sta $65A2 + $1A
-    sta $65A3 + $1A
-    sta $65C2 + $1A
-    sta $65C3 + $1A
-    sta $65E2 + $1A
-    sta $65E3 + $1A
-
-    jmp AttributeWrite_67C0_to_67FF
-
-; Ophis macro to help unroll loops
-; Will call sax on 16 continuous bytes in memory
-.macro sta_16_bytes
-    sta _1
-    sta _1 + $01
-    sta _1 + $02
-    sta _1 + $03
-    sta _1 + $04
-    sta _1 + $05
-    sta _1 + $06
-    sta _1 + $07
-    sta _1 + $08
-    sta _1 + $09
-    sta _1 + $0A
-    sta _1 + $0B
-    sta _1 + $0C
-    sta _1 + $0D
-    sta _1 + $0E
-    sta _1 + $0F
-.macend
-
-
-.scope
-AttributeWrite_63C0_to_63FF:
-    ldx RoomPal         ;Index into table below (Lowest 2 bits).
-    lda ATDataTable,x   ;Load attribute.
-    ldx SpareMemB7
-    beq ResetAttrTable_63C0
-        rts
-
-    ResetAttrTable_63C0:
-
-        lax RoomPal
-        and #$03
-        tay
-        lda ATDataTable,y
-        `sta_16_bytes $63F0
-        
-        txa
-        lsr 
-        lsr
-        tax
-        and #$03
-        tay
-        lda ATDataTable,y
-        `sta_16_bytes $63E0
-
-        txa
-        lsr 
-        lsr
-        tax
-        and #$03
-        tay
-        lda ATDataTable,y
-        `sta_16_bytes $63D0
-
-        txa
-        lsr 
-        lsr
-        tax
-        and #$03
-        tay
-        lda ATDataTable,y
-        `sta_16_bytes $63C0
-
-    Bank06_RTS:
-        rts
-.scend
-
-AttributeWrite_67C0_to_67FF:
-    ldx RoomPal         ;Index into table below (Lowest 2 bits).
-    lda ATDataTable,x   ;Load attribute.
-    ldx SpareMemB7
-    beq ResetAttrTable_67C0
-        rts
-
-.scope
-ResetAttrTable_67C0:
+    lda BankErasureTablePtr_Hi, x
+    sta CodePtr + 1
 
     lax RoomPal
     and #$03
     tay
-    lda ATDataTable,y
-    `sta_16_bytes $67F0
-    
-    txa
-    lsr 
-    lsr
-    tax
-    and #$03
-    tay
-    lda ATDataTable,y
-    `sta_16_bytes $67E0
+    lda ATDataTable, y
+    sta $03
 
     txa
-    lsr 
     lsr
-    tax
+    asr #$06
+    tay
+    lda ATDataTable, y
+    sta $02
+
+    lda Div16Table, x
     and #$03
     tay
-    lda ATDataTable,y
-    `sta_16_bytes $67D0
+    lda ATDataTable, y
+    sta $01
 
-    txa
-    lsr 
+    lda Div16Table, x 
     lsr
-    tax
-    and #$03
+    lsr 
     tay
-    lda ATDataTable,y
-    `sta_16_bytes $67C0
+    lda ATDataTable, y
+    sta $00
 
-    rts
+    ldy $90                     ; Real Room Number
+    lda ScrollDir
+    ldx CartRAMPtrUB
+    cpx #$60
+    beq DoRoomRamClear_6000
+    jmp DoRoomRamClear_6400
+
+ClearScreenLeftRight_6000_Trampoline:
+    jmp ClearScreenLeftRight_6000
+
+ClearScreenBottom_6000_Trampoline:
+    jmp ClearScreenBottom_6000
+
+DoRoomRamClear_6000:
+    ldx #$FF
+    cmp #$02
+    bcs ClearScreenLeftRight_6000_Trampoline
+
+    ClearScreenTopBottom_6000:
+        lda Quarter
+        lsr
+        eor ScrollDir
+        and #$01
+        beq ClearScreenBottom_6000_Trampoline
+
+.scope
+    ClearScreenTop_6000:
+        lda (CodePtr), y
+        beq _skipAll
+        ror
+        ; will need to push and pop A
+        bcc _skipCore
+            jsr ClearTopLeftCore_6000
+            jsr ClearTopRightCore_6000
+
+            ; left door
+            `stx_2_bytes $6142
+            `stx_2_bytes $6162
+            `stx_2_bytes $6182
+            `stx_2_bytes $61A2
+            `stx_2_bytes $61C2
+            `stx_2_bytes $61E2 
+
+            ; right door
+            `stx_2_bytes $615C
+            `stx_2_bytes $617C
+            `stx_2_bytes $619C
+            `stx_2_bytes $61BC
+            `stx_2_bytes $61DC
+            `stx_2_bytes $61FC
+
+        _skipCore:
+        ror
+        bcc _skipSecondFromTop
+            jsr ClearTopLeftSecondRow_6000
+            jsr ClearTopRightSecondRow_6000
+        _skipSecondFromTop:
+        ror
+        bcc _skipTopRow
+            jsr ClearTopLeftRow_6000
+            jsr ClearTopRightRow_6000
+        _skipTopRow:
+        ror
+        bcc _skipRightWall
+            jsr ClearTopRightCol_6000
+        _skipRightWall:
+        ror
+        bcc _skipLeftWall
+            jsr ClearTopLeftCol_6000
+        _skipLeftWall:
+        ror
+        bcc _skipCorners
+            jsr ClearTopLeftCorner_6000
+            jsr ClearTopRightCorner_6000
+        _skipCorners:
+        _skipAll:
+
+        jsr AttrWriteTopLeft_6000
+        jmp AttrWriteTopRight_6000
 .scend
 
-.macro clear_box_row
-    sta _1 + $04
-    sta _1 + $05
-    sta _1 + $06
-    sta _1 + $07
-    sta _1 + $08
-    sta _1 + $09
-    sta _1 + $0A
-    sta _1 + $0B
-    sta _1 + $0C
-    sta _1 + $0D
-    sta _1 + $0E
-    sta _1 + $0F
-    sta _1 + $10
-    sta _1 + $11
-    sta _1 + $12
-    sta _1 + $13
-    sta _1 + $14
-    sta _1 + $15
-    sta _1 + $16
-    sta _1 + $17
-    sta _1 + $18
-    sta _1 + $19
-    sta _1 + $1A
-    sta _1 + $1B
+.scope
+    ClearScreenBottom_6000:
+        lda (CodePtr), y
+        beq _skipAll
+        ror
+        ; will need to push and pop A
+        bcc _skipCore
+            jsr ClearBottomLeftCore_6000
+            jsr ClearBottomRightCore_6000
+        _skipCore:
+        ror
+        ror
+        bcc _skipFloor
+            jsr ClearBottomLeftFloor_6000
+            jsr ClearBottomRightFloor_6000
+        _skipFloor:
+        ror
+        bcc _skipRightWall
+            jsr ClearBottomRightCol_6000
+        _skipRightWall:
+        ror
+        bcc _skipLeftWall
+            jsr ClearBottomLeftCol_6000
+        _skipLeftWall:
+        ror
+        bcc _skipCorners
+            jsr ClearBottomLeftCorner_6000
+            jsr ClearBottomRightCorner_6000
+        _skipCorners:
+        _skipAll:
+
+        jsr AttrWriteBottomLeft_6000
+        jmp AttrWriteBottomRight_6000
+.scend
+
+    ClearScreenLeftRight_6000:
+        lda Quarter
+        lsr
+        eor ScrollDir
+        and #$01
+        beq ClearScreenRight_6000
+
+.scope
+    ClearScreenLeft_6000:
+        lda (CodePtr), y
+        beq _skipAll
+        ror
+        ; will need to push and pop A
+        bcc _skipCore
+            jsr ClearTopLeftCore_6000
+            jsr ClearBottomLeftCore_6000
+
+            ; left door
+            `stx_2_bytes $6142
+            `stx_2_bytes $6162
+            `stx_2_bytes $6182
+            `stx_2_bytes $61A2
+            `stx_2_bytes $61C2
+            `stx_2_bytes $61E2 
+
+        _skipCore:
+        ror
+        bcc _skipSecondFromTop
+            jsr ClearTopLeftSecondRow_6000
+        _skipSecondFromTop:
+        ror
+        bcc _skipTopRow
+            jsr ClearTopLeftRow_6000
+            jsr ClearBottomLeftFloor_6000
+        _skipTopRow:
+        ror
+        ror
+        bcc _skipLeftWall
+            jsr ClearTopLeftCol_6000
+            jsr ClearBottomLeftCol_6000
+        _skipLeftWall:
+        ror
+        bcc _skipCorners
+            jsr ClearTopLeftCorner_6000
+            jsr ClearBottomLeftCorner_6000
+        _skipCorners:
+        _skipAll:
+
+        jsr AttrWriteTopLeft_6000
+        jmp AttrWriteBottomLeft_6000
+.scend
+
+.scope
+    ClearScreenRight_6000:
+        lda (CodePtr), y
+        beq _skipAll
+        ror
+        ; will need to push and pop A
+        bcc _skipCore
+            jsr ClearTopRightCore_6000
+            jsr ClearBottomRightCore_6000
+
+            ; right door
+            `stx_2_bytes $615C
+            `stx_2_bytes $617C
+            `stx_2_bytes $619C
+            `stx_2_bytes $61BC
+            `stx_2_bytes $61DC
+            `stx_2_bytes $61FC
+
+        _skipCore:
+        ror
+        bcc _skipSecondFromTop
+            jsr ClearTopRightSecondRow_6000
+        _skipSecondFromTop:
+        ror
+        bcc _skipTopRow
+            jsr ClearTopRightRow_6000
+            jsr ClearBottomRightFloor_6000
+        _skipTopRow:
+        ror
+        bcc _skipRightWall
+            jsr ClearTopRightCol_6000
+            jsr ClearBottomRightCol_6000
+        _skipRightWall:
+        ror
+        ror
+        bcc _skipCorners
+            jsr ClearTopRightCorner_6000
+            jsr ClearBottomRightCorner_6000
+        _skipCorners:
+        _skipAll:
+
+        jsr AttrWriteTopRight_6000
+        jmp AttrWriteBottomRight_6000
+.scend
+
+ClearScreenLeftRight_6400_Trampoline:
+    jmp ClearScreenLeftRight_6400
+
+DoRoomRamClear_6400:
+    ldx #$FF
+    cmp #$02
+    bcs ClearScreenLeftRight_6400_Trampoline
+
+    ClearScreenTopBottom_6400:
+        lda Quarter
+        lsr
+        eor ScrollDir
+        and #$01
+        beq ClearScreenBottom_6400
+
+.scope
+    ClearScreenTop_6400:
+        lda (CodePtr), y
+        beq _skipAll
+        ror
+        ; will need to push and pop A
+        bcc _skipCore
+            jsr ClearTopLeftCore_6400
+            jsr ClearTopRightCore_6400
+        _skipCore:
+        ror
+        bcc _skipSecondFromTop
+            jsr ClearTopLeftSecondRow_6400
+            jsr ClearTopRightSecondRow_6400
+        _skipSecondFromTop:
+        ror
+        bcc _skipTopRow
+            jsr ClearTopLeftRow_6400
+            jsr ClearTopRightRow_6400
+        _skipTopRow:
+        ror
+        bcc _skipRightWall
+            jsr ClearTopRightCol_6400
+        _skipRightWall:
+        ror
+        bcc _skipLeftWall
+            jsr ClearTopLeftCol_6400
+        _skipLeftWall:
+        ror
+        bcc _skipCorners
+            jsr ClearTopLeftCorner_6400
+            jsr ClearTopRightCorner_6400
+        _skipCorners:
+        _skipAll:
+
+        jsr AttrWriteTopLeft_6400
+        jmp AttrWriteTopRight_6400
+.scend
+
+.scope
+    ClearScreenBottom_6400:
+        lda (CodePtr), y
+        beq _skipAll
+        ror
+        ; will need to push and pop A
+        bcc _skipCore
+            jsr ClearBottomLeftCore_6400
+            jsr ClearBottomRightCore_6400
+        _skipCore:
+        ror
+        ror
+        bcc _skipFloor
+            jsr ClearBottomLeftFloor_6400
+            jsr ClearBottomRightFloor_6400
+        _skipFloor:
+        ror
+        bcc _skipRightWall
+            jsr ClearBottomRightCol_6400
+        _skipRightWall:
+        ror
+        bcc _skipLeftWall
+            jsr ClearBottomLeftCol_6400
+        _skipLeftWall:
+        ror
+        bcc _skipCorners
+            jsr ClearBottomLeftCorner_6400
+            jsr ClearBottomRightCorner_6400
+        _skipCorners:
+        _skipAll:
+
+        jsr AttrWriteBottomLeft_6400
+        jmp AttrWriteBottomRight_6400
+.scend
+
+    ClearScreenLeftRight_6400:
+        lda Quarter
+        lsr
+        eor ScrollDir
+        and #$01
+        beq ClearScreenRight_6400
+
+.scope
+    ClearScreenLeft_6400:
+        lda (CodePtr), y
+        beq _skipAll
+        ror
+        ; will need to push and pop A
+        bcc _skipCore
+            jsr ClearTopLeftCore_6400
+            jsr ClearBottomLeftCore_6400
+        _skipCore:
+        ror
+        bcc _skipSecondFromTop
+            jsr ClearTopLeftSecondRow_6400
+        _skipSecondFromTop:
+        ror
+        bcc _skipTopRow
+            jsr ClearTopLeftRow_6400
+            jsr ClearBottomLeftFloor_6400
+        _skipTopRow:
+        ror
+        ror
+        bcc _skipLeftWall
+            jsr ClearTopLeftCol_6400
+            jsr ClearBottomLeftCol_6400
+        _skipLeftWall:
+        ror
+        bcc _skipCorners
+            jsr ClearTopLeftCorner_6400
+            jsr ClearBottomLeftCorner_6400
+        _skipCorners:
+        _skipAll:
+
+        jsr AttrWriteTopLeft_6400
+        jmp AttrWriteBottomLeft_6400
+.scend
+
+.scope
+    ClearScreenRight_6400:
+        lda (CodePtr), y
+        beq _skipAll
+        ror
+        ; will need to push and pop A
+        bcc _skipCore
+            jsr ClearTopRightCore_6400
+            jsr ClearBottomRightCore_6400
+        _skipCore:
+        ror
+        bcc _skipSecondFromTop
+            jsr ClearTopRightSecondRow_6400
+        _skipSecondFromTop:
+        ror
+        bcc _skipTopRow
+            jsr ClearTopRightRow_6400
+            jsr ClearBottomRightFloor_6400
+        _skipTopRow:
+        ror
+        bcc _skipRightWall
+            jsr ClearTopRightCol_6400
+            jsr ClearBottomRightCol_6400
+        _skipRightWall:
+        ror
+        ror
+        bcc _skipCorners
+            jsr ClearTopRightCorner_6400
+            jsr ClearBottomRightCorner_6400
+        _skipCorners:
+        _skipAll:
+
+        jsr AttrWriteTopRight_6400
+        jmp AttrWriteBottomRight_6400
+.scend
+
+; Ophis macro to help unroll loops
+; Will call sta on 14 continuous bytes in memory
+.macro stx_14_bytes
+    stx _1
+    stx _1 + $01
+    stx _1 + $02
+    stx _1 + $03
+    stx _1 + $04
+    stx _1 + $05
+    stx _1 + $06
+    stx _1 + $07
+    stx _1 + $08
+    stx _1 + $09
+    stx _1 + $0A
+    stx _1 + $0B
+    stx _1 + $0C
+    stx _1 + $0D
 .macend
 
-ClearRoom_Box_6400:
-    lda #$FF
-    `clear_box_row $6480
-    `clear_box_row $64A0
-    `clear_box_row $64C0
-    `clear_box_row $64E0
+.macro stx_12_bytes
+    stx _1
+    stx _1 + $01
+    stx _1 + $02
+    stx _1 + $03
+    stx _1 + $04
+    stx _1 + $05
+    stx _1 + $06
+    stx _1 + $07
+    stx _1 + $08
+    stx _1 + $09
+    stx _1 + $0A
+    stx _1 + $0B
+.macend
 
-    `clear_box_row $6500
-    `clear_box_row $6520
-    `clear_box_row $6540
-    `clear_box_row $6560
-    `clear_box_row $6580
-    `clear_box_row $65A0
-    `clear_box_row $65C0
-    `clear_box_row $65E0
+.macro stx_4_bytes
+    stx _1
+    stx _1 + $01
+    stx _1 + $02
+    stx _1 + $03
+.macend
 
-    `clear_box_row $6600
-    `clear_box_row $6620
-    `clear_box_row $6640
-    `clear_box_row $6660
-    `clear_box_row $6680
-    `clear_box_row $66A0
-    `clear_box_row $66C0
-    `clear_box_row $66E0
+.macro sta_4_bytes
+    sta _1
+    sta _1 + $01
+    sta _1 + $02
+    sta _1 + $03
+.macend
 
-    `clear_box_row $6700
-    `clear_box_row $6720
-    `clear_box_row $6740
-    `clear_box_row $6760
-    `clear_box_row $6780
-    `clear_box_row $67A0
+.macro stx_2_bytes
+    stx _1
+    stx _1 + $01
+.macend
+
+ClearTopLeftCorner_6000:
+    `stx_4_bytes $6000
+    `stx_4_bytes $6020
+    `stx_4_bytes $6040
+    `stx_4_bytes $6060
     rts
 
-.scope
-ClearRoom_Left_And_Right_Columns_6000:
-    ldy #$04
-    _left_col_loop:
-
-        sta $6080, y
-        sta $60A0, y
-        sta $60C0, y
-        sta $60E0, y
-
-        sta $6100, y
-        sta $6120, y
-        sta $6140, y
-        sta $6160, y
-        sta $6180, y
-        sta $61A0, y
-        sta $61C0, y
-        sta $61E0, y
-
-        sta $6200, y
-        sta $6220, y
-        sta $6240, y
-        sta $6260, y
-        sta $6280, y
-        sta $62A0, y
-        sta $62C0, y
-        sta $62E0, y
-
-        sta $6300, y
-        sta $6320, y
-
-        dey
-        bpl _left_col_loop
-
-    ldy #$04
-    _right_col_loop:
-
-        sta $609C, y
-        sta $60BC, y
-        sta $60DC, y
-        sta $60FC, y
-
-        sta $611C, y
-        sta $613C, y
-        sta $615C, y
-        sta $617C, y
-        sta $619C, y
-        sta $61BC, y
-        sta $61DC, y
-        sta $61FC, y
-
-        sta $621C, y
-        sta $623C, y
-        sta $625C, y
-        sta $627C, y
-        sta $629C, y
-        sta $62BC, y
-        sta $62DC, y
-        sta $62FC, y
-
-        sta $631C, y
-        sta $633C, y
-        dey
-        bpl _right_col_loop
+ClearTopRightCorner_6000:
+    `stx_4_bytes $601C
+    `stx_4_bytes $603C
+    `stx_4_bytes $605C
+    `stx_4_bytes $607C
     rts
-.scend
 
-.scope
-ClearRoom_Left_And_Right_Columns_6400:
-    ldy #$04
-    _left_col_loop:
-
-        sta $6480, y
-        sta $64A0, y
-        sta $64C0, y
-        sta $64E0, y
-
-        sta $6500, y
-        sta $6520, y
-        sta $6540, y
-        sta $6560, y
-        sta $6580, y
-        sta $65A0, y
-        sta $65C0, y
-        sta $65E0, y
-
-        sta $6600, y
-        sta $6620, y
-        sta $6640, y
-        sta $6660, y
-        sta $6680, y
-        sta $66A0, y
-        sta $66C0, y
-        sta $66E0, y
-
-        sta $6700, y
-        sta $6720, y
-        dey
-        bpl _left_col_loop
-
-    ldy #$04
-    _right_col_loop:
-
-        sta $649C, y
-        sta $64BC, y
-        sta $64DC, y
-        sta $64FC, y
-
-        sta $651C, y
-        sta $653C, y
-        sta $655C, y
-        sta $657C, y
-        sta $659C, y
-        sta $65BC, y
-        sta $65DC, y
-        sta $65FC, y
-
-        sta $661C, y
-        sta $663C, y
-        sta $665C, y
-        sta $667C, y
-        sta $669C, y
-        sta $66BC, y
-        sta $66DC, y
-        sta $66FC, y
-
-        sta $671C, y
-        sta $673C, y
-        dey
-        bpl _right_col_loop
+ClearBottomLeftCorner_6000:
+    `stx_4_bytes $6340
+    `stx_4_bytes $6360
+    `stx_4_bytes $6380
+    `stx_4_bytes $63A0
     rts
-.scend
 
-.scope
-    ClearRoom_Top_And_Bottom_Rows_6000:
-        ldy #$17
-        _loop:
-            sta $6004, y
-            sta $6024, y
-            sta $6044, y
-            sta $6064, y
+ClearBottomRightCorner_6000:
+    `stx_4_bytes $635C
+    `stx_4_bytes $637C
+    `stx_4_bytes $639C
+    `stx_4_bytes $63BC
+    rts
 
-            sta $6344, y
-            sta $6364, y
-            sta $6384, y
-            sta $63A4, y
-            dey
-            bpl _loop
-        rts
-.scend
+ClearTopLeftCorner_6400:
+    `stx_4_bytes $6400
+    `stx_4_bytes $6420
+    `stx_4_bytes $6440
+    `stx_4_bytes $6460
+    rts
 
-.scope
-    ClearRoom_Top_And_Bottom_Rows_6400:
-        ldy #$17
-        _loop:
-            sta $6404, y
-            sta $6424, y
-            sta $6444, y
-            sta $6464, y
+ClearTopRightCorner_6400:
+    `stx_4_bytes $641C
+    `stx_4_bytes $643C
+    `stx_4_bytes $645C
+    `stx_4_bytes $647C
+    rts
 
-            sta $6744, y
-            sta $6764, y
-            sta $6784, y
-            sta $67A4, y
-            dey
-            bpl _loop
-        rts
-.scend
+ClearBottomLeftCorner_6400:
+    `stx_4_bytes $6740
+    `stx_4_bytes $6760
+    `stx_4_bytes $6780
+    `stx_4_bytes $67A0
+    rts
+
+ClearBottomRightCorner_6400:
+    `stx_4_bytes $675C
+    `stx_4_bytes $677C
+    `stx_4_bytes $679C
+    `stx_4_bytes $67BC
+    rts
+
+ClearTopLeftCol_6400:
+    `stx_4_bytes $6480
+    `stx_4_bytes $64A0
+    `stx_4_bytes $64C0
+    `stx_4_bytes $64E0
+
+    `stx_4_bytes $6500
+    `stx_4_bytes $6520
+
+    ; The main core will get the other bytes
+    `stx_2_bytes $6540
+    `stx_2_bytes $6560
+    `stx_2_bytes $6580
+    `stx_2_bytes $65A0
+    `stx_2_bytes $65C0
+    `stx_2_bytes $65E0
+    rts
+
+ClearBottomLeftCol_6400:
+    `stx_4_bytes $6600
+    `stx_4_bytes $6620
+    `stx_4_bytes $6640
+    `stx_4_bytes $6660
+    `stx_4_bytes $6680
+    `stx_4_bytes $66A0
+    `stx_4_bytes $66C0
+    `stx_4_bytes $66E0
+
+    `stx_4_bytes $6700
+    `stx_4_bytes $6720
+    rts
+
+ClearTopRightCol_6400:
+    `stx_4_bytes $649C
+    `stx_4_bytes $64BC
+    `stx_4_bytes $64DC
+    `stx_4_bytes $64FC
+
+    `stx_4_bytes $651C
+    `stx_4_bytes $653C
+
+    ; The main core will get the other bytes
+    `stx_2_bytes $655E
+    `stx_2_bytes $657E
+    `stx_2_bytes $659E
+    `stx_2_bytes $65BE
+    `stx_2_bytes $65DE
+    `stx_2_bytes $65FE
+    rts
+
+ClearBottomRightCol_6400:
+    `stx_4_bytes $661C
+    `stx_4_bytes $663C
+    `stx_4_bytes $665C
+    `stx_4_bytes $667C
+    `stx_4_bytes $669C
+    `stx_4_bytes $66BC
+    `stx_4_bytes $66DC
+    `stx_4_bytes $66FC
+
+    `stx_4_bytes $671C
+    `stx_4_bytes $673C
+    rts
+
+ClearTopLeftRow_6400:
+    `stx_12_bytes $6404
+    `stx_12_bytes $6424
+    rts
+
+ClearTopRightRow_6400:
+    `stx_12_bytes $6410
+    `stx_12_bytes $6430
+    rts
+
+ClearTopLeftSecondRow_6400:
+    `stx_12_bytes $6444
+    `stx_12_bytes $6464
+    rts
+
+ClearTopRightSecondRow_6400:
+    `stx_12_bytes $6450
+    `stx_12_bytes $6470
+    rts
+
+ClearTopLeftCore_6400:
+    `stx_12_bytes $6484
+    `stx_12_bytes $64A4
+    `stx_12_bytes $64C4
+    `stx_12_bytes $64E4
+
+    `stx_12_bytes $6504
+    `stx_12_bytes $6524
+    ; left door
+    `stx_14_bytes $6542
+    `stx_14_bytes $6562
+    `stx_14_bytes $6582
+    `stx_14_bytes $65A2
+    `stx_14_bytes $65C2
+    `stx_14_bytes $65E2
+    rts
+    
+ClearTopRightCore_6400:
+    `stx_12_bytes $6490
+    `stx_12_bytes $64B0
+    `stx_12_bytes $64D0
+    `stx_12_bytes $64F0
+
+    `stx_12_bytes $6510
+    `stx_12_bytes $6530
+    ; right door
+    `stx_14_bytes $6550
+    `stx_14_bytes $6570
+    `stx_14_bytes $6590
+    `stx_14_bytes $65B0
+    `stx_14_bytes $65D0
+    `stx_14_bytes $65F0
+    rts
+
+ClearBottomLeftCore_6400:
+    `stx_12_bytes $6604
+    `stx_12_bytes $6624
+    `stx_12_bytes $6644
+    `stx_12_bytes $6664
+    `stx_12_bytes $6684
+    `stx_12_bytes $66A4
+    `stx_12_bytes $66C4
+    `stx_12_bytes $66E4
+
+    `stx_12_bytes $6704
+    `stx_12_bytes $6724
+    rts
+
+ClearBottomRightCore_6400:
+    `stx_12_bytes $6610
+    `stx_12_bytes $6630
+    `stx_12_bytes $6650
+    `stx_12_bytes $6670
+    `stx_12_bytes $6690
+    `stx_12_bytes $66B0
+    `stx_12_bytes $66D0
+    `stx_12_bytes $66F0
+
+    `stx_12_bytes $6710
+    `stx_12_bytes $6730
+    rts
+
+ClearBottomLeftFloor_6400:
+    `stx_12_bytes $6744
+    `stx_12_bytes $6764
+    `stx_12_bytes $6784
+    `stx_12_bytes $67A4
+    rts
+
+ClearBottomRightFloor_6400:
+    `stx_12_bytes $6750
+    `stx_12_bytes $6770
+    `stx_12_bytes $6790
+    `stx_12_bytes $67B0
+    rts
+
+; === page 6000 attr writes ===
+AttrWriteTopLeft_6000:
+    lda $00
+    `sta_4_bytes $63C0
+    `sta_4_bytes $63C8
+    lda $01
+    `sta_4_bytes $63D0
+    `sta_4_bytes $63D8
+    rts
+
+AttrWriteTopRight_6000:
+    lda $00
+    `sta_4_bytes $63C4
+    `sta_4_bytes $63CC
+    lda $01
+    `sta_4_bytes $63D4
+    `sta_4_bytes $63DC
+    rts
+
+AttrWriteBottomLeft_6000:
+    lda $02
+    `sta_4_bytes $63E0
+    `sta_4_bytes $63E8
+    lda $03
+    `sta_4_bytes $63F0
+    `sta_4_bytes $63F8
+    rts
+
+AttrWriteBottomRight_6000:
+    lda $02
+    `sta_4_bytes $63E4
+    `sta_4_bytes $63EC
+    lda $03
+    `sta_4_bytes $63F4
+    `sta_4_bytes $63FC
+    rts
+
+; == page 6400 attr writes ===
+
+AttrWriteTopLeft_6400:
+    lda $00
+    `sta_4_bytes $67C0
+    `sta_4_bytes $67C8
+    lda $01
+    `sta_4_bytes $67D0
+    `sta_4_bytes $67D8
+    rts
+
+AttrWriteTopRight_6400:
+    lda $00
+    `sta_4_bytes $67C4
+    `sta_4_bytes $67CC
+    lda $01
+    `sta_4_bytes $67D4
+    `sta_4_bytes $67DC
+    rts
+
+AttrWriteBottomLeft_6400:
+    lda $02
+    `sta_4_bytes $67E0
+    `sta_4_bytes $67E8
+    lda $03
+    `sta_4_bytes $67F0
+    `sta_4_bytes $67F8
+    rts
+
+AttrWriteBottomRight_6400:
+    lda $02
+    `sta_4_bytes $67E4
+    `sta_4_bytes $67EC
+    lda $03
+    `sta_4_bytes $67F4
+    `sta_4_bytes $67FC
+    rts
+
+.word $EEEE, $EEEE, $EEEE
 
 ;----------------------------------------------------------------------------------------------------
 

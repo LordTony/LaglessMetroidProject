@@ -153,7 +153,7 @@
 .alias SpritePagePos    $5B     ;Index into sprite RAM used to load object sprite data.
 ; used $5C - $64                ;Some routing eor $5C,x oer $5D,x where x == #$06 and counts down
 .alias ObjectCounter    $65     ;Counts such things as object explosion time.
-; unused                $66
+; used                  $66
 ; unused                $67                    
 .alias RoomPal          $68
 .alias TempX            $69
@@ -281,9 +281,9 @@
 .alias SpareMemD7       $D7     ;Written to in title routine, but never accessed.
 .alias IntroMusRstrt    $D8     ;After all title routines run twice, restarts intro music.
 ; unused                $D9
-; unused                $DA
-; unused                $DB
-; unused                $DC
+; used, but isolated    $DA
+; used, but isolated    $DB
+.alias Quarter          $DC
 ; unused                $DD
 ; unused                $DE
 ; unused                $DF
@@ -387,7 +387,7 @@
 .alias EnXRoomPos       $0401   ;Enemy x position in room.(not actual screen position).
 .alias EnAttr_02        $0402
 .alias EnAttr_03        $0403
-.alias EnAttr_04        $0404
+.alias EnHasBeenHit     $0404   ;Keeps track of if the enemy has been hit with a bullet, missile, or bomb this frame
 .alias EnAttr_05        $0405
 .alias EnCounter        $0406   ;Counts such things as explosion time.
 .alias EnAttr_07        $0407
@@ -532,6 +532,8 @@
 .alias SQ2ContSFX       $068A   ;Continuation flags for SQ2 SFX (never used)
 .alias TriangleContSFX  $068B   ;Continuation flags for Triangle SFX
 .alias MultiContSFX     $068C   ;Continuation flags for Multi SFX
+
+.alias PipeEnemyStatus  $0728
 
 .alias PowerUpType      $0748   ;Holds the byte describing what power-up is on name table.
 .alias PowerUpYCoord    $0749   ;Y coordinate of the power-up.
@@ -713,6 +715,10 @@
 .alias EnDataIndex      $6B02   ;Contains index into enemy data tables.
 ;                       $6B03
 
+
+.alias IdentityTable    $6C00
+.alias MetroidDataRam   $6D20
+
 .alias IntroStrSprt00   $6E00   ;thru $6E9F. RAM used for storing intro star sprite data.
 
 ;Intro sprite 0 and sparkle sprite.
@@ -880,6 +886,7 @@
 .alias PalPntrTbl_Hi            $9560
 .alias PalPntrTbl_Lo            $957C
 .alias SpecItmsTblPtr           $9598
+.alias HandleBankEnemies        $95E5
 .alias AreaRoutine              $95C3
 .alias EnemyHitPointTbl         $962B
 .alias EnemyInitDelayTbl        $96BB
@@ -902,15 +909,27 @@
 .alias SXFInitTables            $B29D
 .alias SoundEngineEntryPoint    $B3CC
 .alias StructPointerTable_Hi    $BF0F
-.alias StructPointerTable_Lo    $BF60
+.alias StructPointerTable_Lo    $BF68
 .alias InterruptVectors         $BFFA
 
 ;----------------------------------------------------------------------------------------------------
 
-.alias WorldMapRAM              $7000   ;Thru $73FF. The map is 1Kb in size (1024 bytes).
-.alias ClearRoom_Box_6000       $7400
-.alias IdentityTable            $7E00
-.alias SamusData                $77FE   ;Thru $782D. Samus saved game data (not used).
+.alias WorldMapRAM                  $7000   ;Thru $73FF. The map is 1Kb in size (1024 bytes).
+
+.alias ClearTopLeftCore_6000        $7400
+.alias ClearTopRightCore_6000       $75B1
+.alias ClearBottomLeftCore_6000     $7762
+.alias ClearBottomRightCore_6000    $78CB 
+.alias ClearTopLeftCol_6000         $7A34
+.alias ClearBottomLeftCol_6000      $7AC5
+.alias ClearTopRightCol_6000        $7B3E
+.alias ClearBottomRightCol_6000     $7BCF
+.alias ClearBottomLeftFloor_6000    $7C48
+.alias ClearTopLeftRow_6000         $7CD9
+.alias ClearBottomRightFloor_6000   $7D22
+.alias ClearTopRightRow_6000        $7DB3
+.alias ClearTopLeftSecondRow_6000   $7DFC
+.alias ClearTopRightSecondRow_6000  $7E45
 
 ;-----------------------------------------[ MMC Registers ]------------------------------------------
 
@@ -920,6 +939,18 @@
 .alias MMC1Reg3         $E000   ;
 
 ;-------------------------------------------[ Constants ]--------------------------------------------
+;Numeric Values
+.alias MidScreenVertical        120
+.alias MidScreenHorizontal      128
+
+;Banks
+.alias TitleBank        $00
+.alias BrinstarBank     $01
+.alias NorfairBank      $02
+.alias TourianBank      $03
+.alias KraidBank        $04
+.alias RidleyBank       $05
+.alias GFXBank          $06
 
 ;Bitmask defs used for SamusGear.
 .alias gr_BOMBS         $01

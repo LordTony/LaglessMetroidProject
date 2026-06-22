@@ -14,7 +14,7 @@ _L8015:  JMP UpdateEnemyHitpoints
 _L8018:  JMP Bank07_LFBB9
 _L801B:  JMP Bank07_LFB88
 _L801E:  JMP Bank07_LFBCA
-_L8021:  JMP Bank07_LF870
+_L8021:  JMP Bank07_LF870       ; used in bank 02 and bank 05
 _L8024:  JMP _ChooseRoutine
 _L8027:  JMP Bank07_LFD8F
 _L802A:  JMP Bank07_LEB6E
@@ -187,18 +187,19 @@ _L81AC:  LDA #$01
 _L81AE:  STA $66
 _L81B0:  RTS
 
-_L81B1:  JSR $81B8
-_L81B4:  STA $6AFE,X
-_L81B7:  RTS
+_L81B1: 
+    LDA #$20
+    JSR UpdateEnAttr_05
+    LDA #$00
+    STA $6AFE,X
+    RTS
 
-_L81B8:  LDA #$20
-_L81BA:  JSR LF744
-_L81BD:  LDA #$00
-_L81BF:  RTS
-
-_L81C0:  JSR $81B8
-_L81C3:  STA $6AFF,X
-_L81C6:  RTS
+_L81C0: 
+    LDA #$20
+    JSR UpdateEnAttr_05
+    LDA #$00
+    STA $6AFF,X
+    RTS
 
 _L81C7:  JSR $81F6
 _L81CA:  BNE $81F5

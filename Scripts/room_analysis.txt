@@ -1,0 +1,2533 @@
+========================= [ Room Quads ] =========================
+
+;Room #$00
+Bank01_LA441:
+	.byte $AA
+	.word Bank01_Room_00_Top_Left
+	.word Bank01_Room_00_Top_Right
+	.word FFLabel
+
+Bank01_Room_00_Bottom_Right:
+	.byte $FF
+
+Bank01_Room_00_Top_Left:
+	.byte $40, $01
+	.byte $50, $03
+	.byte $FD
+	.byte $02, $B1				; Door
+	.byte $FF
+
+Bank01_Room_00_Top_Right:
+	.byte $48, $01
+	.byte $5F, $03
+	.byte $FD
+	.byte $02, $A1				; Door
+	.byte $FF
+
+;Room #$01
+Bank01_LA454:
+	.byte $AA
+	.word Bank01_Room_01_Top_Left
+	.word FFLabel
+	.word Bank01_Room_01_Bottom_Left
+
+Bank01_Room_01_Bottom_Right:
+	.byte $FF
+
+Bank01_Room_01_Top_Left:
+	.byte $07, $02
+	.byte $FF
+
+Bank01_Room_01_Bottom_Left:
+	.byte $87, $41
+	.byte $FF
+
+;Room #$02
+Bank01_LA45C:
+	.byte $FF
+	.word Bank01_Room_02_Top_Left
+	.word Bank01_Room_02_Top_Right
+	.word Bank01_Room_02_Bottom_Left
+
+Bank01_Room_02_Bottom_Right:
+	.byte $AE, $0B
+	.byte $FD
+	.byte $11, $83, $8A			; Enemy
+	.byte $FF
+
+Bank01_Room_02_Top_Left:
+	.byte $00, $0B
+	.byte $50, $0B
+	.byte $FD
+	.byte $01, $03, $42			; Enemy
+	.byte $FF
+
+Bank01_Room_02_Top_Right:
+	.byte $0E, $0B
+	.byte $5E, $0B
+	.byte $FD
+	.byte $31, $02, $59			; Enemy
+	.byte $FF
+
+Bank01_Room_02_Bottom_Left:
+	.byte $A0, $0B
+	.byte $FD
+	.byte $21, $03, $B5			; Enemy
+	.byte $41, $02, $A3			; Enemy
+	.byte $FF
+
+;Room #$03
+Bank01_LA480:
+	.byte $FF
+	.word Bank01_Room_03_Top_Left
+	.word Bank01_Room_03_Top_Right
+	.word Bank01_Room_03_Bottom_Left
+
+Bank01_Room_03_Bottom_Right:
+	.byte $8B, $0A
+	.byte $8E, $0B
+	.byte $DE, $3D
+	.byte $FD
+	.byte $11, $05, $BA			; Enemy
+	.byte $FF
+
+Bank01_Room_03_Top_Left:
+	.byte $00, $0B
+	.byte $02, $09
+	.byte $50, $0B
+	.byte $56, $0A
+	.byte $FD
+	.byte $01, $85, $47			; Enemy
+	.byte $31, $83, $53			; Enemy
+	.byte $FF
+
+Bank01_Room_03_Top_Right:
+	.byte $0E, $0B
+	.byte $5F, $03
+	.byte $FD
+	.byte $02, $A1				; Door
+	.byte $21, $03, $08			; Enemy
+	.byte $FF
+
+Bank01_Room_03_Bottom_Left:
+	.byte $92, $0A
+	.byte $A0, $0B
+	.byte $C7, $09
+	.byte $FD
+	.byte $41, $83, $97			; Enemy
+	.byte $51, $03, $C5			; Enemy
+	.byte $FF
+
+;Room #$04
+Bank01_LA4BB:
+	.byte $FF
+	.word Bank01_Room_04_Top_Left
+	.word Bank01_Room_04_Top_Right
+	.word Bank01_Room_04_Bottom_Left
+
+Bank01_Room_04_Bottom_Right:
+	.byte $9C, $0A
+	.byte $AE, $0B
+	.byte $FD
+	.byte $51, $03, $BB			; Enemy
+	.byte $FF
+
+Bank01_Room_04_Top_Left:
+	.byte $00, $0B
+	.byte $04, $0A
+	.byte $47, $09
+	.byte $50, $03
+	.byte $FD
+	.byte $02, $B1				; Door
+	.byte $41, $03, $45			; Enemy
+	.byte $FF
+
+Bank01_Room_04_Top_Right:
+	.byte $0E, $0B
+	.byte $5E, $0B
+	.byte $FD
+	.byte $31, $05, $39			; Enemy
+	.byte $FF
+
+Bank01_Room_04_Bottom_Left:
+	.byte $80, $0B
+	.byte $82, $0A
+	.byte $B6, $0A
+	.byte $C0, $3C
+	.byte $FF
+
+;Room #$05
+Bank01_LA4ED:
+	.byte $FF
+	.word Bank01_Room_05_Top_Left
+	.word Bank01_Room_05_Top_Right
+	.word Bank01_Room_05_Bottom_Left
+
+Bank01_Room_05_Bottom_Right:
+	.byte $8B, $0A
+	.byte $8E, $0B
+	.byte $CE, $3C
+	.byte $FF
+
+Bank01_Room_05_Top_Left:
+	.byte $00, $0B
+	.byte $15, $09
+	.byte $50, $03
+	.byte $57, $0A
+	.byte $FD
+	.byte $02, $B1				; Door
+	.byte $01, $83, $43			; Enemy
+	.byte $FF
+
+Bank01_Room_05_Top_Right:
+	.byte $0E, $0B
+	.byte $5F, $03
+	.byte $FD
+	.byte $02, $A1				; Door
+	.byte $31, $85, $48			; Enemy
+	.byte $FF
+
+Bank01_Room_05_Bottom_Left:
+	.byte $80, $0B
+	.byte $82, $0A
+	.byte $B0, $3A
+	.byte $C6, $09
+	.byte $FD
+	.byte $51, $05, $B7			; Enemy
+	.byte $FF
+
+;Room #$06
+Bank01_LA524:
+	.byte $FF
+	.word Bank01_Room_06_Top_Left
+	.word Bank01_Room_06_Top_Right
+	.word Bank01_Room_06_Bottom_Left
+
+Bank01_Room_06_Bottom_Right:
+	.byte $8A, $0A
+	.byte $AE, $0B
+	.byte $FD
+	.byte $21, $05, $A8			; Enemy
+	.byte $FF
+
+Bank01_Room_06_Top_Left:
+	.byte $00, $0B
+	.byte $12, $0A
+	.byte $37, $0A
+	.byte $50, $0B
+	.byte $73, $0A
+	.byte $FD
+	.byte $31, $05, $64			; Enemy
+	.byte $FF
+
+Bank01_Room_06_Top_Right:
+	.byte $0E, $0B
+	.byte $5E, $0B
+	.byte $FD
+	.byte $11, $03, $3C			; Enemy
+	.byte $51, $85, $7B			; Enemy
+	.byte $41, $05, $28			; Enemy
+	.byte $FF
+
+Bank01_Room_06_Bottom_Left:
+	.byte $A0, $0B
+	.byte $B6, $09
+	.byte $FD
+	.byte $01, $03, $B3			; Enemy
+	.byte $FF
+
+;Room #$07
+Bank01_LA55A:
+	.byte $FE
+	.word Bank01_Room_07_Top_Left
+	.word Bank01_Room_07_Top_Right
+	.word Bank01_Room_07_Bottom_Left
+
+Bank01_Room_07_Bottom_Right:
+	.byte $AE, $0B
+	.byte $CD, $3F
+	.byte $FD
+	.byte $41, $05, $BD			; Enemy
+	.byte $FF
+
+Bank01_Room_07_Top_Left:
+	.byte $00, $0D
+	.byte $54, $06
+	.byte $67, $07
+	.byte $FD
+	.byte $31, $05, $67			; Enemy
+	.byte $FF
+
+Bank01_Room_07_Top_Right:
+	.byte $08, $0D
+	.byte $5A, $06
+	.byte $FF
+
+Bank01_Room_07_Bottom_Left:
+	.byte $A0, $0B
+	.byte $C2, $3F
+	.byte $D2, $00
+	.byte $D6, $00
+	.byte $FD
+	.byte $51, $05, $B2			; Enemy
+	.byte $FF
+
+;Room #$08
+Bank01_LA587:
+	.byte $FF
+	.word FFLabel
+	.word Bank01_Room_08_Top_Right
+	.word FFLabel
+
+Bank01_Room_08_Bottom_Right:
+	.byte $8C, $1E
+	.byte $B8, $1E
+	.byte $CC, $39
+	.byte $FF
+
+Bank01_Room_08_Top_Right:
+	.byte $08, $1E
+	.byte $0C, $1E
+	.byte $38, $1E
+	.byte $4C, $1E
+	.byte $78, $1E
+	.byte $FF
+
+;Room #$09
+Bank01_LA5B9:
+	.byte $FF
+	.word Bank01_Room_09_Top_Left
+	.word Bank01_Room_09_Top_Right
+	.word Bank01_Room_09_Bottom_Left
+
+Bank01_Room_09_Bottom_Right:
+	.byte $FF
+
+Bank01_Room_09_Top_Left:
+	.byte $00, $35
+	.byte $20, $36
+	.byte $35, $1D
+	.byte $55, $0B
+	.byte $FD
+	.byte $51, $05, $25			; Enemy
+	.byte $FF
+
+Bank01_Room_09_Top_Right:
+	.byte $28, $36
+	.byte $2F, $36
+	.byte $3B, $1D
+	.byte $5A, $0B
+	.byte $FD
+	.byte $41, $05, $2B			; Enemy
+	.byte $FF
+
+Bank01_Room_09_Bottom_Left:
+	.byte $C5, $16
+	.byte $D0, $37
+	.byte $FF
+
+;Room #$0A
+Bank01_LA5DD:
+	.byte $00
+	.word Bank01_Room_0A_Top_Left
+	.word Bank01_Room_0A_Top_Right
+	.word Bank01_Room_0A_Bottom_Left
+
+Bank01_Room_0A_Bottom_Right:
+	.byte $88, $14
+	.byte $99, $16
+	.byte $BC, $47
+	.byte $FF
+
+Bank01_Room_0A_Top_Left:
+	.byte $00, $14
+	.byte $10, $47
+	.byte $14, $47
+	.byte $25, $08
+	.byte $50, $14
+	.byte $60, $14
+	.byte $70, $13
+	.byte $FF
+
+Bank01_Room_0A_Top_Right:
+	.byte $08, $14
+	.byte $0F, $15
+	.byte $58, $0C
+	.byte $5F, $04
+	.byte $FD
+	.byte $02, $A0				; Door
+	.byte $FF
+
+Bank01_Room_0A_Bottom_Left:
+	.byte $80, $14
+	.byte $90, $16
+	.byte $B3, $47
+	.byte $FF
+
+;Room #$0B
+Bank01_LA615:
+	.byte $02
+	.word Bank01_Room_0B_Top_Left
+	.word Bank01_Room_0B_Top_Right
+	.word Bank01_Room_0B_Bottom_Left
+
+Bank01_Room_0B_Bottom_Right:
+	.byte $89, $16
+	.byte $FF
+
+Bank01_Room_0B_Top_Left:
+	.byte $00, $15
+	.byte $01, $16
+	.byte $50, $04
+	.byte $FD
+	.byte $02, $B1				; Door
+	.byte $FF
+
+Bank01_Room_0B_Top_Right:
+	.byte $08, $16
+	.byte $0F, $15
+	.byte $4F, $15
+	.byte $FF
+
+Bank01_Room_0B_Bottom_Left:
+	.byte $80, $16
+	.byte $87, $41
+	.byte $FF
+
+;Room #$0C
+Bank01_LA635:
+	.byte $AA
+	.word Bank01_Room_0C_Top_Left
+	.word Bank01_Room_0C_Top_Right
+	.word Bank01_Room_0C_Bottom_Left
+
+Bank01_Room_0C_Bottom_Right:
+	.byte $BC, $19
+	.byte $D9, $00
+	.byte $FD
+	.byte $31, $02, $AA			; Enemy
+	.byte $FF
+
+Bank01_Room_0C_Top_Left:
+	.byte $00, $1B
+	.byte $10, $1A
+	.byte $50, $03
+	.byte $FD
+	.byte $02, $B1				; Door
+	.byte $FF
+
+Bank01_Room_0C_Top_Right:
+	.byte $08, $1B
+	.byte $FD
+	.byte $51, $02, $5A			; Enemy
+	.byte $FF
+
+Bank01_Room_0C_Bottom_Left:
+	.byte $80, $42
+	.byte $82, $19
+	.byte $C6, $1B
+	.byte $D1, $00
+	.byte $FF
+
+;Room #$0D
+Bank01_LA661:
+	.byte $AA
+	.word Bank01_Room_0D_Top_Left
+	.word Bank01_Room_0D_Top_Right
+	.word Bank01_Room_0D_Bottom_Left
+
+Bank01_Room_0D_Bottom_Right:
+	.byte $8C, $19
+	.byte $8E, $42
+	.byte $FF
+
+Bank01_Room_0D_Top_Left:
+	.byte $00, $1B
+	.byte $FD
+	.byte $51, $02, $44			; Enemy
+	.byte $FF
+
+Bank01_Room_0D_Top_Right:
+	.byte $08, $1B
+	.byte $1E, $1A
+	.byte $5F, $03
+	.byte $FD
+	.byte $02, $A1				; Door
+	.byte $FF
+
+Bank01_Room_0D_Bottom_Left:
+	.byte $B7, $43
+	.byte $C2, $44
+	.byte $D0, $00
+	.byte $D7, $00
+	.byte $FD
+	.byte $31, $05, $B3			; Enemy
+	.byte $FF
+
+;Room #$0E
+Bank01_LA68D:
+	.byte $AA
+	.word Bank01_Room_0E_Top_Left
+	.word Bank01_Room_0E_Top_Right
+	.word Bank01_Room_0E_Bottom_Left
+
+Bank01_Room_0E_Bottom_Right:
+	.byte $AC, $19
+	.byte $B8, $1A
+	.byte $D8, $00
+	.byte $FD
+	.byte $21, $02, $8B			; Enemy
+	.byte $31, $02, $BD			; Enemy
+	.byte $FF
+
+Bank01_Room_0E_Top_Left:
+	.byte $00, $1B
+	.byte $FF
+
+Bank01_Room_0E_Top_Right:
+	.byte $08, $1B
+	.byte $FD
+	.byte $01, $82, $28			; Enemy
+	.byte $FF
+
+Bank01_Room_0E_Bottom_Left:
+	.byte $B4, $19
+	.byte $D0, $00
+	.byte $FD
+	.byte $11, $05, $A5			; Enemy
+	.byte $FF
+
+;Room #$0F
+Bank01_LA6B1:
+	.byte $AA
+	.word Bank01_Room_0F_Top_Left
+	.word Bank01_Room_0F_Top_Right
+	.word Bank01_Room_0F_Bottom_Left
+
+Bank01_Room_0F_Bottom_Right:
+	.byte $AC, $19
+	.byte $BB, $19
+	.byte $D8, $00
+	.byte $FD
+	.byte $11, $02, $B8			; Enemy
+	.byte $FF
+
+Bank01_Room_0F_Top_Left:
+	.byte $00, $1B
+	.byte $FF
+
+Bank01_Room_0F_Top_Right:
+	.byte $08, $1B
+	.byte $59, $06
+	.byte $FD
+	.byte $01, $02, $3B			; Enemy
+	.byte $41, $05, $49			; Enemy
+	.byte $FF
+
+Bank01_Room_0F_Bottom_Left:
+	.byte $92, $19
+	.byte $C0, $3F
+	.byte $D0, $00
+	.byte $FD
+	.byte $51, $85, $84			; Enemy
+	.byte $FF
+
+;Room #$10
+Bank01_LA6DB:
+	.byte $AA
+	.word Bank01_Room_10_Top_Left
+	.word Bank01_Room_10_Top_Right
+	.word Bank01_Room_10_Bottom_Left
+
+Bank01_Room_10_Bottom_Right:
+	.byte $8E, $42
+	.byte $D8, $12
+	.byte $FF
+
+Bank01_Room_10_Top_Left:
+	.byte $00, $17
+	.byte $10, $17
+	.byte $20, $17
+	.byte $30, $17
+	.byte $40, $17
+	.byte $50, $03
+	.byte $FD
+	.byte $02, $B1				; Door
+	.byte $FF
+
+Bank01_Room_10_Top_Right:
+	.byte $5F, $03
+	.byte $FD
+	.byte $02, $A1				; Door
+	.byte $01, $02, $5C			; Enemy
+	.byte $FF
+
+Bank01_Room_10_Bottom_Left:
+	.byte $80, $17
+	.byte $86, $2E
+	.byte $97, $34
+	.byte $80, $42
+	.byte $D2, $12
+	.byte $FD
+	.byte $11, $02, $A7			; Enemy
+	.byte $FF
+
+;Room #$11
+Bank01_LA715:
+	.byte $FF
+	.word Bank01_Room_11_Top_Left
+	.word Bank01_Room_11_Top_Right
+	.word Bank01_Room_11_Bottom_Left
+
+Bank01_Room_11_Bottom_Right:
+	.byte $AE, $0B
+	.byte $FD
+	.byte $01, $83, $DD			; Enemy
+	.byte $FF
+
+Bank01_Room_11_Top_Left:
+	.byte $00, $0B
+	.byte $02, $06
+	.byte $50, $0B
+	.byte $52, $06
+	.byte $FD
+	.byte $11, $03, $35			; Enemy
+	.byte $FF
+
+Bank01_Room_11_Top_Right:
+	.byte $0E, $0B
+	.byte $5E, $0B
+	.byte $FD
+	.byte $21, $02, $7D			; Enemy
+	.byte $FF
+
+Bank01_Room_11_Bottom_Left:
+	.byte $A0, $0B
+	.byte $A2, $06
+	.byte $FF
+
+;Room #$12
+Bank01_LA73C:
+	.byte $FF
+	.word Bank01_Room_12_Top_Left
+	.word Bank01_Room_12_Top_Right
+	.word Bank01_Room_12_Bottom_Left
+
+Bank01_Room_12_Bottom_Right:
+	.byte $FF
+
+Bank01_Room_12_Top_Left:
+	.byte $00, $0B
+	.byte $02, $11
+	.byte $50, $03
+	.byte $FD
+	.byte $02, $B1				; Door
+	.byte $FF
+
+Bank01_Room_12_Top_Right:
+	.byte $0A, $11
+	.byte $FD
+	.byte $51, $04, $3A			; Enemy
+	.byte $41, $04, $29			; Enemy
+	.byte $31, $04, $1E			; Enemy
+	.byte $FF
+
+Bank01_Room_12_Bottom_Left:
+	.byte $80, $0B
+	.byte $82, $0A
+	.byte $D0, $37
+	.byte $FD
+	.byte $01, $05, $C7			; Enemy
+	.byte $FF
+
+;Room #$13
+Bank01_LA768:
+	.byte $FF
+	.word Bank01_Room_13_Top_Left
+	.word Bank01_Room_13_Top_Right
+	.word Bank01_Room_13_Bottom_Left
+
+Bank01_Room_13_Bottom_Right:
+	.byte $8A, $09
+	.byte $8E, $0B
+	.byte $FD
+	.byte $11, $05, $C8			; Enemy
+	.byte $FF
+
+Bank01_Room_13_Top_Left:
+	.byte $00, $11
+	.byte $07, $10
+	.byte $FF
+
+Bank01_Room_13_Top_Right:
+	.byte $0E, $0B
+	.byte $5F, $03
+	.byte $FD
+	.byte $02, $A1				; Door
+	.byte $01, $05, $7B			; Enemy
+	.byte $FF
+
+Bank01_Room_13_Bottom_Left:
+	.byte $D0, $37
+	.byte $FF
+
+;Room #$14
+Bank01_LA78B:
+	.byte $55
+	.word Bank01_Room_14_Top_Left
+	.word Bank01_Room_14_Top_Right
+	.word Bank01_Room_14_Bottom_Left
+
+Bank01_Room_14_Bottom_Right:
+	.byte $FF
+
+Bank01_Room_14_Top_Left:
+	.byte $00, $35
+	.byte $FD
+	.byte $51, $04, $14			; Enemy
+	.byte $FF
+
+Bank01_Room_14_Top_Right:
+
+	.byte $FD
+	.byte $21, $04, $38			; Enemy
+	.byte $41, $04, $2E			; Enemy
+	.byte $FF
+
+Bank01_Room_14_Bottom_Left:
+	.byte $D0, $37
+	.byte $FF
+
+;Room #$15
+Bank01_LA7A3:
+	.byte $FF
+	.word Bank01_Room_15_Top_Left
+	.word FFLabel
+	.word Bank01_Room_15_Bottom_Left
+
+Bank01_Room_15_Bottom_Right:
+	.byte $AA, $05
+	.byte $AC, $1F
+	.byte $BA, $10
+	.byte $FD
+	.byte $51, $05, $89			; Enemy
+	.byte $37, $87, $AB			; Zeb Hole
+	.byte $FF
+
+Bank01_Room_15_Top_Left:
+	.byte $00, $37
+	.byte $FD
+	.byte $21, $06, $23			; Enemy
+	.byte $FF
+
+Bank01_Room_15_Bottom_Left:
+	.byte $90, $1F
+	.byte $96, $1F
+	.byte $C4, $05
+	.byte $D0, $37
+	.byte $FD
+	.byte $17, $07, $C5			; Zeb Hole
+	.byte $FF
+
+;Room #$16
+Bank01_LA7D0:
+	.byte $55
+	.word Bank01_Room_16_Top_Left
+	.word FFLabel
+	.word Bank01_Room_16_Bottom_Left
+
+Bank01_Room_16_Bottom_Right:
+	.byte $B8, $05
+	.byte $BC, $1F
+	.byte $FD
+	.byte $47, $87, $B9			; Zeb Hole
+	.byte $FF
+
+Bank01_Room_16_Top_Left:
+	.byte $00, $35
+	.byte $FF
+
+Bank01_Room_16_Bottom_Left:
+	.byte $B0, $1F
+	.byte $B6, $05
+	.byte $C6, $40
+	.byte $D4, $00
+	.byte $FD
+	.byte $07, $07, $B7			; Zeb Hole
+	.byte $FF
+
+;Room #$17
+Bank01_LA7F1:
+	.byte $FF
+	.word Bank01_Room_17_Top_Left
+	.word Bank01_Room_17_Top_Right
+	.word Bank01_Room_17_Bottom_Left
+
+Bank01_Room_17_Bottom_Right:
+	.byte $8B, $4C
+	.byte $8C, $1E
+	.byte $B9, $1D
+	.byte $C8, $0C
+	.byte $FF
+
+Bank01_Room_17_Top_Left:
+	.byte $00, $11
+	.byte $FF
+
+Bank01_Room_17_Top_Right:
+	.byte $08, $10
+	.byte $4A, $4B
+	.byte $6A, $4C
+	.byte $6B, $4B
+	.byte $FF
+
+Bank01_Room_17_Bottom_Left:
+	.byte $A6, $47
+	.byte $B3, $1D
+	.byte $C3, $0C
+	.byte $D0, $37
+	.byte $FD
+	.byte $41, $05, $B4			; Enemy
+	.byte $FF
+
+;Room #$18
+Bank01_LA81B:
+	.byte $55
+	.word Bank01_Room_18_Top_Left
+	.word Bank01_Room_18_Top_Right
+	.word Bank01_Room_18_Bottom_Left
+
+Bank01_Room_18_Bottom_Right:
+	.byte $88, $20
+	.byte $8C, $1E
+	.byte $BE, $3A
+	.byte $FD
+	.byte $21, $05, $D9			; Enemy
+	.byte $FF
+
+Bank01_Room_18_Top_Left:
+	.byte $00, $0B
+	.byte $01, $11
+	.byte $50, $03
+	.byte $64, $0D
+	.byte $66, $20
+	.byte $FD
+	.byte $02, $B1				; Door
+	.byte $31, $05, $56			; Enemy
+	.byte $FF
+
+Bank01_Room_18_Top_Right:
+	.byte $09, $32
+	.byte $0E, $0B
+	.byte $5F, $03
+	.byte $FD
+	.byte $02, $A1				; Door
+	.byte $01, $85, $5A			; Enemy
+	.byte $FF
+
+Bank01_Room_18_Bottom_Left:
+	.byte $80, $1F
+	.byte $84, $20
+	.byte $A6, $20
+	.byte $B0, $3A
+	.byte $E6, $20
+	.byte $FF
+
+;Room #$19
+Bank01_LA85B:
+	.byte $55
+	.word Bank01_Room_19_Top_Left
+	.word Bank01_Room_19_Top_Right
+	.word Bank01_Room_19_Bottom_Left
+
+Bank01_Room_19_Bottom_Right:
+	.byte $D8, $10
+	.byte $FD
+	.byte $41, $05, $CA			; Enemy
+	.byte $FF
+
+Bank01_Room_19_Top_Left:
+	.byte $00, $10
+	.byte $04, $38
+	.byte $12, $31
+	.byte $44, $38
+	.byte $FF
+
+Bank01_Room_19_Top_Right:
+	.byte $0C, $33
+	.byte $FD
+	.byte $31, $06, $3C			; Enemy
+	.byte $FF
+
+Bank01_Room_19_Bottom_Left:
+	.byte $84, $38
+	.byte $D0, $3B
+	.byte $FD
+	.byte $51, $05, $C0			; Enemy
+	.byte $FF
+
+;Room #$1A
+Bank01_LA88B:
+	.byte $A2
+	.word Bank01_Room_1A_Top_Left
+	.word Bank01_Room_1A_Top_Right
+	.word Bank01_Room_1A_Bottom_Left
+
+Bank01_Room_1A_Bottom_Right:
+	.byte $D8, $2D
+	.byte $FD
+	.byte $11, $85, $CA			; Enemy
+	.byte $FF
+
+Bank01_Room_1A_Top_Left:
+	.byte $00, $28
+	.byte $01, $2D
+	.byte $50, $04
+	.byte $FD
+	.byte $02, $B0				; Door
+	.byte $FF
+
+Bank01_Room_1A_Top_Right:
+	.byte $09, $2D
+	.byte $FF
+
+Bank01_Room_1A_Bottom_Left:
+	.byte $80, $28
+	.byte $81, $14
+	.byte $95, $15
+	.byte $D0, $2D
+	.byte $FD
+	.byte $01, $05, $C7			; Enemy
+	.byte $FF
+
+;Room #$1B
+Bank01_LA8B1:
+	.byte $0A
+	.word Bank01_Room_1B_Top_Left
+	.word Bank01_Room_1B_Top_Right
+	.word Bank01_Room_1B_Bottom_Left
+
+Bank01_Room_1B_Bottom_Right:
+	.byte $A8, $15
+	.byte $AE, $0B
+	.byte $BA, $3E
+	.byte $FD
+	.byte $41, $05, $AA			; Enemy
+	.byte $FF
+
+Bank01_Room_1B_Top_Left:
+	.byte $00, $14
+	.byte $04, $15
+	.byte $FD
+	.byte $21, $06, $17			; Enemy
+	.byte $FF
+
+Bank01_Room_1B_Top_Right:
+	.byte $08, $14
+	.byte $0A, $15
+	.byte $FF
+
+Bank01_Room_1B_Bottom_Left:
+	.byte $97, $06
+	.byte $A0, $0B
+	.byte $A6, $15
+	.byte $B4, $3E
+	.byte $C2, $3F
+	.byte $D2, $00
+	.byte $D6, $00
+	.byte $FD
+	.byte $11, $05, $A4			; Enemy
+	.byte $FF
+
+;Room #$1C
+Bank01_LA8E7:
+	.byte $00
+	.word Bank01_Room_1C_Top_Left
+	.word Bank01_Room_1C_Top_Right
+	.word Bank01_Room_1C_Bottom_Left
+
+Bank01_Room_1C_Bottom_Right:
+	.byte $89, $14
+	.byte $FF
+
+Bank01_Room_1C_Top_Left:
+	.byte $00, $15
+	.byte $01, $0D
+	.byte $37, $22
+	.byte $50, $03
+	.byte $FD
+	.byte $02, $B1				; Door
+	.byte $FF
+
+Bank01_Room_1C_Top_Right:
+	.byte $09, $0E
+	.byte $2A, $23
+	.byte $4D, $0E
+	.byte $6A, $16
+	.byte $6D, $0E
+	.byte $FF
+
+Bank01_Room_1C_Bottom_Left:
+	.byte $80, $14
+	.byte $87, $41
+	.byte $FF
+
+;Room #$1D
+Bank01_LA910:
+	.byte $55
+	.word Bank01_Room_1D_Top_Left
+	.word Bank01_Room_1D_Top_Right
+	.word Bank01_Room_1D_Bottom_Left
+
+Bank01_Room_1D_Bottom_Right:
+	.byte $B8, $0E
+	.byte $FF
+
+Bank01_Room_1D_Top_Left:
+	.byte $00, $0E
+	.byte $44, $0E
+	.byte $FD
+	.byte $31, $06, $42			; Enemy
+	.byte $FF
+
+Bank01_Room_1D_Top_Right:
+	.byte $08, $0E
+	.byte $FF
+
+Bank01_Room_1D_Bottom_Left:
+	.byte $84, $0F
+	.byte $94, $0E
+	.byte $B0, $0E
+	.byte $FF
+
+;Room #$1E
+Bank01_LA92B:
+	.byte $55
+	.word Bank01_Room_1E_Top_Left
+	.word Bank01_Room_1E_Top_Right
+	.word Bank01_Room_1E_Bottom_Left
+
+Bank01_Room_1E_Bottom_Right:
+	.byte $88, $0E
+	.byte $CC, $4A
+	.byte $FD
+	.byte $01, $03, $C8			; Enemy
+	.byte $FF
+
+Bank01_Room_1E_Top_Left:
+	.byte $00, $0E
+	.byte $02, $2A
+	.byte $07, $25
+	.byte $10, $0E
+	.byte $12, $2A
+	.byte $17, $25
+	.byte $50, $03
+	.byte $74, $26
+	.byte $FD
+	.byte $02, $B1				; Door
+	.byte $11, $02, $52			; Enemy
+	.byte $FF
+
+Bank01_Room_1E_Top_Right:
+	.byte $08, $0E
+	.byte $18, $0E
+	.byte $5F, $03
+	.byte $78, $26
+	.byte $FD
+	.byte $02, $A1				; Door
+	.byte $FF
+
+Bank01_Room_1E_Bottom_Left:
+	.byte $80, $0E
+	.byte $C0, $4A
+	.byte $D4, $00
+	.byte $FF
+
+;Room #$1F
+Bank01_LA96B:
+	.byte $55
+	.word Bank01_Room_1F_Top_Left
+	.word Bank01_Room_1F_Top_Right
+	.word Bank01_Room_1F_Bottom_Left
+
+Bank01_Room_1F_Bottom_Right:
+	.byte $CA, $26
+	.byte $D8, $45
+	.byte $FD
+	.byte $11, $02, $BB			; Enemy
+	.byte $31, $02, $8B			; Enemy
+	.byte $FF
+
+Bank01_Room_1F_Top_Left:
+	.byte $00, $27
+	.byte $10, $24
+	.byte $50, $03
+	.byte $FD
+	.byte $02, $B1				; Door
+	.byte $FF
+
+Bank01_Room_1F_Top_Right:
+	.byte $08, $27
+	.byte $FD
+	.byte $01, $02, $2B			; Enemy
+	.byte $21, $82, $5B			; Enemy
+	.byte $FF
+
+Bank01_Room_1F_Bottom_Left:
+	.byte $80, $24
+	.byte $A6, $26
+	.byte $B0, $0E
+	.byte $FF
+
+;Room #$20
+Bank01_LA997:
+	.byte $55
+	.word Bank01_Room_20_Top_Left
+	.word Bank01_Room_20_Top_Right
+	.word Bank01_Room_20_Bottom_Left
+
+Bank01_Room_20_Bottom_Right:
+	.byte $8C, $24
+	.byte $BA, $26
+	.byte $C8, $46
+	.byte $FD
+	.byte $31, $05, $BA			; Enemy
+	.byte $FF
+
+Bank01_Room_20_Top_Left:
+	.byte $00, $27
+	.byte $20, $24
+	.byte $FF
+
+Bank01_Room_20_Top_Right:
+	.byte $08, $27
+	.byte $1C, $24
+	.byte $5F, $03
+	.byte $FD
+	.byte $02, $A1				; Door
+	.byte $FF
+
+Bank01_Room_20_Bottom_Left:
+	.byte $C4, $26
+	.byte $D0, $45
+	.byte $FD
+	.byte $51, $02, $85			; Enemy
+	.byte $41, $02, $C5			; Enemy
+	.byte $21, $05, $C5			; Enemy
+	.byte $FF
+
+;Room #$21
+Bank01_LA9C6:
+	.byte $55
+	.word Bank01_Room_21_Top_Left
+	.word Bank01_Room_21_Top_Right
+	.word Bank01_Room_21_Bottom_Left
+
+Bank01_Room_21_Bottom_Right:
+	.byte $BC, $24
+	.byte $DA, $00
+	.byte $FD
+	.byte $11, $05, $AC			; Enemy
+	.byte $21, $05, $A8			; Enemy
+	.byte $FF
+
+Bank01_Room_21_Top_Left:
+	.byte $00, $0E
+	.byte $30, $0E
+	.byte $FF
+
+Bank01_Room_21_Top_Right:
+	.byte $08, $0E
+	.byte $38, $0E
+	.byte $FD
+	.byte $51, $06, $7A			; Enemy
+	.byte $FF
+
+Bank01_Room_21_Bottom_Left:
+	.byte $A7, $26
+	.byte $B0, $24
+	.byte $B6, $24
+	.byte $C4, $05
+	.byte $D4, $27
+	.byte $FD
+	.byte $07, $07, $C5			; Zeb Hole
+	.byte $FF
+
+;Room #$22
+Bank01_LA9F6:
+	.byte $55
+	.word Bank01_Room_22_Top_Left
+	.word Bank01_Room_22_Top_Right
+	.word Bank01_Room_22_Bottom_Left
+
+Bank01_Room_22_Bottom_Right:
+	.byte $B8, $0E
+	.byte $FF
+
+Bank01_Room_22_Top_Left:
+	.byte $00, $0E
+	.byte $30, $0E
+	.byte $37, $25
+	.byte $FD
+	.byte $41, $06, $75			; Enemy
+	.byte $FF
+
+Bank01_Room_22_Top_Right:
+	.byte $08, $0E
+	.byte $48, $2A
+	.byte $4C, $2A
+	.byte $68, $0E
+	.byte $78, $0E
+	.byte $FF
+
+Bank01_Room_22_Bottom_Left:
+	.byte $A3, $26
+	.byte $B0, $0E
+	.byte $FD
+	.byte $21, $03, $85			; Enemy
+	.byte $FF
+
+;Room #$23
+Bank01_LAA20:
+	.byte $69
+	.word Bank01_Room_23_Top_Left
+	.word Bank01_Room_23_Top_Right
+	.word Bank01_Room_23_Bottom_Left
+
+Bank01_Room_23_Bottom_Right:
+	.byte $8B, $29
+	.byte $9B, $28
+	.byte $D8, $00
+	.byte $D9, $45
+	.byte $DE, $05
+	.byte $FD
+	.byte $11, $05, $8B			; Enemy
+	.byte $47, $07, $DF			; Zeb Hole
+	.byte $31, $83, $A8			; Enemy
+	.byte $FF
+
+Bank01_Room_23_Top_Left:
+	.byte $00, $27
+	.byte $63, $29
+	.byte $73, $28
+	.byte $FD
+	.byte $01, $85, $63			; Enemy
+	.byte $FF
+
+Bank01_Room_23_Top_Right:
+	.byte $08, $27
+	.byte $FD
+	.byte $21, $02, $6E			; Enemy
+	.byte $FF
+
+Bank01_Room_23_Bottom_Left:
+	.byte $C0, $26
+	.byte $C6, $26
+	.byte $D0, $45
+	.byte $FF
+
+;Room #$24
+Bank01_LAA56:
+	.byte $55
+	.word Bank01_Room_24_Top_Left
+	.word Bank01_Room_24_Top_Right
+	.word Bank01_Room_24_Bottom_Left
+
+Bank01_Room_24_Bottom_Right:
+	.byte $88, $2B
+	.byte $98, $27
+	.byte $A8, $2B
+	.byte $B8, $0E
+	.byte $FD
+	.byte $21, $05, $8A			; Enemy
+	.byte $31, $85, $AF			; Enemy
+	.byte $FF
+
+Bank01_Room_24_Top_Left:
+	.byte $00, $0E
+	.byte $40, $2B
+	.byte $50, $0E
+	.byte $53, $20
+	.byte $60, $2B
+	.byte $70, $27
+	.byte $FD
+	.byte $41, $05, $47			; Enemy
+	.byte $FF
+
+Bank01_Room_24_Top_Right:
+	.byte $08, $0E
+	.byte $48, $2B
+	.byte $58, $0E
+	.byte $5B, $20
+	.byte $68, $13
+	.byte $78, $27
+	.byte $FD
+	.byte $01, $05, $4D			; Enemy
+	.byte $11, $85, $6C			; Enemy
+	.byte $FF
+
+Bank01_Room_24_Bottom_Left:
+	.byte $80, $2B
+	.byte $90, $27
+	.byte $A0, $13
+	.byte $B0, $0E
+	.byte $FF
+
+;Room #$25
+Bank01_LAAA4:
+	.byte $55
+	.word Bank01_Room_25_Top_Left
+	.word Bank01_Room_25_Top_Right
+	.word Bank01_Room_25_Bottom_Left
+
+Bank01_Room_25_Bottom_Right:
+	.byte $89, $2B
+	.byte $98, $0E
+	.byte $A8, $13
+	.byte $B8, $0E
+	.byte $FD
+	.byte $31, $05, $8E			; Enemy
+	.byte $FF
+
+Bank01_Room_25_Top_Left:
+	.byte $00, $27
+	.byte $05, $27
+	.byte $23, $24
+	.byte $52, $24
+	.byte $FF
+
+Bank01_Room_25_Top_Right:
+	.byte $0A, $0E
+	.byte $4A, $13
+	.byte $59, $20
+	.byte $5A, $0E
+	.byte $6A, $2B
+	.byte $79, $0E
+	.byte $FD
+	.byte $51, $05, $4F			; Enemy
+	.byte $41, $05, $6E			; Enemy
+	.byte $21, $02, $48			; Enemy
+	.byte $FF
+
+Bank01_Room_25_Bottom_Left:
+	.byte $90, $28
+	.byte $94, $06
+	.byte $B0, $0E
+	.byte $FF
+
+;Room #$26
+Bank01_LAAE6:
+	.byte $56
+	.word Bank01_Room_26_Top_Left
+	.word Bank01_Room_26_Top_Right
+	.word Bank01_Room_26_Bottom_Left
+
+Bank01_Room_26_Bottom_Right:
+	.byte $8B, $24
+	.byte $D8, $00
+	.byte $FF
+
+Bank01_Room_26_Top_Left:
+	.byte $00, $0E
+	.byte $40, $2B
+	.byte $50, $0E
+	.byte $56, $20
+	.byte $60, $2B
+	.byte $FD
+	.byte $51, $05, $67			; Enemy
+	.byte $FF
+
+Bank01_Room_26_Top_Right:
+	.byte $08, $27
+	.byte $68, $2C
+	.byte $FD
+	.byte $41, $05, $7E			; Enemy
+	.byte $21, $05, $7B			; Enemy
+	.byte $31, $03, $49			; Enemy
+	.byte $FF
+
+Bank01_Room_26_Bottom_Left:
+	.byte $80, $27
+	.byte $D0, $00
+	.byte $FD
+	.byte $11, $02, $C6			; Enemy
+	.byte $FF
+
+;Room #$27
+Bank01_LAB19:
+	.byte $FF
+	.word Bank01_Room_27_Top_Left
+	.word Bank01_Room_27_Top_Right
+	.word Bank01_Room_27_Bottom_Left
+
+Bank01_Room_27_Bottom_Right:
+	.byte $C8, $1D
+	.byte $FF
+
+Bank01_Room_27_Top_Left:
+	.byte $00, $0B
+	.byte $02, $11
+	.byte $50, $04
+	.byte $FD
+	.byte $02, $B0				; Door
+	.byte $31, $06, $27			; Enemy
+	.byte $FF
+
+Bank01_Room_27_Top_Right:
+	.byte $09, $11
+	.byte $FD
+	.byte $11, $04, $38			; Enemy
+	.byte $FF
+
+Bank01_Room_27_Bottom_Left:
+	.byte $80, $0B
+	.byte $82, $1E
+	.byte $B6, $1D
+	.byte $B7, $1D
+	.byte $C2, $09
+	.byte $D0, $37
+	.byte $FF
+
+;Room #$28
+Bank01_LAB48:
+	.byte $A2
+	.word Bank01_Room_28_Top_Left
+	.word Bank01_Room_28_Top_Right
+	.word Bank01_Room_28_Bottom_Left
+
+Bank01_Room_28_Bottom_Right:
+	.byte $8F, $28
+	.byte $9A, $15
+	.byte $D8, $2D
+	.byte $FF
+
+Bank01_Room_28_Top_Left:
+	.byte $00, $2D
+	.byte $FD
+	.byte $01, $06, $23			; Enemy
+	.byte $FF
+
+Bank01_Room_28_Top_Right:
+	.byte $08, $2D
+	.byte $0F, $28
+	.byte $5F, $03
+	.byte $FD
+	.byte $02, $A1				; Door
+	.byte $31, $05, $7D			; Enemy
+	.byte $FF
+
+Bank01_Room_28_Bottom_Left:
+	.byte $87, $14
+	.byte $C3, $26
+	.byte $D0, $2D
+	.byte $FF
+
+;Room #$29
+Bank01_LAB71:
+	.byte $AA
+	.word Bank01_Room_29_Top_Left
+	.word Bank01_Room_29_Top_Right
+	.word Bank01_Room_29_Bottom_Left
+
+Bank01_Room_29_Bottom_Right:
+	.byte $C9, $26
+	.byte $D8, $2D
+	.byte $FD
+	.byte $21, $05, $CB			; Enemy
+	.byte $FF
+
+Bank01_Room_29_Top_Left:
+	.byte $00, $2D
+	.byte $FD
+	.byte $41, $86, $25			; Enemy
+	.byte $FF
+
+Bank01_Room_29_Top_Right:
+	.byte $08, $2D
+	.byte $FD
+	.byte $51, $06, $2A			; Enemy
+	.byte $FF
+
+Bank01_Room_29_Bottom_Left:
+	.byte $C2, $26
+	.byte $C7, $26
+	.byte $D0, $2D
+	.byte $FF
+
+;Room #$2A
+Bank01_LABBF:
+	.byte $AA
+	.word Bank01_Room_2A_Top_Left
+	.word Bank01_Room_2A_Top_Right
+	.word Bank01_Room_2A_Bottom_Left
+
+Bank01_Room_2A_Bottom_Right:
+	.byte $8D, $19
+	.byte $9C, $19
+	.byte $9F, $15
+	.byte $DF, $49
+	.byte $FF
+
+Bank01_Room_2A_Top_Left:
+	.byte $00, $30
+	.byte $01, $1A
+	.byte $02, $30
+	.byte $03, $1A
+	.byte $05, $1C
+	.byte $10, $30
+	.byte $14, $30
+	.byte $35, $18
+	.byte $41, $19
+	.byte $44, $2F
+	.byte $45, $18
+	.byte $46, $2F
+	.byte $50, $04
+	.byte $53, $19
+	.byte $64, $1C
+	.byte $65, $1C
+	.byte $FD
+	.byte $02, $B1				; Door
+	.byte $FF
+
+Bank01_Room_2A_Top_Right:
+	.byte $0A, $1B
+	.byte $0F, $30
+	.byte $1F, $30
+	.byte $2C, $18
+	.byte $5F, $04
+	.byte $68, $2F
+	.byte $FD
+	.byte $02, $A0				; Door
+	.byte $06					; Statues
+	.byte $FF
+
+Bank01_Room_2A_Bottom_Left:
+	.byte $80, $15
+	.byte $81, $19
+	.byte $C0, $48
+	.byte $D1, $00
+	.byte $D7, $00
+	.byte $FF
+
+;Room #$2B
+Bank01_LABBF:
+	.byte $AA
+	.word Bank01_Room_2B_Top_Left
+	.word Bank01_Room_2B_Top_Right
+	.word Bank01_Room_2B_Bottom_Left
+
+Bank01_Room_2B_Bottom_Right:
+	.byte $8D, $19
+	.byte $9C, $19
+	.byte $9F, $15
+	.byte $DF, $49
+	.byte $FF
+
+Bank01_Room_2B_Top_Left:
+	.byte $00, $30
+	.byte $01, $1A
+	.byte $02, $30
+	.byte $03, $1A
+	.byte $05, $1C
+	.byte $10, $30
+	.byte $14, $30
+	.byte $35, $18
+	.byte $41, $19
+	.byte $44, $2F
+	.byte $45, $18
+	.byte $46, $2F
+	.byte $50, $04
+	.byte $53, $19
+	.byte $64, $1C
+	.byte $65, $1C
+	.byte $FD
+	.byte $02, $B1				; Door
+	.byte $FF
+
+Bank01_Room_2B_Top_Right:
+	.byte $0A, $1B
+	.byte $0F, $30
+	.byte $1F, $30
+	.byte $2C, $18
+	.byte $5F, $04
+	.byte $68, $2F
+	.byte $FD
+	.byte $02, $A0				; Door
+	.byte $06					; Statues
+	.byte $FF
+
+Bank01_Room_2B_Bottom_Left:
+	.byte $80, $15
+	.byte $81, $19
+	.byte $C0, $48
+	.byte $D1, $00
+	.byte $D7, $00
+	.byte $FF
+
+;Room #$2C
+Bank01_LAC24:
+	.byte $00
+	.word Bank01_Room_2C_Top_Left
+	.word Bank01_Room_2C_Top_Right
+	.word Bank01_Room_2C_Bottom_Left
+
+Bank01_Room_2C_Bottom_Right:
+	.byte $89, $16
+	.byte $AF, $15
+	.byte $FF
+
+Bank01_Room_2C_Top_Left:
+	.byte $00, $16
+	.byte $07, $16
+	.byte $20, $15
+	.byte $40, $30
+	.byte $FF
+
+Bank01_Room_2C_Top_Right:
+	.byte $0E, $16
+	.byte $1F, $15
+	.byte $5F, $04
+	.byte $FD
+	.byte $02, $A1				; Door
+	.byte $FF
+
+Bank01_Room_2C_Bottom_Left:
+	.byte $80, $16
+	.byte $87, $41
+	.byte $A0, $15
+	.byte $FF
+
+;Room #$2D
+Bank01_LAC6A:
+	.byte $FF
+	.word Bank01_Room_2D_Top_Left
+	.word Bank01_Room_2D_Top_Right
+	.word Bank01_Room_2D_Bottom_Left
+
+Bank01_Room_2D_Bottom_Right:
+	.byte $AE, $0B
+	.byte $FF
+
+Bank01_Room_2D_Top_Left:
+	.byte $00, $0B
+	.byte $50, $03
+	.byte $FD
+	.byte $02, $B1				; Door
+	.byte $FF
+
+Bank01_Room_2D_Top_Right:
+	.byte $0E, $0B
+	.byte $5E, $0B
+	.byte $FF
+
+Bank01_Room_2D_Bottom_Left:
+	.byte $80, $0B
+	.byte $D0, $3D
+	.byte $FF
+
+;Room #$2E
+Bank01_Room_2E:
+	.byte $FF
+	.word FFLabel
+	.word FFLabel
+	.word Bank01_Room_2E_Bottom_Left
+
+Bank01_Room_2E_Bottom_Right:
+	.byte $B8, $1E
+	.byte $CC, $39
+	.byte $FF
+
+Bank01_Room_2E_Bottom_Left:
+	.byte $B0, $1E
+	.byte $B4, $1E
+	.byte $FF
+
+;Room #$2F
+Bank01_Room_2F:
+	.byte $FF
+	.word Bank01_Room_2F_Top_Left
+	.word Bank01_Room_2F_Top_Right
+	.word FFLabel
+
+Bank01_Room_2F_Bottom_Right:
+	.byte $FF
+
+Bank01_Room_2F_Top_Left:
+	.byte $00, $1E
+	.byte $04, $1E
+	.byte $40, $1E
+	.byte $44, $1E
+	.byte $FF
+
+Bank01_Room_2F_Top_Right:
+	.byte $08, $1E
+	.byte $0C, $1E
+	.byte $38, $1E
+	.byte $4C, $1E
+	.byte $FF
+
+========================= Room Overdraw =========================
+Room #$00
+3 overdrawn macros
+................
+................
+................
+................
+1111111111111111
+2.......1......1
+2.......1......1
+2.......1......1
+1111111111111111
+................
+................
+................
+................
+................
+................
+
+Room #$01
+0 overdrawn macros
+.......11.......
+.......11.......
+.......11.......
+.......11.......
+.......11.......
+.......11.......
+.......11.......
+.......11.......
+.......11.......
+.......11.......
+.......11.......
+.......11.......
+.......11.......
+.......11.......
+.......11.......
+
+Room #$02
+0 overdrawn macros
+11............11
+11............11
+11............11
+11............11
+11............11
+11............11
+11............11
+11............11
+11............11
+11............11
+11............11
+11............11
+11............11
+11............11
+11............11
+
+Room #$03
+0 overdrawn macros
+111111........11
+11............11
+11............11
+11............11
+11............11
+11....111......1
+11.............1
+11.............1
+11.........11111
+11111.........11
+11............11
+11............11
+11.....1111...11
+11............11
+11............11
+
+Room #$04
+3 overdrawn macros
+11..111.......11
+11............11
+11............11
+11............11
+11.....1111...11
+1.............11
+1.............11
+1.............11
+11111.........11
+11..........1121
+11............11
+11....111.....11
+22............11
+11............11
+11............11
+
+Room #$05
+6 overdrawn macros
+11............11
+11...1111.....11
+11............11
+11............11
+11............11
+1......111.....1
+1..............1
+1..............1
+11111......11111
+11............11
+11............11
+22............11
+22....1111....22
+11............11
+11............11
+
+Room #$06
+0 overdrawn macros
+11............11
+11111.........11
+11............11
+11.....111....11
+11............11
+11............11
+11............11
+11.111........11
+11........111.11
+11............11
+11............11
+11....1111....11
+11............11
+11............11
+11............11
+
+Room #$07
+12 overdrawn macros
+1111111111111111
+................
+................
+................
+................
+....1.....1.....
+....1..1..1.....
+....1..1..1.....
+....1..1..1.....
+....1..1..1.....
+11.....1......11
+11.....1......11
+111..........111
+1121112222111211
+1121112222111211
+
+Room #$08
+4 overdrawn macros
+........11111111
+........11111111
+........11111111
+........22221111
+........11111111
+........11111111
+........11111111
+........11111111
+........11111111
+........11111111
+........11111111
+........11111111
+........11111111
+........11111111
+........11111111
+
+Room #$09
+7 overdrawn macros
+1111111111111111
+1111111111111111
+1.......1......1
+.....1.....1....
+.....1.....1....
+.....11...11....
+.....11...11....
+.....11...11....
+.....11...11....
+.....11...11....
+................
+................
+.....1111111....
+1111122222221111
+1111111111111111
+
+Room #$0A
+1 overdrawn macro
+1111111111111112
+1...1..........1
+1...111........1
+1...1111.......1
+1...1111.......1
+1111111111.....1
+11111111.......1
+11111111.......1
+1111111111111111
+1111111..1111111
+1111111..1111111
+...1........1...
+...1........1...
+...1........1...
+...1........1...
+
+Room #$0B
+2 overdrawn macros
+1111111111111111
+1111111111111111
+1..............1
+1..............1
+1..............2
+1..............1
+1..............1
+1..............1
+1111111111111112
+1111111111111111
+.......11.......
+.......11.......
+.......11.......
+.......11.......
+.......11.......
+
+Room #$0C
+9 overdrawn macros
+1111111111111111
+22111...11111...
+11..............
+11..............
+11..............
+1...............
+1...............
+1...............
+111111..........
+11..............
+11..............
+11..........1111
+11....11111111..
+1211112222211111
+1211111111111111
+
+Room #$0D
+6 overdrawn macros
+1111111111111111
+11111...11111.11
+..............11
+..............11
+..............11
+...............1
+...............1
+...............1
+............1122
+..............11
+..............11
+.......11.....11
+..11...11.....11
+1111111211111121
+1111111211111121
+
+Room #$0E
+4 overdrawn macros
+1111111111111111
+11111...11111...
+................
+................
+................
+................
+................
+................
+................
+................
+............1111
+....111111......
+........11......
+1111111122111111
+1111111122111111
+
+Room #$0F
+2 overdrawn macros
+1111111111111111
+11111...11111...
+................
+................
+................
+.........1......
+.........1......
+.........1......
+.........1......
+..1111...1......
+............1111
+...........1111.
+1...............
+2111111111111111
+2111111111111111
+
+Room #$10
+5 overdrawn macros
+1111111111111111
+1111111111111111
+1111111111111111
+1111111111111111
+1111111111111111
+1..............1
+1..............1
+1..............1
+2211112111111122
+11.....11111..11
+11............11
+11............11
+11............11
+1111111111111111
+1111111111111111
+
+Room #$11
+0 overdrawn macros
+111...........11
+111...........11
+111...........11
+111...........11
+111...........11
+111...........11
+111...........11
+111...........11
+111...........11
+111...........11
+111...........11
+111...........11
+111...........11
+111...........11
+111...........11
+
+Room #$12
+0 overdrawn macros
+1111111111111111
+1111111111111111
+111.......1.....
+11..............
+11..............
+1...............
+1...............
+1...............
+11111...........
+11..............
+11..............
+11..............
+11..............
+1111111111111111
+1111111111111111
+
+Room #$13
+4 overdrawn macros
+1111111211111121
+1111111211111121
+1.............11
+..............11
+..............11
+...............1
+...............1
+...............1
+..........111111
+..............11
+..............11
+..............11
+..............11
+1111111111111111
+1111111111111111
+
+Room #$14
+0 overdrawn macros
+1111111111111111
+1111111111111111
+................
+................
+................
+................
+................
+................
+................
+................
+................
+................
+................
+1111111111111111
+1111111111111111
+
+Room #$15
+12 overdrawn macros
+1111111111111111
+1111111111111111
+................
+................
+................
+................
+................
+................
+................
+1111..1111......
+1111..1111111111
+1111..1111112222
+1111111111112222
+1111111111112222
+1111111111111111
+
+Room #$16
+0 overdrawn macros
+1111111111111111
+1111111111111111
+................
+................
+................
+................
+................
+................
+................
+................
+................
+1111..1111..1111
+1111..1111..1111
+1111111111111111
+1111111111111111
+
+Room #$17
+3 overdrawn macros
+1111111111111111
+1111111111111111
+1...............
+................
+..........1111..
+..........1111..
+..........11111.
+..........11111.
+...........11111
+...........11111
+......1.....1111
+...1..1..1..1111
+...21.1.12......
+1111112111111111
+1111111111111111
+
+Room #$18
+11 overdrawn macros
+1211111111111111
+1211111111111111
+12.......1....11
+11............11
+11............11
+1..............1
+1...11222211...1
+1..............1
+1111111111111111
+1111........1111
+1111..1111..1111
+2211........1122
+11............11
+11............11
+11....1111....11
+
+Room #$19
+9 overdrawn macros
+1111222211111111
+1121222211111111
+....111111111...
+....11111111....
+....11111111....
+....11111111....
+....11111111....
+....11111111....
+....11111111....
+....11111111....
+....11111111....
+....11111111....
+................
+1111111111111111
+1111111111111111
+
+Room #$1A
+1 overdrawn macro
+1111111111111111
+1111111111111111
+1...............
+1...............
+1...............
+1...............
+1...............
+1...............
+111111111.......
+1....1..........
+1....1..........
+1....1..........
+1....1..........
+1111121111111111
+1111111111111111
+
+Room #$1B
+21 overdrawn macros
+1111211111211111
+....1.....1.....
+....1.....1.....
+....1.....1.....
+....1.....1.....
+................
+................
+................
+................
+.......1........
+11....111.....11
+11..1.111.1...11
+111.1.111.1...11
+1121213332211111
+1121213232211111
+
+Room #$1C
+23 overdrawn macros
+1111111111111111
+1........1111111
+1........1222111
+1......112222111
+1......111111111
+1......111111111
+1......111111333
+1......11.111333
+1111111211111222
+.......11....111
+.......11.......
+.......11.......
+.......11.......
+.......11.......
+.......11.......
+
+Room #$1D
+16 overdrawn macros
+1111111111111111
+1111111111111111
+1111111111111111
+1111111111111111
+....11111111....
+....11111111....
+....11111111....
+....11111111....
+....11111111....
+....11111111....
+....11111111....
+1111222222221111
+1111222222221111
+1111111111111111
+1111111111111111
+
+Room #$1E
+72 overdrawn macros
+1122221211111111
+2244442422222222
+2233332422222222
+2222222422222222
+1111111211111111
+1..............1
+1..............1
+1...11..11.....1
+1111111111111111
+1111111111111111
+1111111111111111
+1111111111111111
+1111........1111
+1111111111111111
+1111111111111111
+
+Room #$1F
+8 overdrawn macros
+1111111111111111
+2222111111111111
+1111............
+1111............
+1111............
+1...............
+1...............
+1...............
+1111............
+1111............
+1111..11........
+22221111........
+11111111..11....
+1111111111111111
+1111111111111111
+
+Room #$20
+4 overdrawn macros
+1111111111111111
+1111111111112222
+1111........1111
+1111........1111
+1111........1111
+1111...........1
+...............1
+...............1
+............1111
+............1111
+............1111
+..........111111
+....11..11111111
+11111111........
+11111111........
+
+Room #$21
+36 overdrawn macros
+1111111111111111
+1111111111111111
+1111111111111111
+2222222222222222
+1111111111111111
+1111111111111111
+1111111111111111
+................
+................
+................
+.......11.......
+1111..1111..1111
+1111111111..1111
+1111112222222222
+1111112222222222
+
+Room #$22
+36 overdrawn macros
+1111111111111111
+1111111111111111
+1111111111111111
+2222222311111111
+1111111211111111
+1111111211111111
+1111111211111111
+........22222222
+........22222222
+........22222222
+...11...11111111
+1111111111111111
+1111111111111111
+1111111111111111
+1111111111111111
+
+Room #$23
+17 overdrawn macros
+1111111111111111
+1111111111111111
+................
+................
+................
+................
+...1............
+...1............
+...1.......1....
+...1.......1....
+...1.......1....
+...1.......1....
+11....11...1....
+1111111112232233
+1111111112222222
+
+Room #$24
+88 overdrawn macros
+1111111111111111
+1111111111111111
+1111111111111111
+1111111111111111
+1111111111111111
+1112222111122221
+2222222222222222
+2222222222222222
+3333333333333333
+1111111111111111
+2222222222222222
+1111111111111111
+1111111111111111
+1111111111111111
+1111111111111111
+
+Room #$25
+87 overdrawn macros
+1111122211222111
+1111122211222111
+...1111...111111
+...1111...111111
+...1111...111111
+..12221..1222111
+..1111....222222
+..1111...1222222
+..1111...2333333
+1...1...12222222
+1...1...23333333
+2111211122222222
+2111211122222222
+2111211111111111
+1111111111111111
+
+Room #$26
+18 overdrawn macros
+1111111111111111
+1111111111111111
+11111111........
+11111111........
+11111111........
+1111112211......
+222222221.......
+11111111........
+22222222...1111.
+11111111...1111.
+...........1111.
+...........1111.
+................
+1111111111111111
+1111111111111111
+
+Room #$27
+3 overdrawn macros
+1111111112111111
+1111111112111111
+111......1......
+11..............
+11..............
+1...............
+1...............
+1...............
+111111..........
+111111..........
+111111..........
+11111111........
+111111111.......
+1111111121111111
+1111111111111111
+
+Room #$28
+3 overdrawn macros
+1111111111111112
+1111111111111112
+...............1
+...............1
+...............1
+...............1
+...............1
+...............1
+.......111111111
+..........1....1
+..........1....1
+..........1....1
+...11.....1....1
+1111111111211111
+1111111111111111
+
+Room #$29
+0 overdrawn macros
+1111111111111111
+1111111111111111
+................
+................
+................
+................
+................
+................
+................
+................
+................
+................
+..11...1111.....
+1111111111111111
+1111111111111111
+
+Room #$2A
+34 overdrawn macros
+1121111111222112
+21212.....111112
+21212.......1..2
+212121.........2
+1111311........1
+1..1111........1
+1...122232221..1
+1..............1
+11111........111
+1...........1112
+1..............1
+1..............1
+2..............1
+1111111221111112
+1111111221111111
+
+Room #$2B
+34 overdrawn macros
+1121111111222112
+21212.....111112
+21212.......1..2
+212121.........2
+1111311........1
+1..1111........1
+1...122232221..1
+1..............1
+11111........111
+1...........1112
+1..............1
+1..............1
+2..............1
+1111111221111112
+1111111221111111
+
+Room #$2C
+5 overdrawn macros
+1111111111111111
+1111111111111112
+1..............1
+1..............1
+2..............1
+2..............2
+2..............1
+1..............1
+1111111111111111
+1111111111111111
+1......11......1
+1......11......1
+1......11......1
+1......11......1
+1......11......1
+
+Room #$2D
+0 overdrawn macros
+11............11
+11............11
+11............11
+11............11
+11............11
+1.............11
+1.............11
+1.............11
+11............11
+11............11
+11............11
+11............11
+11............11
+11............11
+11............11
+
+Room #$2E
+0 overdrawn macros
+................
+................
+................
+................
+................
+................
+................
+................
+................
+................
+................
+111111111111....
+1111111111111111
+1111111111111111
+1111111111111111
+
+Room #$2F
+4 overdrawn macros
+1111111111111111
+1111111111111111
+1111111111111111
+1111111122221111
+1111111111111111
+1111111111111111
+1111111111111111
+11111111....1111
+................
+................
+................
+................
+................
+................
+................
+

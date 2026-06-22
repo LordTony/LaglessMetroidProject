@@ -104,7 +104,7 @@ L8096:  STY IntroStarOffset     ;Reset index into IntroStarPntr table.
 L8098:  STY FadeDataIndex       ;Reset index into fade out palette data.
 
 L809A:  STY GenPtr00LB          ;Set $0000 to point to address $6000.
-        jsr CreateRoomEraseFunction
+        jsr GenerateRamHelperFunctions
 L809C:  LDX #>RoomRAMA          ;
 
 RAM6000LoadLoop:
@@ -2699,31 +2699,39 @@ AddYToPtr02:
 
 ;----------------------------------------------------------------------------------------------------
 
-
-;Brinstar room tile patterns.
+;More Tourian room tile patterns.
 ; Moved from Bank06
-GFXBrinstar1:
-    .byte $3E, $7F, $FF, $70, $07, $FF, $FC, $1E, $00, $06, $1F, $00, $00, $07, $D0, $1E
-    .byte $18, $FE, $C1, $0F, $E0, $82, $1F, $80, $00, $1E, $C1, $0F, $E0, $82, $1F, $80
-    .byte $C1, $FF, $3F, $98, $C3, $FF, $7E, $1F, $00, $C1, $20, $18, $03, $8F, $7E, $1F
-    .byte $E3, $FF, $C6, $0E, $30, $87, $03, $FC, $63, $FF, $06, $0E, $30, $87, $03, $FC
-    .byte $7F, $7F, $7F, $7F, $7F, $7F, $7F, $7F, $73, $73, $73, $73, $73, $73, $73, $73
-    .byte $58, $58, $58, $58, $58, $58, $58, $58, $58, $58, $58, $58, $58, $58, $58, $58
-    .byte $00, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $00, $FF, $FF, $FF, $00, $00, $FF, $FF
-    .byte $FF, $00, $FF, $00, $00, $FF, $00, $00, $FF, $00, $FF, $00, $00, $FF, $00, $00
-    .byte $0C, $32, $7F, $5F, $E1, $BF, $F8, $8E, $00, $00, $06, $1C, $20, $07, $38, $00
-    .byte $00, $0C, $0E, $9E, $0D, $9E, $F7, $59, $00, $00, $06, $0C, $00, $18, $04, $40
-    .byte $B9, $1E, $C6, $F4, $3C, $F0, $40, $80, $39, $1E, $C6, $34, $3C, $F0, $40, $80
-    .byte $7F, $FF, $79, $43, $5E, $1F, $0B, $06, $20, $33, $40, $40, $00, $01, $00, $00
-    .byte $86, $11, $01, $81, $41, $43, $5E, $80, $9E, $2F, $3F, $9F, $DF, $DF, $DE, $80
-    .byte $08, $04, $24, $22, $02, $04, $4C, $38, $38, $7C, $5C, $DE, $FE, $7C, $7C, $38
-    .byte $3C, $7E, $47, $DA, $49, $E2, $5C, $D5, $3C, $46, $03, $9A, $41, $E2, $5C, $C5
-    .byte $3C, $7E, $E2, $5B, $92, $47, $3A, $A3, $3C, $62, $C2, $1B, $82, $47, $3A, $A3
-    .byte $CA, $8A, $A0, $20, $AA, $BA, $55, $0F, $8A, $00, $20, $20, $20, $3A, $15, $0F
-    .byte $53, $51, $05, $04, $55, $5D, $AA, $F0, $51, $00, $04, $04, $04, $5C, $A8, $F0
-    .byte $06, $01, $10, $10, $00, $00, $00, $01, $0E, $3F, $2F, $6F, $7F, $7F, $7F, $3F
-    .byte $00, $8C, $92, $42, $42, $C6, $DC, $80, $00, $BC, $8E, $DE, $DE, $DE, $DC, $80
-    .byte $07, $12, $48, $48, $09, $18, $30, $00, $07, $72, $B8, $B9, $FA, $FB, $73, $01
+
+GFXTourian3:
+    .byte $FF, $FF, $C0, $C0, $CF, $CB, $CC, $CC, $00, $00, $1F, $3F, $3F, $38, $3B, $3B
+    .byte $FC, $FC, $0C, $0C, $CC, $4C, $CC, $CC, $00, $04, $EC, $FC, $FC, $3C, $BC, $BC
+    .byte $CB, $CF, $C0, $C0, $FF, $FF, $00, $00, $3B, $30, $3F, $1F, $7F, $FF, $00, $00
+    .byte $4C, $CC, $0C, $0C, $FC, $FC, $00, $00, $3C, $3C, $FC, $EC, $FC, $FC, $00, $00
+    .byte $FE, $02, $02, $02, $FE, $00, $00, $7F, $00, $FE, $0E, $FE, $FE, $00, $00, $00
+    .byte $7F, $40, $40, $40, $7F, $00, $00, $FE, $00, $3F, $30, $3F, $7F, $00, $00, $00
+    .byte $40, $40, $40, $7F, $00, $00, $00, $FF, $3F, $30, $3F, $7F, $00, $00, $FF, $FF
+    .byte $02, $02, $02, $FE, $00, $00, $00, $FF, $FE, $0E, $FE, $FE, $00, $00, $FF, $FF
+    .byte $FF, $FF, $C0, $D0, $C0, $C0, $C0, $C0, $00, $00, $3F, $27, $3F, $3F, $3F, $3F
+    .byte $FC, $FC, $0C, $4C, $0C, $0C, $0C, $0C, $00, $04, $FC, $9C, $FC, $FC, $FC, $FC
+    .byte $C0, $C0, $D0, $C0, $FF, $FF, $00, $00, $3F, $3F, $27, $3F, $3F, $7F, $00, $00
+    .byte $0C, $0C, $4C, $0C, $FC, $FC, $00, $00, $FC, $FC, $9C, $FC, $FC, $FC, $00, $00
+
+;----------------------------------------------------------------------------------------------------
+; Moved from Bank06
+;Even more Tourian room tile patterns.
+GFXTourian4:
+    .byte $FF, $FF, $C0, $C0, $CF, $CB, $CC, $CC, $00, $00, $1F, $3F, $3F, $38, $3B, $3B
+    .byte $FC, $FC, $0C, $0C, $CC, $4C, $CC, $CC, $00, $04, $EC, $FC, $FC, $3C, $BC, $BC
+    .byte $CB, $CF, $C0, $C0, $FF, $FF, $00, $00, $3B, $30, $3F, $1F, $7F, $FF, $00, $00
+    .byte $4C, $CC, $0C, $0C, $FC, $FC, $00, $00, $3C, $3C, $FC, $EC, $FC, $FC, $00, $00
+    .byte $FE, $02, $02, $02, $FE, $00, $00, $7F, $00, $FE, $0E, $FE, $FE, $00, $00, $00
+    .byte $7F, $40, $40, $40, $7F, $00, $00, $FE, $00, $3F, $30, $3F, $7F, $00, $00, $00
+    .byte $40, $40, $40, $7F, $00, $00, $00, $FF, $3F, $30, $3F, $7F, $00, $00, $FF, $FF
+    .byte $02, $02, $02, $FE, $00, $00, $00, $FF, $FE, $0E, $FE, $FE, $00, $00, $FF, $FF
+    .byte $73, $FD, $3B, $A0, $C0, $E0, $60, $80, $00, $00, $00, $1F, $10, $17, $14, $14
+    .byte $E8, $9C, $7C, $1C, $44, $58, $5C, $5C, $00, $04, $0C, $FC, $24, $B8, $BC, $BC
+    .byte $E0, $E7, $A0, $2F, $73, $7C, $00, $00, $17, $10, $1F, $0F, $33, $7C, $00, $00
+    .byte $58, $D4, $14, $DC, $EC, $D8, $00, $00, $B8, $34, $F4, $DC, $EC, $D8, $00, $00
 
 ;The following table points to the palette data used in this bank.
 
@@ -4362,25 +4370,25 @@ LA53D:  .byte $00               ;End PPU block write.
 
 WorldMap:
 LA53E:  .byte ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___
-LA55E:  .byte ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, $2E, ___, $2E, ___, ___, ___, ___, ___, ___, $2E, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___
-LA57E:  .byte ___, ___, ___, $2C, $2B, $27, $15, $15, $16, $14, $13, $04, ___, $06, $08, $0A, $1A, $29, $29, $28, $2D, ___, ___, ___, ___, ___, ___, ___, ___, ___, $2E, ___
+LA55E:  .byte ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, $08, ___, $08, ___, ___, ___, ___, ___, ___, $08, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___
+LA57E:  .byte ___, ___, ___, $2C, $2B, $27, $15, $15, $16, $14, $13, $04, ___, $06, $08, $0A, $1A, $29, $29, $28, $2D, ___, ___, ___, ___, ___, ___, ___, ___, ___, $08, ___
 LA59E:  .byte ___, $0E, ___, $01, ___, ___, ___, ___, ___, ___, ___, $06, ___, $03, $1F, $23, $25, $24, $26, $20, $1E, $1F, $21, $21, $07, $22, $1D, $1B, $21, $20, $04, ___
 LA5BE:  .byte ___, $10, ___, $0E, ___, ___, ___, ___, ___, ___, ___, $06, ___, $06, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, $02, ___
 LA5DE:  .byte ___, $10, ___, $0B, ___, ___, $08, $0A, $1A, $29, $28, $04, ___, $06, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, $08, $0A, $1A, $29, $29, $28, $04, ___
-LA5FE:  .byte ___, $10, ___, $0B, ___, ___, ___, ___, ___, ___, ___, $06, ___, $06, ___, ___, ___, ___, $2E, ___, ___, ___, $2E, ___, ___, ___, ___, ___, ___, ___, $06, ___
+LA5FE:  .byte ___, $10, ___, $0B, ___, ___, ___, ___, ___, ___, ___, $06, ___, $06, ___, ___, ___, ___, $08, ___, ___, ___, $08, ___, ___, ___, ___, ___, ___, ___, $06, ___
 LA61E:  .byte ___, $10, ___, $0F, $11, $13, $14, $14, $13, $12, $0D, $03, $00, $05, $0C, $0E, $0E, $0D, $10, $0C, $0F, $0D, $10, $0C, $0E, $1B, $0F, $0E, $0F, $0D, $04, ___
-LA63E:  .byte ___, $10, ___, ___, ___, ___, ___, ___, ___, ___, $0C, $06, ___, $06, ___, ___, ___, ___, $11, ___, ___, ___, $06, ___, ___, ___, ___, ___, ___, ___, $2F, ___
+LA63E:  .byte ___, $10, ___, ___, ___, ___, ___, ___, ___, ___, $0C, $06, ___, $06, ___, ___, ___, ___, $11, ___, ___, ___, $06, ___, ___, ___, ___, ___, ___, ___, $08, ___
 LA65E:  .byte ___, $10, ___, ___, ___, ___, ___, ___, ___, ___, $0C, $06, ___, $06, ___, ___, ___, ___, $11, $0A, $1A, $28, $04, ___, $06, ___, ___, ___, ___, ___, $06, ___
-LA67E:  .byte ___, $10, ___, ___, ___, ___, ___, ___, ___, ___, $0C, $06, ___, $06, ___, ___, ___, ___, $2F, ___, ___, ___, $2F, ___, $08, $1B, $06, $19, $19, $2A, $0B, ___
+LA67E:  .byte ___, $10, ___, ___, ___, ___, ___, ___, ___, ___, $0C, $06, ___, $06, ___, ___, ___, ___, $08, ___, ___, ___, $08, ___, $08, $1B, $06, $19, $19, $2A, $0B, ___
 LA69E:  .byte ___, $0F, $04, $03, $02, $05, $06, $07, $08, $09, $0A, $06, ___, $03, $12, $14, $15, $14, $07, $16, $15, $13, $0B, ___, $0C, $07, $19, $19, $19, $2A, $0E, ___
-LA6BE:  .byte ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, $06, ___, $2F, ___, ___, ___, ___, ___, ___, ___, ___, $01, ___, $0A, $1B, $04, $0F, $06, $2A, $0E, ___
+LA6BE:  .byte ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, $06, ___, $08, ___, ___, ___, ___, ___, ___, ___, ___, $01, ___, $0A, $1B, $04, $0F, $06, $2A, $0E, ___
 LA6DE:  .byte ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, $06, ___, $06, ___, ___, ___, ___, ___, ___, ___, ___, $02, ___, $06, ___, ___, ___, ___, ___, $09, ___
 LA6FE:  .byte ___, $08, $17, $09, $14, $13, $18, $12, $14, $19, $13, $04, ___, $08, $1D, $1F, $06, $1F, $19, $1E, $1E, $1C, $03, $28, $29, $29, $29, $2B, $29, $2A, $0E, ___
-LA71E:  .byte ___, ___, ___, ___, ___, ___, $06, ___, ___, ___, ___, $2F, ___, $08, $1D, $1F, $1E, $19, $07, $19, $19, $2C, $06, $06, $2B, $2B, $1A, $1A, $1A, $2A, $0B, ___
+LA71E:  .byte ___, ___, ___, ___, ___, ___, $06, ___, ___, ___, ___, $08, ___, $08, $1D, $1F, $1E, $19, $07, $19, $19, $2C, $06, $06, $2B, $2B, $1A, $1A, $1A, $2A, $0B, ___
 LA73E:  .byte ___, ___, ___, ___, ___, ___, $06, ___, $0B, ___, ___, $0B, ___, $06, $07, $04, $0F, $10, $0B, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, $09, ___
 LA75E:  .byte ___, ___, ___, ___, ___, ___, $06, ___, $07, $17, $18, $0C, ___, $08, $21, $25, $25, $22, $03, $21, $25, $20, $00, $27, $2C, $2C, $06, $04, $0F, $10, $0E, ___
 LA77E:  .byte ___, ___, ___, ___, ___, ___, $03, $1C, $07, $17, $18, $0C, ___, $0A, $21, $23, $25, $22, $03, $21, $24, $24, $24, $23, $23, $06, $24, $25, $22, $11, $2D, ___
-LA79E:  .byte ___, ___, ___, ___, ___, ___, $2F, $01, $07, $17, $18, $0C, ___, $09, ___, ___, ___, $06, $06, ___, ___, ___, ___, ___, ___, $07, $26, $25, $22, $0B, $2D, ___
+LA79E:  .byte ___, ___, ___, ___, ___, ___, $08, $01, $07, $17, $18, $0C, ___, $09, ___, ___, ___, $06, $06, ___, ___, ___, ___, ___, ___, $07, $26, $25, $22, $0B, $2D, ___
 LA7BE:  .byte ___, $0B, ___, ___, ___, ___, ___, $02, $0B, ___, ___, $08, ___, $0A, $12, $14, $13, $03, $12, $15, $13, $0D, $12, $14, $06, $14, $18, $15, $19, $07, $09, ___
 LA7DE:  .byte ___, $09, $17, $1C, $10, $19, $18, $03, $13, $10, $18, $0C, ___, $06, ___, ___, ___, $09, $04, $0F, $10, $0B, ___, ___, $08, $12, $16, $16, $16, $13, $0E, ___
 LA7FE:  .byte ___, $0A, $17, $1C, $1C, $1C, $18, $03, $13, $19, $12, $0B, ___, $00, ___, ___, $0B, $08, $12, $19, $19, $07, ___, ___, $08, $05, ___, ___, ___, ___, $06, ___
@@ -5743,64 +5751,126 @@ GFXBrinstarEnemies:
     .include "Sound_Engine_Common_2.asm"
 .scend
 
-; 7400 - 7A30
-; will clear shared spaces the needs to be cleared
-; for any kind of room
-
 .scope
 
-CreateRoomEraseFunction:
-    lda #$A9                    ; Start the program with "LDA #$FF" ($A9 $FF)
-    sta ClearRoom_Box_6000
-    lda #$FF
-    sta ClearRoom_Box_6000 + $01
+.alias _destination_Hi          $D5
+.alias _destination_Lo          $D4
+.alias _destination_Ptr         $D4
+.alias _row_addr_Hi             $90
+.alias _row_addr_Lo             $89
+.alias _currentAddr_Hi          $DF
+.alias _currentAddr_Lo          $DE
+.alias _row_count               $02
+.alias _col_count               $03             
 
-    lda #>ClearRoom_Box_6000
-    sta $D5
-    lda #<ClearRoom_Box_6000 + $02
-    sta $D4                     ; destination pointer low byte, still starts at #$02
-    ldx #$80                    ; low byte of starting address ($6080)
-    lda #$60
-    sta $D6                     ; high byte of starting address
-    _loop:
-        ; Skip if lower 5 bits of X are $00-$03 or $1C-$1F
-        txa
-        and #$1F
-        cmp #$04
-        bcc _skip
-        cmp #$1C
-        bcs _skip
 
-        ldy #$00
-        lda #$8D                ; Absolute STA opcode
-        sta ($D4), y
-        iny
-        txa
-        sta ($D4), y
-        iny
-        lda $D6
-        sta ($D4), y
-        inc $D4
-        inc $D4
-        inc $D4
-        lda $D4
-        cmp #$03
-        bcs _skip
-        inc $D5                 ; $D4 wrapped, bump destination page
+;0 = ClearTopLeft_6000              $7400
+;1 = ClearTopRight_6000             $75B1
+;2 = ClearBottomLeft_6000           $7762
+;3 = ClearBottomRight_6000          $78CB 
+;4 = ClearTopLeftCol_6000           $7A34
+;5 = ClearBottomLeftCol_6000        $7AC5
+;6 = ClearTopRightCol_6000          $7B3E
+;7 = ClearBottomRightCol_6000       $7BCF
+;8 = ClearBottomLeftFloor_6000      $7C48
+;9 = ClearTopLeftRow_6000           $7C??
+;10 = ClearBottomRightFloor_6000    $7D22
+;11 = ClearTopRightRow_6000         $7D??
+;12 = ClearTopLeftSecondRow_6000    $7DFB
+;12 = ClearTopRightSecondRow_6000   $7E44
 
-    _skip:
+RamHelperTable_TargetHi:
+    .byte $60, $60, $62, $62, $60, $62, $60, $62, $63, $60, $63, $60, $60, $60
+
+RamHelperTable_TargetLo:
+    .byte $84, $90, $04, $10, $80, $00, $9C, $1C, $44, $04, $50, $10, $44, $50
+
+RamHelperTable_Height_Width:
+    .byte $CC, $CC, $AC, $AC, $C4, $A4, $C4, $A4, $4C, $2C, $4C, $2C, $2C, $2C
+
+GenerateRamHelperFunctions:
+
+    lda #>ClearTopLeftCore_6000
+    sta _destination_Hi
+
+    lda #<ClearTopLeftCore_6000
+    sta _destination_Lo
+
+    ldx #$00
+    _generatorLoop:
+        jsr CreateRectEraseFunction
         inx
-        bne +
-            inc $D6
-        *   lda $D6
-        cmp #$63
-        bcc _loop               ; high byte < $63, keep going
-        txa
-        cmp #$40
-        bcc _loop               ; high byte = $63 but X < $40, keep going
-        ; write rts
-        lda #$60
-        sta $7A32
+        cpx #$0E
+        bne _generatorLoop
+    beq CreateIdentityTable
+
+CreateRectEraseFunction:
+
+    lda RamHelperTable_TargetHi,x 
+    sta _row_addr_Hi
+
+    lda RamHelperTable_TargetLo,x 
+    sta _row_addr_Lo
+
+    lda RamHelperTable_Height_Width,x
+    lsr
+    lsr
+    lsr
+    lsr
+    sta _row_count
+
+_row_loop:
+    lda _row_addr_Lo
+    sta _currentAddr_Lo
+    lda _row_addr_Hi
+    sta _currentAddr_Hi
+
+    lda RamHelperTable_Height_Width, x
+    and #$0F
+    sta _col_count
+_col_loop:
+    ldy #$00
+    lda #$8E                  ; STX absolute opcode
+    sta (_destination_Ptr), y
+    iny
+    lda _currentAddr_Lo
+    sta (_destination_Ptr), y
+    iny
+    lda _currentAddr_Hi
+    sta (_destination_Ptr), y
+
+    ; advance destination pointer by 3 bytes
+    lda _destination_Lo
+    clc
+    adc #$03
+    sta _destination_Lo
+    bcc +
+        inc _destination_Hi
+
+    ; advance currentAddr by 1 column
+    * inc _currentAddr_Lo
+    bne +
+        inc _currentAddr_Hi
+    * dec _col_count
+    bne _col_loop
+
+    ; advance to next row: row_addr += $20
+    lda _row_addr_Lo
+    clc
+    adc #$20
+    sta _row_addr_Lo
+    bcc +
+        inc _row_addr_Hi
+    * dec _row_count
+    bne _row_loop
+
+    ldy #$00
+    lda #$60        ; RTS
+    sta (_destination_Ptr), y
+    inc _destination_Lo
+    bne +
+        inc _destination_Hi
+    * rts
 .scend 
 
 .scope
@@ -5816,7 +5886,7 @@ CreateIdentityTable:
 
     _upper:
         txa
-        sta $7F00,x
+        sta IdentityTable + $100,x
         dex
         bpl _upper
 
@@ -5824,13 +5894,12 @@ CreateIdentityTable:
 
     _lower:
         txa
-        sta $7D00,x
+        sta IdentityTable - $100,x
         inx
         bne _lower
     rts
-.scend 
+.scend
 
-.byte $BB, $BB, $BB
 ;--------------------------------------------------------------------------------------------------
 
 RESET_Bank00:
