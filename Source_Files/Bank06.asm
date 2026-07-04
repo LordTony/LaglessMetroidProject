@@ -847,9 +847,21 @@ Bank06_LB870:  .byte $00, $00, $44, $28, $10, $28, $44, $00, $00, $00, $44, $28,
 Bank06_LB880:  .byte $00, $24, $24, $1C, $04, $24, $18, $00, $00, $24, $24, $1C, $04, $24, $18, $00
 Bank06_LB890:  .byte $00, $00, $7C, $08, $10, $20, $7C, $00, $00, $00, $7C, $08, $10, $20, $7C, $00
 Bank06_LB8A0:  .byte $00, $1C, $22, $02, $08, $00, $08, $00, $00, $1C, $22, $02, $08, $00, $08, $00
-Bank06_LB8B0:  .byte $00, $00, $00, $7C, $00, $00, $00, $00, $00, $00, $00, $7C, $00, $00, $00, $00
+Bank06_LB8B0:  .byte $00, $00, $00, $7C, $00, $00, $00, $00, $00, $00, $00, $7C;, $00, $00, $00, $00    ; Last 4 bytes are taken from the table below
 
 ;----------------------------------------------------------------------------------------------------
+
+ATDataTable_Hi_Crumb:
+    .byte $00, $00, $00, $00
+    .byte $55, $55, $55, $55
+    .byte $AA, $AA, $AA, $AA
+    .byte $FF, $FF, $FF, $FF
+
+ATDataTable_Lo_Crumb:
+    .byte $00, $55, $AA, $FF
+    .byte $00, $55, $AA, $FF
+    .byte $00, $55, $AA, $FF
+    .byte $00, $55, $AA, $FF
 
 BankErasureTablePtr_Hi:
     .byte >BrinstarRoomErasureTable
@@ -903,10 +915,6 @@ RidleyRoomErasureTable:
     .byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
     .byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
 
-ATDataTable:
-    .byte %00000000, %01010101, %10101010, %11111111
-
-
 ; The Erasure tables here are used to tell what parts of a room need to be erased
 ; Special Cases:
 ;   $00 erase nothing
@@ -936,7 +944,6 @@ ATDataTable:
 ;  Q2 x RT = 00         Right
 
 DoRoomRamClear:
-
     lda InArea
     and #$0F
     tax
@@ -945,33 +952,10 @@ DoRoomRamClear:
     lda BankErasureTablePtr_Hi, x
     sta CodePtr + 1
 
-    lax RoomPal
-    and #$03
-    tay
-    lda ATDataTable, y
-    sta $03
-
-    txa
-    lsr
-    asr #$06
-    tay
-    lda ATDataTable, y
-    sta $02
-
-    lda Div16Table, x
-    and #$03
-    tay
-    lda ATDataTable, y
-    sta $01
-
-    lda Div16Table, x 
-    lsr
-    lsr 
-    tay
-    lda ATDataTable, y
-    sta $00
-
     ldy $90                     ; Real Room Number
+    lda (CodePtr), y
+    tay
+
     lda ScrollDir
     ldx CartRAMPtrUB
     cpx #$60
@@ -998,7 +982,7 @@ DoRoomRamClear_6000:
 
 .scope
     ClearScreenTop_6000:
-        lda (CodePtr), y
+        tya
         beq _skipAll
         ror
         ; will need to push and pop A
@@ -1048,13 +1032,28 @@ DoRoomRamClear_6000:
         _skipCorners:
         _skipAll:
 
-        jsr AttrWriteTopLeft_6000
-        jmp AttrWriteTopRight_6000
+        ldy RoomPal_Hi_Nib
+
+        ; AttrWriteTopRight_6000
+        lda ATDataTable_Lo_Crumb, y
+        `sta_4_bytes $63D0
+        `sta_4_bytes $63D8
+        `sta_4_bytes $63D4
+        `sta_4_bytes $63DC
+
+        ; AttrWriteTopLeft_6000
+        lda ATDataTable_Hi_Crumb, y
+        `sta_4_bytes $63C0
+        `sta_4_bytes $63C8
+        `sta_4_bytes $63C4
+        `sta_4_bytes $63CC
+        rts
+
 .scend
 
 .scope
     ClearScreenBottom_6000:
-        lda (CodePtr), y
+        tya
         beq _skipAll
         ror
         ; will need to push and pop A
@@ -1083,20 +1082,38 @@ DoRoomRamClear_6000:
         _skipCorners:
         _skipAll:
 
-        jsr AttrWriteBottomLeft_6000
-        jmp AttrWriteBottomRight_6000
+        ldy RoomPal_Lo_Nib
+
+        ; AttrWriteBottomRight_6000
+        lda ATDataTable_Lo_Crumb, y
+        `sta_4_bytes $63F0
+        `sta_4_bytes $63F8
+        `sta_4_bytes $63F4
+        `sta_4_bytes $63FC
+    
+        ; AttrWriteBottomLeft_6000
+        lda ATDataTable_Hi_Crumb, y
+        `sta_4_bytes $63E0
+        `sta_4_bytes $63E8
+        `sta_4_bytes $63E4
+        `sta_4_bytes $63EC
+
+        rts
 .scend
+
+    ClearScreenRight_6000_Trampoline:
+        jmp ClearScreenRight_6000
 
     ClearScreenLeftRight_6000:
         lda Quarter
         lsr
         eor ScrollDir
         and #$01
-        beq ClearScreenRight_6000
+        beq ClearScreenRight_6000_Trampoline
 
 .scope
     ClearScreenLeft_6000:
-        lda (CodePtr), y
+        tya
         beq _skipAll
         ror
         ; will need to push and pop A
@@ -1135,13 +1152,33 @@ DoRoomRamClear_6000:
         _skipCorners:
         _skipAll:
 
-        jsr AttrWriteTopLeft_6000
-        jmp AttrWriteBottomLeft_6000
+        ; AttrWriteTopLeft_6000
+        ; AttrWriteBottomLeft_6000
+
+        ldy RoomPal_Lo_Nib
+        lda ATDataTable_Lo_Crumb, y
+        `sta_4_bytes $63F0
+        `sta_4_bytes $63F8
+
+        lda ATDataTable_Hi_Crumb, y
+        `sta_4_bytes $63E0
+        `sta_4_bytes $63E8
+
+        ldy RoomPal_Hi_Nib
+        lda ATDataTable_Lo_Crumb, y
+        `sta_4_bytes $63D0
+        `sta_4_bytes $63D8
+
+        lda ATDataTable_Hi_Crumb, y
+        `sta_4_bytes $63C0
+        `sta_4_bytes $63C8
+
+        rts
 .scend
 
 .scope
     ClearScreenRight_6000:
-        lda (CodePtr), y
+        tya
         beq _skipAll
         ror
         ; will need to push and pop A
@@ -1180,12 +1217,35 @@ DoRoomRamClear_6000:
         _skipCorners:
         _skipAll:
 
-        jsr AttrWriteTopRight_6000
-        jmp AttrWriteBottomRight_6000
+        ; AttrWriteTopRight_6000
+        ; AttrWriteBottomRight_6000
+
+        ldy RoomPal_Lo_Nib
+        lda ATDataTable_Lo_Crumb, y
+        `sta_4_bytes $63F4
+        `sta_4_bytes $63FC
+
+        lda ATDataTable_Hi_Crumb, y
+        `sta_4_bytes $63E4
+        `sta_4_bytes $63EC
+
+        ldy RoomPal_Hi_Nib
+        lda ATDataTable_Lo_Crumb, y
+        `sta_4_bytes $63D4
+        `sta_4_bytes $63DC
+
+        lda ATDataTable_Hi_Crumb, y
+        `sta_4_bytes $63C4
+        `sta_4_bytes $63CC
+
+        rts
 .scend
 
 ClearScreenLeftRight_6400_Trampoline:
     jmp ClearScreenLeftRight_6400
+
+ClearScreenBottom_6400_Trampoline:
+    jmp ClearScreenBottom_6400
 
 DoRoomRamClear_6400:
     ldx #$FF
@@ -1197,11 +1257,11 @@ DoRoomRamClear_6400:
         lsr
         eor ScrollDir
         and #$01
-        beq ClearScreenBottom_6400
+        beq ClearScreenBottom_6400_Trampoline
 
 .scope
     ClearScreenTop_6400:
-        lda (CodePtr), y
+        tya
         beq _skipAll
         ror
         ; will need to push and pop A
@@ -1234,13 +1294,27 @@ DoRoomRamClear_6400:
         _skipCorners:
         _skipAll:
 
-        jsr AttrWriteTopLeft_6400
-        jmp AttrWriteTopRight_6400
+        ldy RoomPal_Hi_Nib
+
+        ; AttrWriteTopRight_6400
+        lda ATDataTable_Lo_Crumb, y
+        `sta_4_bytes $67D0
+        `sta_4_bytes $67D8
+        `sta_4_bytes $67D4
+        `sta_4_bytes $67DC
+
+        ; AttrWriteTopLeft_6400
+        lda ATDataTable_Hi_Crumb, y
+        `sta_4_bytes $67C0
+        `sta_4_bytes $67C8
+        `sta_4_bytes $67C4
+        `sta_4_bytes $67CC
+        rts
 .scend
 
 .scope
     ClearScreenBottom_6400:
-        lda (CodePtr), y
+        tya
         beq _skipAll
         ror
         ; will need to push and pop A
@@ -1269,20 +1343,39 @@ DoRoomRamClear_6400:
         _skipCorners:
         _skipAll:
 
-        jsr AttrWriteBottomLeft_6400
-        jmp AttrWriteBottomRight_6400
+        ldy RoomPal_Lo_Nib
+
+        ; AttrWriteBottomRight_6400
+        lda ATDataTable_Lo_Crumb, y
+        `sta_4_bytes $67F0
+        `sta_4_bytes $67F8
+        `sta_4_bytes $67F4
+        `sta_4_bytes $67FC
+    
+        ; AttrWriteBottomLeft_6400
+        lda ATDataTable_Hi_Crumb, y
+        `sta_4_bytes $67E0
+        `sta_4_bytes $67E8
+        `sta_4_bytes $67E4
+        `sta_4_bytes $67EC
+
+        rts
+
 .scend
+
+    ClearScreenRight_6400_Trampoline:
+        jmp ClearScreenRight_6400
 
     ClearScreenLeftRight_6400:
         lda Quarter
         lsr
         eor ScrollDir
         and #$01
-        beq ClearScreenRight_6400
+        beq ClearScreenRight_6400_Trampoline
 
 .scope
     ClearScreenLeft_6400:
-        lda (CodePtr), y
+        tya
         beq _skipAll
         ror
         ; will need to push and pop A
@@ -1311,14 +1404,34 @@ DoRoomRamClear_6400:
             jsr ClearBottomLeftCorner_6400
         _skipCorners:
         _skipAll:
+        
+        ; AttrWriteTopLeft_6400
+        ; AttrWriteBottomLeft_6400
 
-        jsr AttrWriteTopLeft_6400
-        jmp AttrWriteBottomLeft_6400
+        ldy RoomPal_Lo_Nib
+        lda ATDataTable_Lo_Crumb, y
+        `sta_4_bytes $67F0
+        `sta_4_bytes $67F8
+
+        lda ATDataTable_Hi_Crumb, y
+        `sta_4_bytes $67E0
+        `sta_4_bytes $67E8
+
+        ldy RoomPal_Hi_Nib
+        lda ATDataTable_Lo_Crumb, y
+        `sta_4_bytes $67D0
+        `sta_4_bytes $67D8
+
+        lda ATDataTable_Hi_Crumb, y
+        `sta_4_bytes $67C0
+        `sta_4_bytes $67C8
+        
+        rts
 .scend
 
 .scope
     ClearScreenRight_6400:
-        lda (CodePtr), y
+        tya
         beq _skipAll
         ror
         ; will need to push and pop A
@@ -1348,8 +1461,28 @@ DoRoomRamClear_6400:
         _skipCorners:
         _skipAll:
 
-        jsr AttrWriteTopRight_6400
-        jmp AttrWriteBottomRight_6400
+        ; AttrWriteTopRight_6400
+        ; AttrWriteBottomRight_6400
+
+        ldy RoomPal_Lo_Nib
+        lda ATDataTable_Lo_Crumb, y
+        `sta_4_bytes $67F4
+        `sta_4_bytes $67FC
+
+        lda ATDataTable_Hi_Crumb, y
+        `sta_4_bytes $67E4
+        `sta_4_bytes $67EC
+
+        ldy RoomPal_Hi_Nib
+        lda ATDataTable_Lo_Crumb, y
+        `sta_4_bytes $67D4
+        `sta_4_bytes $67DC
+
+        lda ATDataTable_Hi_Crumb, y
+        `sta_4_bytes $67C4
+        `sta_4_bytes $67CC
+
+        rts
 .scend
 
 ; Ophis macro to help unroll loops
@@ -1404,34 +1537,6 @@ DoRoomRamClear_6400:
     stx _1
     stx _1 + $01
 .macend
-
-ClearTopLeftCorner_6000:
-    `stx_4_bytes $6000
-    `stx_4_bytes $6020
-    `stx_4_bytes $6040
-    `stx_4_bytes $6060
-    rts
-
-ClearTopRightCorner_6000:
-    `stx_4_bytes $601C
-    `stx_4_bytes $603C
-    `stx_4_bytes $605C
-    `stx_4_bytes $607C
-    rts
-
-ClearBottomLeftCorner_6000:
-    `stx_4_bytes $6340
-    `stx_4_bytes $6360
-    `stx_4_bytes $6380
-    `stx_4_bytes $63A0
-    rts
-
-ClearBottomRightCorner_6000:
-    `stx_4_bytes $635C
-    `stx_4_bytes $637C
-    `stx_4_bytes $639C
-    `stx_4_bytes $63BC
-    rts
 
 ClearTopLeftCorner_6400:
     `stx_4_bytes $6400
@@ -1607,12 +1712,7 @@ ClearBottomRightCore_6400:
     `stx_12_bytes $6730
     rts
 
-ClearBottomLeftFloor_6400:
-    `stx_12_bytes $6744
-    `stx_12_bytes $6764
-    `stx_12_bytes $6784
-    `stx_12_bytes $67A4
-    rts
+; ClearBottomLeftFloor_6400 <== Moved to $7F52 created in Bank00 
 
 ClearBottomRightFloor_6400:
     `stx_12_bytes $6750
@@ -1621,82 +1721,7 @@ ClearBottomRightFloor_6400:
     `stx_12_bytes $67B0
     rts
 
-; === page 6000 attr writes ===
-AttrWriteTopLeft_6000:
-    lda $00
-    `sta_4_bytes $63C0
-    `sta_4_bytes $63C8
-    lda $01
-    `sta_4_bytes $63D0
-    `sta_4_bytes $63D8
-    rts
-
-AttrWriteTopRight_6000:
-    lda $00
-    `sta_4_bytes $63C4
-    `sta_4_bytes $63CC
-    lda $01
-    `sta_4_bytes $63D4
-    `sta_4_bytes $63DC
-    rts
-
-AttrWriteBottomLeft_6000:
-    lda $02
-    `sta_4_bytes $63E0
-    `sta_4_bytes $63E8
-    lda $03
-    `sta_4_bytes $63F0
-    `sta_4_bytes $63F8
-    rts
-
-AttrWriteBottomRight_6000:
-    lda $02
-    `sta_4_bytes $63E4
-    `sta_4_bytes $63EC
-    lda $03
-    `sta_4_bytes $63F4
-    `sta_4_bytes $63FC
-    rts
-
-; == page 6400 attr writes ===
-
-AttrWriteTopLeft_6400:
-    lda $00
-    `sta_4_bytes $67C0
-    `sta_4_bytes $67C8
-    lda $01
-    `sta_4_bytes $67D0
-    `sta_4_bytes $67D8
-    rts
-
-AttrWriteTopRight_6400:
-    lda $00
-    `sta_4_bytes $67C4
-    `sta_4_bytes $67CC
-    lda $01
-    `sta_4_bytes $67D4
-    `sta_4_bytes $67DC
-    rts
-
-AttrWriteBottomLeft_6400:
-    lda $02
-    `sta_4_bytes $67E0
-    `sta_4_bytes $67E8
-    lda $03
-    `sta_4_bytes $67F0
-    `sta_4_bytes $67F8
-    rts
-
-AttrWriteBottomRight_6400:
-    lda $02
-    `sta_4_bytes $67E4
-    `sta_4_bytes $67EC
-    lda $03
-    `sta_4_bytes $67F4
-    `sta_4_bytes $67FC
-    rts
-
-.word $EEEE, $EEEE, $EEEE
+;.word $6666, $6666, $6666
 
 ;----------------------------------------------------------------------------------------------------
 

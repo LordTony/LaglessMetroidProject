@@ -1700,8 +1700,6 @@ Bank01_LA441:
 	.word Bank01_Room_00_Top_Left
 	.word Bank01_Room_00_Top_Right
 	.word FFLabel
-
-Bank01_Room_00_Bottom_Right:
 	.byte $FF
 
 Bank01_Room_00_Top_Left:
@@ -2241,7 +2239,7 @@ Bank01_Room_10_Bottom_Right:
 
 Bank01_Room_10_Top_Left:
 	.byte $00, $17
-	.byte $10, $17
+	.byte $40, $1C
 	.byte $50, $03
 	.byte $FD
 	.byte $02, $B1				; Door
@@ -2249,7 +2247,7 @@ Bank01_Room_10_Top_Left:
 
 Bank01_Room_10_Top_Right:
 	.byte $08, $17
-	.byte $18, $17
+	.byte $48, $1C
 	.byte $5F, $03
 	.byte $FD
 	.byte $02, $A1				; Door
@@ -2320,7 +2318,7 @@ Bank01_Room_12_Left:
 	.byte $D0, $10
 	.byte $FD
 	.byte $02, $B1				; Door
-	;.byte $01, $05, $C7			; Enemy
+	.byte $01, $05, $C7			; Enemy
 	.byte $FF
 
 Bank01_Room_12_Right:
@@ -2328,10 +2326,10 @@ Bank01_Room_12_Right:
 	.byte $02, $11
 	.byte $D8, $10
 	.byte $FD
-	;.byte $11, $05, $CB			; Enemy
-	;.byte $51, $04, $3A			; Enemy
+	.byte $11, $05, $CB			; Enemy
+	.byte $51, $04, $3A			; Enemy
 	.byte $41, $04, $29			; Enemy
-	;.byte $31, $04, $1E			; Enemy
+	.byte $31, $04, $1E			; Enemy
 	.byte $FF
 
 ;Room #$13
@@ -2578,6 +2576,7 @@ Bank01_LA88B:
 
 Bank01_Room_1A_Bottom_Right:
 	.byte $D8, $2D
+	.byte $81, $14
 	.byte $FD
 	.byte $11, $85, $CA			; Enemy
 	.byte $FF
@@ -3594,7 +3593,6 @@ Bank06_L8A90:  .byte $00, $00, $04, $00, $00, $00, $00, $00, $00, $00, $00, $00,
     .byte <Brinstar_Bridge_To_Tourian_Attrs     ;Room #$2B
     .byte <Brinstar_Elivator_To_Tourian_Attrs   ;Room #$2C
     .byte <Brinstar_Left_Door_Attrs     		;Room #$2D
-
 
 ;-----------------------------------[ Enemy animation data tables ]----------------------------------
 

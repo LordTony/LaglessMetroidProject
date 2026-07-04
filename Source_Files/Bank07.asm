@@ -84,7 +84,6 @@ LC06D:  LDA #%00001110          ;Verticle mirroring.
 LC06F:  STA MMCReg0Cntrl        ;
 
 LC071:  LDY #$00                ;Clear bits 3 and 4 of MMC1 register 3.
-LC073:  STY SwitchUprBits       ;
 LC077:  STY ScrollX             ;ScrollX = 0
 LC079:  STY ScrollY             ;ScrollY = 0
 LC07B:  STY PPUScroll           ;Clear hardware scroll x
@@ -455,18 +454,6 @@ LC1CB:  BPL -                   ;
 LC1CD:  LDA GameMode            ;
 LC1CF:  BEQ Exit101             ; branch if mode = Play.
 LC1D1:  JMP DecSpriteYCoord     ;($988A)Find proper y coord of sprites.
-
-;-------------------------------------[Clear RAM $33 thru $DF]---------------------------------------
-
-;The routine below clears RAM associated with rooms and enemies.
-
-ClearRAM_33_DF:
-LC1D6:  LAX AlwaysZero                ;
-LC1D8:* STA $33,x               ;Clear RAM addresses $33 through $DF.
-LC1DA:  INX                     ;
-LC1DB:  CPX #$A0                ;
-LC1DD:  BCC -                   ;Loop until all desired addresses are cleared.
-LC1DF:  RTS                     ;
 
 ;--------------------------------[ Check and prepare palette write ]---------------------------------
 
@@ -851,7 +838,9 @@ SwitchOK:
     DEY                     ;Y now contains the bank to switch to.
     STY CurrentBank         ;
 
-LC4E2:  JSR ROMSwitch            ;($C4E8)Perform bank switch.
+LC4E2:  
+    JSR ROMSwitch            ;($C4E8)Perform bank switch.
+    tya
 
 ;Calls the proper routine according to the bank number in A.
 GoBankInit:
@@ -871,14 +860,6 @@ GoBankTable_LoBytes:
 
 ROMSwitch:
     TYA                     ;
-    STA $00                 ;Bank to switch to is stored at location $00.
-    LDA SwitchUprBits       ;Load upper two bits for Reg 3 (they should always be 0).
-    AND #$18                ;Extract bits 3 and 4 and add them to the current
-    ORA $00                 ;bank to switch to.
-    STA SwitchUprBits       ;Store any new bits set in 3 or 4(there should be none).
-
-;Loads the lower memory page with the bank specified in A.
-
 MMCWriteReg3:
     STA MMC1Reg3            ;Write bit 0 of ROM bank #.
     LSR                     ;
@@ -889,7 +870,6 @@ MMCWriteReg3:
     STA MMC1Reg3            ;Write bit 3 of ROM bank #.
     LSR                     ;
     STA MMC1Reg3            ;Write bit 4 of ROM bank #.
-    LDA $00                 ;Restore A with current bank number before exiting.
 MMCWriteRegExit:
     RTS                   ;
 
@@ -926,11 +906,19 @@ LC55F:  LDA #$00                ;
 LC561:  STA MainRoutine         ;Run InitArea routine next.
 LC563:  STA InArea              ;Start in Brinstar.
 LC565:  STA GamePaused          ;Make sure game is not paused.
-LC567:  JSR ClearRAM_33_DF      ;($C1D4)Clear game engine memory addresses.
-        LDY #$0F                ;Clears Samus stats(Health, full tanks, game timer, etc.).
-*       STA $0100,y             ;A = 0 here. Load $100 thru $10F with #$00.
-        DEY                     ;
-        BPL -                   ;Loop 16 times.
+
+ClearRAM_33_DF:
+    LAX AlwaysZero                ;
+*   STA $33,x               ;Clear RAM addresses $33 through $DF.
+    INX                     ;
+    CPX #$A0                ;
+    BCC -                   ;Loop until all desired addresses are cleared.
+
+    LDY #$0F                ;Clears Samus stats(Health, full tanks, game timer, etc.).
+*   STA $0100,y             ;A = 0 here. Load $100 thru $10F with #$00.
+    DEY                     ;
+    BPL -                   ;Loop 16 times.
+
 InitBank1_RomSwitch:
 LC56D:  tay                     ; A = 0 and Y = 0 here
 LC56F:  JSR ROMSwitch           ;($C4EF)Load Brinstar memory page into lower 16Kb memory.
@@ -1408,7 +1396,17 @@ LCB30:  jsr UpdateProjectiles   ;($D4BF)Display of bullets/missiles/bombs.
 
 LCB45:  jsr LF93B
 LCB48:  jsr UpdateSpinnerDestruction    ; destruction of green spinners
-LCB4B:  jsr SamusEnterDoor      ;($8B13)Check if Samus entered a door.
+
+.scope
+HandleSamusEnterDoor:
+    lda DoorStatus              ;The code determines if Samus has entered a door if the-->
+    bne _skip                   ;door status is 0, but door data information has been-->
+    ldy SamusDoorData           ;written. If both conditions are met, Samus has just-->
+    beq _skip                   ;entered a door.
+        jsr SamusEnterDoor      ;($8B13)Check if Samus entered a door.
+    _skip:
+.scend
+
 LCB4E:  jsr DoorHandler         ; display of doors
 LCB51:  jsr UpdateTiles         ; tile de/regeneration
 LCB54:  jsr CollisionDetection  ; Samus < enemies crash detection
@@ -4754,12 +4752,12 @@ LE0E2:  lsr
         lsr
         lsr
         lsr
-LE0E5:  jsr SPRWriteDigit       ;($E173)Display digit on screen.
-LE0E8:  ldy EndTimerHi          ;
-LE0EB:  iny                 ;Is Samus in escape sequence?
-LE0EC:  bne ++              ;If so, branch.
-LE0EE:  ldy MaxMissiles         ;
-LE0F1:  beq +               ;Don't show missile count if Samus has no missile containers.
+LE0E5:  jsr SPRWriteDigit                   ;($E173)Display digit on screen.
+LE0E8:  ldy EndTimerHi                      ;
+LE0EB:  iny                                 ;Is Samus in escape sequence?
+LE0EC:  bne DisplayEscapeSequenceTimer      ;If so, branch.
+LE0EE:  ldy MaxMissiles                     ;
+LE0F1:  beq EraseMissileSprite              ;Don't show missile count if Samus has no missile containers.
 
 ;Display 3-digit missile count.
 LE0F3:  lda MissileCount        ;
@@ -4770,8 +4768,8 @@ LE0F3:  lda MissileCount        ;
 DisplayHexAsDigits:
 
     ;Hundreds digit
-        ldy #$00
-        sec
+        ; ldy #$00              
+        sec                     ; y = 0 here
     HundredDigitInc:
         iny
         sbc #100              ;Loop and subtract value in $0A from A until carry flag
@@ -4804,6 +4802,7 @@ DisplayHexAsDigits:
 
 LE108:  bne +++             ;Branch always.
 
+EraseMissileSprite:
 ;Samus has no missiles, erase missile sprite.
 LE10A:* lda #$FF            ;"Blank" tile.
 LE10C:  cpx #$F4            ;If at last 3 sprites, branch to skip.
@@ -4814,6 +4813,7 @@ LE115:  bcs ++              ;
 LE117:  sta SpriteRAM+$11,x     ;Erase right half of missile.
 LE11A:  bne ++              ;Branch always.
 
+DisplayEscapeSequenceTimer:
 ;Display 3-digit end sequence timer.
 LE11C:* lda EndTimerHi          ;
 LE11F:     
@@ -4831,11 +4831,11 @@ LE130:
         lsr
         lsr
         lsr
-LE133:  jsr SPRWriteDigit       ;($E173)Display digit on screen.
-LE136:  lda #$58            ;"TI" sprite(left half of "TIME").
+LE133:  jsr SPRWriteDigit     ;($E173)Display digit on screen.
+LE136:  lda #$58              ;"TI" sprite(left half of "TIME").
 LE138:  sta SpriteRAM+1,x     ;
 LE13B:  inc SpriteRAM+2,x     ;Change color of sprite.
-LE13E:  cpx #$FC            ;If at last sprite, branch to skip.
+LE13E:  cpx #$FC              ;If at last sprite, branch to skip.
 LE140:  bcs +               ;
 LE142:  lda #$59            ;"ME" sprite(right half of "TIME").
 LE144:  sta SpriteRAM+5,x     ;
@@ -6323,6 +6323,11 @@ Exit18: rts
 
 ; ==== ALERT TODO BUG WARNING ERROR PROBLEM ISSUE =====
 ; THE COLOR GITCH IS HERE SOMEWHERE.
+
+; TODO: Optimize this
+; 844 Cycles
+; 7.5 Scanlines
+
 WritePPUAttribTbl:
 LE5E2:  ldx #$C0            ;Low byte of First row of attribute table.
         ror
@@ -6381,7 +6386,6 @@ AFTER_PPU_Write:
 
 LE620:  stx PPUStrIndex             ;Store updated PPU string index.
 LE623:  jsr EndPPUString            ;($C376)Append end marker(#$00) and exit writing routines.
-        lda RoomNumber
 
 ;------------------------------------[ write attribute table data ]----------------------------------
 
@@ -6481,10 +6485,14 @@ LEA45:  sta _originalRoomPtr_Lo     ;Base copied from $959A to $3B.
 LEA48:  lda RoomPointerTable_Hi,y   ;High byte of 16-bit room pointer.
 LEA4A:  sta _originalRoomPtr_Hi     ;Base copied from $959B to $3C.
 
-SetRoomPal:
+SetRoomPalNibbles:
 LEA4C:  ldy #$00                    ;
-LEA4E:  lda (_originalRoomPtr),y    ;Y = 0 here. First byte of room data.
-LEA50:  sta RoomPal                 ;store initial palette # to fill attrib table with.
+LEA4E:  lax (_originalRoomPtr),y    ; First byte of room data.
+        lda Div16Table, x
+        sta RoomPal_Hi_Nib
+        txa
+        and #$0F
+        sta RoomPal_Lo_Nib          ;store initial palette # to fill attrib table with.
 
 DrawHalfOrFullRoom:
     jsr DrawSingleRoomQuarter 
@@ -6537,11 +6545,11 @@ and #$01
 bne End_Attr_Loop
 
 InitTables:
-    ldy #GFXBank                ; Switch to Bank06
-    jsr ROMSwitch 
+    lda #GFXBank                ; Switch to Bank06
+    jsr MMCWriteReg3 
     jsr DoRoomRamClear          ; Call this routine which exists only in Bank06
-    ldy CurrentBank             
-    jsr ROMSwitch               ; Switch back to whatever bank we were on
+    lda CurrentBank             
+    jsr MMCWriteReg3            ; Switch back to whatever bank we were on
 
 .scope
 
@@ -7018,7 +7026,7 @@ UpdateDoorData:
     eor EnNameTable,x
     lsr
     bcs +
-    lda $0405,x
+    lda EnAttr_05,x
     and #$02
     bne +
     sta EnStatus,x
@@ -7175,7 +7183,7 @@ LEDB5:  beq Exit11          ;(item ptr = FFFF). Branch to exit.
 
 LEDB7:  lda ($00),y         ;High byte of ptr to next item data.
 LEDB9:  stx $00             ;Write low byte for next item.
-LEDBB:  jmp ScanOneItem         ;Process next item.
+LEDBB:  jmp ScanOneItem     ;Process next item.
 
 LEDBE:
 *   lda #$03            ;Get ready to look at byte containing X pos.
@@ -7619,6 +7627,7 @@ LF09F:
     *   jsr DistFromEn0ToObj1
         jsr GetObject1CoordData
         jsr LF1FA
+        bcs +
         jsr LF2CA
     *   lda IdentityTable+16, y
         tay      ; next projectile slot
@@ -7878,7 +7887,6 @@ LF2BF:
 *   rts
 
 LF2CA:
-    bcs +++
 ; JUMANJI
 ; At this point, the bullet has made contact with the enemy
     lda ObjAction,y
@@ -8031,7 +8039,8 @@ LF3BE:
     asl
     asl
     asl
-    ;and #$C0
+    ; TODO: see if "and #$C0" can be removed
+    and #$C0
     sta $6B03,x
     lda EnDelay,x
     beq LF40D
@@ -9125,6 +9134,7 @@ Bank07_LFBCA:
     sta EnResetAnimIndex,x
     jmp LF690
 
+; TODO: Optimize 
 UpdateSpinnerDestruction:
 .scope
     lda #$40
@@ -10083,10 +10093,6 @@ Div16Table:
     .byte $0D, $0D, $0D, $0D, $0D, $0D, $0D, $0D, $0D, $0D, $0D, $0D, $0D, $0D, $0D, $0D
     .byte $0E, $0E, $0E, $0E, $0E, $0E, $0E, $0E, $0E, $0E, $0E, $0E, $0E, $0E, $0E, $0E
     .byte $0F, $0F, $0F, $0F, $0F, $0F, $0F, $0F, $0F, $0F, $0F, $0F, $0F, $0F, $0F, $0F
-
-; Dangerous table should be index at -$60
-Is_63_or_67_Table:
-    .byte $00, $00, $00, $01, $00, $00, $00, $01, $00
 
 Common_Struct_00:  
     .byte $08, $01, $01, $01, $01, $01, $01, $01, $01

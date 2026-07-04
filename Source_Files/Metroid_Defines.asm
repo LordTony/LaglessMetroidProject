@@ -63,8 +63,7 @@
 .alias MMCReg0Cntrl     $25     ;Stores bits to be loaded into MMC1 Register 0.
 ;unused                 $26
 ;unused                 $27
-.alias SwitchUprBits    $28     ;Used to store bits 3 and 4 for MMC1 register 3.  Bits
-                                ;3 and 4 should always be 0 under normal conditions.
+;unused                 $28     
 .alias Timer2Delay      $29     ;Count down from 9 to 0. Decremented every frame.
 .alias Timer1           $2A     ;Decremented every frame after set.
 .alias Timer2           $2B     ;Decremented every frame after set.
@@ -154,8 +153,8 @@
 ; used $5C - $64                ;Some routing eor $5C,x oer $5D,x where x == #$06 and counts down
 .alias ObjectCounter    $65     ;Counts such things as object explosion time.
 ; used                  $66
-; unused                $67                    
-.alias RoomPal          $68
+.alias RoomPal_Lo_Nib   $67     ; Isolated to Room Drawing Routines
+.alias RoomPal_Hi_Nib   $68     ; Isolated to Room Drawing Routines
 .alias TempX            $69
 .alias TempY            $6A
 .alias ObjectCntrl      $6B     ;Controls object properties such as mirroring and color
@@ -930,6 +929,11 @@
 .alias ClearTopRightRow_6000        $7DB3
 .alias ClearTopLeftSecondRow_6000   $7DFC
 .alias ClearTopRightSecondRow_6000  $7E45
+.alias ClearTopLeftCorner_6000      $7E8E
+.alias ClearTopRightCorner_6000     $7EBF
+.alias ClearBottomLeftCorner_6000   $7EF0
+.alias ClearBottomRightCorner_6000  $7F21
+.alias ClearBottomLeftFloor_6400    $7F52
 
 ;-----------------------------------------[ MMC Registers ]------------------------------------------
 

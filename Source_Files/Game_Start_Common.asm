@@ -1421,10 +1421,6 @@ _L8B03:  .byte $0C, $04, $10, $FD, $00, $57, $18, $FD, $40, $18, $57, $FD, $C0, 
 
 .advance SamusEnterDoor
 
-_L8B13:  LDA DoorStatus          ;The code determines if Samus has entered a door if the-->
-_L8B15:  BNE ++++                ;door status is 0, but door data information has been-->
-_L8B17:  LDY SamusDoorData       ;written. If both conditions are met, Samus has just-->
-_L8B19:  BEQ ++++                ;entered a door.
 _L8B1B:  STA CrntMslePickups     ;
 _L8B1D:  STA CrntEnrgyPickups    ;Reset current missile and energy power-up counters.
 _L8B1F:  LDA RandomNumber1       ;
@@ -1475,6 +1471,14 @@ _L8B74:  ORA #$80                ;Set MSB of DoorStatus to indicate Samus has ju
 _L8B76:  STA DoorStatus          ;entered a door.
 _L8B78:  RTS                     ;
 ; swaped ObjAction for SamusObjAction on ZP
+nop
+nop
+nop
+nop
+nop
+nop
+nop
+nop
 nop
 nop
 ;----------------------------------------------------------------------------------------------------

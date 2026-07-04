@@ -935,7 +935,9 @@ L8871:  CMP #$08                    ;If bit 3 is set, nibble is a negative numbe
 L8873:  BCC +                       ;and lower three bits are converted to twos
 
 L8875:  AND #$07                    ;compliment for subtraction, else exit.
-L8877:  JSR Bank00_TwosCompliment   ;Prepare for subtraction with twos compliment.
+        EOR #$FF
+        CLC
+        ADC #$01
 L887A:* RTS                         ;
 
 ;----------------------------------------------------------------------------------------------------
@@ -1393,8 +1395,15 @@ L8AF4:  LDA #PPU_PAL_UB         ;This tie starting at address $3F1D.
 L8AF6:  STA PPUDestPtrUB        ;
 L8AF8:  INY                     ;
 
-L8AF9:  JSR AddYToPtr02         ;($C2B3)Find new data base of palette data.
-L8AFC:  JMP PrepPPUPalStr       ;($C37E)Prepare and write new palette data.
+AddYToPtr02:
+        TYA                     ;
+        CLC                     ;Add value stored in Y to lower address
+        ADC $02                 ;byte stored in $02.
+        STA $02                 ;
+        BCC +                   ;Increment $01(upper address byte) if carry
+        INC $03                 ;has occurred.
+
+L8AFC:  * JMP PrepPPUPalStr       ;($C37E)Prepare and write new palette data.
 
 ;----------------------------------------------------------------------------------------------------
 
@@ -2436,7 +2445,7 @@ CursorPosTbl:
 L92C8:  .byte $48, $50, $58, $60, $68, $70, $80, $88, $90, $98, $A0, $A8
 
 InitializeGame:
-L92D4:  JSR ClearRAM_33_DF      ;($C1D4)Clear RAM.
+L92D4:  JSR ClearRAM_33_DF_Bank00      ;($C1D4)Clear RAM.
 L92D7:  JSR ClearSamusStats     ;($C578)Reset Samus stats for a new game.
 L92DA:  JSR LoadPasswordData    ;($8D12)Load data from password.
 L92DD:  LDY #$00                ;
@@ -2677,25 +2686,6 @@ ClearSamusStats:
     DEY                     ;
     BPL -                   ;Loop 16 times.
     RTS                     ;
-
-Bank00_TwosCompliment:
-    EOR #$FF
-    CLC
-    ADC #$01
-    RTS
-
-;----------------------------------------------------------------------------------------------------
-
-;Add Y to pointer at $0002
-
-AddYToPtr02:
-    TYA                     ;
-    CLC                     ;Add value stored in Y to lower address
-    ADC $02                 ;byte stored in $02.
-    STA $02                 ;
-    BCC +                   ;Increment $01(upper address byte) if carry
-    INC $03                 ;has occurred.
-*   RTS                     ;
 
 ;----------------------------------------------------------------------------------------------------
 
@@ -5677,6 +5667,14 @@ GFXBrinstarEnemies:
     .byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $00, $00, $00, $00, $00, $00, $00, $00
     .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
 
+ClearRAM_33_DF_Bank00:
+      LAX AlwaysZero          ;
+    * STA $33,x               ;Clear RAM addresses $33 through $DF.
+      INX                     ;
+      CPX #$A0                ;
+      BCC -                   ;Loop until all desired addresses are cleared.
+      RTS                     ;
+
 ;----------------------------------------------------------------------------------------------------
 
 .advance SoundEngineOrg
@@ -5764,29 +5762,36 @@ GFXBrinstarEnemies:
 .alias _col_count               $03             
 
 
-;0 = ClearTopLeft_6000              $7400
-;1 = ClearTopRight_6000             $75B1
-;2 = ClearBottomLeft_6000           $7762
-;3 = ClearBottomRight_6000          $78CB 
-;4 = ClearTopLeftCol_6000           $7A34
-;5 = ClearBottomLeftCol_6000        $7AC5
-;6 = ClearTopRightCol_6000          $7B3E
-;7 = ClearBottomRightCol_6000       $7BCF
-;8 = ClearBottomLeftFloor_6000      $7C48
-;9 = ClearTopLeftRow_6000           $7C??
-;10 = ClearBottomRightFloor_6000    $7D22
-;11 = ClearTopRightRow_6000         $7D??
-;12 = ClearTopLeftSecondRow_6000    $7DFB
-;12 = ClearTopRightSecondRow_6000   $7E44
+;=== [ Generate These Routines ] ===
+
+; ClearTopLeftCore_6000        $7400
+; ClearTopRightCore_6000       $75B1
+; ClearBottomLeftCore_6000     $7762
+; ClearBottomRightCore_6000    $78CB 
+; ClearTopLeftCol_6000         $7A34
+; ClearBottomLeftCol_6000      $7AC5
+; ClearTopRightCol_6000        $7B3E
+; ClearBottomRightCol_6000     $7BCF
+; ClearBottomLeftFloor_6000    $7C48
+; ClearTopLeftRow_6000         $7CD9
+; ClearBottomRightFloor_6000   $7D22
+; ClearTopRightRow_6000        $7DB3
+; ClearTopLeftSecondRow_6000   $7DFC
+; ClearTopRightSecondRow_6000  $7E45
+; ClearTopLeftCorner_6000      $7E8E
+; ClearTopRightCorner_6000     $7EBF
+; ClearBottomLeftCorner_6000   $7EF0
+; ClearBottomRightCorner_6000  $7F21
+; ClearBottomLeftFloor_6400    $7F52
 
 RamHelperTable_TargetHi:
-    .byte $60, $60, $62, $62, $60, $62, $60, $62, $63, $60, $63, $60, $60, $60
+    .byte $60, $60, $62, $62, $60, $62, $60, $62, $63, $60, $63, $60, $60, $60, $60, $60, $63, $63, $67
 
 RamHelperTable_TargetLo:
-    .byte $84, $90, $04, $10, $80, $00, $9C, $1C, $44, $04, $50, $10, $44, $50
+    .byte $84, $90, $04, $10, $80, $00, $9C, $1C, $44, $04, $50, $10, $44, $50, $00, $1C, $40, $5C, $44
 
 RamHelperTable_Height_Width:
-    .byte $CC, $CC, $AC, $AC, $C4, $A4, $C4, $A4, $4C, $2C, $4C, $2C, $2C, $2C
+    .byte $CC, $CC, $AC, $AC, $C4, $A4, $C4, $A4, $4C, $2C, $4C, $2C, $2C, $2C, $44, $44, $44, $44, $4C
 
 GenerateRamHelperFunctions:
 
@@ -5800,9 +5805,35 @@ GenerateRamHelperFunctions:
     _generatorLoop:
         jsr CreateRectEraseFunction
         inx
-        cpx #$0E
+        cpx #$13
         bne _generatorLoop
-    beq CreateIdentityTable
+
+.scope
+CreateIdentityTable:
+    ldx #$00
+
+    _main:
+        txa
+        sta IdentityTable,x
+        inx
+        bne _main
+        ldx #$0F
+
+    _upper:
+        txa
+        sta IdentityTable + $100,x
+        dex
+        bpl _upper
+
+        ldx #$F0
+
+    _lower:
+        txa
+        sta IdentityTable - $100,x
+        inx
+        bne _lower
+    rts
+.scend
 
 CreateRectEraseFunction:
 
@@ -5812,11 +5843,8 @@ CreateRectEraseFunction:
     lda RamHelperTable_TargetLo,x 
     sta _row_addr_Lo
 
-    lda RamHelperTable_Height_Width,x
-    lsr
-    lsr
-    lsr
-    lsr
+    ldy RamHelperTable_Height_Width,x
+    lda Div16Table, y
     sta _row_count
 
 _row_loop:
@@ -5871,33 +5899,6 @@ _col_loop:
     bne +
         inc _destination_Hi
     * rts
-.scend 
-
-.scope
-CreateIdentityTable:
-    ldx #$00
-
-    _main:
-        txa
-        sta IdentityTable,x
-        inx
-        bne _main
-        ldx #$0F
-
-    _upper:
-        txa
-        sta IdentityTable + $100,x
-        dex
-        bpl _upper
-
-        ldx #$F0
-
-    _lower:
-        txa
-        sta IdentityTable - $100,x
-        inx
-        bne _lower
-    rts
 .scend
 
 ;--------------------------------------------------------------------------------------------------
