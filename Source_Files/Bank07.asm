@@ -4299,7 +4299,7 @@ MoveEnemies:
     ORA $08
     STA $0405,x
     LDA $08
-    BEQ ++
+    BEQ LDE53
     JMP DoDrawSpriteObject
 
 AnimDrawObject:
