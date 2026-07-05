@@ -37,11 +37,17 @@ elevator_ctrl_nibble = '4'
 statue_ctrl_nibble = '6'
 hole_ctrl_nibble = '7'
 
-bank = "Bank01";
+bank = "Bank02";
 
 f = open(f"./Source_Files/{bank}.asm", "r")
 
 lines = f.readlines();
+
+# Hack to get this one struct for Bank 07
+lines.append('Common_Struct_00:')
+lines.append('.byte $08, $01, $01, $01, $01, $01, $01, $01, $01')
+lines.append('.byte $08, $00, $00, $00, $00, $00, $00, $00, $00')
+lines.append('.byte $FF')
 
 struct_pointer_table_start = next((index for index, line in enumerate(lines) if ".advance StructPointerTable_Hi" in line), None)
 struct_pointer_table_end = next((index for index, line in enumerate(lines) if ".advance StructPointerTable_Lo" in line), None)

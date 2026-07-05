@@ -1485,59 +1485,6 @@ DoRoomRamClear_6400:
         rts
 .scend
 
-; Ophis macro to help unroll loops
-; Will call sta on 14 continuous bytes in memory
-.macro stx_14_bytes
-    stx _1
-    stx _1 + $01
-    stx _1 + $02
-    stx _1 + $03
-    stx _1 + $04
-    stx _1 + $05
-    stx _1 + $06
-    stx _1 + $07
-    stx _1 + $08
-    stx _1 + $09
-    stx _1 + $0A
-    stx _1 + $0B
-    stx _1 + $0C
-    stx _1 + $0D
-.macend
-
-.macro stx_12_bytes
-    stx _1
-    stx _1 + $01
-    stx _1 + $02
-    stx _1 + $03
-    stx _1 + $04
-    stx _1 + $05
-    stx _1 + $06
-    stx _1 + $07
-    stx _1 + $08
-    stx _1 + $09
-    stx _1 + $0A
-    stx _1 + $0B
-.macend
-
-.macro stx_4_bytes
-    stx _1
-    stx _1 + $01
-    stx _1 + $02
-    stx _1 + $03
-.macend
-
-.macro sta_4_bytes
-    sta _1
-    sta _1 + $01
-    sta _1 + $02
-    sta _1 + $03
-.macend
-
-.macro stx_2_bytes
-    stx _1
-    stx _1 + $01
-.macend
-
 ClearTopLeftCorner_6400:
     `stx_4_bytes $6400
     `stx_4_bytes $6420
@@ -1721,7 +1668,60 @@ ClearBottomRightFloor_6400:
     `stx_12_bytes $67B0
     rts
 
-;.word $6666, $6666, $6666
+; Ophis macro to help unroll loops
+; Will call sta on 14 continuous bytes in memory
+.macro stx_14_bytes
+    stx _1
+    stx _1 + $01
+    stx _1 + $02
+    stx _1 + $03
+    stx _1 + $04
+    stx _1 + $05
+    stx _1 + $06
+    stx _1 + $07
+    stx _1 + $08
+    stx _1 + $09
+    stx _1 + $0A
+    stx _1 + $0B
+    stx _1 + $0C
+    stx _1 + $0D
+.macend
+
+.macro stx_12_bytes
+    stx _1
+    stx _1 + $01
+    stx _1 + $02
+    stx _1 + $03
+    stx _1 + $04
+    stx _1 + $05
+    stx _1 + $06
+    stx _1 + $07
+    stx _1 + $08
+    stx _1 + $09
+    stx _1 + $0A
+    stx _1 + $0B
+.macend
+
+.macro stx_4_bytes
+    stx _1
+    stx _1 + $01
+    stx _1 + $02
+    stx _1 + $03
+.macend
+
+.macro sta_4_bytes
+    sta _1
+    sta _1 + $01
+    sta _1 + $02
+    sta _1 + $03
+.macend
+
+.macro stx_2_bytes
+    stx _1
+    stx _1 + $01
+.macend
+
+.word $6666, $6666, $6666
 
 ;----------------------------------------------------------------------------------------------------
 

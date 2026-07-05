@@ -1700,7 +1700,7 @@ Set_MusicInitFlag:
     RTS 
 
 ;---------------------------------------[ Samus Handler ]-------------------------------------------
-
+; HUGBEES #2 - 10% of averge frame time is spent here
 GoSamusHandler:
     LDX SamusObjAction                              ;
     BMI SamusStand                                  ;Branch if Samus is standing.
@@ -4135,7 +4135,7 @@ LDCFC:
     BEQ +++++
 *   LDA $040C,x
     ASL
-    BMI LDD75
+    BMI OnBossKilled
     JSR LF74B
     STA $00
 
@@ -4165,6 +4165,7 @@ LDCFC:
     LDA MaxMissiles
     BEQ LDD5B
     INC CrntMslePickups
+EXIT_67:
 *   RTS
 
 *   LDY MaxEnergyPickup
@@ -4172,9 +4173,9 @@ LDCFC:
     BEQ LDD5B
     INC CrntEnrgyPickups
     CMP #$89
-    BNE --
+    BNE EXIT_67
     LSR $00
-    BCS --
+    BCS EXIT_67
 
 LDD5B:
     ldx PageIndex
@@ -4192,7 +4193,7 @@ LDD5B:
     sty MaxEnergyPickup
     bne -----
 
-LDD75:
+OnBossKilled:
     jsr PowerUpMusic
     lda InArea
     and #$0F
@@ -4202,14 +4203,16 @@ LDD75:
     sta MaxMissiles,y
     lda #75
     jsr AddToMaxMissiles
-    bne LDD5B
+    bne LDD5B               ; Branch always
 
 ; TODO - This kicks off the fat slow
+; HUGBEES #3  - %7 of average frame time is spent here
 LDD70:
 SomethingAboutMovement:
-    ldx PageIndex
-    lda EnAnimFrame,x
-    cmp #$F7
+    ; MARU
+    ldx PageIndex          ; Should be loaded from all callers already
+    ldy EnAnimFrame,x
+    cpy #$F7
     bne MoveEnemies
     lda #$00
     sta ObjectCntrl
@@ -4224,15 +4227,12 @@ AddToMaxMissiles:
     PHA             ;Temp storage of # of missiles to add.
     CLC
     ADC MissileCount
-    BCC +
+    BCC +               ; Only possible to overflow 255 during loading
     LDA #$FF
 *   STA MissileCount
     PLA
-    CLC
     ADC MaxMissiles
-    BCC +
-    LDA #$FF
-*   STA MaxMissiles
+    STA MaxMissiles
     RTS
 
 MoveEnemies:
@@ -4242,7 +4242,7 @@ MoveEnemies:
     STA $0B  ; X coord
     LDA EnNameTable,x
     STA $06  ; hi coord
-    LDY EnAnimFrame,x
+;    LDY EnAnimFrame,x
     LDA EnemyFramePtrTbl_Lo,y
 *   STA $00
     LDA EnemyFramePtrTbl_Hi,y
@@ -4275,7 +4275,14 @@ MoveEnemies:
     INY
     LDA ($00),y
     STA EnRadY,x
-    JSR ReduceYRadius       ;($DE3D)Reduce temp y radius by #$10.
+
+    ; Reduce Y Radius
+      sec             ;
+      sbc #$10            ;Subtract #$10 from object y radius.
+      bcs +               ;If number is still a positive number, branch to store value.
+      lda #$00            ;Number is negative.  Set Y radius to #$00.
+    * sta $08             ;Store result and return.
+
     INY
     LDA ($00),y
     STA EnRadX,x
@@ -4294,19 +4301,6 @@ MoveEnemies:
     LDA $08
     BEQ ++
     JMP DoDrawSpriteObject
-
-;------------------------------------[ Object drawing routines ]-------------------------------------
-
-;The following function effectively sets an object's temporary y radius to #$00 if the object
-;is 4 tiles tall or less.  If it is taller, #$10 is subtracted from the temporary y radius.
-
-ReduceYRadius:
-LDE3D:  sec             ;
-LDE3E:  sbc #$10            ;Subtract #$10 from object y radius.
-LDE40:  bcs +               ;If number is still a positive number, branch to store value.
-LDE42:  lda #$00            ;Number is negative.  Set Y radius to #$00.
-LDE44:* sta $08             ;Store result and return.
-LDE46:  rts             ;
 
 AnimDrawObject:
 LDE47:  jsr UpdateObjAnim       ;($DC8F)Update animation if needed.
@@ -4375,7 +4369,14 @@ LDEBC:* ldx PageIndex           ;
 LDEBE:  iny                 ;Increment to second frame data byte.
 LDEBF:  lda ($00),y         ;
 LDEC1:  sta ObjRadY,x           ;Get verticle radius in pixles of object.
-LDEC3:  jsr ReduceYRadius       ;($DE3D)Reduce temp y radius by #$10.
+
+    ; Reduce Y Radius
+      sec             ;
+      sbc #$10            ;Subtract #$10 from object y radius.
+      bcs +               ;If number is still a positive number, branch to store value.
+      lda #$00            ;Number is negative.  Set Y radius to #$00.
+    * sta $08             ;Store result and return.
+
 LDEC6:  iny             ;Increment to third frame data byte.
 LDEC7:  lda ($00),y         ;Get horizontal radius in pixels of object.
 LDEC9:  sta ObjRadX,x           ;
@@ -4384,6 +4385,7 @@ LDECD:  iny             ;Set index to 4th byte of frame data.
 LDECE:  sty $11             ;Store current index into frame data.
 LDED0:  jsr IsObjectVisible     ;($DFDF)Determine if object is within the screen boundaries.
 LDED3:  txa             ;
+
 LDED4:  ldx PageIndex           ;Get index to object.
 LDED6:  sta ObjectOnScreen,x        ;Store visibility status of object.
 LDEDB:  tax                    ;
@@ -4554,7 +4556,7 @@ SkipPlacementData:
     adc #$01
     sta $0F
 LDF36:  inc $11                     ;Increment to next data item in frame data.
-LDF38:  jmp DrawSpriteObject        ;($DF19)Draw next sprite.
+LDF38:  bne DrawSpriteObject        ;Branch Always - ($DF19)Draw next sprite.
 
 .scope
 
@@ -4580,7 +4582,7 @@ GetNewControlByte:
         lda ObjectCntrl             ;
         ora #$80                    ;
         sta ObjectCntrl             ;Ensure MSB of object control byte remains set.
-        jmp GetNextFrameByte        ;($DF1B)Load next frame data byte.
+        bne GetNextFrameByte        ;Branch Always - ($DF1B)Load next frame data byte.
 .scend
 
 OffsetObjectPosition:
@@ -4609,60 +4611,67 @@ LDF68:  bne DrawSpriteObject        ;Always branch. Draw next sprite.
 ;the object is on and what the scroll offsets are. 
 
 IsObjectVisible:
-LDFDF:  ldx #$01            ;Assume object is visible on screen.
-LDFE1:  lda $0A             ;Object Y position in room.
-LDFE3:  tay             ;
-LDFE4:  sec             ;Subtract y scroll to find sprite's y position on screen.
-LDFE5:  sbc ScrollY         ;
-LDFE7:  sta $10             ;Store result in $10.
-LDFE9:  lda $0B             ;Object X position in room.
-LDFEB:  sec             ;
-LDFEC:  sbc ScrollX         ;Subtract x scroll to find sprite's x position on screen.
-LDFEE:  sta $0E             ;Store result in $0E.
+LDFDF:  ldx #$01                ;Assume object is visible on screen.
+
+LDFE1:  lda $0A                 ;Object Y position in room.
+LDFE3:  tay                     ;
+LDFE4:  sec                     ;Subtract y scroll to find sprite's y position on screen.
+LDFE5:  sbc ScrollY             ;
+LDFE7:  sta $10                 ;Store result in $10.
+
+LDFE9:  lda $0B                 ;Object X position in room.
+LDFEB:  sec                     ;
+LDFEC:  sbc ScrollX             ;Subtract x scroll to find sprite's x position on screen.
+LDFEE:  sta $0E                 ;Store result in $0E.
+
 LDFF0:  lda ScrollDir           ;
-LDFF2:  and #$02            ;Is Samus scrolling left or right?
+LDFF2:  and #$02                ;Is Samus scrolling left or right?
 LDFF4:  bne HorzScrollCheck     ;($E01C)If so, branch.
 
 VertScrollCheck:
-LDFF6:  cpy ScrollY         ;If object room pos is >= scrollY, set carry.
-LDFF8:  lda $06             ;Check if object is on different name table as current
+LDFF6:  cpy ScrollY             ;If object room pos is >= scrollY, set carry.
+LDFF8:  lda $06                 ;Check if object is on different name table as current
 LDFFA:  eor PPUCNT0ZP           ;name table active in PPU.
-LDFFC:  and #$01            ;If not, branch.
-LDFFE:  beq +               ;
-LE000:  bcs ++              ;If carry is still set, sprite is not in screen boundaries.
-LE002:  lda $10             ;
-LE004:  sbc #$0F            ;Move sprite y position up 15 pixles.
-LE006:  sta $10             ;
-LE008:  lda $09             ;
-LE00A:  clc             ;If a portion of the object is outside the sceen
-LE00B:  adc $10             ;boundaries, treat object as if the whole thing is
-LE00D:  cmp #$F0            ;not visible.
-LE00F:  bcc +++             ;
-LE011:  clc             ;Causes next statement to branch always.
-LE012:* bcc +               ;
-LE014:  lda $09             ;If object is on same name table as the current one in
-LE016:  cmp $10             ;the PPU, check if part of object is out of screen 
-LE018:  bcc ++              ;boundaries.  If so, branch.
-LE01A:* dex             ;Sprite is not within screen boundaries. Decrement X.
-LE01B:* rts             ;
+LDFFC:  and #$01                ;If not, branch.
+LDFFE:  beq +                   ;
+LE000:  bcs ++                  ;If carry is still set, sprite is not in screen boundaries.
+LE002:  lda $10                 ;
+LE004:  sbc #$0F                ;Move sprite y position up 15 pixles.
+LE006:  sta $10                 ;
+LE008:  lda $09                 ;
+LE00A:  clc                     ;If a portion of the object is outside the sceen
+LE00B:  adc $10                 ;boundaries, treat object as if the whole thing is
+LE00D:  cmp #$F0                ;not visible.
+LE00F:  bcc VertScrollCheckExit ;
+LE011:  clc                     ;Causes next statement to branch always.
+LE012:* bcc +                   ;
+LE014:  lda $09                 ;If object is on same name table as the current one in
+LE016:  cmp $10                 ;the PPU, check if part of object is out of screen 
+LE018:  bcc VertScrollCheckExit ;boundaries.  If so, branch.
+LE01A:* dex                     ;Sprite is not within screen boundaries. Decrement X.
+VertScrollCheckExit:
+LE01B:* rts                     ;
 
 HorzScrollCheck:
-LE01C:  lda $06             ;
-LE01E:  eor PPUCNT0ZP       ;Check if object is on different name table as current
-LE020:  and #$01            ;name table active in PPU.
-LE022:  beq +               ;If not, branch.
-LE024:  bcs ++              ;If carry is still set, sprite is not in screen boundaries.
-LE026:  lda $09             ;
-LE028:  clc                ;If a portion of the object is outside the sceen
-LE029:  adc $0E             ;boundaries, treat object as if the whole thing is
-LE02B:  bcc +++             ;not visible.
-LE02D:  clc             ;Causes next statement to branch always.
-LE02E:* bcc +               ;
-LE030:  lda $09             ;If object is on same name table as the current one in
-LE032:  cmp $0E             ;the PPU, check if part of object is out of screen 
-LE034:  bcc ++              ;boundaries.  If so, branch.
-LE036:* dex             ;Sprite is not within screen boundaries. Decrement X.
-LE037:* rts             ;
+LE01C:  lda $06                 ;
+LE01E:  eor PPUCNT0ZP           ;Check if object is on different name table as current
+LE020:  and #$01                ;name table active in PPU.
+LE022:  beq +                   ;If not, branch.
+LE024:  bcs ++                  ;If carry is still set, sprite is not in screen boundaries.
+LE026:  lda $09                 ;
+;LE028:  clc                    ;If a portion of the object is outside the screen
+LE029:  adc $0E                 ;boundaries, treat object as if the whole thing is
+LE02B:  bcc HorzScrollCheckExit ;not visible.
+LE02D:  clc                     ;Causes next statement to branch always.
+LE02E:* bcc +                   ;
+LE030:  lda $09                 ;If object is on same name table as the current one in
+LE032:  cmp $0E                 ;the PPU, check if part of object is out of screen 
+LE034:  bcc HorzScrollCheckExit ;boundaries.  If so, branch.
+LE036:* dex                     ;Sprite is not within screen boundaries. Decrement X.
+HorzScrollCheckExit:
+LE037:* rts                     ;
+
+
 
 ;--------------------------------------[ Update enemy animation ]-----------------------------------
 
@@ -5035,6 +5044,7 @@ LE25C: rts                 ;
 
 ;----------------------------------[ Check lava and movement routines ]------------------------------
 
+; HUGBEES #5 - %4.5 of frame time is spent here (???)
 LavaAndMoveCheck:
 LE25D:  
     lda SamusObjAction           ;
@@ -5083,6 +5093,7 @@ LE29D:* lda #$07            ;
 LE29F:  sta HealthLoChange      ;Samus takes lava damage.
 LE2A1:  jsr SubtractHealth      ;($CE92)
 LE2A4:* ldy #$00            ;Prepare to indicate Samus is in lava.
+
 UpdateLavaStatus:
 LE2A6:* iny             ;Set Samus lava status.
 LE2A7:  sty SamusInLava         ;
@@ -7538,6 +7549,7 @@ DrawStructExit:
 ; Collision detection
 ; ===============
 
+; HUGBEES #4 - %8 of all frame time is spent here.
 CollisionDetection:
     lda #$FF
     sta $73
@@ -7580,7 +7592,9 @@ CollisionDetection:
         bne ++
     *   jsr LF149
         bcs +
-        jsr LF279
+        lda $10
+        ora $030A,y
+        sta $030A,y
         jsr LF2BF
     *   lda IdentityTable+16, y
         tay
@@ -7597,7 +7611,10 @@ CollisionDetection:
     jsr IsSamusDead
     beq ++
     jsr AreObjectsTouching      ;($DC7F)
-    jsr LF277
+    bcs +
+    lda $10
+    ora $030A,y
+    sta $030A,y
 *   txa
     sbx #$10
     bmi --
@@ -7776,16 +7793,19 @@ LF1FA:
     sta $10
     and ScrollDir
     sta $03
+
     lda $07             ;Load object 0 y coord.
     sec             ;
     sbc $06             ;Subtract object 1 y coord.
     sta $00             ;Store difference in $00.
+
     lda $03
     bne ++
     lda $0B
     eor $0A
     beq ++
     jsr LF262
+    
     lda $00
     sec
     sbc #$10
@@ -7836,17 +7856,10 @@ LF262:
 
 LF266:
     sta $01
-    bpl +
+    bpl Exit17
     jsr LE449
     inc $10
-*   rts
-
-LF277:  bcs Exit17
-LF279:  lda $10
-LF27B:
-    ora $030A,y
-    sta $030A,y
-    Exit17:
+Exit17:
     rts
 
 LF282:
@@ -7866,7 +7879,12 @@ LF282:
     and #$10
     bne Exit17
 *   ldy #$00
-    jsr LF338
+    lda $10
+    asl
+    asl
+    asl
+    ora $030A,y
+    sta $030A,y
     jmp LF306
 
 *   lda #$81
@@ -7891,8 +7909,14 @@ LF2CA:
 ; At this point, the bullet has made contact with the enemy
     lda ObjAction,y
     sta $040E,x
-    jsr LF279
-*   jsr LF332
+    lda $10
+    ora $030A,y
+    sta $030A,y
+*   lda $10
+    eor #$03
+    asl
+    asl
+    asl
 *   ora EnHasBeenHit,x
     sta EnHasBeenHit,x
 *   rts
@@ -7914,7 +7938,11 @@ LF2ED:
     bcc +
     lda #$80
     sta $010F
-    jsr LF332
+    lda $10
+    eor #$03
+    asl
+    asl
+    asl
     ora $030A,x
     sta $030A,x
 LF306:  
@@ -7928,7 +7956,12 @@ LF311:
     bcs Exit22
     lda #$E0
     sta $010F
-    jsr LF338
+    lda $10
+    asl
+    asl
+    asl
+    ora $030A,y
+    sta $030A,y
     lda $0F
     beq +
     lda #$01
@@ -7939,25 +7972,11 @@ LF323:  lda #$00
 LF325:  sta HealthLoChange
 LF327:  sta HealthHiChange
 
-Exit22: 
+EXIT22: 
 LF329: 
     rts             ;Return for routine above and below.
 
-LF332:  
-    lda $10
-    eor #$03
-    asl
-    asl
-    asl
-    rts       ; * 8
-
-LF338:
-    lda $10
-    asl
-    asl
-    asl
-    jmp LF27B
-
+; HUGBEES #1 - %15 of average frame time is spent here
 DoOneEnemy:
     stx PageIndex
     cpy #$03
@@ -7972,19 +7991,17 @@ DoOneEnemy:
     sta $0B
     lda EnNameTable,x     ; hi coord
     sta $06
-    lda EnRadY,x
-    sta $08
+    ;lda EnRadY,x          ; I don't think we need sta $08 at all here
+    ;sta $08
     lda EnRadX,x
     sta $09
     jsr IsObjectVisible     ;Determine if object is within the screen boundaries.
-    bne ChooseEnemySubroutine
-EXIT24:
-    rts
+    beq EXIT22
 
 ChooseEnemySubroutine:
-*   ldx PageIndex
+    ldx PageIndex
 ChooseEnemySubroutine_SkipPageIndexLoad:
-*   lda EnAttr_05,x
+    lda EnAttr_05,x
     asl
     rol
     tay
@@ -7998,13 +8015,15 @@ ChooseEnemySubroutine_SkipPageIndexLoad:
 
     ldy EnStatus,x
     sty $81
-    beq EXIT24
-    cpy #$07
-    bcc DoEnemySubroutine
-KillObject_Duplicate:
-    lda #$00
-    sta EnStatus,x
-    rts
+    beq EXIT22
+; ==== Couldn't get these bytes to trigger =====
+;    cpy #$07
+;    bcc DoEnemySubroutine
+;KillObject_Duplicate:
+;    lda #$00
+;    sta EnStatus,x
+;    rts
+
 DoEnemySubroutine:
     lda DoOneEnemyTableHiByte - 1, y    ; -1 is because we already handled the 0 case
     sta CodePtr + 1                     ; Don't need to waste 2 bytes for the exit routine
@@ -8023,7 +8042,7 @@ EnemyRoutine_1:
 LF3BE:
     lda EnAttr_05,x
     asl
-    bmi LF40D
+    bmi EnemyRoutine_3
     lda #$00
     sta $6B01,x
     sta EnCounter,x
@@ -8043,9 +8062,9 @@ LF3BE:
     and #$C0
     sta $6B03,x
     lda EnDelay,x
-    beq LF40D
+    beq +
     jsr LF7BA
-*   jmp LF40D
+*   jmp HandleBankEnemies
 
 EnemyRoutine_2:
 LF3E6:
@@ -8371,6 +8390,7 @@ SFX_BigEnemyHit_Inline:
     beq ++
 *   dec EnHitPoints,x
     bne GetPageIndex
+
 *   lda #$03
     sta EnStatus,x
     bit $0A
@@ -8393,6 +8413,7 @@ SFX_BigEnemyHit_Inline:
     cmp #$E0
     bne -
     beq GetPageIndex
+
 *   lda $95DD
     jsr DoSomethingToAnimationIndecies
     lda #$0A
@@ -8403,6 +8424,7 @@ SFX_BigEnemyHit_Inline:
     bvc +
     lda #$03
 *   sta $0407,x
+
     ldy PageIndex
     lda EnYRoomPos,y
     sta EnYRoomPos,x
@@ -8410,7 +8432,8 @@ SFX_BigEnemyHit_Inline:
     sta EnXRoomPos,x
     lda EnNameTable,y
     sta EnNameTable,x
-    GetPageIndex:
+
+GetPageIndex:
     ldx PageIndex
     rts
 
@@ -8425,23 +8448,8 @@ LF690:
     sta EnAnimIndex,x
     lda #$00
     sta EnAnimDelay,x
+Exit12:
 *   rts
-
-LF699:
-    jsr LF844
-    lda $965B,y
-    cmp EnResetAnimIndex,x
-    beq Exit12
-    jsr DoSomethingToAnimationIndecies
-    ldy EnDataIndex,x
-    lda $967B,y
-    and #$7F
-    beq Exit12
-    tay
-*   dec EnAnimIndex,x
-    dey
-    bne -
-Exit12: rts
 
 LF6B9:
     lda #$00
@@ -8468,7 +8476,12 @@ LF6B9:
     lda ScrollDir
     cmp #$02
     bcc +
-    jsr LF752
+
+    lda EnNameTable,x
+    tay
+    eor ObjectHi
+    lsr
+
     bcc +
     tya
     eor PPUCNT0ZP
@@ -8491,7 +8504,12 @@ LF6B9:
     lda ScrollDir
     cmp #$02
     bcs +
-    jsr LF752
+
+    lda EnNameTable,x
+    tay
+    eor ObjectHi
+    lsr
+
     bcc +
     tya
     eor PPUCNT0ZP
@@ -8528,13 +8546,6 @@ UpdateEnAttr_05:
 LF74B:
     ldy EnDataIndex,x
     lda $968B,y
-    rts
-
-LF752:
-    lda EnNameTable,x
-    tay
-    eor ObjectHi
-    lsr
     rts
 
 LF75B:
@@ -8611,7 +8622,24 @@ SFXEnemyRegen_Inline:
 
     ldx PageIndex
 *   inc EnStatus,x
-    jsr LF699
+
+.scope
+LF699:
+    jsr LF844
+    lda $965B,y
+    cmp EnResetAnimIndex,x
+    beq _done
+    jsr DoSomethingToAnimationIndecies
+    ldy EnDataIndex,x
+    lda $967B,y
+    and #$7F
+    beq _done
+    tay
+*   dec EnAnimIndex,x
+    dey
+    bne -
+    _done:
+.scend
     ldy EnDataIndex,x
     lda $96CB,y
     clc
