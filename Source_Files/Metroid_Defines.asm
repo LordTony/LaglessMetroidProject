@@ -155,8 +155,8 @@
 ; used                  $66
 .alias RoomPal_Lo_Nib   $67     ; Isolated to Room Drawing Routines
 .alias RoomPal_Hi_Nib   $68     ; Isolated to Room Drawing Routines
-.alias TempX            $69
-.alias TempY            $6A
+.alias HudCacheIndex    $69     ; Isolated to DisplayBar draw
+.alias TempY            $6A     ; Isolated to ChooseRoutine used in bank 00
 .alias ObjectCntrl      $6B     ;Controls object properties such as mirroring and color
                                 ;bits. Bit 4 controls object mirroring.
 .alias DoorOnNameTable3 $6C     ;The following two addresses are used to keep track of the
@@ -546,13 +546,13 @@
 .alias PowerUpBNameTbl  $0753   ;#$00 if on name table 0, #$01 if on name table 3.
 .alias PowerUpBAnimIdx  $0757   ;Entry into FramePtrTable for item animation.
 
-.alias TileSize         $0780   ;4 MSBs=Y size of tile to erase.4 LSBs=X size of tile to erase.
-.alias TileInfo0        $0781   ;
-.alias TileInfo1        $0782   ;
-.alias TileInfo2        $0783   ;Tile patterns to replace blasted tiles.
-.alias TileInfo3        $0784   ;
-.alias TileInfo4        $0785   ;
-.alias TileInfo5        $0786   ;
+.alias TileSize         $0760   ;4 MSBs=Y size of tile to erase.4 LSBs=X size of tile to erase.
+.alias TileInfo0        $0761   ;
+.alias TileInfo1        $0762   ;
+.alias TileInfo2        $0763   ;Tile patterns to replace blasted tiles.
+.alias TileInfo3        $0764   ;
+.alias TileInfo4        $0765   ;
+.alias TileInfo5        $0766   ;
 
 ;$07A1 thru $07F0 contain a byte string of data to be written the the PPU. The first
 ;byte in the string is the upper address byte of the starting point in the PPU to write
@@ -564,7 +564,7 @@
 ;0-5 of the configuration byte.  Those bytes are a repitition counter. Any following bytes
 ;are the actual data bytes to be written to the PPU. #$00 separates the data chunks.
 
-.alias PPUDataString        $07A1   ;Thru $07F0. String of data bytes to be written to PPU.
+.alias PPUDataString        $0781   ;Thru $07F0. String of data bytes to be written to PPU.
 
 ;-------------------------------------[ Hardware Defines ]-------------------------------------------
 
@@ -889,7 +889,6 @@
 .alias AreaRoutine              $95C3
 .alias EnemyHitPointTbl         $962B
 .alias EnemyInitDelayTbl        $96BB
-.alias EndGamePalWrite          $9F54
 .alias MemuByte                 $95E4
 .alias RoomAttrTbl_Hi           $ACB0
 .alias RoomAttrTbl_Lo           $ACE0
@@ -1108,6 +1107,6 @@
 .alias BTN_B            $40     ;Controller button B.
 .alias BTN_A            $80     ;Controller button A.
 
-.alias PPUMaxSize       $4F     ;How many bytes the PPU can handle at once
+.alias PPUMaxSize       $6F; $4F     ;How many bytes the PPU can handle at once
 
 .alias ___              $FF     ;Used in world map to make it more readable.

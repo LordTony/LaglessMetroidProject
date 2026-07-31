@@ -21,9 +21,9 @@ The idea here is to attempt to take the Metroid lag as low as possible without a
 The baseline benchmark is Samus standing still in the opening room with 2 of the spikey bois both alive and crawing on the walls.
 
   * Metroid finishes all work for the benchmark frames in **137 to 149** scanlines
-  * Lagless Metroid finishes in **69 to 92** scanlines
-  * Lagless Metroid finishes in **%52 to %62** of the scanlines it takes Metroid
-  * The limit might be something like **68** scanlines, so keep pushing
+  * Lagless Metroid finishes in **62 to 79** scanlines
+  * Lagless Metroid finishes in **45% to 53%** of the scanlines it takes Metroid
+  * The limit might be something like **60** scanlines, so keep pushing
 
 ### Code Progress
 * ChooseRoutine has been removed from bank07 and is now only called from outside
@@ -52,7 +52,6 @@ The baseline benchmark is Samus standing still in the opening room with 2 of the
 * Get rid of the Mul and Div routines
   * Consider placing Mul and Div tables in unused spots in Bank01-Bank05
 * Refactor the common code in Bank01-Bank05
-* Fight a little harder for inlining some of the UpdateSamus code
 * Re-align the $0400 enemy memory so it's grouped by property rather than enemy
   * x = x+1 (inx) is much cheaper than x = x+16
 
@@ -104,21 +103,28 @@ Using these sites a lot:
 I want to create some tables for the common multiplication operations that happen. Like a mul / div table for 16, and 32 (8 is just 2 shifts and a table lookup would be slower). If I could find the bytes for it, I would also like to try adding an identity table for the XMinus16 and YPlus16 calls so that way I could add numbers with code that looks like this:
 
 ```
-LDA IdentityTable+16, X
+lda IdentityTable+16, X
 tax
 ```
 
 Now that I've gotten the identity table in, I can't help but wonder if those 256 + 32 bytes would be better spent just unrolling loops. Would need to do it and test it, and that might not be that simple of a change.
 
+Update on the Identity table idea. I realized the illigal opcode "SBX" is faster and fewer bytes so perhaps that identity table isn't that useful.
+In order for it to work properly, A needs to have all of the bits set that X has. In practice that means A should equal X or #$FF
+
+```
+; Subtract 16 from X
+txa
+SBX #$16
+
+; Add 16 to X
+txa
+SBX #$F0
+```
+
 ### Benchmarking
 The "Visualize Hotspots" lua script can be run and tweaked to find places in the code that are hit more often. It helped me get some big wins.
 
 ## Bugs
-* Running into color palette glitches from time to time
-  * When running from a zone with one palette into a zone with another, I think it just doesn't set the palette
-* Starting with a Ridley Password and going up the elevator gets a bugged map
-* Tourian (Metroid / Mother Brain / Bank03.asm) might be broken
-  * Shooting metroids with missiles plays the wrong sounds (haven't tested this in a while)
-* Seeing single 8x8 random sprites pop in from time to time
-  * It looks like this is only when the lag frames happen. When the room loads and it tries to place sprites as well.
-  * Seeing sprits wrap around the screen quite often.
+* Loading can get confused when direction changes right as the load is happening and you can get half of the wrong room.
+* Room 1B in Bank01 (Brinstar) has a phantom destroyable block under the sand/lava

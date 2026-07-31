@@ -528,8 +528,8 @@ _IncrementSFXFrame:
 ;10th SFX cycle $E0=#$26,$E1=#$BC,$E2=#$4B,$E3=#$BC.  Base address=$B2B1
 
 _CheckSFXFlag:
-  STA CurrentSFXFlags     ;Store any set flags in some space zeropage.
-  STX SFXPtrE4LB 
+  STA CurrentSFXFlags     ;Store any set flags in some space zeropage. 
+  STX SFXPtrE4LB
   LDY #$04                ;Y=0 for counting loop ahead.
   LDA (SFXPtrE4),Y        ;
   STA ChannelType         ;#$00=SQ1,#$01=SQ2,#$02=Triangle,#$03=Noise
@@ -547,13 +547,11 @@ _CheckSFXFlag:
   STA $E0
 
   ;Y is zero at this point
-  lda CurrentSFXFlags
+  lax CurrentSFXFlags
   beq _NoSound
-  bit CurrentSFXFlags                 ; RoomNumber *should* always be $FF while not in the room gen code 
-  bmi _Highest_Bit_Set
-  bvs _Second_Highest_Bit_Set
-  and #$3F                            ; Mask out the top two bits that were tested alread
-  tax 
+  bmi _SFXFlagFound
+  asl
+  bcs _Second_Highest_Bit_Set
   ldy CheckFlagTablePlus1 - 1, x      ; check the rest against a 63 bit table
 
   _SFXFlagFound:
@@ -565,15 +563,11 @@ _CheckSFXFlag:
 
   _NoSound:
     rts
-
-  _Highest_Bit_Set:
-      ldy #$00
-      beq _SFXFlagFound
     
   _Second_Highest_Bit_Set:
-      ldy #$02
+      iny
+      iny
       bne _SFXFlagFound
-
     
     ;-----------------------------------[ SFX Handling Routines ]---------------------------------------
 

@@ -2725,9 +2725,30 @@ Bank03_LAE2C:  .byte $08, $0D, $22, $22, $22, $22, $22, $22, $0D, $FF
 Bank03_LAE36:  .byte $08, $0E, $0E, $0E, $0E, $0E, $0E, $0E, $0E, $08, $0E, $10, $0E, $0E, $10, $10
 Bank03_LAE46:  .byte $0E, $10, $FF
 
-;-----------------------------------[ Enemy animation data tables ]----------------------------------
+;Tourian memory page.
 
-.byte $BB, $BB, $BB, $BB, $BB
+Bank03_Init:
+        LDA #$00                ;GameMode = play.
+        STA GameMode            ;
+        JSR ScreenNmiOff        ;($C45D)Disable screen and Vblank.
+        LDY #$0D                ;
+    *   LDA MetroidData,y       ;Load info from table below into ram
+        STA MetroidDataRam,y 
+        DEY                     ;
+        BPL -                   ;
+        lda #$09
+        sta SpareMemD1
+TourianGFX_Loop:
+        ldx SpareMemD1
+        ldy TourianGFXTable, x
+        JSR LoadGFX
+        dec SpareMemD1
+        bpl TourianGFX_Loop
+LC5A5:  JMP NmiOn               ;($C487)Turn on VBlank interrupts.
+
+; CODE CAVE (18 x 16 bytes)
+
+;-----------------------------------[ Enemy animation data tables ]----------------------------------
 
 .advance RoomAttrTbl_Hi
     .byte >Tourian_DefaultAttrs         ;Room #$00
@@ -3393,6 +3414,12 @@ Bank03_LB19D:  .byte $0C               ;F#2        +
 Bank03_LB19E:  .byte $FF               ;
 Bank03_LB19F:  .byte $00               ;End mother brain room music.
 
+;Table used by above subroutine and loads the initial data used to describe
+;metroid's behavior in the Tourian section of the game.
+
+MetroidData:
+    .byte $F8, $08, $30, $D0, $60, $A0, $02, $04, $00, $00, $00, $00, $00, $00
+
 ;------------------------------------------[ Sound Engine ]------------------------------------------
 
 .advance SoundEngineOrg
@@ -3466,7 +3493,6 @@ Bank03_LB19F:  .byte $00               ;End mother brain room music.
 
     .include "Sound_Engine_Common_2.asm"
 .scend
-
 
 ;----------------------------------- Struct Pointer Table -----------------------------------------------
 

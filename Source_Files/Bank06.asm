@@ -242,7 +242,7 @@ Bank06_L9090:  .byte $C7, $BF, $3A, $7F, $BD, $A3, $7F, $FC, $3C, $7C, $FD, $E7,
 Bank06_L90A0:  .byte $00, $00, $18, $18, $3C, $7E, $5E, $FF, $10, $10, $18, $38, $7C, $7E, $FE, $FF
 Bank06_L90B0:  .byte $00, $10, $10, $10, $10, $30, $30, $10, $10, $10, $10, $10, $30, $30, $30, $30
 Bank06_L90C0:  .byte $20, $30, $30, $20, $60, $30, $70, $F8, $20, $30, $30, $60, $60, $70, $F0, $F8
-Bank06_L90D0:  .byte $3C, $42, $99, $A1, $A1, $99, $42, $3C, $00, $00, $00, $00, $00, $00, $00, $00
+Bank06_L90D0:  .byte $3C, $42, $99, $A1, $A1, $99, $42, $3C, $00, $00, $00, $00, $00, $00, $00      ;, $00 interleaved
 
 ;----------------------------------------------------------------------------------------------------
 
@@ -598,18 +598,6 @@ Bank06_LA940:  .byte $07, $12, $48, $48, $09, $18, $30, $00, $07, $72, $B8, $B9,
 
 ;----------------------------------------------------------------------------------------------------
 
-;More Norfair room tile patterns.
-GFXNorfair2:
-Bank06_LA950:  .byte $00, $00, $00, $09, $02, $2D, $11, $05, $00, $00, $03, $0F, $1F, $37, $3E, $3F
-Bank06_LA960:  .byte $00, $00, $40, $90, $D0, $08, $5C, $0C, $00, $00, $C0, $70, $F8, $FC, $F4, $FC
-Bank06_LA970:  .byte $10, $22, $56, $03, $2B, $74, $37, $0D, $3F, $5F, $7D, $7F, $7F, $5F, $3F, $0F
-Bank06_LA980:  .byte $68, $F6, $BC, $5E, $3C, $DE, $7C, $F0, $FC, $DE, $FE, $FE, $FE, $FE, $FC, $F0
-Bank06_LA990:  .byte $00, $00, $7F, $80, $80, $FF, $7F, $00, $00, $7F, $80, $7F, $FF, $FF, $7F, $00
-Bank06_LA9A0:  .byte $00, $00, $FC, $01, $03, $FF, $FE, $00, $00, $FE, $03, $FF, $FF, $FF, $FE, $00
-Bank06_LA9B0:  .byte $00, $10, $20, $20, $00, $20, $00, $00, $3C, $42, $81, $81, $81, $81, $42, $3C
-
-;----------------------------------------------------------------------------------------------------
-
 ;Tourian room tile patterns.
 GFXTourian1:
 Bank06_LA9C0:  .byte $7F, $7F, $3F, $1F, $80, $0F, $08, $88, $12, $80, $C0, $E0, $E0, $EF, $E8, $E8
@@ -657,7 +645,19 @@ Bank06_LAC50:  .byte $00, $00, $80, $80, $40, $A0, $30, $00, $00, $00, $80, $80,
 Bank06_LAC60:  .byte $10, $0C, $02, $03, $01, $01, $00, $00, $1F, $0F, $03, $03, $01, $01, $00, $00
 Bank06_LAC70:  .byte $04, $04, $04, $08, $08, $90, $90, $90, $F8, $F8, $F8, $F0, $F0, $E0, $E0, $E0
 Bank06_LAC80:  .byte $00, $00, $01, $01, $02, $05, $0C, $00, $00, $00, $01, $01, $03, $06, $00, $00
-Bank06_LAC90:  .byte $A0, $A0, $C0, $40, $80, $00, $00, $00, $C0, $C0, $80, $80, $00, $00, $00, $00
+Bank06_LAC90:  .byte $A0, $A0, $C0, $40, $80, $00, $00, $00, $C0, $C0, $80, $80, $00                ;, $00, $00, $00 interleaved
+
+;----------------------------------------------------------------------------------------------------
+
+;More Norfair room tile patterns.
+GFXNorfair2:
+Bank06_LA950:  .byte $00, $00, $00, $09, $02, $2D, $11, $05, $00, $00, $03, $0F, $1F, $37, $3E, $3F
+Bank06_LA960:  .byte $00, $00, $40, $90, $D0, $08, $5C, $0C, $00, $00, $C0, $70, $F8, $FC, $F4, $FC
+Bank06_LA970:  .byte $10, $22, $56, $03, $2B, $74, $37, $0D, $3F, $5F, $7D, $7F, $7F, $5F, $3F, $0F
+Bank06_LA980:  .byte $68, $F6, $BC, $5E, $3C, $DE, $7C, $F0, $FC, $DE, $FE, $FE, $FE, $FE, $FC, $F0
+Bank06_LA990:  .byte $00, $00, $7F, $80, $80, $FF, $7F, $00, $00, $7F, $80, $7F, $FF, $FF, $7F, $00
+Bank06_LA9A0:  .byte $00, $00, $FC, $01, $03, $FF, $FE, $00, $00, $FE, $03, $FF, $FF, $FF, $FE, $00
+Bank06_LA9B0:  .byte $00, $10, $20, $20, $00, $20, $00, $00, $3C, $42, $81, $81, $81, $81, $42, $3C
 
 ;----------------------------------------------------------------------------------------------------
 
@@ -863,6 +863,12 @@ ATDataTable_Lo_Crumb:
     .byte $00, $55, $AA, $FF
     .byte $00, $55, $AA, $FF
 
+ATDataTable_Mixed_Bottom_Top_Tile:
+    .byte $00, $50, $A0, $F0
+    .byte $05, $55, $A5, $F5
+    .byte $0A, $5A, $AA, $FA
+    .byte $0F, $5F, $AF, $FF
+
 BankErasureTablePtr_Hi:
     .byte >BrinstarRoomErasureTable
     .byte >NorfairRoomErasureTable
@@ -896,10 +902,11 @@ BrinstarRoomErasureTable:
     .byte %00000001, %00000111, %00001001, %00010001, %00011001, %00011001, %00011001, %00011001, %00000101, %00011001, %00011011, %00111011, %00111011, %00011001, %00000001, %00001001
     .byte %00011001, %00011001, %00010001, %00011001, %00000000, %00010001, %00011001, %00011001, %00011001, %00011001, $FF,       %00011011, %11111111, %00000111
 
+;         0          1          2          3          4          5          6          7          8          9          A          B          C          D          E           F
 NorfairRoomErasureTable:
-    .byte $FF,       $FF,       $FF,       $FF,       $FF,       $FF,       $FF,       $FF,       $FF,       $FF,       $FF,       $FF,       $FF,       $FF,       $FF,       $FF
-    .byte $FF,       $FF,       $FF,       $FF,       $FF,       $FF,       $FF,       $FF,       $FF,       $FF,       $FF,       $FF,       $FF,       $FF,       $FF,       $FF
-    .byte $FF,       $FF,       $FF,       $FF,       $FF,       $FF,       $FF,       $FF,       $FF,       $FF,       $FF,       $FF,       $FF,       $FF
+    .byte $FF,       %11111111, %00000111, %00000111, $FF,       $FF,       %00000000, %00000000, %00000111, %00000111, $FF,       $FF,       $FF,       $FF,       %00000111,       $FF
+    .byte $FF,       $FF,       $FF,       $FF,       $FF,       $FF,       $FF,       $FF,       %00000111, %00111011, %00010111, $FF,       %00011001, %00011001, %00011001, %00011001
+    .byte $FF,       $FF,       $FF,       $FF,       $FF,       $FF,       $FF,       $FF,       %00001001, %00011001, %00010001, %00011001, $FF,       $FF
 
 TourianRoomErasureTable:
     .byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
@@ -989,14 +996,7 @@ DoRoomRamClear_6000:
         bcc _skipCore
             jsr ClearTopLeftCore_6000
             jsr ClearTopRightCore_6000
-
-            ; left door
-            `stx_2_bytes $6142
-            `stx_2_bytes $6162
-            `stx_2_bytes $6182
-            `stx_2_bytes $61A2
-            `stx_2_bytes $61C2
-            `stx_2_bytes $61E2 
+            jsr ClearLeftDoor_6000
 
             ; right door
             `stx_2_bytes $615C
@@ -1085,18 +1085,24 @@ DoRoomRamClear_6000:
         ldy RoomPal_Lo_Nib
 
         ; AttrWriteBottomRight_6000
-        lda ATDataTable_Lo_Crumb, y
-        `sta_4_bytes $63F0
-        `sta_4_bytes $63F8
-        `sta_4_bytes $63F4
-        `sta_4_bytes $63FC
-    
         ; AttrWriteBottomLeft_6000
+
+        ; Attr Table Row index 4 and 5
         lda ATDataTable_Hi_Crumb, y
         `sta_4_bytes $63E0
-        `sta_4_bytes $63E8
         `sta_4_bytes $63E4
+        `sta_4_bytes $63E8
         `sta_4_bytes $63EC
+    
+        ; Attr Table Row index 6
+        lda ATDataTable_Mixed_Bottom_Top_Tile, y
+        `sta_4_bytes $63F0
+        `sta_4_bytes $63F4
+
+        ; Attr Table Row index 7
+        lda ATDataTable_Lo_Crumb, y
+        `sta_4_bytes $63F8
+        `sta_4_bytes $63FC
 
         rts
 .scend
@@ -1120,14 +1126,7 @@ DoRoomRamClear_6000:
         bcc _skipCore
             jsr ClearTopLeftCore_6000
             jsr ClearBottomLeftCore_6000
-
-            ; left door
-            `stx_2_bytes $6142
-            `stx_2_bytes $6162
-            `stx_2_bytes $6182
-            `stx_2_bytes $61A2
-            `stx_2_bytes $61C2
-            `stx_2_bytes $61E2 
+            jsr ClearLeftDoor_6000
 
         _skipCore:
         ror
@@ -1157,8 +1156,10 @@ DoRoomRamClear_6000:
 
         ldy RoomPal_Lo_Nib
         lda ATDataTable_Lo_Crumb, y
-        `sta_4_bytes $63F0
         `sta_4_bytes $63F8
+
+        lda ATDataTable_Mixed_Bottom_Top_Tile, y
+        `sta_4_bytes $63F0
 
         lda ATDataTable_Hi_Crumb, y
         `sta_4_bytes $63E0
@@ -1222,8 +1223,10 @@ DoRoomRamClear_6000:
 
         ldy RoomPal_Lo_Nib
         lda ATDataTable_Lo_Crumb, y
-        `sta_4_bytes $63F4
         `sta_4_bytes $63FC
+
+        lda ATDataTable_Mixed_Bottom_Top_Tile, y
+        `sta_4_bytes $63F4
 
         lda ATDataTable_Hi_Crumb, y
         `sta_4_bytes $63E4
@@ -1346,18 +1349,24 @@ DoRoomRamClear_6400:
         ldy RoomPal_Lo_Nib
 
         ; AttrWriteBottomRight_6400
-        lda ATDataTable_Lo_Crumb, y
-        `sta_4_bytes $67F0
-        `sta_4_bytes $67F8
-        `sta_4_bytes $67F4
-        `sta_4_bytes $67FC
-    
         ; AttrWriteBottomLeft_6400
+    
+        ; Attr Table Row index 4 and 5
         lda ATDataTable_Hi_Crumb, y
         `sta_4_bytes $67E0
         `sta_4_bytes $67E8
         `sta_4_bytes $67E4
         `sta_4_bytes $67EC
+
+        ; Attr Table Row index 6
+        lda ATDataTable_Mixed_Bottom_Top_Tile, y
+        `sta_4_bytes $67F0
+        `sta_4_bytes $67F4
+
+        ; Attr Table Row index 7
+        lda ATDataTable_Lo_Crumb, y
+        `sta_4_bytes $67F8
+        `sta_4_bytes $67FC
 
         rts
 
@@ -1410,8 +1419,10 @@ DoRoomRamClear_6400:
 
         ldy RoomPal_Lo_Nib
         lda ATDataTable_Lo_Crumb, y
-        `sta_4_bytes $67F0
         `sta_4_bytes $67F8
+
+        lda ATDataTable_Mixed_Bottom_Top_Tile, y
+        `sta_4_bytes $67F0
 
         lda ATDataTable_Hi_Crumb, y
         `sta_4_bytes $67E0
@@ -1466,8 +1477,10 @@ DoRoomRamClear_6400:
 
         ldy RoomPal_Lo_Nib
         lda ATDataTable_Lo_Crumb, y
-        `sta_4_bytes $67F4
         `sta_4_bytes $67FC
+
+        lda ATDataTable_Mixed_Bottom_Top_Tile, y
+        `sta_4_bytes $67F4
 
         lda ATDataTable_Hi_Crumb, y
         `sta_4_bytes $67E4
@@ -1668,6 +1681,16 @@ ClearBottomRightFloor_6400:
     `stx_12_bytes $67B0
     rts
 
+ClearLeftDoor_6000:
+    ; left door
+    `stx_2_bytes $6142
+    `stx_2_bytes $6162
+    `stx_2_bytes $6182
+    `stx_2_bytes $61A2
+    `stx_2_bytes $61C2
+    `stx_2_bytes $61E2 
+    rts
+
 ; Ophis macro to help unroll loops
 ; Will call sta on 14 continuous bytes in memory
 .macro stx_14_bytes
@@ -1720,8 +1743,6 @@ ClearBottomRightFloor_6400:
     stx _1
     stx _1 + $01
 .macend
-
-.word $6666, $6666, $6666
 
 ;----------------------------------------------------------------------------------------------------
 

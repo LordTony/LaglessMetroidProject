@@ -2443,9 +2443,8 @@ Bank04_LAC27:
 .byte $04, $0D, $0D, $0D, $0D
 .byte $FF
 
+; CODE CAVE (82 x 16 bytes)
 ;-----------------------------------[ Enemy animation data tables ]----------------------------------
-
-.byte $BB, $BB, $BB, $BB, $BB
 
 .advance RoomAttrTbl_Hi
     .byte >Kraid_DefaultAttrs         ;Room #$00

@@ -271,6 +271,7 @@ _L8251:  EOR #$20
 _L8253:  BEQ $82A2
 _L8255:  JSR $822B
 _L8258:  LDY EnCounter,X
+
 _L825B:  LDA ($81),Y
 _L825D:  CMP #$F0
 _L825F:  BCC $827F
@@ -288,6 +289,7 @@ _L8275:  LDA #$00
 _L8277:  STA EnCounter,X
 _L827A:  BEQ $8258
 _L827C:  JMP $8312
+
 _L827F:  SEC 
 _L8280:  SBC EnDelay,X
 _L8283:  BNE $8290
@@ -300,6 +302,7 @@ _L828E:  BNE $825B
 _L8290:  INC EnDelay,X
 _L8293:  INY 
 _L8294:  LDA ($81),Y
+
 _L8296:  ASL 
 _L8297:  PHP 
 _L8298:  JSR _Adiv32              ;($C2BE)Divide by 32.
@@ -372,6 +375,7 @@ _L8327:  BEQ $833C
 _L8329:  LDY EnCounter,X
 _L832C:  INY 
 _L832D:  LDA ($81),Y
+
 _L832F:  TAX 
 _L8330:  AND #$08
 _L8332:  PHP 
@@ -1492,6 +1496,8 @@ _L8B81:  SBX #$10
 _L8B84:  BMI _L8B7B
 _L8B86:  RTS
 
+; Note: Game crashes when a door comes into view
+; if I remove this advance here.
 .advance $8B87
 
 _L8B87:  STX PageIndex

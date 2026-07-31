@@ -357,7 +357,6 @@ Bank01_LAE8E:
 ;Structure #$27
 Bank01_LAE92:
     .byte $08, $1E, $1E, $1E, $1E, $1E, $1E, $1E, $1E
-Bank01_Struct_4D:
     .byte $08, $1E, $1E, $1E, $1E, $1E, $1E, $1E, $1E
     .byte $FF
 
@@ -458,6 +457,11 @@ Bank01_Struct_3A:
     .byte $FF
 
 Bank01_Struct_3B:
+    .byte $08, $1E, $1E, $1C, $1C, $1E, $1E, $1E, $1E
+    .byte $08, $1E, $1E, $1E, $1E, $1C, $1E, $1E, $1E
+    .byte $08, $1C, $1E, $1E, $1E, $1E, $1E, $1C, $1E
+    .byte $08, $1E, $1E, $1E, $1C, $1E, $1C, $1C, $1E
+	.byte $08, $2B, $03, $03, $2B, $03, $03, $03, $2B
 	.byte $08, $1E, $1E, $1C, $33, $33, $33, $33, $1E
 	.byte $FF
 
@@ -539,6 +543,12 @@ Bank01_Struct_4C:
     .byte $01, $08
     .byte $FF
 
+Bank01_Struct_4D:
+	.byte $08, $1E, $1E, $1E, $1E, $1E, $1E, $1E, $1E
+	.byte $08, $2B, $03, $03, $2B, $03, $03, $03, $2B
+	.byte $08, $1E, $1E, $1E, $1E, $1E, $1E, $1E, $1E
+	.byte $FF
+
 Bank01_Struct_4F:
     .byte $06, $20, $20, $20, $1E, $1E, $1C
     .byte $06, $20, $1A, $20, $1E, $1E, $1E
@@ -567,6 +577,22 @@ Bank01_Struct_53:
 Bank01_Struct_55:
 	.byte $02, $33, $33
 	.byte $FF
+
+Bank01_Struct_56:
+    .byte $04, $1E, $1E, $1C, $1C
+    .byte $04, $1E, $1E, $1E, $1E
+    .byte $04, $1C, $1E, $1E, $1E
+    .byte $04, $1E, $1E, $1E, $1C
+    .byte $FF
+
+Bank01_Struct_57:
+    .byte $04, $1E, $1E, $1E, $1E
+    .byte $04, $1C, $1E, $1E, $1E
+    .byte $04, $1E, $1E, $1C, $1E
+    .byte $04, $1E, $1C, $1C, $1E
+    .byte $FF
+
+; OUT OF ROOM HERE. More Structs scattered around wildly
 
 .advance PalPntrTbl_Hi
 
@@ -871,6 +897,9 @@ Bank01_L99F0:  CMP #$03
 Bank01_L99F2:  BEQ $99F7
 Bank01_L99F4:  JSR $801B
 Bank01_L99F7:  JMP $99C8
+
+.advance $99FA
+
 Bank01_L99FA:  LDA $81
 Bank01_L99FC:  CMP #$01
 Bank01_L99FE:  BEQ $9A44
@@ -2071,27 +2100,32 @@ Bank01_Room_0A_Bottom_Left:
 ;Room #$0B
 Bank01_LA615:
 	.byte $02
-	.word Bank01_Room_0B_Left
-	.word Bank01_Room_0B_Right
-	.word FFLabel
+	.word Bank01_Room_0B_Top_Left
+	.word Bank01_Room_0B_Top_Right
+	.word Bank01_Room_0B_Bottom_Left
+
+Bank01_Room_0B_Bottom_Right:
+	.byte $87, $41
+	.byte $89, $16
 	.byte $FF
 
-Bank01_Room_0B_Left:
+Bank01_Room_0B_Top_Left:
 	.byte $00, $15
 	.byte $01, $16
 	.byte $50, $04
-	.byte $80, $16
-	.byte $87, $41
 	.byte $FD
 	.byte $02, $B1				; Door
 	.byte $FF
 
-Bank01_Room_0B_Right:
+Bank01_Room_0B_Top_Right:
 	.byte $08, $16
 	.byte $0F, $15
 	.byte $4F, $15
+	.byte $FF
+
+Bank01_Room_0B_Bottom_Left:
+	.byte $80, $16
 	.byte $87, $41
-	.byte $89, $16
 	.byte $FF
 
 ;Room #$0C
@@ -2605,7 +2639,7 @@ Bank01_Room_1A_Bottom_Left:
 
 ;Room #$1B
 Bank01_LA8B1:
-	.byte $0A
+	.byte $0E
 	.word Bank01_Room_1B_Left
 	.word Bank01_Room_1B_Right
 	.word FFLabel
@@ -2672,29 +2706,27 @@ Bank01_Room_1C_Right:
 ;Room #$1D
 Bank01_LA910:
 	.byte $55
-	.word Bank01_Room_1D_Top_Left
-	.word Bank01_Room_1D_Top_Right
-	.word Bank01_Room_1D_Bottom_Left
-
-Bank01_Room_1D_Bottom_Right:
-	.byte $B8, $0E
+	.word Bank01_Room_1D_Left
+	.word Bank01_Room_1D_Right
+	.word FFLabel
 	.byte $FF
 
-Bank01_Room_1D_Top_Left:
+Bank01_Room_1D_Left:
 	.byte $00, $0E
-	.byte $44, $0E
+	.byte $44, $56
+	.byte $84, $0F
+	.byte $94, $56
+	.byte $B0, $0E
 	.byte $FD
 	.byte $31, $06, $42			; Enemy
 	.byte $FF
 
-Bank01_Room_1D_Top_Right:
+Bank01_Room_1D_Right:
 	.byte $08, $0E
-	.byte $FF
-
-Bank01_Room_1D_Bottom_Left:
+	.byte $48, $57
 	.byte $84, $0F
-	.byte $94, $0E
-	.byte $B0, $0E
+	.byte $98, $57
+	.byte $B8, $0E
 	.byte $FF
 
 ;Room #$1E
@@ -2743,37 +2775,31 @@ Bank01_Room_1E_Bottom_Left:
 ;Room #$1F
 Bank01_LA96B:
 	.byte $55
-	.word Bank01_Room_1F_Top_Left
-	.word Bank01_Room_1F_Top_Right
-	.word Bank01_Room_1F_Bottom_Left
-
-Bank01_Room_1F_Bottom_Right:
-	.byte $CA, $26
-	.byte $D8, $45
-	.byte $FD
-	.byte $11, $02, $BB			; Enemy
-	.byte $31, $02, $8B			; Enemy
+	.word Bank01_Room_1F_Left
+	.word Bank01_Room_1F_Right
+	.word FFLabel
 	.byte $FF
 
-Bank01_Room_1F_Top_Left:
+Bank01_Room_1F_Left:
 	.byte $00, $27
 	.byte $10, $24
 	.byte $50, $03
+	.byte $80, $24
+	.byte $A6, $26
+	.byte $B0, $0E
 	.byte $FD
 	.byte $02, $B1				; Door
 	.byte $FF
 
-Bank01_Room_1F_Top_Right:
+Bank01_Room_1F_Right:
 	.byte $08, $27
+	.byte $CA, $26
+	.byte $D8, $45
 	.byte $FD
 	.byte $01, $02, $2B			; Enemy
+	.byte $11, $02, $BB			; Enemy
 	.byte $21, $82, $5B			; Enemy
-	.byte $FF
-
-Bank01_Room_1F_Bottom_Left:
-	.byte $80, $24
-	.byte $A6, $26
-	.byte $B0, $0E
+	.byte $31, $02, $8B			; Enemy
 	.byte $FF
 
 ;Room #$20
@@ -2816,25 +2842,25 @@ Bank01_LA9C6:
 	.byte $FF
 
 Bank01_Room_21_Left:
-	.byte $00, $0E
+	.byte $00, $4E
 	.byte $30, $0E
 	.byte $A7, $26
 	.byte $B0, $24
 	.byte $B6, $24
 	.byte $C4, $05
-	.byte $D4, $27
+	.byte $D4, $35
 	.byte $FD
 	.byte $07, $07, $C5			; Zeb Hole
 	.byte $FF
 
 Bank01_Room_21_Right:
-	.byte $08, $0E
+	.byte $08, $4E
 	.byte $38, $0E
 	.byte $A7, $26
 	.byte $B6, $24
-	.byte $BC, $24
+	.byte $BC, $58
 	.byte $D8, $00
-	.byte $D2, $27				; Order Matters for this one
+	.byte $D2, $27				; order matters for this one
 	.byte $FD
 	.byte $11, $05, $AC			; Enemy
 	.byte $21, $05, $A8			; Enemy
@@ -2917,13 +2943,9 @@ Bank01_LAA56:
 	.byte $FF
 
 Bank01_Room_24_Left:
-	.byte $00, $0E
-	.byte $40, $2B
-	.byte $50, $3B
+	.byte $00, $3B
 	.byte $60, $2B
 	.byte $70, $4D
-	.byte $80, $2B
-	.byte $90, $4D
 	.byte $A0, $13
 	.byte $B0, $0E
 	.byte $FD
@@ -2931,13 +2953,9 @@ Bank01_Room_24_Left:
 	.byte $FF
 
 Bank01_Room_24_Right:
-	.byte $08, $0E
-	.byte $48, $2B
-	.byte $58, $3B
+	.byte $08, $3B
 	.byte $68, $13
 	.byte $78, $4D
-	.byte $88, $2B
-	.byte $98, $4D
 	.byte $A8, $2B
 	.byte $B8, $0E
 	.byte $FD
@@ -3085,7 +3103,7 @@ Bank01_Room_28_Bottom_Left:
 
 ;Room #$29
 Bank01_LAB71:
-	.byte $AA
+	.byte $A6
 	.word Bank01_Room_29_Top_Left
 	.word Bank01_Room_29_Top_Right
 	.word Bank01_Room_29_Bottom_Left
@@ -3237,150 +3255,91 @@ Bank01_Room_2D_Bottom_Left:
 ; Reworking the palette data so each room just tags which changes it wants to make
 ; Right now this is wasteful and stupid
 
-Brinstar_Left_Door_Attrs:
-    .byte $D0, $EF
-    .byte $D8, $EE
-    .byte $00
-
 Brinstar_28_Attrs:
     .byte $E7, $A8
     .byte $EF, $AA
-    .byte $F5, $A0
     .byte $F1, $A4
     .byte $F2, $A5
-    .byte $00
-
-Brinstar_29_Attrs:
-    .byte $F1, $A5
-    .byte $F3, $A5
-    .byte $F4, $A5
-    .byte $F5, $A5
+	.byte $F7, $AA
     .byte $00
 
 Brinstar_1A_Attrs:
     .byte $E0, $A2
     .byte $E8, $AA
+	.byte $F0, $AA
     .byte $F2, $22
     .byte $00
 
-Brinstar_Right_Door_Attrs:
-    .byte $D7, $BF
-    .byte $DF, $BB
+Brinstar_Left_Door_Attrs:
+    .byte $D0, $AF
+    .byte $D8, $AA
     .byte $00
-
+	
 Brinstar_Two_Door_Attrs:
-    .byte $D0, $6F
-    .byte $D7, $95
-    .byte $D8, $66
-    .byte $DF, $99
+    .byte $D0, $AF
+    .byte $D8, $AA
+Brinstar_Right_Door_Attrs:
+	.byte $D7, $AF
+    .byte $DF, $AA
     .byte $00
 
 Brinstar_16_Attrs:
-    .byte $EB, $FF
+	.byte $04, $A5, $F2, $F3, $F4, $F5
+	.byte $04, $AA, $FA, $FB, $FC, $FD
+	.byte $EB, $FF
     .byte $EC, $FF
-    .byte $F2, $A5
-    .byte $F3, $A5
-    .byte $F4, $A5
-    .byte $F5, $A5
-    .byte $FA, $AA
-    .byte $FB, $AA
-    .byte $FC, $AA
-    .byte $FD, $AA
     .byte $00
 
 Brinstar_Bridge_To_Tourian_Attrs:
-    .byte $C0, $88
-    .byte $C1, $88
+	.byte $09, $88, $C0, $C1, $C8, $C9, $CA, $E0, $E8, $F0, $F8
+	.byte $05, $22, $C7, $CF, $EF, $F7, $FF
+
     .byte $C2, $CA
-    .byte $C7, $22
-    .byte $C8, $88
-    .byte $C9, $88
-    .byte $CA, $88
-    .byte $CF, $22
     .byte $D0, $A8
 	.byte $D2, $A8
     .byte $D7, $A2
-    .byte $E0, $88
     .byte $E7, $2A
-    .byte $E8, $88
-    .byte $EF, $22
-    .byte $F0, $88
-    .byte $F7, $22
-    .byte $F8, $88
-    .byte $FF, $22
     .byte $00
 
 Brinstar_Elivator_To_Tourian_Attrs:
+	.byte $08, $AA, $E3, $EB, $EC, $F3, $F4, $FB, $FC, $DF
 	.byte $D7, $A0
-	.byte $DF, $AA
 	.byte $E3, $88
-	.byte $E4, $22
-	.byte $EB, $88
-	.byte $EC, $22
-	.byte $F3, $88
-	.byte $F4, $22
-	.byte $FB, $88
-	.byte $FC, $22
+    .byte $E4, $22
 	.byte $00
 
 Brinstar_Lava_Floor_Attrs:
-    .byte $F0, $FF
-    .byte $F1, $AF
-    .byte $F6, $AF
-    .byte $F7, $FF
-    .byte $F8, $FF
-    .byte $FF, $FF
+	.byte $04, $FF, $F0, $F7, $F8, $FF
     .byte $00
 
-Brinstar_Norf_Elevator:
+Brinstar_Norf_Kraid_Elevator_Attrs:
+	.byte $05, $AA, $D8, $EB, $EC, $F3, $F4
     .byte $D0, $A0
-    .byte $D8, $AA
     .byte $E3, $88
     .byte $E4, $22
-    .byte $EB, $88
-    .byte $EC, $22
     .byte $00
 
 Brinstar_0F_Attrs:
-    .byte $DC, $CC
-    .byte $E4, $CC
+	.byte $03, $FF, $D4, $DC, $E4
+	.byte $F0, $AF
     .byte $00
 
 Brinstar_1B_Attrs:
-    .byte $EB, $CC
-    .byte $EC, $CC
-    .byte $F2, $A3 
+	.byte $04, $FF, $F0, $F7, $F8, $FF
+    .byte $EB, $CC 
+	.byte $EC, $CC
     .byte $F3, $AC
-    .byte $F4, $AC
-    .byte $F5, $A3
+	.byte $F4, $AC
     .byte $00
-
-Brinstar_1C_Attrs:
-	.byte $D0, $A0
-	.byte $D8, $AA
-	.byte $E3, $88
-	.byte $E4, $22
-	.byte $EB, $AA
-	.byte $EC, $AA
-	.byte $00
 
 ; Fall through
 Brinstar_1E_Attrs:
-    .byte $D7, $A5
-    .byte $DF, $AA
-    .byte $F2, $AA
-    .byte $F3, $AA
-    .byte $F4, $AA
-    .byte $F5, $AA
-    .byte $FA, $AA
-    .byte $FB, $AA
-    .byte $FC, $AA
-    .byte $FD, $AA
+	.byte $08, $AA, $F2, $F3, $F4, $F5, $FA, $FB, $FC, $FD
 
+; Fall through
 Brinstar_1F_Attrs:
     .byte $D0, $A5
     .byte $D8, $AA
-    .byte $00
 
 Brinstar_20_Attrs:
     .byte $D7, $A5
@@ -3388,19 +3347,16 @@ Brinstar_20_Attrs:
     .byte $00
 
 Brinstar_21_Attrs:
-    .byte $F2, $5F
-    .byte $F5, $A5
-    .byte $F6, $A5
-    .byte $F7, $A5
-    .byte $FD, $AA
-    .byte $FE, $AA
-    .byte $FF, $AA
-    .byte $00
+	.byte $04, $AA, $F5, $FD, $FE, $FF
+	.byte $F2, $5F
+	.byte $F6, $A5
+	.byte $F7, $A5
+	.byte $00
 
 Brinstar_23_Attrs:
-    .byte $D9, $A5
-    .byte $E5, $A5
-    .byte $F4, $60
+    .byte $02, $A5, $D9, $E5
+	.byte $02, $55, $F0, $F3
+	.byte $F4, $6A
     .byte $F5, $5A
     .byte $F7, $FF
     .byte $FC, $06
@@ -3409,62 +3365,20 @@ Brinstar_23_Attrs:
 ; Falls through to Brinstar_26_Attrs
 ; because there is so much overlap
 Brinstar_24_Attrs:
-    .byte $D4, $50
-    .byte $D5, $50
-    .byte $D6, $50
-    .byte $D7, $50
-    .byte $DD, $50
-    .byte $DE, $50
-    .byte $DF, $50
-    .byte $E0, $50
-    .byte $E1, $50
-    .byte $E2, $50
-    .byte $E3, $50
-    .byte $E4, $50
-    .byte $E5, $50
-    .byte $E6, $50
-    .byte $E7, $50
-    .byte $E8, $50
-    .byte $E9, $50
-    .byte $EA, $50
-    .byte $EB, $50
-    .byte $EC, $50
-    .byte $ED, $50
-    .byte $EE, $50
-    .byte $EF, $50
+	.byte $17, $50 
+    	.byte $D4, $D5, $D6, $D7, $DD, $DE, $DF, $E0, $E1, $E2, $E3, $E4, $E5, $E6, $E7, $E8
+    	.byte $E9, $EA, $EB, $EC, $ED, $EE, $EF
 
 Brinstar_26_Attrs:
-    .byte $D0, $50
-    .byte $D1, $50
-    .byte $D2, $50
-    .byte $D3, $50
-    .byte $D8, $50
-    .byte $D9, $50
-    .byte $DA, $50
-    .byte $DB, $50
-    .byte $DC, $50
+    .byte $09, $50, $D0, $D1, $D2, $D3, $D8, $D9, $DA, $DB, $DC
     .byte $00
 
 Brinstar_25_Attrs:
-    .byte $D4, $50
-    .byte $D5, $50
-    .byte $D6, $50
-    .byte $D7, $50
-    .byte $DC, $50
-    .byte $DD, $50
-    .byte $DE, $50
-    .byte $DF, $50
-    .byte $E0, $AA
-    .byte $E4, $50
-    .byte $E5, $50
-    .byte $E6, $50
-    .byte $E7, $50
+	.byte $10, $50
+    	.byte $D4, $D5, $D6, $D7, $DC, $DD, $DE, $DF, $E4, $E5, $E6, $E7, $EC, $ED, $EE, $EF
+	.byte $E0, $AA
     .byte $E8, $5A
     .byte $EA, $53
-    .byte $EC, $50
-    .byte $ED, $50
-    .byte $EE, $50
-    .byte $EF, $50
     .byte $00
 
 Brinstar_Chozo_Attrs:
@@ -3473,7 +3387,7 @@ Brinstar_Chozo_Attrs:
     .byte $D2, $04
     .byte $D3, $0F
     .byte $D7, $B0
-    .byte $DF, $BB
+    .byte $DF, $AA
     .byte $00
 
 ;Intro and end tile patterns.
@@ -3496,8 +3410,6 @@ Bank06_L8A70:  .byte $00, $00, $00, $00, $00, $00, $04, $00, $00, $40, $00, $00,
 Bank06_L8A80:  .byte $00, $00, $00, $00, $10, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
 Bank06_L8A90:  .byte $00, $00, $04, $00, $00, $00, $00, $00, $00, $00, $00, $00, $40, $00, $00, $00
 
-.word $BBBB, $BBBB, $BBBB
-
 .advance RoomAttrTbl_Hi		
     .byte >Brinstar_DefaultAttrs        		;Room #$00
     .byte >Brinstar_DefaultAttrs        		;Room #$01
@@ -3510,7 +3422,7 @@ Bank06_L8A90:  .byte $00, $00, $04, $00, $00, $00, $00, $00, $00, $00, $00, $00,
     .byte >Brinstar_DefaultAttrs        		;Room #$08
     .byte >Brinstar_DefaultAttrs        		;Room #$09
     .byte >Brinstar_Chozo_Attrs         		;Room #$0A
-    .byte >Brinstar_Norf_Elevator       		;Room #$0B
+    .byte >Brinstar_Norf_Kraid_Elevator_Attrs   ;Room #$0B
     .byte >Brinstar_DefaultAttrs        		;Room #$0C
     .byte >Brinstar_DefaultAttrs        		;Room #$0D
     .byte >Brinstar_DefaultAttrs        		;Room #$0E
@@ -3527,7 +3439,7 @@ Bank06_L8A90:  .byte $00, $00, $04, $00, $00, $00, $00, $00, $00, $00, $00, $00,
     .byte >Brinstar_DefaultAttrs        		;Room #$19
     .byte >Brinstar_1A_Attrs            		;Room #$1A
     .byte >Brinstar_1B_Attrs            		;Room #$1B
-    .byte >Brinstar_1C_Attrs        			;Room #$1C
+    .byte >Brinstar_Norf_Kraid_Elevator_Attrs   ;Room #$1C
     .byte >Brinstar_DefaultAttrs        		;Room #$1D
     .byte >Brinstar_1E_Attrs            		;Room #$1E
     .byte >Brinstar_1F_Attrs            		;Room #$1F
@@ -3540,7 +3452,7 @@ Bank06_L8A90:  .byte $00, $00, $04, $00, $00, $00, $00, $00, $00, $00, $00, $00,
     .byte >Brinstar_26_Attrs            		;Room #$26
     .byte >Brinstar_Left_Door_Attrs     		;Room #$27
     .byte >Brinstar_28_Attrs            		;Room #$28
-    .byte >Brinstar_29_Attrs            		;Room #$29
+    .byte >Brinstar_DefaultAttrs            	;Room #$29
     .byte >Brinstar_DefaultAttrs        		;Room #$2A
     .byte >Brinstar_Bridge_To_Tourian_Attrs     ;Room #$2B
     .byte >Brinstar_Elivator_To_Tourian_Attrs   ;Room #$2C
@@ -3558,7 +3470,7 @@ Bank06_L8A90:  .byte $00, $00, $04, $00, $00, $00, $00, $00, $00, $00, $00, $00,
     .byte <Brinstar_DefaultAttrs        		;Room #$08
     .byte <Brinstar_DefaultAttrs        		;Room #$09
     .byte <Brinstar_Chozo_Attrs         		;Room #$0A
-    .byte <Brinstar_Norf_Elevator       		;Room #$0B
+    .byte <Brinstar_Norf_Kraid_Elevator_Attrs   ;Room #$0B
     .byte <Brinstar_DefaultAttrs        		;Room #$0C
     .byte <Brinstar_DefaultAttrs        		;Room #$0D
     .byte <Brinstar_DefaultAttrs        		;Room #$0E
@@ -3575,7 +3487,7 @@ Bank06_L8A90:  .byte $00, $00, $04, $00, $00, $00, $00, $00, $00, $00, $00, $00,
     .byte <Brinstar_DefaultAttrs        		;Room #$19
     .byte <Brinstar_1A_Attrs            		;Room #$1A
     .byte <Brinstar_1B_Attrs            		;Room #$1B
-    .byte <Brinstar_1C_Attrs        			;Room #$1C
+    .byte <Brinstar_Norf_Kraid_Elevator_Attrs   ;Room #$1C
     .byte <Brinstar_DefaultAttrs        		;Room #$1D
     .byte <Brinstar_1E_Attrs            		;Room #$1E
     .byte <Brinstar_1F_Attrs            		;Room #$1F
@@ -3588,7 +3500,7 @@ Bank06_L8A90:  .byte $00, $00, $04, $00, $00, $00, $00, $00, $00, $00, $00, $00,
     .byte <Brinstar_26_Attrs            		;Room #$26
     .byte <Brinstar_Left_Door_Attrs     		;Room #$27
     .byte <Brinstar_28_Attrs            		;Room #$28
-    .byte <Brinstar_29_Attrs            		;Room #$29
+    .byte <Brinstar_DefaultAttrs            	;Room #$29
     .byte <Brinstar_DefaultAttrs        		;Room #$2A
     .byte <Brinstar_Bridge_To_Tourian_Attrs     ;Room #$2B
     .byte <Brinstar_Elivator_To_Tourian_Attrs   ;Room #$2C
@@ -4083,6 +3995,15 @@ Bank01_LB132:  .byte $04           ;Drumbeat 01    |
 Bank01_LB133:  .byte $04           ;Drumbeat 01    +
 Bank01_LB134:  .byte $FF           ;
 
+;----------------------------[ Cramming structs wherever they will fit]-----------------------------
+
+Bank01_Struct_58:
+    .byte $04, $1E, $1E, $1C, $1E
+    .byte $04, $1E, $1E, $1E, $1E
+	.byte $FF
+
+; CODE CAVE (~ 6 x 16 bytes)
+
 ;------------------------------------------[ Sound Engine ]------------------------------------------
 
 .advance SoundEngineOrg
@@ -4171,8 +4092,8 @@ Bank01_LB134:  .byte $FF           ;
     .byte >Bank01_Struct_38, 	>Bank01_Struct_39, >Bank01_Struct_3A, >Bank01_Struct_3B, >Bank01_Struct_3C, >Bank01_Struct_3D, >Bank01_Struct_3E, >Bank01_Struct_3F 
     .byte >Bank01_Struct_40, 	>Bank01_Struct_41, >Bank01_Struct_42, >Bank01_Struct_43, >Bank01_Struct_44, >Bank01_Struct_45, >Bank01_Struct_46, >Bank01_Struct_47 
     .byte >Bank01_Struct_48, 	>Bank01_Struct_49, >Bank01_Struct_4A, >Bank01_Struct_4B, >Bank01_Struct_4C, >Bank01_Struct_4D, >Bank01_Struct_4E, >Bank01_Struct_4F 
-	.byte >Bank01_Struct_50,	>Bank01_Struct_51, >Bank01_Struct_52, >Bank01_Struct_53, >Bank01_Struct_54, >Bank01_Struct_55
-
+	.byte >Bank01_Struct_50,	>Bank01_Struct_51, >Bank01_Struct_52, >Bank01_Struct_53, >Bank01_Struct_54, >Bank01_Struct_55, >Bank01_Struct_56, >Bank01_Struct_57
+	.byte >Bank01_Struct_58
 .advance StructPointerTable_Lo
 
     .byte <Common_Struct_00, 	<Bank01_LAC97,     <Bank01_LACB0,     <Bank01_LACC9,     <Bank01_LACD0,     <Bank01_LACD7,     <Bank01_LACDB,     <Bank01_LACE6 
@@ -4185,7 +4106,8 @@ Bank01_LB134:  .byte $FF           ;
     .byte <Bank01_Struct_38, 	<Bank01_Struct_39, <Bank01_Struct_3A, <Bank01_Struct_3B, <Bank01_Struct_3C, <Bank01_Struct_3D, <Bank01_Struct_3E, <Bank01_Struct_3F 
     .byte <Bank01_Struct_40, 	<Bank01_Struct_41, <Bank01_Struct_42, <Bank01_Struct_43, <Bank01_Struct_44, <Bank01_Struct_45, <Bank01_Struct_46, <Bank01_Struct_47 
     .byte <Bank01_Struct_48, 	<Bank01_Struct_49, <Bank01_Struct_4A, <Bank01_Struct_4B, <Bank01_Struct_4C, <Bank01_Struct_4D, <Bank01_Struct_4E, <Bank01_Struct_4F 
-	.byte <Bank01_Struct_50,	<Bank01_Struct_51, <Bank01_Struct_52, <Bank01_Struct_53, <Bank01_Struct_54, <Bank01_Struct_55
+	.byte <Bank01_Struct_50,	<Bank01_Struct_51, <Bank01_Struct_52, <Bank01_Struct_53, <Bank01_Struct_54, <Bank01_Struct_55, <Bank01_Struct_56, <Bank01_Struct_57
+	.byte <Bank01_Struct_58
 
 ;----------------------------------------------------------------------------------------------------
 

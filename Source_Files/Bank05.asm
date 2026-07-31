@@ -2250,9 +2250,23 @@ Bank05_LAB1A:  .byte $01, $1F, $FF
 ;Structure #$1C
 Bank05_LAB1D:  .byte $04, $20, $20, $20, $20, $FF
 
-;-----------------------------------[ Enemy animation data tables ]----------------------------------
+Bank05_Init:
+    LDA #$00                ;GameMode = play.
+    STA GameMode            ;
+    JSR ScreenNmiOff        ;($C45D)Disable screen and Vblank.
+    lda #$06
+    sta SpareMemD1
+RidleyGFX_Loop:
+    ldx SpareMemD1
+    ldy RidleyGFXTable, x
+    JSR LoadGFX
+    dec SpareMemD1
+    bpl RidleyGFX_Loop
+    JMP NmiOn               ;($C487)Turn on VBlank interrupts.
 
-.byte $BB, $BB, $BB, $BB, $BB
+; CODE CAVE (86 x 16 bytes) 1.3 KB
+
+;-----------------------------------[ Enemy animation data tables ]----------------------------------
 
 .advance RoomAttrTbl_Hi
     .byte >Ridley_DefaultAttrs         ;Room #$00
@@ -2753,6 +2767,7 @@ Bank05_LB0E6:  .byte $FF           ;
 
 .scend
 
+; CODE CAVE 13 * 16 bytes
 ;------------------------------------------[ Sound Engine ]------------------------------------------
 
 .advance SoundEngineOrg
@@ -2843,6 +2858,8 @@ Bank05_LB0E6:  .byte $FF           ;
     .byte <Bank05_LAA83, <Bank05_LAA86, <Bank05_LAA8C, <Bank05_LAA96, <Bank05_LAAAB, <Bank05_LAAC7, <Bank05_LAAD2, <Bank05_LAAD9
     .byte <Bank05_LAAEE, <Bank05_LAB0A, <Bank05_LAB11, <Bank05_LAB1A, <Bank05_LAB1D
 
+
+.word $B00B, $5555, $5555, $5555, $5555
 ;----------------------------------------------------------------------------------------------------
 
 RESET_Bank05:

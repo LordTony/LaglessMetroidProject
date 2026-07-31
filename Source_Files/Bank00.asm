@@ -82,7 +82,7 @@ L8071:  LDY #$02                ;
         STY IntroMusRstrt 
 L8077:  DEY                     ;
 DEBUG_NARPASS_HACK:
-    STY NARPASSWORD         ; While debugging the game, play with narpass always
+;    STY NARPASSWORD         ; While debugging the game, play with narpass always
 L807A:  STY SpareMemD1          ;
 L807C:  DEY                     ;
 L8075:  STY HorzCntrNonLinr     ;
@@ -92,7 +92,7 @@ L807D:  STY AlwaysZero          ;
 L807F:  STY VertCntrLinear      ;
 L8081:  STY SamusHorzSpdMax     ;
 
-;L8083:  STY NARPASSWORD         ;Set NARPASSWORD not active.
+L8083:  STY NARPASSWORD         ;Set NARPASSWORD not active.
 L8086:  STY VertCntrNonLinr     ;
 L8088:  STY SamusJmpDsplcmnt    ;
 L808E:  STY SpareMemB7          ;Not used.
@@ -3734,7 +3734,7 @@ L9F48:  .byte $7C, $26, $22, $B2
 L9F4C:  .byte $73, $26, $23, $E7
 L9F50:  .byte $0C, $26, $22, $AA
 
-_EndGamePalWrite:
+EndGamePalWrite:
 L9F54:  LDA PalDataPending      ;If no palette data pending, branch to exit.
 L9F56:  BEQ ++                  ;
 L9F58:  CMP #$0C                ;If PalDataPending has loaded last palette,
@@ -5662,6 +5662,7 @@ GFXBrinstarEnemies:
     .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
     .byte $1D, $1D, $1D, $1D, $1D, $1D, $1D, $1D, $0F, $0F, $0F, $0F, $0F, $0F, $0F, $0F
     .byte $F8, $F8, $F8, $F8, $F8, $F8, $F8, $F8, $A0, $A0, $A0, $A0, $A0, $A0, $A0, $A0
+    
     .byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
     .byte $00, $00, $00, $00, $00, $00, $00, $00, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
     .byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $00, $00, $00, $00, $00, $00, $00, $00
