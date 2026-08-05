@@ -246,6 +246,8 @@ Bank01_LADBE:
 	.byte $08, $0D, $0D, $0D, $0D, $0D, $0D, $0D, $0D
 	.byte $08, $0D, $0D, $0D, $0D, $0D, $0D, $0D, $0D
 	.byte $08, $0D, $0D, $0D, $0D, $0D, $0D, $0D, $0D
+;Structure #$1C
+Bank01_LAE09:
 	.byte $08, $0D, $0D, $0D, $0D, $0D, $0D, $0D, $0D
 	.byte $FF
 
@@ -280,9 +282,7 @@ Bank01_LADF9:
     .byte $FF
 
 ;Structure #$1C
-Bank01_LAE09:
-    .byte $08, $0D, $0D, $0D, $0D, $0D, $0D, $0D, $0D
-    .byte $FF
+; Moved UP above
 
 ;Structure #$1D
 Bank01_LAE13:
@@ -489,6 +489,7 @@ Bank01_Struct_3F:
     .byte $01, $08
     .byte $01, $33
     .byte $01, $33
+	.byte $01, $33
     .byte $FF
 
 ;Structure #$1F (4 rows down to 1)
@@ -863,10 +864,10 @@ Bank01_L99A5:  BEQ $99B0
 Bank01_L99A7:  CMP #$03
 Bank01_L99A9:  BEQ $99B5
 Bank01_L99AB:  LDA $00
-Bank01_L99AD:  JMP $8000
+Bank01_L99AD:  JMP StartUpdateEnemyAnimation
 Bank01_L99B0:  LDA $01
-Bank01_L99B2:  JMP $8003
-Bank01_L99B5:  JMP $8006
+Bank01_L99B2:  JMP StartUpdateEnemyAnimation_2
+Bank01_L99B5:  JMP Start_Special_Attrs
 
 Bank01_L99B8:  LDA #$09
 Bank01_L99BA:  STA $85
@@ -874,7 +875,7 @@ Bank01_L99BC:  STA $86
 Bank01_L99BE:  LDA EnStatus,X
 Bank01_L99C1:  CMP #$03
 Bank01_L99C3:  BEQ $99C8
-Bank01_L99C5:  JSR $801B
+Bank01_L99C5:  JSR Bank07_LFB88
 Bank01_L99C8:  LDA #$06
 Bank01_L99CA:  STA $00
 Bank01_L99CC:  LDA #$08
@@ -886,7 +887,7 @@ Bank01_L99D5:  JMP $99BA
 Bank01_L99D8:  LDA EnStatus,X
 Bank01_L99DB:  CMP #$03
 Bank01_L99DD:  BEQ $99E2
-Bank01_L99DF:  JSR $801E
+Bank01_L99DF:  JSR Bank07_LFBCA
 Bank01_L99E2:  JMP $99C8
 Bank01_L99E5:  LDA #$21
 Bank01_L99E7:  STA $85
@@ -895,7 +896,7 @@ Bank01_L99EB:  STA $86
 Bank01_L99ED:  LDA EnStatus,X
 Bank01_L99F0:  CMP #$03
 Bank01_L99F2:  BEQ $99F7
-Bank01_L99F4:  JSR $801B
+Bank01_L99F4:  JSR Bank07_LFB88
 Bank01_L99F7:  JMP $99C8
 
 .advance $99FA
@@ -932,12 +933,12 @@ Bank01_L9A3B:  DEY
 Bank01_L9A3C:  DEY 
 Bank01_L9A3D:  BPL $9A22
 Bank01_L9A3F:  LDA #$02
-Bank01_L9A41:  JMP $8000
+Bank01_L9A41:  JMP StartUpdateEnemyAnimation
 Bank01_L9A44:  LDA #$08
-Bank01_L9A46:  JMP $8003
-Bank01_L9A49:  JMP $8006
+Bank01_L9A46:  JMP StartUpdateEnemyAnimation_2
+Bank01_L9A49:  JMP Start_Special_Attrs
 
-Bank01_L9A4C:  JSR $8009
+Bank01_L9A4C:  JSR DoSomethingToFrameCount
 Bank01_L9A4F:  AND #$03
 Bank01_L9A51:  BEQ $9A87
 Bank01_L9A53:  LDA $81
@@ -963,8 +964,8 @@ Bank01_L9A7E:  JSR $9AE2
 Bank01_L9A81:  JSR $9AA8
 Bank01_L9A84:  JSR $9AC6
 Bank01_L9A87:  LDA #$03
-Bank01_L9A89:  JSR $800C
-Bank01_L9A8C:  JMP $8006
+Bank01_L9A89:  JSR UpdateEnemyAnim
+Bank01_L9A8C:  JMP Start_Special_Attrs
 Bank01_L9A8F:  LDA $0405,X
 Bank01_L9A92:  LSR 
 Bank01_L9A93:  LDA $040A,X
@@ -972,7 +973,7 @@ Bank01_L9A96:  AND #$03
 Bank01_L9A98:  ROL 
 Bank01_L9A99:  TAY 
 Bank01_L9A9A:  LDA $9AA0,Y
-Bank01_L9A9D:  JMP $800F
+Bank01_L9A9D:  JMP DoSomethingToAnimationIndecies
 
 Bank01_L9AA0:  .byte $35, $35, $3E, $38, $3B, $3B, $38, $3E 
 
@@ -1040,10 +1041,10 @@ Bank01_L9B1E:  BCS $9B25
 Bank01_L9B20:  LDA #$00
 Bank01_L9B22:  STA $6AFE,X
 Bank01_L9B25:  LDA #$03
-Bank01_L9B27:  JMP $8000
-Bank01_L9B2A:  JMP $8006
+Bank01_L9B27:  JMP StartUpdateEnemyAnimation
+Bank01_L9B2A:  JMP Start_Special_Attrs
 Bank01_L9B2D:  LDA #$08
-Bank01_L9B2F:  JMP $8003
+Bank01_L9B2F:  JMP StartUpdateEnemyAnimation_2
 Bank01_L9B32:  LDA EnStatus,X
 Bank01_L9B35:  CMP #$02
 Bank01_L9B37:  BNE $9B71
@@ -1076,18 +1077,18 @@ Bank01_L9B75:  BMI $9B95
 Bank01_L9B77:  LDA EnStatus,X
 Bank01_L9B7A:  CMP #$02
 Bank01_L9B7C:  BNE $9B95
-Bank01_L9B7E:  JSR $8036
+Bank01_L9B7E:  JSR $833F
 Bank01_L9B81:  PHA 
-Bank01_L9B82:  JSR $8039
+Bank01_L9B82:  JSR $8395
 Bank01_L9B85:  STA $05
 Bank01_L9B87:  PLA 
 Bank01_L9B88:  STA $04
 Bank01_L9B8A:  JSR $9CA8
-Bank01_L9B8D:  JSR $8027
+Bank01_L9B8D:  JSR Bank07_LFD8F
 Bank01_L9B90:  BCC $9B9A
 Bank01_L9B92:  JSR $9C96
 Bank01_L9B95:  LDA #$03
-Bank01_L9B97:  JMP $8003
+Bank01_L9B97:  JMP StartUpdateEnemyAnimation_2
 Bank01_L9B9A:  LDA #$00
 Bank01_L9B9C:  STA EnStatus,X
 Bank01_L9B9F:  RTS
@@ -1128,21 +1129,21 @@ Bank01_L9BEB:  BMI $9C12
 Bank01_L9BED:  LDA EnStatus,X
 Bank01_L9BF0:  CMP #$02
 Bank01_L9BF2:  BNE $9C12
-Bank01_L9BF4:  JSR $802D
+Bank01_L9BF4:  JSR $8244
 Bank01_L9BF7:  LDX PageIndex
 Bank01_L9BF9:  LDA $00
 Bank01_L9BFB:  STA $0402,X
-Bank01_L9BFE:  JSR $8030
+Bank01_L9BFE:  JSR $8318
 Bank01_L9C01:  LDX PageIndex
 Bank01_L9C03:  LDA $00
 Bank01_L9C05:  STA $0403,X
-Bank01_L9C08:  JSR $8033
+Bank01_L9C08:  JSR Bank07_LFA1E
 Bank01_L9C0B:  BCS $9C12
 Bank01_L9C0D:  LDA #$03
 Bank01_L9C0F:  STA EnStatus,X
 Bank01_L9C12:  LDA #$01
-Bank01_L9C14:  JSR $800C
-Bank01_L9C17:  JMP $8006
+Bank01_L9C14:  JSR UpdateEnemyAnim
+Bank01_L9C17:  JMP Start_Special_Attrs
 Bank01_L9C1A:  JMP $9BD2
 Bank01_L9C1D:  LDX #$50
 Bank01_L9C1F:  JSR $9C2A
@@ -1176,7 +1177,7 @@ Bank01_L9C53:  BEQ $9C60
 Bank01_L9C55:  LDA #$00
 Bank01_L9C57:  STA EnStatus,X
 Bank01_L9C5A:  STA EnSpecialAttribs,X
-Bank01_L9C5D:  JSR $802A
+Bank01_L9C5D:  JSR Bank07_LEB6E
 Bank01_L9C60:  LDA $0405
 Bank01_L9C63:  STA $0405,X
 Bank01_L9C66:  LSR 
@@ -1199,7 +1200,7 @@ Bank01_L9C7D:  LDA $9CBB,Y
 Bank01_L9C80:  STA $05
 Bank01_L9C82:  LDX #$00
 Bank01_L9C84:  JSR $9CA8
-Bank01_L9C87:  JSR $8027
+Bank01_L9C87:  JSR Bank07_LFD8F
 Bank01_L9C8A:  LDX PageIndex
 Bank01_L9C8C:  BCC $9CA7
 Bank01_L9C8E:  LDA EnStatus,X
@@ -2648,7 +2649,7 @@ Bank01_LA8B1:
 Bank01_Room_1B_Left:
 	.byte $00, $14
 	.byte $04, $15
-	.byte $97, $06
+	.byte $97, $3F
 	.byte $A6, $15
 	.byte $B4, $3F
 	.byte $C2, $36
@@ -2662,7 +2663,7 @@ Bank01_Room_1B_Left:
 Bank01_Room_1B_Right:
 	.byte $08, $14
 	.byte $0A, $15
-	.byte $97, $06
+	.byte $97, $3F
 	.byte $A8, $15
 	.byte $BA, $3F
 	.byte $D8, $00

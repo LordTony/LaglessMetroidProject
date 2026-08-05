@@ -873,7 +873,7 @@
 .alias IntroSpr7YDir    $6F1F   ;MSB set=decrease sprite y pos, else increase sprite  y pos.
 
 ;---------------------------------- [ Constant Locations in Swap Banks ] -----------------------------
-
+.alias Common_Struct_00         $8000
 .alias L8048_Ptr_Table          $8048
 .alias ObjectAnimIdxTbl         $8572
 .alias FramePtrTable_Hi         $860B

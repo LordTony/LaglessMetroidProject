@@ -2,31 +2,12 @@
 
 ;-----------------------------------------[ Start of code ]------------------------------------------
 .scope
+; Code Cave  (~ 70 bytes, reachable from Bank 01-05)
 
-_L8000:  JMP StartUpdateEnemyAnimation
-_L8003:  JMP StartUpdateEnemyAnimation_2
-_L8006:  JMP Start_Special_Attrs
-_L8009:  JMP DoSomethingToFrameCount
-_L800C:  JMP UpdateEnemyAnim     ;($E094)
-_L800F:  JMP DoSomethingToAnimationIndecies
-_L8012:  JMP DoSomethingToEnDataIndex
-_L8015:  JMP UpdateEnemyHitpoints
-_L8018:  JMP Bank07_LFBB9
-_L801B:  JMP Bank07_LFB88
-_L801E:  JMP Bank07_LFBCA
-_L8021:  JMP Bank07_LF870       ; used in bank 02 and bank 05
-_L8024:  JMP _ChooseRoutine
-_L8027:  JMP Bank07_LFD8F
-_L802A:  JMP Bank07_LEB6E
-_L802D:  JMP $8244
-_L8030:  JMP $8318
-_L8033:  JMP Bank07_LFA1E
-_L8036:  JMP $833F
-_L8039:  JMP $8395
-_L803C:  JMP SomethingAboutMovement
-_L803F:  JMP DrawTileBlast
-_L8042:  JMP SubtractHealth      ;($CE92)
-_L8045:  JMP Base10Subtract      ;($C3FB)
+.advance Common_Struct_00
+    .byte $08, $01, $01, $01, $01, $01, $01, $01, $01
+    .byte $08, $00, $00, $00, $00, $00, $00, $00, $00
+    .byte $FF
 
 .advance L8048_Ptr_Table
     .word _L84FD, _L84A6, _L844A, _L844A, _L84A6, _L84FD, _L83F4, _L83F4
@@ -1361,28 +1342,6 @@ _L8A8E:  .byte $0D, $03, $03, $3F, $FD, $40, $3F, $FD, $00, $4F, $FD, $40, $4F, 
 ;Skree burrow.
 _L8A9C:  .byte $34, $04, $04, $F2, $FF
 
-;-----------------------------------------[ Choose routine ]-----------------------------------------
-
-;This is an indirect jump routine. A is used as an index into a code
-;pointer table, and the routine at that position is executed. The programmers
-;always put the pointer table itself directly after the JSR to _ChooseRoutine,
-;meaning that its address can be popped from the stack.
-
-_ChooseRoutine:
-    ASL
-    TAY
-    INY
-    PLA
-    STA TempPtr
-    PLA
-    STA TempPtr+1
-    LDA (TempPtr),Y
-    STA CodePtr
-    INY
-    LDA (TempPtr),Y
-    STA CodePtr+1
-    JMP (CodePtr)
-
 _Adiv32:
     lsr
 _Adiv16:
@@ -1394,7 +1353,6 @@ _Adiv16:
 
 _AMul16:
     asl
-_AMul8:
     asl
     asl
     asl
@@ -1502,7 +1460,7 @@ _L8B86:  RTS
 
 _L8B87:  STX PageIndex
 _L8B89:  LDA ObjAction,X
-_L8B8C:  JSR _ChooseRoutine       ;($C27C)
+_L8B8C:  JSR ChooseRoutine       ;($C27C)
 _L8B8F:  .word ExitSub
 _L8B91:  .word _L8B9D
 _L8B93:  .word _L8BD5
@@ -1681,7 +1639,7 @@ _L8D02:  TXA
 _L8D03:  JSR _Adiv16
 _L8D06:  AND #$01
 _L8D08:  TAY 
-_L8D09:  LDA $8D3A,Y
+_L8D09:  LDA _CommonTable,Y
 _L8D0C:  STA $03
 _L8D0E:  LDA $030C,X
 _L8D11:  STA $0B
@@ -1709,10 +1667,9 @@ _L8D34:  LDA $05
 _L8D36:  STA $005D,Y
 _L8D39:  RTS
 
-.advance $8D3A
-
-_L8D3A:  .byte $E8, $10, $60, $AD, $91, $69, $8D, $78, $68, $AD, $92, $69, $8D, $79, $68, $A9 
-_L8D4A:  .byte $00, $85, $00, $85, $02, $AD, $97, $69, $29, $80, $F0, $06, $A5, $00, $09, $80
-_L8D5A:  .byte $85, $00, $AD, $97, $69, $29
+_CommonTable:
+_L8D3A:  .byte $E8, $10 ; looks to be unused ;, $60, $AD, $91, $69, $8D, $78, $68, $AD, $92, $69, $8D, $79, $68, $A9 
+;_L8D4A:  .byte $00, $85, $00, $85, $02, $AD, $97, $69, $29, $80, $F0, $06, $A5, $00, $09, $80
+;_L8D5A:  .byte $85, $00, $AD, $97, $69, $29
 
 .scend

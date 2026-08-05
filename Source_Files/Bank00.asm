@@ -2659,7 +2659,7 @@ L945C:  JMP EraseTile           ;($C328)Erase the selected tiles.
 
 ;This is an indirect jump routine. A is used as an index into a code
 ;pointer table, and the routine at that position is executed. The programmers
-;always put the pointer table itself directly after the JSR to _ChooseRoutine,
+;always put the pointer table itself directly after the JSR to ChooseRoutine,
 ;meaning that its address can be popped from the stack.
 
 Bank00ChooseRoutine:
