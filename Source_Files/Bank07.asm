@@ -667,11 +667,9 @@ LC35F:  JSR AddYToPtr00         ;($C2A8)Move to next name table line.
 LC362:  LDY $06                 ;Store index to find next tile info.
 LC364:  DEC $04                 ;
 LC366:  BNE --                  ;Branch if more lines need to be changed on name table.
-;        lda #$00           
-;        sta PPUDataString,x
-;        rts
-LC368: JSR EndPPUString
-
+        lda #$00           
+        sta PPUDataString,x
+        rts
 
 WritePPUByte:
 LC36B:  STA PPUDataString,x     ;Store data byte at end of PPUDataString.
@@ -4210,7 +4208,7 @@ LDCE4:  STA $04             ;horizontal mirroring of the sprite if set.
 LDCE6:  LDA ObjectCntrl     ;
 LDCE8:  BPL +               ;If MSB is set in ObjectCntrl, use its flip bits(6 and 7).
 
-;; SpriteFlipBitsOverride
+; SpriteFlipBitsOverride
     and #$3F
     sta $D4                 ; scratch ZP
     txa 
@@ -4323,7 +4321,7 @@ OnBossKilled:
 ; Move this to the most common jmpSomethingAboutMovement line
 SomethingAboutMovement:
     ; MARU
-    ldx PageIndex          ; Should be loaded from all callers already
+    ;ldx PageIndex          ; Should be loaded from all callers already
     ldy EnAnimFrame,x
     cpy #$F7
     bne MoveEnemies
@@ -4369,7 +4367,7 @@ MoveEnemies:
     CPX #$01
     BNE +
 
-    ;LDX PageIndex
+    LDX PageIndex
     INC EnCounter,x
     LDA EnCounter,x
     PHA
@@ -9284,6 +9282,7 @@ LF991:
     STA $0A
     LDA $97A8,y
     STA $0B
+    
 *   LDY $0408,x
     LDA ($0A),y
     CMP #$FF
@@ -10003,12 +10002,12 @@ DrawTileBlast:
     
 GetTileFramePtr:
     lda TileAnimFrame,x
-    asl
     tay
-    lda $97AF,y
+
+    lda TileFramePtrTbl_Lo,y
     sta $02
 
-    lda $97B0,y
+    lda TileFramePtrTbl_Hi,y
     sta $03
 
     ldy #$00
@@ -10026,8 +10025,7 @@ GetTileFramePtr:
     sty $10
 
 *   ldx $05
-; TODO - Optimize
-*   ldy $10         ; loop, at start $10 == 1 and $11 = 0
+*   ldy $10
     lda ($02),y
     inc $10
 

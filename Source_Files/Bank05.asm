@@ -139,7 +139,7 @@ GFXGameOverJapaneseFont:
     .byte <_Palette07         ;($A142)
     .byte <_Palette08         ;($A149)
     .byte <_Palette09         ;($A150)
-    .byte <_Palette0A         ;($A157)
+    .byte <_Palette0A         ;($A157)5
     .byte <_Palette0B         ;($A15F)
     .byte <_Palette0C         ;($A167)
     .byte <_Palette0D         ;($A16F)
@@ -199,7 +199,10 @@ Bank05_L95C0:
 
 .advance AreaRoutine
 
-Bank05_L95C3:  JMP $9B48           ;Area specific routine.
+Bank05_L95C3:
+    rts 
+    nop 
+    nop 
 
 TwosCompliment:
 Bank05_L95C6:  EOR #$FF            ;
@@ -299,9 +302,17 @@ Bank05_L978B:  .byte $00, $00, $00, $00, $34, $34, $44, $4A, $00, $00, $00, $00,
 Bank05_L979B:  .byte $08, $F8, $00, $00, $00, $00, $08, $F8, $00, $00, $00, $F8
 
 .advance $97A7
-Bank05_L97A7:  .word $97FD, $97FD, $980C, $981B, $9B49, $9B4E, $9B53, $9B58
-Bank05_L97B7:  .word $9B5D, $9B62, $9B67, $9B6C, $9B71, $9B76, $9B7B, $9B80
-Bank05_L97C7:  .word $9B85, $9B85, $9B85, $9B85, $9B85
+Bank05_L97A7:  .word $97FD, $97FD, $980C, $981B
+
+.advance TileFramePtrTbl_Hi
+Bank05_L97AF:  .byte >Bank05_L9B49, >Bank05_L9B4E, >Bank05_L9B53, >Bank05_L9B58, >Bank05_L9B5D,      >Bank05_L9B62,      >Bank05_L9B67,      >Bank05_L9B6C
+Bank05_L97B7:  .byte >Bank05_L9B71, >Bank05_L9B76, >Bank05_L9B7B, >Bank05_L9B80, >EnemyAnimIndexTbl, >EnemyAnimIndexTbl, >EnemyAnimIndexTbl, >EnemyAnimIndexTbl
+Bank05_L97BF:  .byte >EnemyAnimIndexTbl
+
+.advance TileFramePtrTbl_Lo
+Bank05_L97C0:  .byte <Bank05_L9B49, <Bank05_L9B4E, <Bank05_L9B53, <Bank05_L9B58, <Bank05_L9B5D,      <Bank05_L9B62,      <Bank05_L9B67,      <Bank05_L9B6C
+Bank05_L97C8:  .byte <Bank05_L9B71, <Bank05_L9B76, <Bank05_L9B7B, <Bank05_L9B80, <EnemyAnimIndexTbl, <EnemyAnimIndexTbl, <EnemyAnimIndexTbl, <EnemyAnimIndexTbl
+Bank05_L97D0:  .byte <EnemyAnimIndexTbl
 
 Bank05_L97D1:  .byte $01, $04, $05, $01, $06, $07, $00, $02, $00, $09, $00, $0D, $01, $0E, $0F, $03
 Bank05_L97E1:  .byte $00, $01, $02, $03, $00, $10, $00, $11, $00, $00, $00, $01
@@ -682,7 +693,7 @@ Bank05_L9B26:  LSR
 Bank05_L9B27:  LSR 
 Bank05_L9B28:  ADC $2D
 Bank05_L9B2A:  AND #$07
-Bank05_L9B2C:  BNE $9B48
+Bank05_L9B2C:  BNE Bank05_L9B48
 Bank05_L9B2E:  LSR $0405,X
 Bank05_L9B31:  LDA #$03
 Bank05_L9B33:  STA $87
@@ -690,11 +701,13 @@ Bank05_L9B35:  LDA $2E
 Bank05_L9B37:  LSR 
 Bank05_L9B38:  ROL $0405,X
 Bank05_L9B3B:  AND #$03
-Bank05_L9B3D:  BEQ $9B48
+Bank05_L9B3D:  BEQ Bank05_L9B48
 Bank05_L9B3F:  STA $88
 Bank05_L9B41:  LDA #$02
 Bank05_L9B43:  STA $85
 Bank05_L9B45:  JMP Bank07_LF870
+
+Bank05_Area_Routine:
 Bank05_L9B48:  RTS
 
 Bank05_L9B49:  .byte $22, $FF, $FF, $FF, $FF

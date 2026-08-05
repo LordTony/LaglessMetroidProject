@@ -665,11 +665,14 @@ Bank01_L95BD:
 Bank01_L95C0:
     rts 
     nop 
-    nop
+    nop 
 
 .advance AreaRoutine
 
-Bank01_L95C3:  JMP $9D35           ;Area specific routine.
+Bank01_L95C3: 
+	rts 
+	nop 
+	nop 
 
 TwosCompliment:
 Bank01_L95C6:  EOR #$FF            ;
@@ -787,9 +790,17 @@ Bank01_L978B:  .byte $00, $00, $64, $67, $69, $69, $00, $00, $00, $00, $00, $00,
 Bank01_L979B:  .byte $0C, $F4, $00, $00, $00, $00, $00, $00, $F4, $00, $00, $00
 
 .advance $97A7
-Bank01_L97A7:  .word $9965, $9974, $9983, $9992, $9D36, $9D3B, $9D40, $9D45
-Bank01_L97B7:  .word $9D4A, $9D4F, $9D54, $9D59, $9D5E, $9D63, $9D6A, $9D6A
-Bank01_L97C7:  .word $9D6A, $9D6A, $9D6A, $9D6A, $9D6A
+Bank01_L97A7:  .word $9965, $9974, $9983, $9992 
+
+.advance TileFramePtrTbl_Hi
+Bank01_L97AF:  .byte >Bank01_L9D36, >Bank01_L9D3B, >Bank01_L9D40, 		>Bank01_L9D45, 		>Bank01_L9D4A, 		>Bank01_L9D4F, 		>Bank01_L9D54, 		>Bank01_L9D59
+Bank01_L97B7:  .byte >Bank01_L9D5E, >Bank01_L9D63, >EnemyAnimIndexTbl, 	>EnemyAnimIndexTbl, >EnemyAnimIndexTbl, >EnemyAnimIndexTbl, >EnemyAnimIndexTbl, >EnemyAnimIndexTbl
+Bank01_L97BF:  .byte >EnemyAnimIndexTbl
+
+.advance TileFramePtrTbl_Lo
+Bank01_L97C0:  .byte <Bank01_L9D36, <Bank01_L9D3B, <Bank01_L9D40, 		<Bank01_L9D45, 		<Bank01_L9D4A, 		<Bank01_L9D4F, 		<Bank01_L9D54, 		<Bank01_L9D59
+Bank01_L97C8:  .byte <Bank01_L9D5E, <Bank01_L9D63, <EnemyAnimIndexTbl, 	<EnemyAnimIndexTbl, <EnemyAnimIndexTbl, <EnemyAnimIndexTbl, <EnemyAnimIndexTbl, <EnemyAnimIndexTbl
+Bank01_L97D0:  .byte <EnemyAnimIndexTbl
 
 Bank01_L97D1:  .byte $01, $01, $02, $01, $03, $04, $00, $05, $00, $06, $00, $07, $00, $08, $00, $09
 Bank01_L97E1:  .byte $00, $00, $00, $0B, $01, $0C, $0D, $00, $0E, $03, $0F, $10, $11, $0F
@@ -1284,10 +1295,21 @@ Bank01_L9D2F:  LDA #$08
 Bank01_L9D31:  STA EnDelay,X
 Bank01_L9D34:  RTS
 
-Bank01_L9D35:  .byte $60, $22, $FF, $FF, $FF, $FF, $22, $80, $81, $82, $83, $22, $84, $85, $86, $87
-Bank01_L9D45:  .byte $22, $88, $89, $8A, $8B, $22, $8C, $8D, $8E, $8F, $22, $94, $95, $96, $97, $22
-Bank01_L9D55:  .byte $9C, $9D, $9D, $9C, $22, $9E, $9F, $9F, $9E, $22, $90, $91, $92, $93, $32, $4E
-Bank01_L9D65:  .byte $4E, $4E, $4E, $4E, $4E
+; UNUSED
+Bank01_Area_Routine:  
+	.byte $60
+
+Bank01_Tiles_Tbl:
+	Bank01_L9D36: .byte $22, $FF, $FF, $FF, $FF 
+	Bank01_L9D3B: .byte $22, $80, $81, $82, $83 
+	Bank01_L9D40: .byte $22, $84, $85, $86, $87
+	Bank01_L9D45: .byte $22, $88, $89, $8A, $8B
+	Bank01_L9D4A: .byte $22, $8C, $8D, $8E, $8F
+	Bank01_L9D4F: .byte $22, $94, $95, $96, $97
+	Bank01_L9D54: .byte $22, $9C, $9D, $9D, $9C
+	Bank01_L9D59: .byte $22, $9E, $9F, $9F, $9E
+	Bank01_L9D5E: .byte $22, $90, $91, $92, $93
+	Bank01_L9D63: .byte $32, $4E, $4E, $4E, $4E, $4E, $4E
 
 ;------------------------------[ Enemy sprite placement data tables ]--------------------------------
 

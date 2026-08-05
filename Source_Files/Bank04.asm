@@ -245,7 +245,10 @@ Bank04_L95C0:
 
 .advance AreaRoutine
 
-Bank04_L95C3:  JMP $9C49           ;Area specific routine.
+Bank04_L95C3:
+    rts 
+    nop 
+    nop           ;Area specific routine (Just an RTS in bank 04)
 
 TwosCompliment:
 Bank04_L95C6:  EOR #$FF            ;
@@ -344,9 +347,17 @@ Bank04_L978B:  .byte $00, $00, $5F, $62, $64, $64, $00, $00, $00, $00, $00, $00,
 Bank04_L979B:  .byte $0C, $F4, $00, $00, $00, $00, $00, $00, $F4, $00, $00, $00
 
 .advance $97A7
-Bank04_L97A7:  .word $98C9, $98D8, $98E7, $98F6, $9C4A, $9C4F, $9C54, $9C59
-Bank04_L97B7:  .word $9C5E, $9C63, $9C68, $9C6D, $9C72, $9C77, $9C7C, $9C81
-Bank04_L97C7:  .word $9C86, $9C86, $9C86, $9C86, $9C86
+Bank04_L97A7:  .word $98C9, $98D8, $98E7, $98F6
+
+.advance TileFramePtrTbl_Hi
+Bank04_L97AF:  .byte >Bank04_L9C4A, >Bank04_L9C4F, >Bank04_L9C54, >Bank04_L9C59, >Bank04_L9C5E,      >Bank04_L9C63,      >Bank04_L9C68,      >Bank04_L9C6D
+Bank04_L97B7:  .byte >Bank04_L9C72, >Bank04_L9C77, >Bank04_L9C7C, >Bank04_L9C81, >EnemyAnimIndexTbl, >EnemyAnimIndexTbl, >EnemyAnimIndexTbl, >EnemyAnimIndexTbl
+Bank04_L97BF:  .byte >EnemyAnimIndexTbl
+
+.advance TileFramePtrTbl_Lo
+Bank04_L97C0:  .byte <Bank04_L9C4A, <Bank04_L9C4F, <Bank04_L9C54, <Bank04_L9C59, <Bank04_L9C5E,      <Bank04_L9C63,      <Bank04_L9C68,      <Bank04_L9C6D
+Bank04_L97C8:  .byte <Bank04_L9C72, <Bank04_L9C77, <Bank04_L9C7C, <Bank04_L9C81, <EnemyAnimIndexTbl, <EnemyAnimIndexTbl, <EnemyAnimIndexTbl, <EnemyAnimIndexTbl
+Bank04_L97D0:  .byte <EnemyAnimIndexTbl
 
 Bank04_L97D1:  .byte $01, $01, $02, $01, $03, $04, $00, $06, $00, $07, $00, $09, $00, $00, $01, $0C
 Bank04_L97E1:  .byte $0D, $00, $0E, $03, $0F, $10, $11, $0F
@@ -791,7 +802,8 @@ Bank04_L9C43:  LDA #$08
 Bank04_L9C45:  STA $0409,X
 Bank04_L9C48:  RTS 
 
-Bank04_L9C49:  .byte $60
+Bank04_Area_Routine:
+    RTS 
 
 Bank04_L9C4A:  .byte $22, $FF, $FF, $FF, $FF
 

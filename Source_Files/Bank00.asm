@@ -2649,8 +2649,8 @@ L944D:  JMP ProcessPPUStr       ;($C30C)
 PrepareEraseTiles:
 L9450:  STX $00                 ;PPU low address byte
 L9452:  STY $01                 ;PPU high address byte
-L9454:  LDX #$80                ;
-L9456:  LDY #$07                ;
+L9454:  LDX #<TileSize          ;
+L9456:  LDY #>TileSize          ;
 L9458:  STX $02                 ;Address of byte where tile size  
 L945A:  STY $03                 ;of tile to be erased is stored.
 L945C:  JMP EraseTile           ;($C328)Erase the selected tiles.

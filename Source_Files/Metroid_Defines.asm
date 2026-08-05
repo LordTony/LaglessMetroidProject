@@ -564,7 +564,8 @@
 ;0-5 of the configuration byte.  Those bytes are a repitition counter. Any following bytes
 ;are the actual data bytes to be written to the PPU. #$00 separates the data chunks.
 
-.alias PPUDataString        $0781   ;Thru $07F0. String of data bytes to be written to PPU.
+.alias PPUDataString    $0781   ;Thru $07F0. String of data bytes to be written to PPU.
+.alias PPUMaxSize       $6F     ;How many bytes the PPU can handle at once
 
 ;-------------------------------------[ Hardware Defines ]-------------------------------------------
 
@@ -887,9 +888,11 @@
 .alias SpecItmsTblPtr           $9598
 .alias HandleBankEnemies        $95E5
 .alias AreaRoutine              $95C3
+.alias MemuByte                 $95E4
 .alias EnemyHitPointTbl         $962B
 .alias EnemyInitDelayTbl        $96BB
-.alias MemuByte                 $95E4
+.alias TileFramePtrTbl_Hi       $97AF
+.alias TileFramePtrTbl_Lo       $97C0
 .alias RoomAttrTbl_Hi           $ACB0
 .alias RoomAttrTbl_Lo           $ACE0
 .alias EnemyAnimIndexTbl        $AD14
@@ -1106,7 +1109,5 @@
 .alias BTN_SELECT       $20     ;Controller button select.
 .alias BTN_B            $40     ;Controller button B.
 .alias BTN_A            $80     ;Controller button A.
-
-.alias PPUMaxSize       $6F; $4F     ;How many bytes the PPU can handle at once
 
 .alias ___              $FF     ;Used in world map to make it more readable.

@@ -234,7 +234,7 @@ Bank03_L95C0:  JMP Bank03_LA142
 
 .advance AreaRoutine
 
-Bank03_L95C3:  JMP $9B25           ;Area specific routine.
+Bank03_L95C3:  JMP Bank03_Area_Routine           ;Area specific routine.
 
 TwosCompliment_:
 Bank03_L95C6:  EOR #$FF            ;
@@ -336,9 +336,17 @@ Bank03_L978B:  .byte $00, $00, $26, $26, $26, $26, $00, $00, $00, $00, $00, $00,
 Bank03_L979B:  .byte $0C, $F4, $00, $00, $00, $00, $00, $00, $F4, $00, $00, $00
 
 .advance $97A7
-Bank03_L97A7:  .word $97D5, $97D5, $97D8, $97DB, $A32B, $A330, $A337, $A348
-Bank03_L97B7:  .word $A359, $A36A, $A37B, $A388, $A391, $A3A2, $A3B3, $A3C4
-Bank03_L97C7:  .word $A3D5, $A3DE, $A3E7, $A3F0, $A3F9
+Bank03_L97A7:  .word $97D5, $97D5, $97D8, $97DB
+
+.advance TileFramePtrTbl_Hi
+Bank03_L97AF:  .byte >Bank03_LA32B, >Bank03_LA330, 	>Bank03_LA337,	>Bank03_LA348,	>Bank03_LA359, >Bank03_LA36A, >Bank03_LA37B, >Bank03_LA388
+Bank03_L97B7:  .byte >Bank03_LA391, >Bank03_LA3A2, 	>Bank03_LA3B3, 	>Bank03_LA3C4, 	>Bank03_LA3D5, >Bank03_LA3DE, >Bank03_LA3E7, >Bank03_LA3F0
+Bank03_L97BF:  .byte >Bank03_LA3F9
+
+.advance TileFramePtrTbl_Lo
+Bank03_L97C0:  .byte <Bank03_LA32B, <Bank03_LA330, 	<Bank03_LA337,	<Bank03_LA348,	<Bank03_LA359, <Bank03_LA36A, <Bank03_LA37B, <Bank03_LA388
+Bank03_L97C8:  .byte <Bank03_LA391, <Bank03_LA3A2, 	<Bank03_LA3B3, 	<Bank03_LA3C4, 	<Bank03_LA3D5, <Bank03_LA3DE, <Bank03_LA3E7, <Bank03_LA3F0
+Bank03_L97D0:  .byte <Bank03_LA3F9
 
 Bank03_L97D1:  .byte $00, $00, $00, $01
 
@@ -738,6 +746,7 @@ Bank03_L9B22:  ASL
 Bank03_L9B23:  ASL 
 Bank03_L9B24:  RTS
 
+Bank03_Area_Routine:
 Bank03_L9B25:  JSR $9B37
 Bank03_L9B28:  JSR $9DD4
 Bank03_L9B2B:  JSR $A1E7
