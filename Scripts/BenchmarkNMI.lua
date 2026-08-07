@@ -31,8 +31,13 @@ function onFrame()
 		local max_val = math.max(table.unpack(scanlines))
 		local avr_val = calculateAverage(scanlines)
 		emu.drawString(5, 5, "Scanlines to complete frame work", 0xFFFFFF, 0x0, 0, framesToResetOn)
-		emu.drawString(5, 15, "(Last ".. framesToResetOn .. " frames)", 0xFFFFFF, 0x0, 0, framesToResetOn)
-		emu.drawString(5, 25, "Low " .. min_val .. " High " .. max_val .. " Average " .. round(avr_val), 0xFFFFFF, 0x0, 0, framesToResetOn)
+		emu.drawString(5, 15, "Low " .. min_val, 0xFFFFFF, 0x0, 0, framesToResetOn)
+
+		local color = 0xFFFFFF
+		if max_val >= 200 then
+			color = 0xFF0000
+		end
+		emu.drawString(50, 15, "High " .. max_val, color, 0x0, 0, framesToResetOn)
 		
 		timer = 0
 		scanlines = {}
