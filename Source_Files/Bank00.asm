@@ -4472,7 +4472,9 @@ WritePalStringByte:
 *   LDX PPUStrIndex         ;X now contains current length of PPU data string.
     LDA ($02),y             ;
     BNE ----                ;Is PPU string done loading (#$00)? If so exit,
-    JSR EndPPUString        ;($C376)else branch to process PPU byte.
+    STA PPUDataString,x
+    RTS 
+    ;JSR EndPPUString        ;($C376)else branch to process PPU byte.
 
 Bank00_SeparateControlBits:
     STA $04                 ;Store current byte 
@@ -5819,22 +5821,17 @@ CreateIdentityTable:
         inx
         bne _main
         ldx #$0F
-
-    _upper:
-        txa
-        sta IdentityTable + $100,x
-        dex
-        bpl _upper
-
-        ldx #$F0
-
-    _lower:
-        txa
-        sta IdentityTable - $100,x
-        inx
-        bne _lower
     rts
 .scend
+
+AddYToPtr00:
+      tya           ;
+      clc           ;Add value stored in Y to lower address
+      adc $00       ;byte stored in $00.
+      sta $00       ;
+      bcc +         ;Increment $01(upper address byte) if carry
+        inc $01
+    * rts           ;
 
 CreateRectEraseFunction:
 

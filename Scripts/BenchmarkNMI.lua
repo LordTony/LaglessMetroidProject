@@ -2,7 +2,7 @@
 --Press F5 or click the Run button to execute it
 --Type "emu." to show a list of all available API function
 
-nmi_addr = 0xC0DA
+nmi_addr = 0xC0D8
 framesToResetOn = 60
 timer = 0
 scanlines = {}
