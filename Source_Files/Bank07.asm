@@ -308,7 +308,7 @@ WritePPUCtrl:
 
     lda PPUCNT1ZP    
     sta PPUControl1 
-    lda MirrorCntrl 
+    ;lda MirrorCntrl 
     
 PrepPPUMirror:
     lda MirrorCntrl         ;Load MirrorCntrl into A.
@@ -1149,6 +1149,7 @@ LC829:  stx DoorStatus          ;Samus not in door.
 LC82B:  stx SamusDoorData       ;Samus is not inside a door.
 LC82D:  stx UpdtngPrjctl        ;No projectiles need to be updated.
         sta SamusObjAction
+
 LC830:* cpx #$65                ;Check to see if more RAM to clear in $7A thru $DE.
 LC832:  bcs +                   ;
 LC834:  sta $7A,x               ;Clear RAM $7A thru $DE.
@@ -1165,10 +1166,13 @@ LC849:  jsr DestroyEnemies      ;($C8BB)
 
     stx DoorOnNameTable3        ;Clear data about doors on the name tables.
     stx DoorOnNameTable0        ;
+
     ldx #$02  
     stx ScrollDir               ;Set initial scroll direction as left.
+
     lda $95D7                   ;Get Samus start x pos on map.
     sta MapPosX                 ;
+
     lda $95D8                   ;Get Samus start y pos on map.
     sta MapPosY                 ;
 
@@ -1795,10 +1799,10 @@ GoSamusHandler:
 
 ;Pointer table for Samus' action handlers.
 GoSamusHandlerTable_HiBytes:
-    .byte >SamusRun, >SamusJump, >SamusRoll, >SamusPntUp, >SamusDoor, >SamusJump, >SamusDead, >SamusDead2, >SamusElevator
+    .byte >SamusRun, >SamusJump, >SamusRoll, >SamusPntUp, >SamusDoor, >SamusJump, >SamusElevator, >SamusDead, >SamusDead2 
 
 GoSamusHandlerTable_LoBytes:
-    .byte <SamusRun, <SamusJump, <SamusRoll, <SamusPntUp, <SamusDoor, <SamusJump, <SamusDead, <SamusDead2, <SamusElevator
+    .byte <SamusRun, <SamusJump, <SamusRoll, <SamusPntUp, <SamusDoor, <SamusJump, <SamusElevator, <SamusDead, <SamusDead2 
 
 ;---------------------------------------[ Samus standing ]-------------------------------------------
 
@@ -2092,8 +2096,12 @@ SFX_SamusHit_Inline:
     sta ObjVertSpeed
     lda #$38                ;Samus is hit. Store Samus hit gravity.
     sta SamusGravity        ;
-    jsr IsSamusDead
-    bne +
+    
+; jsr IsSamusDead
+    lda SamusObjAction
+    and #$08
+
+    beq +
     jmp CheckHealthBeep
 
 *   lda SamusBlink
@@ -2146,20 +2154,8 @@ SFXBeep_Inline:
     sta TriangleSFXFlag
 *   lda #$00
     sta SamusHit
+Exit3:
 LCE83:  rts
-
-;----------------------------------------[ Is Samus dead ]-------------------------------------------
-
-IsSamusDead:
-LCE84:  lda SamusObjAction      ;
-LCE87:  cmp #sa_Dead            ;
-LCE89:  beq Exit3               ;Samus is dead. Zero flag is set.
-LCE8B:  cmp #sa_Dead2           ;
-LCE8D:  beq Exit3               ;
-LCE8F:  cmp #$FF                ;Samus not dead. Clear zero flag.
-
-Exit3:  
-LCE91:  rts                     ;Exit for routines above and below.
 
 ;----------------------------------------[ Subtract health ]-----------------------------------------
 
@@ -2170,8 +2166,10 @@ LCE94:  ora HealthHiChange      ;If not, branch to exit.
 LCE96:  beq Exit3               ;
 
 ; TODO: Just don't call Subtract health is Samus is dead
-LCE98:  jsr IsSamusDead         ;($CE84)Check if Samus is already dead.
-LCE9B:  beq ClearPendingDamage         ;Samus is dead. Branch to clear damage values.
+;LCE98:  jsr IsSamusDead         ;($CE84)Check if Samus is already dead.
+        lda SamusObjAction
+        and #$08
+LCE9B:  bne ClearPendingDamage         ;Samus is dead. Branch to clear damage values.
 
 ; TODO: Perhaps End Timer can be calibrated to be #$00 rather than #$FF? 
 LCE9D:  ldy EndTimerHi          ;If end escape timer is running, Samus cannot be hurt.
@@ -2210,6 +2208,7 @@ LCEDA:  lda HealthLo            ;
 LCEDD:  and #$F0                ;Is Samus health at 0?  If so, branch to
 LCEDF:  ora HealthHi            ;begin death routine.
 LCEE2:  beq SamusWasKilled      ;
+        bcc SamusWasKilled      ;
 
 ClearPendingDamage:
     lda #$00
@@ -2218,8 +2217,8 @@ ClearPendingDamage:
     rts
 
 SamusWasKilled:
-;LCEE6:* lda #$00                ;Samus is dead.
-LCEE8:* sta HealthLo            ;A == 0 here. Samus is dead.
+LCEE6:  lda #$00                ;Samus is dead.
+LCEE8:* sta HealthLo 
 LCEEB:  sta HealthHi            ;Set health to #$00.
 LCEEE:  lda #sa_Dead            ; #sa_Dead == 7
 LCEF0:  sta SamusObjAction      ;Death handler.
@@ -5675,16 +5674,17 @@ LE462:  jsr CheckMoveUp         ;($E7A2)Check if Samus obstructed UPWARDS.
 *   lda SamusObjAction           ;
     cmp #sa_Elevator        ;Is Samus riding elevator?
     beq +               ;If so, branch.
-    jsr SamusOnElevatorOrEnemy  ;($D976)Calculate if Samus standing on elevator or enemy.
-    lda SamusHit
-    and #$42
-    cmp #$42
-    clc
-    beq MoveSamusUpExit
+        jsr SamusOnElevatorOrEnemy  ;($D976)Calculate if Samus standing on elevator or enemy.
+        lda SamusHit
+        and #$42
+        cmp #$42
+        clc
+        beq MoveSamusUpExit
+
 *   lda SamusScrY
     cmp #$66    ; reached up scroll limit?
     bcs +      ; branch if not
-    jsr ScrollUp
+        jsr ScrollUp
     bcc ++
 *   dec SamusScrY
 *   lda ObjectY
@@ -5708,18 +5708,18 @@ MoveSamusDown:
     clc
     adc ObjRadY
     and #$07
-    bne +          ; only call crash detection every 8th pixel
+    bne +                   ; only call crash detection every 8th pixel
     jsr CheckMoveDown       ; check if Samus obstructed DOWNWARDS
-    bcc +++++++  ; exit if yes
+    bcc Exit104             ; exit if yes
 *   lda SamusObjAction
-    cmp #sa_Elevator    ; is Samus in elevator?
+    cmp #sa_Elevator        ; is Samus in elevator?
     beq +
     jsr SamusOnElevatorOrEnemy
     lda SamusOnElevator
     clc
-    bne ++++++
+    bne Exit104
     lda OnFrozenEnemy
-    bne ++++++
+    bne Exit104
 *   lda SamusScrY
     cmp #$84    ; reached down scroll limit?
     bcc +      ; branch if not
@@ -5738,6 +5738,7 @@ MoveSamusDown:
 *   inc ObjectY
     dec SamusJmpDsplcmnt
     sec
+Exit104:
 *   rts
 
 ; Attempt to scroll UP
@@ -8021,8 +8022,11 @@ CollisionDetection:
     eor PPUCNT0ZP
     and #$01
     sta $0B
-    jsr IsSamusDead
-    beq +
+
+    ; jsr IsSamusDead
+    lda SamusObjAction
+    and #$08
+    bne +
     lda SamusBlink
     bne +
     ldy #$00
@@ -8067,8 +8071,10 @@ AfterMemuCollisionCheck:
     cmp #$02
     bne +
     ldy #$00
-    jsr IsSamusDead
-    beq ++
+    ;jsr IsSamusDead
+    lda SamusObjAction
+    and #$08
+    bne ++
     jsr AreObjectsTouching      ;($DC7F)
     bcs +
     lda $10
@@ -8124,8 +8130,11 @@ AfterBulletLoop:
 *   ldy #$00
     lda SamusBlink
     bne NextEnemy
-    jsr IsSamusDead
-    beq NextEnemy
+
+    ;jsr IsSamusDead
+    lda SamusObjAction
+    and #$08
+    bne NextEnemy
 
     jsr DistFromEn0ToObj1
     jsr GetSamusCoordData_06_08_0A
@@ -8147,8 +8156,10 @@ NextEnemy:
     beq +
     lda SamusBlink
     bne +
-    jsr IsSamusDead
-    beq +
+    ;jsr IsSamusDead
+    lda SamusObjAction
+    and #$08
+    bne +
 
 DistFromObj0ToEn1: 
     lda ObjRadY,x
@@ -8177,8 +8188,12 @@ DistFromObj0ToEn1:
     bne --
 
     ldy #$00
-    jsr IsSamusDead
-    beq ++++
+        
+    ;jsr IsSamusDead
+    lda SamusObjAction
+    and #$08
+
+    bne ++++
     jsr GetSamusCoordData_06_08_0A
     ldx #$F0
 *   lda ObjAction,x

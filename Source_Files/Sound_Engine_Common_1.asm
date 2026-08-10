@@ -547,11 +547,13 @@ _CheckSFXFlag:
   STA $E0
 
   ;Y is zero at this point
-  lax CurrentSFXFlags
+  lda CurrentSFXFlags
   beq _NoSound
-  bmi _SFXFlagFound
-  asl
-  bcs _Second_Highest_Bit_Set
+  bit CurrentSFXFlags                 ; RoomNumber *should* always be $FF while not in the room gen code 
+  bmi _Highest_Bit_Set
+  bvs _Second_Highest_Bit_Set
+  and #$3F                            ; Mask out the top two bits that were tested alread
+  tax 
   ldy CheckFlagTablePlus1 - 1, x      ; check the rest against a 63 bit table
 
   _SFXFlagFound:
@@ -563,11 +565,15 @@ _CheckSFXFlag:
 
   _NoSound:
     rts
+
+  _Highest_Bit_Set:
+      ldy #$00
+      beq _SFXFlagFound
     
   _Second_Highest_Bit_Set:
-      iny
-      iny
+      ldy #$02
       bne _SFXFlagFound
+
     
     ;-----------------------------------[ SFX Handling Routines ]---------------------------------------
 

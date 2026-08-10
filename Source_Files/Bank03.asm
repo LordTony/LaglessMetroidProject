@@ -1295,7 +1295,7 @@ Bank03_L9FC5:  STA NoiseSFXFlag
 nop
 Bank03_L9FC8:  LDA $2C
 Bank03_L9FCA:  BNE $9FD9
-Bank03_L9FCC:  LDA #$08
+Bank03_L9FCC:  LDA #sa_Dead2
 Bank03_L9FCE:  STA SamusObjAction
 nop
 Bank03_L9FD1:  LDA #$0A

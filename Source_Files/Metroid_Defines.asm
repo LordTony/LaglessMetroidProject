@@ -976,9 +976,9 @@
 .alias sa_PntUp         4
 .alias sa_Door          5
 .alias sa_PntJump       6
-.alias sa_Dead          7
-.alias sa_Dead2         8
-.alias sa_Elevator      9
+.alias sa_Elevator      7
+.alias sa_Dead          8
+.alias sa_Dead2         9
 .alias sa_FadeIn0       20
 .alias sa_FadeIn1       21
 .alias sa_FadeIn2       22

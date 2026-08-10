@@ -21,8 +21,8 @@ The idea here is to attempt to take the Metroid lag as low as possible without a
 The baseline benchmark is Samus standing still in the opening room with 2 of the spikey bois both alive and crawing on the walls.
 
   * Metroid finishes all work for the benchmark frames in **137 to 149** scanlines
-  * Lagless Metroid finishes in **59 to 78** scanlines
-  * Lagless Metroid finishes in **44% to 52%** of the scanlines it takes Metroid
+  * Lagless Metroid finishes in **58 to 77** scanlines
+  * Lagless Metroid finishes in **42% to 52%** of the scanlines it takes Metroid
   * The limit might be something like **50** scanlines, so keep pushing
 
 ### Code Progress
