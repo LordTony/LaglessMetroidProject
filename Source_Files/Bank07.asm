@@ -2660,18 +2660,23 @@ SamusPntUp:
  
  .scend
 
-CheckIfMisslesCanBeFired:
+CheckIfBulletCanBeFired:
     ldy #$D0
-*   lda ObjAction,y
-        beq +
-        tya
-        clc
-        adc #$10
-        tay
-    bne -
-    iny     ; set y to 1
+    lda ObjAction + $D0
+    beq +
+
+    ldy #$E0
+    lda ObjAction + $E0
+    beq +
+
+    ldy #$F0
+    lda ObjAction + $F0
+    beq +
+
+    ldy #$01
     rts
 
+; Missiles can only fire one at a time
 *   sta $030A,y
     lda MissileToggle
     beq +
@@ -2686,18 +2691,22 @@ FireWeapon:
 SpawnBulletHorizontal:
     lda MetroidOnSamus
     bne +
-    jsr CheckIfMisslesCanBeFired
+    jsr CheckIfBulletCanBeFired
     bne +
     jsr LD2EB
     jsr LD359
     jsr LD38E
+
     lda #$0C
     sta $030F,y
+
     ldx SamusDir
     lda BulletSpeedTable,x   ; get bullet speed
     sta ObjHorzSpeed,y     ; -4 or 4, depending on Samus' direction
+
     lda #$00
     sta ObjVertSpeed,y
+
     lda #$01
     sta ObjectOnScreen,y
 
@@ -2710,9 +2719,12 @@ SpawnBulletHorizontal:
     tax
     lda Table08,x
     sta $05
+
     lda #$FA
     sta $04
+
     jsr LD306
+
     lda SamusGear
     asr #gr_LONGBEAM
     lsr
@@ -2720,19 +2732,25 @@ SpawnBulletHorizontal:
     ror
     ora HasBeamSFX
     sta HasBeamSFX
+
     ldx ObjAction,y
     dex
     bne +
-    jsr SFX_BulletFire
+
+        lda #SFX_BLT_FIRE
+        ora SQ1SFXFlag
+        sta SQ1SFXFlag
+
 *   ldy #$09
 LD26B:
     tya
     jmp SetSamusNextAnim
-
+    ; safe
+    
 SpawnBulletVertical: 
     lda MetroidOnSamus
     bne +
-    jsr CheckIfMisslesCanBeFired
+    jsr CheckIfBulletCanBeFired
     bne +
     jsr LD2EB
     jsr LD38A
@@ -2758,12 +2776,15 @@ SpawnBulletVertical:
     ldx SamusDir
     lda Table09_A,x
     sta $05
+
     lda ObjAction,y
     and #$01
     tax
     lda Table09_B,x
     sta $04
+
     jsr LD306
+
     lda SamusGear
     asr #gr_LONGBEAM
     lsr
@@ -2771,10 +2792,15 @@ SpawnBulletVertical:
     ror
     ora HasBeamSFX
     sta HasBeamSFX
-    lda ObjAction,y
-    cmp #$01
+
+    ldx ObjAction,y
+    dex
     bne +
-    jsr SFX_BulletFire
+    
+        lda #SFX_BLT_FIRE
+        ora SQ1SFXFlag
+        sta SQ1SFXFlag
+
 *   ldy #$26
     lda SamusGravity
     beq +
@@ -3020,7 +3046,7 @@ SamusElevator:
     cmp #$03
     beq +
     cmp #$08
-    bne +++++++
+    bne SamusElevatorEnd
 *   lda $032F
     bmi +++
     lda ObjectY
@@ -3052,6 +3078,7 @@ SamusElevator:
     sty ObjectY
     jmp LD47E
 
+SamusElevatorEnd:
 *   ldy #$00
     sty ObjVertSpeed
     cmp #$05
@@ -3324,7 +3351,8 @@ ToggleObjectHi:
 *   sta ObjectHi,x
 *   rts
 
-LayBomb1and4:  lda #an_BombTick
+LayBomb1and4:
+    lda #an_BombTick
     jsr SetProjectileAnim
     lda #$18    ; fuse length :-)
     sta $030F,x
@@ -3504,6 +3532,7 @@ LD77F:
     lda $0B
     adc #$00
     jmp LD798
+    ; safe
 
 LD78B:
     sta $00
@@ -3517,9 +3546,12 @@ LD798:
     and #$07
     ora #$60
     sta $05
+Exit99:
 *   rts
 
 ;---------------------------------------------------------------------------------------------------
+
+; TODO : Elevator Routines are always pageindex #$20 and this can likely be exploited to save bytes
 
 UpdateElevator:
     ldx #$20
@@ -3564,7 +3596,7 @@ ElevatorIdle:
 ShowElevator:
     lda FrameCount
     lsr
-    bcc --    ; only display elevator at odd frames
+    bcc Exit99          ; only display elevator at odd frames
     jmp DrawFrame       ; display elevator
 
 LD80E:
@@ -3622,12 +3654,16 @@ ElevatorScroll:
     bne ElevScrollRoom  ; scroll until ScrollY = 0
     lda #$4E
     sta AnimResetIndex
+
     lda #$41
     sta AnimIndex
+
     lda #$5D
     sta AnimResetIndex,x
+
     lda #$50
     sta AnimIndex,x
+
     inc ObjAction,x
     lda #$40
     sta Timer1
@@ -3672,6 +3708,7 @@ LD8A3:
 
 *   lda #$01
     jmp AnimDrawObject
+    ; safe
 
 LD8BF:
     lda $030F,x
@@ -3712,19 +3749,26 @@ LD8BF:
     jsr StartMusic          ;($LD92C)Start music.
     jsr ScreenOn
     jsr DestroyEnemies
+
     ldx #$20
     stx PageIndex
+
     lda #$6B
     sta AnimResetIndex
+
     lda #$5F
     sta AnimIndex
+
     lda #$7A
     sta AnimResetIndex,x
+
     lda #$6E
     sta AnimIndex,x
+
     inc ObjAction,x
     lda #$40
     sta Timer1
+
     rts
 
 StartMusic:
@@ -3948,9 +3992,11 @@ LDA7C:
 
     txa
     and #$01
+    ;ora #$65
     tay
     lda LDA3B,y
     sta $0363
+
     lda $681B,x
     beq +
     bmi +
@@ -10544,6 +10590,9 @@ Table19:
 LDA39:  
     .byte $88
     .byte $68
+
+; This table lookup is easier as
+; lda #$00/#$01 + ora #$65
 
 LDA3B:
     .byte $65
