@@ -7557,9 +7557,7 @@ LEDAA:  bcs Exit11          ;Exit if item Y pos >  Samus Y Pos.
 LEDAC:  iny             ;
 LEDAD:  lax ($00),y         ;Low byte of ptr to next item data.         ;
 LEDB0:  iny             ;
-LEDB1:  eor ($00),y         ; (no longer correct) AND with hi byte of item ptr.
-
-                            ; HACK: 
+LEDB1:  eor ($00),y     ; HACK: 
                             ; instead of checking for FFFF I am now
                             ; checking if the high and low bit are the same 
                             ; In practice this should be the same result.
@@ -7574,6 +7572,8 @@ LEDBB:  jmp ScanOneItem     ;Process next item.
 ScanItemYPositionMatch:
                         ; Carry bit will always be set here
 *   lda #$02            ;Get ready to look at byte containing X pos.
+
+; AddToPtr00:
     adc $00             ;
     sta $00             ; A is added to the 16 bit address stored in $0000.
     bcc ScanItemX           ;
@@ -7586,21 +7586,9 @@ LEDC7:  cmp MapPosX         ;Does it equal Samus' Xpos on map?
 LEDC9:  beq LEDD4           ;If so, then load object.
 LEDCB:  bcs Exit11          ;Exit if item pos X > Samus Pos X.
 
-.scope
-    AnotherItem:
-        iny                 ;
-        lda ($00),y         ;Is there another item with same Y pos?
-        cmp #$FF            ;If so, A is amount to add to ptr. to find X pos.
-        bne Exit11          ;($EF09)
-
-        clc             ;
-        adc $00             ;
-        sta $00             ;A is added to the 16 bit address stored in $0000.
-        bcc ScanItemX       ;
-        inc $01             ;
-    bne ScanItemX           ; branch always;  Try next X coord.
-
-.scend
+LEDCD:  iny                 ;
+LEDCE:  jsr LEF00           ;($EF00)Check for another item on same Y pos.
+LEDD1:  jmp ScanItemX       ;Try next X coord.
 
 LEDD4:* lda #$02            ;Move ahead two bytes to find item data.
 
@@ -7608,7 +7596,8 @@ ChooseHandlerRoutine:
         clc                
         adc $00            
         sta $00            
-        bcs ChooseHandlerRoutine_IncHiByte                    
+        bcc LEDD9
+        inc $01                    
 LEDD9:  ldy #$00                ;
 LEDDB:  lda ($00),y             ;Object type
 LEDDD:  and #$0F                ;Object handling routine index stored in 4 LSBs.
@@ -7618,10 +7607,6 @@ LEDDD:  and #$0F                ;Object handling routine index stored in 4 LSBs.
     lda ChooseHandlerRoutineTable_HiBytes, x
     sta CodePtr + 1
     jmp (CodePtr)
-
-ChooseHandlerRoutine_IncHiByte:
-    inc $01
-    bne LEDD9   ; branch always
 
 ;Handler routines jumped to by above code.
 
@@ -7900,7 +7885,25 @@ PaletteHandler:
 LEEFA:
     lda ScrollDir
     sta $91
-    jmp SetATo1AndJumpToHandlerRoutine
+    bne SetATo1AndJumpToHandlerRoutine
+
+; Probably don't need these, but I don't really know 
+LEF00:
+    lda ($00),y 
+    cmp #$FF    
+    bne LEF09   
+    pla         
+    pla         
+    rts         
+
+LEF09:
+    clc                
+    adc $00            
+    sta $00            
+    bcc Exit102       
+    inc $01            
+Exit102:
+    rts
 
 ;----------------------------------[ Draw structure routines ]----------------------------------------
 .scope
@@ -10083,7 +10086,7 @@ LFE54:
     sta TileAnimIndex,x
     jsr DrawTileBlast
     bcc +
-    ; ldx PageIndex
+    ;ldx PageIndex
     dec TileAnimIndex,x
     * rts
 
