@@ -209,68 +209,14 @@ Bank02_L9550:  .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00,
 
 Bank02_L9598:  .word _SpecItmsTbl       ;($A2D9)Beginning of special items table.
 
-; TODO: Figure out how to .advnace by 14 bytes without the need for manual junk
-; Not used / Unused
+.advance $95C0
 
-Bank02_L959A: .word $BBBB
-Bank02_L959C: .word $0000
-Bank02_L959E: .word $0000
-Bank02_L95A0: .word $0000
-Bank02_L95A2: .word $0000
-Bank02_L95A4: .word $0000
-Bank02_L95A6: .word $0000
-
-Bank02_L95A8: 
-    rts 
-    nop 
-    nop 
-Bank02_L95AB:
-    rts 
-    nop 
-    nop 
-Bank02_L95AE:
-    rts 
-    nop 
-    nop 
-Bank02_L95B1:
-    rts 
-    nop 
-    nop 
-Bank02_L95B4:
-    rts 
-    nop 
-    nop 
-Bank02_L95B7:
-    rts 
-    nop 
-    nop 
-Bank02_L95BA:
-    rts 
-    nop 
-    nop 
-Bank02_L95BD:
-    rts 
-    nop 
-    nop 
 Bank02_L95C0:
     rts 
-    nop 
-    nop 
 
-.advance AreaRoutine
+.advance $95CC
 
-Bank02_L95C3:
-	rts 
-	nop 
-	nop 
-
-TwosCompliment:
-Bank02_L95C6:  EOR #$FF            ;
-Bank02_L95C8:  CLC             ;The following routine returns the twos-->
-Bank02_L95C9:  ADC #$01            ;compliment of the value stored in A.
-Bank02_L95CB:  RTS             ;
-
-Bank02_L95CC:  .byte $FF           ;Not used.
+Bank02_L95CC:  .byte $FF		   ;Boss Music Byte. Only used in bank 04 and 05
 
 Bank02_L95CD:  .byte $08           ;Norfair music init flag.
 
@@ -286,7 +232,7 @@ Bank02_L95D9:  .byte $6E           ;Samus start verticle screen position.
 
 .advance $95DA
 Bank02_L95DA:  .byte $01, $00
-Bank02_L95DC:  .byte $03
+Bank02_L95DC:  .byte $03	; unused
 Bank02_L95DD:  .byte $77, $53, $57, $55, $59, $5B, $4F
 
 .advance MemuByte
@@ -3364,6 +3310,20 @@ Bank02_Struct_3F:
 	.byte $01, $0C
 	.byte $FF
 
+InitBank2:
+		LDA #$00                ;GameMode = play.
+		STA GameMode            ;
+		JSR ScreenNmiOff        ;($C45D)Disable screen and Vblank.
+        lda #$06
+        sta SpareMemD1
+NorfairGFX_Loop:
+        ldx SpareMemD1
+        ldy NorfairGFXTable, x
+        JSR LoadGFX
+        dec SpareMemD1
+        bpl NorfairGFX_Loop
+		JMP NmiOn               ;($C487)Turn on VBlank interrupts.
+
 ;-----------------------------------[ Enemy animation data tables ]----------------------------------
 
 .advance RoomAttrTbl_Hi
@@ -3876,6 +3836,7 @@ Bank02_LB098:  .byte $FF               ;
 ;----------------------------------- Struct Pointer Table ----------------------------------------
 
 .advance StructPointerTable_Hi
+
     .byte >Common_Struct_00,    >Bank02_LACCC,      >Bank02_LACE5, 		>Bank02_LACFE, 		>Bank02_LAD05, 		>Bank02_LAD0C, 		>Bank02_LAD10, 		>Bank02_LAD16
     .byte >Bank02_LAD26,        >Bank02_LAD2B,      >Bank02_LAD31, 		>Bank02_LAD39, 		>Bank02_LAD4E, 		>Bank02_LAD57, 		>Bank02_LAD61, 		>Bank02_LAD6C
     .byte >Bank02_LAD78,        >Bank02_LAD7B,      >Bank02_LAD85, 		>Bank02_LAD88, 		>Bank02_LAD9C, 		>Bank02_LADB1, 		>Bank02_LADB7, 		>Bank02_LADBD
@@ -3886,6 +3847,7 @@ Bank02_LB098:  .byte $FF               ;
 	.byte >Bank02_Struct_38,	>Bank02_Struct_39,	>Bank02_Struct_3A,	>Bank02_Struct_3B,	>Bank02_Struct_3C,	>Bank02_Struct_3D,	>Bank02_Struct_3E,  >Bank02_Struct_3F
 
 .advance StructPointerTable_Lo
+
     .byte <Common_Struct_00,    <Bank02_LACCC,      <Bank02_LACE5, 		<Bank02_LACFE, 		<Bank02_LAD05, 		<Bank02_LAD0C, 		<Bank02_LAD10, 		<Bank02_LAD16
     .byte <Bank02_LAD26,        <Bank02_LAD2B,      <Bank02_LAD31, 		<Bank02_LAD39, 		<Bank02_LAD4E, 		<Bank02_LAD57, 		<Bank02_LAD61, 		<Bank02_LAD6C
     .byte <Bank02_LAD78,        <Bank02_LAD7B,      <Bank02_LAD85, 		<Bank02_LAD88, 		<Bank02_LAD9C, 		<Bank02_LADB1, 		<Bank02_LADB7, 		<Bank02_LADBD

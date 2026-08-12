@@ -959,7 +959,7 @@ DoRoomRamClear:
     lda BankErasureTablePtr_Hi, x
     sta CodePtr + 1
 
-    ldy $90                     ; Real Room Number
+    ldy StableRoomNumber 
     lda (CodePtr), y
     tay
 

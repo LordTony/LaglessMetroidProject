@@ -195,66 +195,12 @@ Bank04_L9550:  .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00,
 
 Bank04_L9598:  .word _SpecItmsTbl       ;($A26D)Beginning of special items table.
 
-; TODO: Figure out how to .advnace by 14 bytes without the need for manual junk
-; Not used / Unused
+.advance $95C0
 
-Bank04_L959A: .word $BBBB
-Bank04_L959C: .word $0000
-Bank04_L959E: .word $0000
-Bank04_L95A0: .word $0000
-Bank04_L95A2: .word $0000
-Bank04_L95A4: .word $0000
-Bank04_L95A6: .word $0000
-
-Bank04_L95A8: 
-    rts 
-    nop 
-    nop 
-Bank04_L95AB:
-    rts 
-    nop 
-    nop 
-Bank04_L95AE:
-    rts 
-    nop 
-    nop 
-Bank04_L95B1:
-    rts 
-    nop 
-    nop 
-Bank04_L95B4:
-    rts 
-    nop 
-    nop 
-Bank04_L95B7:
-    rts 
-    nop 
-    nop 
-Bank04_L95BA:
-    rts 
-    nop 
-    nop 
-Bank04_L95BD:
-    rts 
-    nop 
-    nop 
 Bank04_L95C0:
-    rts 
-    nop 
-    nop 
+    rts
 
-.advance AreaRoutine
-
-Bank04_L95C3:
-    rts 
-    nop 
-    nop           ;Area specific routine (Just an RTS in bank 04)
-
-TwosCompliment:
-Bank04_L95C6:  EOR #$FF            ;
-Bank04_L95C8:  CLC             ;The following routine returns the twos-->
-Bank04_L95C9:  ADC #$01            ;compliment of the value stored in A.
-Bank04_L95CB:  RTS             ;
+.advance $95CC
 
 Bank04_L95CC:  .byte $1D           ;Kraid's room.
 
@@ -272,7 +218,7 @@ Bank04_L95D9:  .byte $6E           ;Samus start verticle screen position.
 
 .advance $95DA
 Bank04_L95DA:  .byte $06, $00
-Bank04_L95DC:  .byte $03
+Bank04_L95DC:  .byte $03    ; unused
 Bank04_L95DD:  .byte $43, $00, $00, $00, $00, $00, $00
 
 .advance MemuByte
@@ -2456,6 +2402,21 @@ Bank04_LAC27:
 .byte $FF
 
 ; CODE CAVE (82 x 16 bytes)
+
+InitBank4:
+    LDA #$00 
+    STA GameMode 
+    JSR ScreenNmiOff
+    lda #$07
+    sta SpareMemD1
+KraidGFX_Loop:
+        ldx SpareMemD1
+        ldy KraidGFXTable, x
+        JSR LoadGFX
+        dec SpareMemD1
+        bpl KraidGFX_Loop
+        JMP NmiOn
+
 ;-----------------------------------[ Enemy animation data tables ]----------------------------------
 
 .advance RoomAttrTbl_Hi

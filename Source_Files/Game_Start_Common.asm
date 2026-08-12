@@ -9,6 +9,12 @@
     .byte $08, $00, $00, $00, $00, $00, $00, $00, $00
     .byte $FF
 
+.advance TwosCompliment
+    EOR #$FF            ;
+    CLC                 ;The following routine returns the twos-->
+    ADC #$01            ;compliment of the value stored in A.
+    RTS                 ;
+
 .advance L8048_Ptr_Table
     .word _L84FD, _L84A6, _L844A, _L844A, _L84A6, _L84FD, _L83F4, _L83F4
 

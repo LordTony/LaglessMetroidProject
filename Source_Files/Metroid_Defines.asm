@@ -208,7 +208,7 @@
 ; used                  $87
 ; used                  $88
 ; unused                $89
-; unused                $90
+.alias StableRoomNumber $90
 ; used in door routine  $91
 
 ;----------------------------------------------------------------------------------------------------
@@ -875,6 +875,7 @@
 
 ;---------------------------------- [ Constant Locations in Swap Banks ] -----------------------------
 .alias Common_Struct_00         $8000
+.alias TwosCompliment           $8014
 .alias L8048_Ptr_Table          $8048
 .alias ObjectAnimIdxTbl         $8572
 .alias FramePtrTable_Hi         $860B
@@ -887,7 +888,7 @@
 .alias PalPntrTbl_Lo            $957C
 .alias SpecItmsTblPtr           $9598
 .alias HandleBankEnemies        $95E5
-.alias AreaRoutine              $95C3
+.alias AreaRoutine              $95C3       ; TODO: Delete
 .alias MemuByte                 $95E4
 .alias EnemyHitPointTbl         $962B
 .alias EnemyInitDelayTbl        $96BB
@@ -910,7 +911,7 @@
 .alias SXFInitTables            $B29D
 .alias SoundEngineEntryPoint    $B3CC
 .alias StructPointerTable_Hi    $BF0F
-.alias StructPointerTable_Lo    $BF68
+.alias StructPointerTable_Lo    $BF69
 .alias InterruptVectors         $BFFA
 
 ;----------------------------------------------------------------------------------------------------

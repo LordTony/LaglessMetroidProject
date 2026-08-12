@@ -149,67 +149,12 @@ GFXGameOverJapaneseFont:
 
 Bank05_L9598:  .word _SpecItmsTbl       ;($A20D)Beginning of special items table.
 
-; TODO: Figure out how to .advnace by 14 bytes without the need for manual junk
-; Not used / Unused
+.advance $95C0
 
-Bank05_L959A: .word $BBBB
-Bank05_L959C: .word $0000
-Bank05_L959E: .word $0000
-Bank05_L95A0: .word $0000
-Bank05_L95A2: .word $0000
-Bank05_L95A4: .word $0000
-Bank05_L95A6: .word $0000
-
-Bank05_L95A8: 
-    rts 
-    nop 
-    nop 
-Bank05_L95AB:
-    rts 
-    nop 
-    nop 
-Bank05_L95AE:
-    rts 
-    nop 
-    nop 
-Bank05_L95B1:
-    rts 
-    nop 
-    nop 
-Bank05_L95B4:
-    rts 
-    nop 
-    nop 
-Bank05_L95B7:
-    rts 
-    nop 
-    nop 
-Bank05_L95BA:
-    rts 
-    nop 
-    nop 
-Bank05_L95BD:
-    rts 
-    nop 
-    nop 
 Bank05_L95C0:
     rts 
-    nop 
-    nop 
 
-.advance AreaRoutine
-
-Bank05_L95C3:
-    rts 
-    nop 
-    nop 
-
-TwosCompliment:
-Bank05_L95C6:  EOR #$FF            ;
-Bank05_L95C8:  CLC             ;The following routine returns the twos-->
-Bank05_L95C9:  ADC #$01            ;compliment of the value stored in A.
-Bank05_L95CB:  RTS             ;
-
+.advance $95CC
 Bank05_L95CC:  .byte $12           ;Ridley's room.
 
 Bank05_L95CD:  .byte $80           ;Ridley hideout music init flag.
@@ -225,9 +170,8 @@ Bank05_L95D8:  .byte $18           ;Samus start y coord on world map.
 Bank05_L95D9:  .byte $6E           ;Samus start verticle screen position.
 
 .advance $95DA
-
 Bank05_L95DA:  .byte $06, $00
-Bank05_L95DC:  .byte $03
+Bank05_L95DC:  .byte $03    ; unused
 Bank01_L95DD:  .byte $58, $44, $4A, $48, $4A, $4A, $36 
 
 .advance MemuByte

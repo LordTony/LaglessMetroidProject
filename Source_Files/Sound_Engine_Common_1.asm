@@ -214,7 +214,7 @@ _NseSFXInitFlags:
   STA ChannelType
   LDA NoiseSFXFlag
   BEQ _NseSFXContFlags
-  LDX #0                     ; _NseInitTbl
+  LDX #$00                     ; _NseInitTbl
   JMP CheckFlagsRedux
 
 _NseSFXContFlags:
@@ -434,7 +434,7 @@ _ClrMusAndSFXAddrs:           ;
       STA TriangleContSFX     ;
       STA MultiContSFX        ;
       STA CurrentMusic        ;
-      .scend
+.scend
   
 JSR _ClearSounds         ;($B43E)all sound addresses in order to start
 
@@ -494,11 +494,17 @@ _MusicBranch01:                  ;
 
 _UpdateContFlags:
 * LDX ChannelType         ;Loads X register with sound channel just changed.
-  LDA NoiseContSFX,X      ;Clear existing continuation SFX
-  AND #$00                ;flags for that channel.
-  ORA CurrentSFXFlags     ;Load new continuation flags.
+  ;LDA NoiseContSFX,X      ;Clear existing continuation SFX
+  ;AND #$00                ;flags for that channel.
+  LDA CurrentSFXFlags     ;Load new continuation flags.
   STA NoiseContSFX,X      ;Save results.
   RTS                     ;
+
+  nop
+  nop
+  nop
+  nop
+  nop
 
 _ClrCrntSFXFlags:
   LDA #$00                ;Once SFX has completed, this block clears the

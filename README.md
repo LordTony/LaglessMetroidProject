@@ -123,8 +123,9 @@ SBX #$F0
 ```
 
 ### Benchmarking
-The "Visualize Hotspots" lua script can be run and tweaked to find places in the code that are hit more often. It helped me get some big wins.
+* The "Visualize Hotspots" lua script can be run and tweaked to find places in the code that are hit more often. It helped me get some big wins.
+* BenchmarkNMI.lua shows how long it takes to reach NMI, min and max, over a second. This can be used to find painful spots
 
 ## Bugs
 * Loading can get confused when direction changes right as the load is happening and you can get half of the wrong room.
-* Room 1B in Bank01 (Brinstar) has a phantom destroyable block under the sand/lava
+* Missiles don't seem to hit spinners from far away (example: The ones hanging on room #$12)

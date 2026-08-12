@@ -209,40 +209,13 @@ Bank03_L9550:  .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00,
 
 Bank03_L9598:  .word _SpecItmsTbl       ;($A83B)Beginning of special items table.
 
-; TODO: Figure out how to .advnace by 14 bytes without the need for manual junk
-; Not used / Unused
+.advance $95C0
 
-Bank03_L959A: .word $BBBB
-Bank03_L959C: .word $0000
-Bank03_L959E: .word $0000
-Bank03_L95A0: .word $0000
-Bank03_L95A2: .word $0000
-Bank03_L95A4: .word $0000
-Bank03_L95A6: .word $0000
+Bank03_L95C0: 
+    JMP Bank03_LA142
 
-; These are unique to Tourian (Bank03)
-; All other banks just have "RTS NOP NOP" for these instead of jumping to other code
-Bank03_L95A8:  JMP Bank03_LA320
-Bank03_L95AB:  JMP Bank03_LA315
-Bank03_L95AE:  JMP Bank03_L9C6F
-Bank03_L95B1:  JMP Bank03_L9CE6
-Bank03_L95B4:  JMP Bank03_L9D21
-Bank03_L95B7:  JMP Bank03_L9D3D
-Bank03_L95BA:  JMP Bank03_L9D6C
-Bank03_L95BD:  JMP Bank03_LA0C6
-Bank03_L95C0:  JMP Bank03_LA142
-
-.advance AreaRoutine
-
-Bank03_L95C3:  JMP Bank03_Area_Routine           ;Area specific routine.
-
-TwosCompliment_:
-Bank03_L95C6:  EOR #$FF            ;
-Bank03_L95C8:  CLC             ;The following routine returns the twos-->
-Bank03_L95C9:  ADC #$01            ;compliment of the value stored in A.
-Bank03_L95CB:  RTS             ;
-
-Bank03_L95CC:  .byte $FF           ;Not used.
+.advance $95CC
+Bank03_L95CC:  .byte $FF           ;Boss music byte. Only unsed in bank 04 - 05
 
 Bank03_L95CD:  .byte $40           ;Tourian music init flag.
 
@@ -259,7 +232,7 @@ Bank03_L95D9:  .byte $6E           ;Samus start verticle screen position.
 .advance $95DA
 Bank03_L95DA:  .byte $06, $00
 
-Bank03_L95DC:  .byte $03
+Bank03_L95DC:  .byte $03    ; unused
 Bank03_L95DD:  .byte $21, $00, $00, $00, $00, $00, $10
 
 .advance MemuByte
