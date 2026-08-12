@@ -2437,14 +2437,20 @@ SamusRoll:
     bit Joy1Change  ; JUMP pressed?
     bpl ++    ; branch if no
 *   lda Joy1Status
-    and #$04       ; DOWN pressed?
+    anc #$04       ; DOWN pressed?
     bne +     ; branch if yes
 ;break out of "ball mode"
     lda ObjRadY
-    clc
+    ;clc
     adc #$08
     sta ObjRadY
-    jsr CheckMoveUp
+
+;CheckMoveUp:
+    lda ObjRadY
+    clc
+    adc #$08
+    jsr CheckMoveUpDownSharedPart
+
     bcc +     ; branch if not possible to stand up
 
     lda ObjectHi
@@ -2641,12 +2647,10 @@ SpawnBulletHorizontal:
     bne +
     jsr DoNormalBulletStuff
 
-    lda SamusDir
-    sta $0502,y
     lda MissileToggle
     bne AfterHorizontalSpecialBeamChecks
-        jsr DoWaveBeamStuff
-        jsr DoIceBeamStuff
+        lda SamusDir
+        jsr DoWaveBeamAndIceBeamStuff
 
 AfterHorizontalSpecialBeamChecks:
     lda #$0C
@@ -2697,6 +2701,7 @@ AfterHorizontalMissleLaunch:
         ora SQ1SFXFlag
         sta SQ1SFXFlag
 
+
 *   ldy #$09
 LD26B:
     tya
@@ -2709,12 +2714,11 @@ SpawnBulletVertical:
     jsr CheckIfBulletCanBeFired
     bne +
     jsr DoNormalBulletStuff
-    lda #$02    
-    sta $0502,y
+
     lda MissileToggle
     bne AfterVerticalSpecialBeamChecks
-        jsr DoWaveBeamStuff
-        jsr DoIceBeamStuff
+        lda #$02
+        jsr DoWaveBeamAndIceBeamStuff
 
 AfterVerticalSpecialBeamChecks:
     lda #$0C
@@ -2729,11 +2733,11 @@ AfterVerticalSpecialBeamChecks:
     lda #$01
     sta ObjectOnScreen,y
  
-    VerticalMissleToggleCheck:
-        lda MissileToggle
-        beq AfterVerticalMissleToggleCheck
+    lda MissileToggle
+    beq AfterVerticalMissleToggleCheck
         lda #$8F
         jsr GoSetBulletAnim
+
     AfterVerticalMissleToggleCheck:
 
     ldx SamusDir
@@ -2768,10 +2772,12 @@ AfterVerticalSpecialBeamChecks:
     lda SamusGravity
     beq +
     ldy #$34
+
 *   lda SamusObjAction
     cmp #$01
-    beq +
-    bne LD26B       ; always branch
+    beq LD26B
+Exit107:
+    rts
 
 DoNormalBulletStuff:
     tya
@@ -2789,6 +2795,7 @@ SetProjectileAnimWithoutReset:
     sta AnimIndex,x
     lda #$00
     sta AnimDelay,x
+Exit108:
 *   rts
 
 LD306:
@@ -2826,27 +2833,35 @@ SFXMissileLaunch_Inline:
     ora NoiseSFXFlag
     sta NoiseSFXFlag
 
-    lda #wa_Missile ; missile handler
+    lda #wa_Missile ; #wa_Missile == #$0B
     sta ObjAction,y
+
     lda #$FF
     sta $030F,y     ; # of frames projectile should last
+
     dec MissileCount
     bne Exit4       ; exit if not the last missile
+
 ; Samus has no more missiles left
     dec MissileToggle       ; put Samus in "regular fire" mode
     jmp SelectSamusPal      ; update Samus' palette to reflect this
+    ; Safe
 
+DoWaveBeamAndIceBeamStuff:
 DoWaveBeamStuff:
+    sta $0502,y
     bit SamusGear
-    bvc WaveBeamExit       ; branch if Samus doesn't have Wave Beam
+    bvc DoIceBeamStuff     ; branch if Samus doesn't have Wave Beam
+
+    lda Div16Table, y      ; Setup the carry bit for below 
+    lsr
+
     lda #$00
     sta AnimDelay,y
     sta $0501,y
     sta $0304,y
-    tya
-    and #%00010000
-    eor #%00010000
-    bne +
+
+    bcs +
         lda #$0C
 *   STA $0500,y
     lda #wa_WaveBeam        ; #wa_WaveBeam == #$02
@@ -2862,9 +2877,9 @@ SFX_WaveFire:
     lda #SFX_WV_FIRE        ; #SFX_WV_FIRE == #$01 
     ora SQ1SFXFlag
     sta SQ1SFXFlag
-WaveBeamExit:
-    rts             
 
+; NARPASS allows having the ice beam and wave beam at the same time
+; but the ice beam overwrites the wave behavior
 DoIceBeamStuff:
     lda SamusGear
     bpl IceBeamExit       ; branch if Samus doesn't have Ice Beam
@@ -2876,7 +2891,7 @@ DoIceBeamStuff:
     ora #$01
     sta HasBeamSFX
 SFX_BulletFire:
-    lda #SFX_BLT_FIRE   ; #SFX_BLT_FIRE == #$10 
+    lda #SFX_BLT_FIRE       ; #SFX_BLT_FIRE == #$10 
     ora SQ1SFXFlag
     sta SQ1SFXFlag
 IceBeamExit:
@@ -4147,9 +4162,9 @@ LDC3A:  DEC $06             ;
 
 LDC3C:* LDA PPUCNT0ZP           ;If item is on the same nametable as current nametable,
 LDC3E:  EOR $08             ;then no further adjustment to item x and y position needed.
-LDC40:  AND #$01            ;
+LDC40:  anc #$01            ;
 LDC42:  PLP             ;Restore the processor status and clear the carry bit.
-LDC43:  CLC             ;
+;LDC43:  CLC             ;
 LDC44:  BEQ +               ;If Scrolling up/down, branch to adjust item y position.
 
 LDC46:  ADC $07             ;Scrolling left/right. Make any necessary adjustments to
@@ -4192,12 +4207,12 @@ GetObject0CoordData:
     sta $09
     lda ObjectHi,x
     eor PPUCNT0ZP
-    and #$01
+    anc #$01
     sta $0B
 
 DistFromObj0ToObj1:
     lda ObjRadY,x
-    clc
+    ;clc
     adc ObjRadY,y
     sta $04
     lda ObjRadX,x
@@ -5503,7 +5518,12 @@ MoveSamusRight:
     adc ObjRadX
     and #$07
     bne +          ; only call crash detection every 8th pixel
-    jsr CheckMoveRight      ; check if Samus is obstructed to the RIGHT
+;CheckMoveRight:
+    ;lax AlwaysZero ; A == 0 here
+    sec
+    sbc ObjRadX
+    jsr CheckMoveRightLeftSharedPart
+
     bcc ResetDoorData       ; branch if yes! (CF = 0)
 *   jsr SamusOnElevatorOrEnemy
     lda SamusHit
@@ -5630,9 +5650,14 @@ LE457:
     lda ObjectY         ;Get Samus' y position in room.
     sec             ;
     sbc ObjRadY         ;Subtract Samus' vertical radius.
-LE45E:  and #$07            ;Check if result is a multiple of 8. If so, branch to
+LE45E:  anc #$07            ;Check if result is a multiple of 8. If so, branch to
 LE460:  bne +               ;Only call crash detection every 8th pixel.
-LE462:  jsr CheckMoveUp         ;($E7A2)Check if Samus obstructed UPWARDS.
+LE462:
+;CheckMoveUp:
+    lda ObjRadY
+    adc #$08
+    jsr CheckMoveUpDownSharedPart
+
     bcc MoveSamusUpExit     ;If so, branch to exit(can't move any further).
 *   lda SamusObjAction           ;
     cmp #sa_Elevator        ;Is Samus riding elevator?
@@ -5950,13 +5975,13 @@ LE626:
     lda ObjectX
     sec
     sbc ObjRadX
-    and #$07
+    anc #$07
     bne +          ; only call crash detection every 8th pixel
 
 ;CheckMoveLeft:
-    ldx #$00
+    ;ldx #$00
     lda ObjRadX
-    clc
+    ;clc
     adc #$08
     jsr CheckMoveRightLeftSharedPart
     bcc ResetDoorDataCopy    ; branch if yes! (CF = 0)
@@ -6132,21 +6157,23 @@ LE76F:* rts             ;
 ;-----------------------------------------------------------------------------------------------------
 
 GrowRadiusY:
-    ldx PageIndex
+    ;ldx PageIndex
     lda EnRadY,x
     clc
     adc #$08
     jmp LE783
 
 ShrinkRadiusY:
-    ldx PageIndex
+    ;ldx PageIndex
     lda #$00
     sec
     sbc EnRadY,x
 LE783:
     sta $02
+
     lda #$08
     sta $04
+
     jsr GetXEnemyRoomPosition_09_08_0B
     lda EnRadX,x
     jmp LE7BD
@@ -6160,16 +6187,8 @@ GetXEnemyRoomPosition_09_08_0B:
     sta $0B     ; hi coord
     rts
 
-CheckMoveUp:
-LE7A2:
-    ldx #$00
-    lda ObjRadY
-    clc
-    adc #$08
-    jmp CheckMoveUpDownSharedPart
-
 CheckMoveDown:
-    lax AlwaysZero
+    ;lda #$00   ; A == 0 here
     sec
     sbc ObjRadY
 
@@ -6262,27 +6281,27 @@ IsWalkableTile:
     Exit16:
     rts
 
-; TODO: Inline
+;HCSS
+; Only every other byte is used
+ASL_ASL_ASL_ORA_80_Table:
+.byte $80, $FF, $90, $FF, $A0, $FF, $B0
+
 LE81E:
     ldx UpdtngPrjctl
     beq ClcExit
     ldx #$06
+LE81E_Loop:
 *   lda $05
     eor $5D,x
     and #$04
-    bne +++
+    bne LE81E_Next
     lda $04
     eor $5C,x
     and #$1F
-    bne +++
-    txa
-    asl 
-    asl 
-    asl      ; * 8 
-    ora #$80
-    tay
+    bne LE81E_Next
+    ldy ASL_ASL_ASL_ORA_80_Table, x
     lda ObjAction,y
-    beq +++
+    beq LE81E_Next
     lda $0307,y
     lsr
     bcs ++
@@ -6302,9 +6321,12 @@ LE81E:
 *   lda #$04
     sta $030A,y
     bne ClcExit
+
+LE81E_Next:
 *   dex
     dex
-    bpl ----
+    bpl LE81E_Loop
+
     lda $04
     lsr
     lsr
@@ -6321,18 +6343,6 @@ SFXMetal:
     ora SQ1SFXFlag
     sta SQ1SFXFlag
     rts
-
-CheckMoveLeft:
-    ldx #$00
-    lda ObjRadX
-    clc
-    adc #$08
-    jmp CheckMoveRightLeftSharedPart
-
-CheckMoveRight:
-    lax AlwaysZero
-    sec
-    sbc ObjRadX
 
 CheckMoveRightLeftSharedPart:
     sta $03
@@ -6387,11 +6397,12 @@ LE8CE:
     lsr
     sta $04
     tya
-    and #$07
+    anc #$07
     beq +
     inx
 *   txa
-    clc
+    ; HCSS show how ANC works
+    ;clc
     adc $04
     rts
 
@@ -6487,31 +6498,36 @@ LD7AE:  sta $0B             ;Load and save temp copy of object nametable.
 ;------------------------------------[ Object pointer into cart RAM ]-------------------------------
 
 ;Find object's equivalent position in room RAM based on object's coordinates.
-;In: $02 = ObjectY, $03 = ObjectX, $0B = ObjectHi. Out: $04 = cart RAM pointer.
+;Inputs:
+;$02 = ObjectY
+;$03 = ObjectX
+;$0B = ObjectHi
+;Output:
+;$04 = cart RAM pointer.
 
+; HCSS
 MakeCartRAMPtr:
-LE96A:  LDA #$18            ;Set pointer to $6xxx(cart RAM).
-LE96C:  STA $05             ;
-LE96E:  LDA $02             ;Object Y room position.
-LE970:  AND #$F8            ;Drop 3 LSBs. Only use multiples of 8.
-LE972:  ASL             ;
-LE973:  ROL $05             ;
-LE975:  ASL             ;Move upper 2 bits to lower 2 bits of $05 and move y bits
-LE976:  ROL $05             ;3, 4, 5 to upper 3 bits of $04.
-LR978:  STA $04             ;
-LE97A:  LDA $03             ;Object X room position.
-LE97C:  LSR             ;
-LE97D:  LSR             ;
-LE97E:  LSR             ;A=ObjectX/8.
-LE97F:  ORA $04             ;
-LE981:  STA $04             ;Put bits 0 thru 4 into $04.
-LE983:  LDA $0B             ;Object nametable.
-LE985:  ASL             ;
-LE986:  ASL             ; A=ObjectHi*4.
-LE987:  AND #$04            ;Set bit 2 if object is on nametable 3.
-LE989:  ORA $05             ;
-LE98B:  STA $05             ;Include nametable bit in $05.
-LE98D:  RTS             ;Return pointer in $04 = 01100HYY YYYXXXXX.
+    lda $0B         ; ObjectHi
+    and #$01        ; isolate the one bit we need
+    ora #$18        ; fold in the base constant (no overlap w/ bit 0)
+    sta $05         ; preset hi-byte accumulator = $18 | H
+
+    lda $02         ; Y
+    and #$F8
+    asl 
+    rol $05         ; Y7 and H both migrate into place here
+    asl 
+    rol $05         ; ...and here — $05 is now the FINAL hi byte
+    sta $04         ; stash Y-derived low-byte bits
+
+    lda $03         ; X
+    lsr 
+    lsr 
+    lsr 
+    ora $04
+    sta $04         ; $04 = final lo byte
+
+    rts
 
 ;---------------------------------------------------------------------------------------------------
 
@@ -6526,11 +6542,11 @@ LE98E:
     adc #$0F
     sta $02
     lda ScrollDir
-    and #$02
+    anc #$02
     bne +
     inc $0B
 *   lda $03
-    clc
+    ;clc
     adc $07
     sta $03
     bcc +
@@ -6803,8 +6819,8 @@ DrawSingleRoomQuarter:
     ; Can use (_quarter << + ScrollDir) to treat ScrollDir_Quarter_Tbls as a double array
     lda Quarter 
     asl
-    asl
-    clc
+    rol     ; this will set the carry bit to 0
+    ;clc
     adc ScrollDir
     tax
 
@@ -7872,7 +7888,7 @@ LEF00:
     rts         
 
 LEF09:
-    clc                
+    ;clc                
     adc $00            
     sta $00            
     bcc Exit102       
@@ -8135,12 +8151,12 @@ NextEnemyLoop:
         bne NextEnemyLoopContinue
         ;jsr IsSamusDead
         lda SamusObjAction
-        and #$08
+        anc #$08
         bne NextEnemyLoopContinue
 
 ;DistFromObj0ToEn1: 
         lda ObjRadY
-        clc
+        ;clc
         adc EnRadY,y
         sta $04
 
@@ -8197,10 +8213,10 @@ SubtractHealth_Trampoline:
     ; safe
 
 LF149:
-    jsr GetObject1CoordData
+    jsr GetObject1CoordData ; <== set the carry bit to zero
 
     lda #$04
-    clc
+    ;clc
     adc ObjRadY,y
     sta $04
 
@@ -8219,7 +8235,7 @@ GetXEnemyRoomPosition_07_09_0B:
 
     lda EnNameTable,x     ; hi coord
     eor PPUCNT0ZP
-    and #$01
+    anc #$01
     sta $0B
 
     rts
@@ -8247,7 +8263,7 @@ GetSamusCoordData_06_08_0A:
 
     lda ObjectHi
     eor PPUCNT0ZP
-    and #$01
+    anc #$01
     sta $0A
 
     rts
@@ -8261,7 +8277,7 @@ GetObject1CoordData:
 
     lda ObjectHi,y
     eor PPUCNT0ZP
-    and #$01
+    anc #$01
     sta $0A
     rts
 
@@ -9269,7 +9285,7 @@ LF699:
     jsr DoSomethingToAnimationIndecies
     ldy EnDataIndex,x
     lda $967B,y
-    and #$7F
+    anc #$7F
     beq _done
     tay
 *   dec EnAnimIndex,x
@@ -9279,7 +9295,7 @@ LF699:
 .scend
     ldy EnDataIndex,x
     lda $96CB,y
-    clc
+    ;clc
     adc #$D1
     sta $00
 
@@ -9603,13 +9619,27 @@ Bank07_LFA1E:
     bcc ++
 ;LFA7D:
 *   ldx PageIndex
-    lda EnYRoomPos,x
-    sta $02
-    lda EnXRoomPos,x
-    sta $03
+
     lda EnNameTable,x
-    sta $0B
-    jsr MakeCartRAMPtr      ;($E96A)Find enemy position in room RAM.
+    and #$01
+    ora #$18
+    sta $05 
+
+    lda EnYRoomPos,x
+    and #$F8
+    asl 
+    rol $05 
+    asl 
+    rol $05 
+    sta $04 
+
+    lda EnXRoomPos,x
+    lsr 
+    lsr 
+    lsr 
+    ora $04
+    sta $04 
+
     ldy #$00
     lda ($04),y
     cmp #$A0
@@ -10047,11 +10077,11 @@ Exit21:
 
 Bank07_LFD8F:
     lda ScrollDir
-    and #$02
+    anc #$02
     sta $02
 
     lda $04
-    clc
+    ;clc
     bmi +++
     beq LFDBF
 
@@ -10202,8 +10232,8 @@ TileSubroutine5:
     sta TileRoutine,x       ; tile = respawned
 
     lda TileWRAMLo,x
-    clc
-    adc #$21
+    ;clc
+    adc #$20        ; Carry is always set here so add #$20 instead of #$21 
     sta $00
 
     and #$E0
@@ -10232,15 +10262,15 @@ TileSubroutine5:
     asr #$03
     sta $0B
 
-    jsr GetSamusCoordData_06_08_0A
+    jsr GetSamusCoordData_06_08_0A  ; <== sets the carry bit to zero
 
     lda #$04
-    clc
+    ;clc
     adc ObjRadY
     sta $04
 
     lda #$04
-    ;clc             ; There is no way this isn't clear here
+    ;clc            ; ObjRadY + #$04 above won't set the carry bit. ObjRadY can't get that big
     adc ObjRadX
     sta $05
 
