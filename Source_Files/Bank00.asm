@@ -88,7 +88,7 @@ L807C:  DEY                     ;
 L8075:  STY HorzCntrNonLinr     ;
 L8078:  STY HorzCntrLinear      ;
 L8073:  STY SamusGravity        ;
-L807D:  STY AlwaysZero          ;
+L807D:  STY SpareMemD0          ;
 L807F:  STY VertCntrLinear      ;
 L8081:  STY SamusHorzSpdMax     ;
 
@@ -3321,7 +3321,6 @@ L9BB0:  STA WaveSpritePtr       ;
 L9BB2:  LDA FrameCount          ;
 L9BB4:  AND #$08                ;Every eigth frame count, change wave sprite data.
 L9BB6:  BNE +                   ;
-;TODO: WaveSpriteCntr is always #$10 aka 16. Doesn't need to be ZP, can just be a constant
 L9BB8:  LDY #$10                ;Load WaveSpriteCntr with #$10(16 bytes of
 L9BBA:  STY WaveSpriteCntr      ;sprite data to be loaded).
 L9BBC:  BNE ++                  ;Branch always.
@@ -5671,7 +5670,7 @@ GFXBrinstarEnemies:
     .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
 
 ClearRAM_33_DF_Bank00:
-      LAX AlwaysZero          ;
+      LXA #$00                ;
     * STA $33,x               ;Clear RAM addresses $33 through $DF.
       INX                     ;
       CPX #$A0                ;

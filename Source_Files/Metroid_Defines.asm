@@ -268,7 +268,7 @@
 .alias HorzCntrLinear   $CE   ;Horizontal movement counter. Linear change in speed.
 .alias SamusGravity     $CF   ;Value used in calculating vertical acceleration on Samus.
 
-.alias AlwaysZero       $D0     ;Spare me that can be relied on to always be zero.
+.alias SpareMemD0       $D0     ;Spare me that can be relied on to always be zero.
 .alias SpareMemD1       $D1     ;Written to in title routine, but never accessed.
 .alias CurrentSFXFlags  $D1     ;Stores flags of SFX currently being processed.
 
@@ -883,7 +883,7 @@
 .alias PlacePtrTable_Hi         $86DF
 .alias PlacePtrTable_Lo         $86EE
 .alias SamusEnterDoor           $8B13
-.alias DoorHandler              $8B79
+.alias DoorHandler              $8B70
 .alias PalPntrTbl_Hi            $9560
 .alias PalPntrTbl_Lo            $957C
 .alias SpecItmsTblPtr           $9598

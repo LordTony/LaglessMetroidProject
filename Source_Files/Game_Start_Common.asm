@@ -1425,7 +1425,11 @@ _L8B56:  JSR _SamusInDoor         ;($8B74)Indicate Samus just entered a door.
 _L8B59:  LDA #$12                ;
 _L8B5B:  STA DoorDelay           ;Set DoorDelay to 18 frames(going into door).
 _L8B5D:  LDA SamusDoorData       ;
-_L8B5F:  JSR _Amul16              ;($C2C5)*16. Move scroll toggle data to upper 4 bits.
+_L8B5F:  
+    asl
+    asl
+    asl
+    asl                             ;($C2C5)*16. Move scroll toggle data to upper 4 bits.
 _L8B62:  ORA SamusObjAction           ;Keep Samus action so she will appear the same comming-->
 _L8B65:  STA SamusDoorData       ;out of the door as she did going in.
 _L8B67:  LDA #$05                ;
@@ -1439,159 +1443,194 @@ _L8B74:  ORA #$80                ;Set MSB of DoorStatus to indicate Samus has ju
 _L8B76:  STA DoorStatus          ;entered a door.
 _L8B78:  RTS                     ;
 ; swaped ObjAction for SamusObjAction on ZP
-nop
-nop
-nop
-nop
-nop
-nop
-nop
-nop
-nop
-nop
+
 ;----------------------------------------------------------------------------------------------------
 
+; HCSS - big win here
 .advance DoorHandler
 
-_L8B79:  LDX #$B0
-_L8B7B:* JSR _L8B87
-_L8B7E:  LAX PageIndex
-_L8B81:  SBX #$10
-_L8B84:  BMI _L8B7B
-_L8B86:  RTS
+    ldx #$B0              ; 12 entries B, A, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0
+    DoorHandlerLoop:
+        stx PageIndex
+        ldy ObjAction, x
+        beq DoorHandlerNext
+            jsr DoorHandlerDispatch
+    DoorHandlerNext:
+        lax PageIndex
+        sbx #$10
+        bmi DoorHandlerLoop
+    DoorHandlerExit:
+        rts
 
-; Note: Game crashes when a door comes into view
-; if I remove this advance here.
-.advance $8B87
+    DoorHandlerDispatch:  
+        LDA DoorHandlerTable_Lo - 1, y      ; -1 because the 0 case is already handled 
+        STA CodePtr
+        LDA DoorHandlerTable_Hi - 1, y
+        STA CodePtr + 1
+        JMP (CodePtr)
 
-_L8B87:  STX PageIndex
-_L8B89:  LDA ObjAction,X
-_L8B8C:  JSR ChooseRoutine       ;($C27C)
-_L8B8F:  .word ExitSub
-_L8B91:  .word _L8B9D
-_L8B93:  .word _L8BD5
-_L8B95:  .word _L8C01
-_L8B97:  .word _L8C84
-_L8B99:  .word _L8CC6
-_L8B9B:  .word _L8CF0
+    DoorHandlerTable_Hi:
+        .byte >DoorHandlerRoutine1, >DoorHandlerRoutine2, >DoorHandlerRoutine3, >DoorHandlerRoutine4, >DoorHandlerRoutine5, >DoorHandlerRoutine6 
 
+    DoorHandlerTable_Lo:
+        .byte <DoorHandlerRoutine1, <DoorHandlerRoutine2, <DoorHandlerRoutine3, <DoorHandlerRoutine4, <DoorHandlerRoutine5, <DoorHandlerRoutine6 
+
+.advance $8B9D
+
+DoorHandlerRoutine1:
 _L8B9D:  INC $0300,X
 _L8BA0:  LDA #$30
 _L8BA2:  JSR SetProjectileAnim       ;($D2FA)
-_L8BA5:  JSR $8CFB
+_L8BA5:  JSR _L8CFB
 _L8BA8:  LDY $0307,X
-_L8BAB:  LDA $8BD1,Y
+_L8BAB:  LDA DoorHandlerRoutine1_Table, Y
 _L8BAE:  STA $030F,X
+
 _L8BB1:  LDA $0307,X
 _L8BB4:  CMP #$03
-_L8BB6:  BNE $8BBA
+_L8BB6:  BNE _L8BBA
 _L8BB8:  LDA #$01
 _L8BBA:  ORA #$A0
 _L8BBC:  STA $6B
+
 _L8BBE:  LDA #$00
 _L8BC0:  STA $030A,X
+
 _L8BC3:  TXA 
 _L8BC4:  AND #$10
 _L8BC6:  EOR #$10
 _L8BC8:  ORA $6B
 _L8BCA:  STA $6B
+
 _L8BCC:  LDA #$06
 _L8BCE:  JMP AnimDrawObject
+
+DoorHandlerRoutine1_Table:
 _L8BD1:  .byte $05, $01, $0A, $01
 
+DoorHandlerRoutine2:
 _L8BD5:  LDA $030A,X
 _L8BD8:  AND #$04
-_L8BDA:  BEQ $8BB1
+_L8BDA:  BEQ _L8BB1
+
 _L8BDC:  DEC $030F,X
-_L8BDF:  BNE $8BB1
+_L8BDF:  BNE _L8BB1
+
 _L8BE1:  LDA #$03
 _L8BE3:  CMP $0307,X
-_L8BE6:  BNE $8BEE
+_L8BE6:  BNE _L8BEE
+
 _L8BE8:  LDY $010B
 _L8BEB:  INY 
-_L8BEC:  BNE $8BB1
+_L8BEC:  BNE _L8BB1
 _L8BEE:  STA $0300,X
+
 _L8BF1:  LDA #$50
 _L8BF3:  STA $030F,X
+
 _L8BF6:  LDA #$2C
 _L8BF8:  STA $0305,X
+
 _L8BFB:  SEC 
 _L8BFC:  SBC #$03
-_L8BFE:  JMP $8C7E
+_L8BFE:  JMP _L8C7E
 
+DoorHandlerRoutine3:
 _L8C01:  LDA DoorStatus
-_L8C03:  BEQ $8C1D
+_L8C03:  BEQ _L8C1D
+
 _L8C05:  LDA $030C
 _L8C08:  EOR $030C,X
 _L8C0B:  LSR 
-_L8C0C:  BCS $8C1D
+_L8C0C:  BCS _L8C1D
+
 _L8C0E:  LDA $030E
 _L8C11:  EOR $030E,X
-_L8C14:  BMI $8C1D
+_L8C14:  BMI _L8C1D
+
 _L8C16:  LDA #$04
 _L8C18:  STA $0300,X
-_L8C1B:  BNE $8C73
+_L8C1B:  BNE _L8C73
 
 _L8C1D:  LDA $0306,X
 _L8C20:  CMP $0305,X
-_L8C23:  BCC $8C73
+_L8C23:  BCC _L8C73
+
 _L8C25:  LDA $030F,X
 _L8C28:  CMP #$50
-_L8C2A:  BNE $8C57
-_L8C2C:  JSR $8CF7
+_L8C2A:  BNE _L8C57
+
+_L8C2C:  JSR _L8CF7
 _L8C2F:  LDA $0307,X
 _L8C32:  CMP #$01
-_L8C34:  BEQ $8C57
+_L8C34:  BEQ _L8C57
+
 _L8C36:  CMP #$03
-_L8C38:  BEQ $8C57
+_L8C38:  BEQ _L8C57
+
 _L8C3A:  LDA #$0A
 _L8C3C:  STA $09
+
 _L8C3E:  LDA $030C,X
 _L8C41:  STA $08
+
 _L8C43:  LDY $50
 _L8C45:  TXA 
 _L8C46:  JSR _Amul16
-_L8C49:  BCC $8C4C
+_L8C49:  BCC _L8C4C
+
 _L8C4B:  DEY 
 _L8C4C:  TYA 
-_L8C4D:  JSR LDC1E
+_L8C4D:  JSR Bank07_LDC1E
 _L8C50:  LDA #$00
 _L8C52:  STA $0300,X
-_L8C55:  BEQ $8C73
+_L8C55:  BEQ _L8C73
+
 _L8C57:  LDA $2D
 _L8C59:  LSR 
-_L8C5A:  BCS $8C73
+_L8C5A:  BCS _L8C73
+
 _L8C5C:  DEC $030F,X
-_L8C5F:  BNE $8C73
+_L8C5F:  BNE _L8C73
+
 _L8C61:  LDA #$01
 _L8C63:  STA $030F,X
-_L8C66:  JSR $8CFB
+
+_L8C66:  JSR _L8CFB
 _L8C69:  LDA #$02
 _L8C6B:  STA $0300,X
-_L8C6E:  JSR $8C76
+
+_L8C6E:  JSR _L8C76
 _L8C71:  LDX PageIndex
-_L8C73:  JMP $8BB1
+_L8C73:  JMP _L8BB1
 
 _L8C76:  LDA #$30
 _L8C78:  STA $0305,X
+
 _L8C7B:  SEC 
 _L8C7C:  SBC #$02
 _L8C7E:  JSR SetProjectileAnimWithoutReset
 _L8C81:  JMP SFXDoor
 
+DoorHandlerRoutine4:
 _L8C84:  LDA DoorStatus
 _L8C86:  CMP #$05
 _L8C88:  BCS _L8CC3
+
 _L8C8A:  JSR _L8CFB
 _L8C8D:  JSR _L8C76
 _L8C90:  LDX PageIndex
 _L8C92:  LDA $91
 _L8C94:  BEQ _L8CA7
-_L8C96:  TXA 
-_L8C97:  JSR _Adiv16
+
+;_L8C96:  TXA 
+;_L8C97:  JSR _Adiv16
+    lda Div16Table, x
+
 _L8C9A:  EOR $91
 _L8C9C:  LSR 
 _L8C9D:  BCC _L8CA7
+
 _L8C9F:  LDA PalToggle
 _L8CA1:  EOR #$07
 _L8CA3:  STA PalToggle
@@ -1600,27 +1639,35 @@ _L8CA5:  STA $1C
 _L8CA7:  INC $0300,X
 _L8CAA:  LDA #$00
 _L8CAC:  STA $91
+
 _L8CAE:  LDA $0307,X
 _L8CB1:  CMP #$03
 _L8CB3:  BNE _L8CC3
+
 _L8CB5:  TXA 
 _L8CB6:  JSR _Amul16
 _L8CB9:  BCS _L8CC0
+
 _L8CBB:  JSR TourianMusic
 _L8CBE:  BNE _L8CC3
+
 _L8CC0:  JSR MotherBrainMusic
 _L8CC3:  JMP _L8C71
 
+DoorHandlerRoutine5:
 _L8CC6:  LDA DoorStatus
 _L8CC8:  CMP #$05
-_L8CCA:  BNE $8CED
+_L8CCA:  BNE _L8CED
+
 _L8CCC:  TXA 
 _L8CCD:  EOR #$10
 _L8CCF:  TAX 
 _L8CD0:  LDA #$06
 _L8CD2:  STA $0300,X
+
 _L8CD5:  LDA #$2C
 _L8CD7:  STA $0305,X
+
 _L8CDA:  SEC 
 _L8CDB:  SBC #$03
 _L8CDD:  JSR SetProjectileAnimWithoutReset
@@ -1629,53 +1676,73 @@ _L8CE3:  JSR SelectSamusPal
 _L8CE6:  LDX PageIndex
 _L8CE8:  LDA #$02
 _L8CEA:  STA $0300,X
-_L8CED:  JMP $8BB1
 
+_L8CED:  JMP _L8BB1
+
+DoorHandlerRoutine6:
 _L8CF0:  LDA DoorStatus
-_L8CF2:  BNE $8CED
-_L8CF4:  JMP $8C61
+_L8CF2:  BNE _L8CED
+
+_L8CF4:  JMP _L8C61
+
 _L8CF7:  LDA #$FF
-_L8CF9:  BNE $8CFD
+_L8CF9:  BNE _L8CFD
+
 _L8CFB:  LDA #$4E
 
 _L8CFD:  PHA 
-_L8CFE:  LDA #$50
-_L8D00:  STA $02
-_L8D02:  TXA 
-_L8D03:  JSR _Adiv16
-_L8D06:  AND #$01
-_L8D08:  TAY 
-_L8D09:  LDA _CommonTable,Y
-_L8D0C:  STA $03
-_L8D0E:  LDA $030C,X
-_L8D11:  STA $0B
-_L8D13:  JSR MakeCartRAMPtr
-_L8D16:  LDY #$00
-_L8D18:  PLA 
-_L8D19:  STA ($04),Y
-_L8D1B:  TAX 
-_L8D1C:  TYA 
-_L8D1D:  CLC 
-_L8D1E:  ADC #$20
-_L8D20:  TAY 
-_L8D21:  TXA 
-_L8D22:  CPY #$C0
-_L8D24:  BNE $8D19
-_L8D26:  LDX PageIndex
-_L8D28:  TXA 
-_L8D29:  lsr
-         lsr
-         asr #$0C
+
+_MakeCartRAMPtr:
+    lda $030C, x
+    and #$01
+    ora #$18        
+    sta $05         
+
+    lda #$50         
+    and #$F8
+    asl 
+    rol $05         
+    asl 
+    rol $05         
+    sta $04         
+
+    ldy #$1D
+    lda Div16Table, x
+    and #$01
+    beq +
+    ldy #$02
+
+*   tya 
+    ora $04
+    sta $04         
+
+_L8D18:  PLA
+
+    ldy #$00
+    sta ($04),Y
+    ldy #$20
+    sta ($04),Y
+    ldy #$40
+    sta ($04),Y
+    ldy #$60
+    sta ($04),Y
+    ldy #$80
+    sta ($04),Y
+    ldy #$A0
+    sta ($04),Y
+
+    lax PageIndex
+    lsr 
+    lsr 
+    asr #$0C
+
 _L8D2E:  TAY 
 _L8D2F:  LDA $04
 _L8D31:  STA $005C,Y
+
 _L8D34:  LDA $05
 _L8D36:  STA $005D,Y
-_L8D39:  RTS
 
-_CommonTable:
-_L8D3A:  .byte $E8, $10 ; looks to be unused ;, $60, $AD, $91, $69, $8D, $78, $68, $AD, $92, $69, $8D, $79, $68, $A9 
-;_L8D4A:  .byte $00, $85, $00, $85, $02, $AD, $97, $69, $29, $80, $F0, $06, $A5, $00, $09, $80
-;_L8D5A:  .byte $85, $00, $AD, $97, $69, $29
+_L8D39:  RTS
 
 .scend

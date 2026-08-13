@@ -21,8 +21,8 @@ The idea here is to attempt to take the Metroid lag as low as possible without a
 The baseline benchmark is Samus standing still in the opening room with 2 of the spikey bois both alive and crawing on the walls.
 
   * Metroid finishes all work for the benchmark frames in **137 to 149** scanlines
-  * Lagless Metroid finishes in **58 to 77** scanlines
-  * Lagless Metroid finishes in **42% to 52%** of the scanlines it takes Metroid
+  * Lagless Metroid finishes in **56 to 77** scanlines
+  * Lagless Metroid finishes in **41% to 52%** of the scanlines it takes Metroid
   * The limit might be something like **50** scanlines, so keep pushing
 
 ### Code Progress
@@ -129,3 +129,4 @@ SBX #$F0
 ## Bugs
 * Loading can get confused when direction changes right as the load is happening and you can get half of the wrong room.
 * Missiles don't seem to hit spinners from far away (example: The ones hanging on room #$12)
+* Missile count is gitched with the Justin Bailey password
