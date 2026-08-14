@@ -83,7 +83,8 @@ LC06D:  LDA #%00001110          ;Verticle mirroring.
                                 ;8KB CHRROM switching enabled.
 LC06F:  STA MMCReg0Cntrl        ;
 
-LC071:  LDY #$00                ;Clear bits 3 and 4 of MMC1 register 3.
+                                ; Y == 0 here
+;LC071:  LDY #$00               ;Clear bits 3 and 4 of MMC1 register 3.
 LC077:  STY ScrollX             ;ScrollX = 0
 LC079:  STY ScrollY             ;ScrollY = 0
 LC07B:  STY PPUScroll           ;Clear hardware scroll x
@@ -113,7 +114,7 @@ LC093:  STA PPUCNT1ZP           ;
 
 LC095:  LDA #$47                ;
 LC097:  STA MirrorCntrl         ;Prepare to set PPU to vertical mirroring.
-LC099:  JSR PrepVertMirror      ;($C4B2)
+LC099:  JSR SetPPUMirror        ;($C4B2)
 
 LC09C:  LDY #$00                ;
 LC09E:  STY DMCCntrl1           ;PCM volume = 0 - disables DMC channel
@@ -815,10 +816,10 @@ LC4A9:* RTS                     ;
 
 ;-----------------------------------[ PPU mirroring routines ]---------------------------------------
 
-PrepVertMirror:
-LC4B2:  NOP                     ;
-LC4B3:  NOP                     ;Prepare to set PPU for vertical mirroring (again).
-LC4B4:  LDA #$47                ;
+;PrepVertMirror:
+;LC4B2:  NOP                     ;
+;LC4B3:  NOP                     ;Prepare to set PPU for vertical mirroring (again).
+;LC4B4:  LDA #$47                ;
 
 SetPPUMirror:
 LC4B6:  LSR                     ;
@@ -1520,17 +1521,17 @@ jsr UpdateItems             ;($DB37)Display of power-up items.
 ; Could possibly cause bugs if the SpritePagePos is really high
     ldx SpritePagePos
 ClearSpriteRamLoop:
-    lda #$F4
     ldy SpriteRAM,x
     cpy #$F4
     beq AfterClearSpriteRam
-    sta SpriteRAM,x
-    sta SpriteRAM+4,x
-    sta SpriteRAM+8,x
-    sta SpriteRAM+12,x
-    txa
-    sbx #$F0
-    bne ClearSpriteRamLoop      ; always branch
+        lda #$F4
+        sta SpriteRAM,x
+        sta SpriteRAM+4,x
+        sta SpriteRAM+8,x
+        sta SpriteRAM+12,x
+        txa
+        sbx #$F0
+        bne ClearSpriteRamLoop      ; always branch
 
 AfterClearSpriteRam:
 
@@ -1691,31 +1692,6 @@ SkipZeroSuit:
 SelectSamusPalExit:
     rts                         ;
         
-;----------------------------------[ Initiate SFX and music routines ]-------------------------------
-
-; Initiate sound effects.
-; Most of these have been inlined
-
-SFXDoor:              
-    LDA #SFX_DOOR
-
-Set_TriangleSFXFlag:
-    ORA TriangleSFXFlag
-    STA TriangleSFXFlag
-    RTS         
-
-MotherBrainMusic:
-    LDA #MUS_BOSS
-    BNE Set_MusicInitFlag
-
-TourianMusic:
-    LDA #MUS_TOURIAN
-
-Set_MusicInitFlag:
-    ORA MusicInitFlag
-    STA MusicInitFlag
-    RTS 
-
 ;---------------------------------------[ Samus Handler ]-------------------------------------------
 ; HUGBEES #2 - 10% of averge frame time is spent here
 GoSamusHandler:
@@ -2971,7 +2947,12 @@ CheckDoorAfterTourian:
     sta ItemRmMusicSts
 *   lda KrdRdlyPresent
     beq +
-    jsr TourianMusic
+
+;TourianMusic:
+    lda #MUS_TOURIAN
+    ora MusicInitFlag
+    sta MusicInitFlag
+
     lda #$00
     sta KrdRdlyPresent
     beq --     ; branch always
@@ -4016,10 +3997,13 @@ LDB48:  BEQ Exit31               ;If so, branch to exit.
 
 LDB4A:  LDA PowerUpYCoord,x     ;
 LDB4D:  STA PowerUpY            ;
+
 LDB50:  LDA PowerUpXCoord,x     ;Store y, x and name table coordinates of power up item.
 LDB53:  STA PowerUpX            ;
+
 LDB56:  LDA PowerUpNameTable,x      ;
 LDB59:  STA PowerUpHi           ;
+
 LDB5C:  JSR GetObjCoords        ;($D79F)Find object position in room RAM.
 ;LDB5F:  LDX ItemIndex           ;Index to proper power up item.
 LDB61:  LDY #$00            ;Reset index.
@@ -4030,10 +4014,12 @@ LDB69:  LDA PowerUpType,x       ;
 LDB6C:  AND #$0F            ;Load power up type byte and keep only bits 0 thru 3.
 LDB6E:  ORA #$50            ;Set bits 4 and 6.
 LDB70:  STA PowerUpAnimFrame        ;Save index to find object animation.
+
 LDB73:  LDA FrameCount          ;
 LDB76:  asr #$07            ;Color affected every other frame. ;the 2 LSBs of object control byte change palette of object.
 LDB78:  ORA #$80            ;Indicate ObjectCntrl contains valid data by setting MSB.
 LDB7A:  STA ObjectCntrl         ;Change color of item every other frame.
+
 LDB7C:  LDA SpritePagePos       ;Load current index into sprite RAM.
 LDB7E:  PHA             ;Temp save sprite RAM position.
 LDB7F:  LDA PowerUpAnimIndex,x      ;Load entry into FramePtrTable for item animation.
@@ -4143,10 +4129,10 @@ LDC1A:  BNE LDBE3           ;Branch always.
 ;properly calculated.
 
 GetItemXYPos:
-LDC1C:  LDA MapPosX         ;
+LDC1C:  LDY MapPosX         ;
 
 Bank07_LDC1E:  
-        STA $07             ;Temp storage of Samus map position x and y in $07
+        STY $07             ;Temp storage of Samus map position x and y in $07
 LDC20:  LDA MapPosY         ;and $06 respectively.
 LDC22:  STA $06             ;
 LDC24:  LDA ScrollDir           ;Load scroll direction and shift LSB into carry bit.

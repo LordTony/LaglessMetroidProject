@@ -1449,25 +1449,30 @@ _L8B78:  RTS                     ;
 ; HCSS - big win here
 .advance DoorHandler
 
-    ldx #$B0              ; 12 entries B, A, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0
-    DoorHandlerLoop:
-        stx PageIndex
-        ldy ObjAction, x
-        beq DoorHandlerNext
-            jsr DoorHandlerDispatch
-    DoorHandlerNext:
-        lax PageIndex
-        sbx #$10
-        bmi DoorHandlerLoop
-    DoorHandlerExit:
-        rts
+    ldy ObjAction + $B0
+    beq +
+        ldx #$B0
+        jsr DoorHandlerDispatch
+*   ldy ObjAction + $A0
+    beq +
+        ldx #$A0
+        jsr DoorHandlerDispatch
+*   ldy ObjAction + $90
+    beq +
+        ldx #$90
+        jsr DoorHandlerDispatch
+*   ldy ObjAction + $80
+    beq _L8B78
+        ldx #$80
+        jmp DoorHandlerDispatch
 
-    DoorHandlerDispatch:  
-        LDA DoorHandlerTable_Lo - 1, y      ; -1 because the 0 case is already handled 
-        STA CodePtr
-        LDA DoorHandlerTable_Hi - 1, y
-        STA CodePtr + 1
-        JMP (CodePtr)
+    DoorHandlerDispatch:
+        stx PageIndex
+        lda DoorHandlerTable_Lo - 1, y      ; -1 because the 0 case is already handled 
+        sta CodePtr
+        lda DoorHandlerTable_Hi - 1, y
+        sta CodePtr + 1
+        jmp (CodePtr)
 
     DoorHandlerTable_Hi:
         .byte >DoorHandlerRoutine1, >DoorHandlerRoutine2, >DoorHandlerRoutine3, >DoorHandlerRoutine4, >DoorHandlerRoutine5, >DoorHandlerRoutine6 
@@ -1475,7 +1480,7 @@ _L8B78:  RTS                     ;
     DoorHandlerTable_Lo:
         .byte <DoorHandlerRoutine1, <DoorHandlerRoutine2, <DoorHandlerRoutine3, <DoorHandlerRoutine4, <DoorHandlerRoutine5, <DoorHandlerRoutine6 
 
-.advance $8B9D
+;.advance $8B9D
 
 DoorHandlerRoutine1:
 _L8B9D:  INC $0300,X
@@ -1489,9 +1494,10 @@ _L8BAE:  STA $030F,X
 _L8BB1:  LDA $0307,X
 _L8BB4:  CMP #$03
 _L8BB6:  BNE _L8BBA
-_L8BB8:  LDA #$01
+    _L8BB8:  LDA #$01
+
 _L8BBA:  ORA #$A0
-_L8BBC:  STA $6B
+_L8BBC:  STA ObjectCntrl
 
 _L8BBE:  LDA #$00
 _L8BC0:  STA $030A,X
@@ -1499,8 +1505,8 @@ _L8BC0:  STA $030A,X
 _L8BC3:  TXA 
 _L8BC4:  AND #$10
 _L8BC6:  EOR #$10
-_L8BC8:  ORA $6B
-_L8BCA:  STA $6B
+_L8BC8:  ORA ObjectCntrl
+_L8BCA:  STA ObjectCntrl
 
 _L8BCC:  LDA #$06
 _L8BCE:  JMP AnimDrawObject
@@ -1520,9 +1526,10 @@ _L8BE1:  LDA #$03
 _L8BE3:  CMP $0307,X
 _L8BE6:  BNE _L8BEE
 
-_L8BE8:  LDY $010B
+_L8BE8:  LDY EndTimerHi
 _L8BEB:  INY 
 _L8BEC:  BNE _L8BB1
+
 _L8BEE:  STA $0300,X
 
 _L8BF1:  LDA #$50
@@ -1539,54 +1546,54 @@ DoorHandlerRoutine3:
 _L8C01:  LDA DoorStatus
 _L8C03:  BEQ _L8C1D
 
-_L8C05:  LDA $030C
-_L8C08:  EOR $030C,X
+_L8C05:  LDA ObjectHi 
+_L8C08:  EOR ObjectHi,x
 _L8C0B:  LSR 
 _L8C0C:  BCS _L8C1D
 
-_L8C0E:  LDA $030E
-_L8C11:  EOR $030E,X
+_L8C0E:  LDA ObjectX 
+_L8C11:  EOR ObjectX, x
 _L8C14:  BMI _L8C1D
 
 _L8C16:  LDA #$04
 _L8C18:  STA $0300,X
-_L8C1B:  BNE _L8C73
+_L8C1B:  BNE _L8BB1
 
 _L8C1D:  LDA $0306,X
 _L8C20:  CMP $0305,X
-_L8C23:  BCC _L8C73
+_L8C23:  BCC _L8BB1
 
 _L8C25:  LDA $030F,X
 _L8C28:  CMP #$50
 _L8C2A:  BNE _L8C57
 
-_L8C2C:  JSR _L8CF7
+         LDA #$FF
+_L8C2C:  JSR _L8CFD
 _L8C2F:  LDA $0307,X
-_L8C32:  CMP #$01
-_L8C34:  BEQ _L8C57
-
-_L8C36:  CMP #$03
-_L8C38:  BEQ _L8C57
+         AND #$01
+         BNE _L8C57
 
 _L8C3A:  LDA #$0A
 _L8C3C:  STA $09
 
-_L8C3E:  LDA $030C,X
+_L8C3E:  LDA ObjectHi,X
 _L8C41:  STA $08
 
 _L8C43:  LDY $50
 _L8C45:  TXA 
-_L8C46:  JSR _Amul16
-_L8C49:  BCC _L8C4C
+;_L8C46:  JSR _Amul16
+         AND #$10
+_L8C49:  BEQ _L8C4D
 
 _L8C4B:  DEY 
-_L8C4C:  TYA 
+;_L8C4C:  TYA 
 _L8C4D:  JSR Bank07_LDC1E
 _L8C50:  LDA #$00
 _L8C52:  STA $0300,X
-_L8C55:  BEQ _L8C73
+_L8C55:  BEQ _L8C73     ; branch always
+         ; safe
 
-_L8C57:  LDA $2D
+_L8C57:  LDA FrameCount
 _L8C59:  LSR 
 _L8C5A:  BCS _L8C73
 
@@ -1601,7 +1608,8 @@ _L8C69:  LDA #$02
 _L8C6B:  STA $0300,X
 
 _L8C6E:  JSR _L8C76
-_L8C71:  LDX PageIndex
+_L8C71:  
+         ;LDX PageIndex
 _L8C73:  JMP _L8BB1
 
 _L8C76:  LDA #$30
@@ -1610,7 +1618,12 @@ _L8C78:  STA $0305,X
 _L8C7B:  SEC 
 _L8C7C:  SBC #$02
 _L8C7E:  JSR SetProjectileAnimWithoutReset
-_L8C81:  JMP SFXDoor
+
+SFXDoor:
+    LDA #SFX_DOOR
+    ORA TriangleSFXFlag
+    STA TriangleSFXFlag
+    RTS    
 
 DoorHandlerRoutine4:
 _L8C84:  LDA DoorStatus
@@ -1619,7 +1632,7 @@ _L8C88:  BCS _L8CC3
 
 _L8C8A:  JSR _L8CFB
 _L8C8D:  JSR _L8C76
-_L8C90:  LDX PageIndex
+;_L8C90:  LDX PageIndex
 _L8C92:  LDA $91
 _L8C94:  BEQ _L8CA7
 
@@ -1634,7 +1647,7 @@ _L8C9D:  BCC _L8CA7
 _L8C9F:  LDA PalToggle
 _L8CA1:  EOR #$07
 _L8CA3:  STA PalToggle
-_L8CA5:  STA $1C
+_L8CA5:  STA PalDataPending
 
 _L8CA7:  INC $0300,X
 _L8CAA:  LDA #$00
@@ -1642,17 +1655,28 @@ _L8CAC:  STA $91
 
 _L8CAE:  LDA $0307,X
 _L8CB1:  CMP #$03
-_L8CB3:  BNE _L8CC3
+_L8CB3:  BNE _L8C71
 
 _L8CB5:  TXA 
 _L8CB6:  JSR _Amul16
 _L8CB9:  BCS _L8CC0
 
-_L8CBB:  JSR TourianMusic
-_L8CBE:  BNE _L8CC3
+_L8CBB:
+TourianMusic:
 
-_L8CC0:  JSR MotherBrainMusic
-_L8CC3:  JMP _L8C71
+    lda #MUS_TOURIAN
+    bne SetMusicInitFlag     ; branch always
+        ; safe
+_L8CC0:  
+MotherBrainMusic:
+
+    lda #MUS_BOSS
+
+SetMusicInitFlag:
+    ora MusicInitFlag
+    sta MusicInitFlag
+
+_L8CC3:  BNE _L8C71      ; branch always
 
 DoorHandlerRoutine5:
 _L8CC6:  LDA DoorStatus
@@ -1673,7 +1697,7 @@ _L8CDB:  SBC #$03
 _L8CDD:  JSR SetProjectileAnimWithoutReset
 _L8CE0:  JSR SFXDoor
 _L8CE3:  JSR SelectSamusPal
-_L8CE6:  LDX PageIndex
+_L8CE6:  LDX PageIndex          ; Necessary for now
 _L8CE8:  LDA #$02
 _L8CEA:  STA $0300,X
 
@@ -1682,18 +1706,14 @@ _L8CED:  JMP _L8BB1
 DoorHandlerRoutine6:
 _L8CF0:  LDA DoorStatus
 _L8CF2:  BNE _L8CED
-
-_L8CF4:  JMP _L8C61
-
-_L8CF7:  LDA #$FF
-_L8CF9:  BNE _L8CFD
+_L8CF4:  JMP _L8C61         ; branch always
 
 _L8CFB:  LDA #$4E
 
 _L8CFD:  PHA 
 
 _MakeCartRAMPtr:
-    lda $030C, x
+    lda ObjectHi, x
     and #$01
     ora #$18        
     sta $05         
