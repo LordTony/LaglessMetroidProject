@@ -1464,7 +1464,6 @@ _L8B78:  RTS                     ;
 *   ldy ObjAction + $80
     beq _L8B78
         ldx #$80
-        jmp DoorHandlerDispatch
 
     DoorHandlerDispatch:
         stx PageIndex

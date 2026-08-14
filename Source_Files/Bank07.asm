@@ -10244,9 +10244,13 @@ TileSubroutine1:
     lda #$50
     sta TileDelay,x
 
+    ; TODO : can probably delete the next 4 lines
+    
+    ; Looks like it might be duplicated in DrawTileBlast
     lda TileWRAMLo,x     ; low WRAM addr of blasted tile
     sta $00
 
+    ; Looks like it might be duplicated in DrawTileBlast
     lda TileWRAMHi,x     ; high WRAM addr
     sta $01
 
@@ -10356,9 +10360,11 @@ DrawTileBlast:
     lda PPUStrIndex
     cmp #$1F
     bcs Exit23
+
     ldx PageIndex
     lda TileWRAMLo,x
     sta $00
+
     lda TileWRAMHi,x
     sta $01
     
