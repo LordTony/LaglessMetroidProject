@@ -1091,7 +1091,7 @@ _EndTriangleSFX:
   STA TriangleInUse       ;Allows music to use triangle channel.
   LDA #$18                ;
   STA TriangleCntrl3      ;Set length index to #$03.
-  JSR _ClrCrntSFXFlags     ;($B4A2)Clear all SFX flags.
+  JMP _ClrCrntSFXFlags     ;($B4A2)Clear all SFX flags.
 
 _MusicBranch04:
   RTS                     ;Exit from for multiple routines.
@@ -1246,15 +1246,16 @@ _DivideTriePeriods:
 ;--------------------------------------[ End SFX routines ]-------------------------------------
 
 _LoadSQ1SQ2Channels:
-  LDX #$00                ;Load SQ1 channel data.
-  JSR _WriteSQCntrl0       ;($BA41)Write Cntrl0 data.
-  INX                     ;Load SQ2 channel data.
-  JSR _WriteSQCntrl0       ;($BA41)Write Cntrl0 data.
-  RTS                     ;
+  LDX #$00                  ;Load SQ1 channel data.
+  LDA SQ1VolumeCntrl + 0    ;Load SQ channel volume data. If zero, branch to exit.
+  BEQ _LoadSQ1SQ2Channel2   ;
+    JSR _WriteSQCntrl0      ;($BA41)Write Cntrl0 data.
+_LoadSQ1SQ2Channel2:
+  INX                       ;Load SQ2 channel data.
+  LDA SQ1VolumeCntrl + 1
+  BEQ +++++
 
 _WriteSQCntrl0:
-  LDA SQ1VolumeCntrl,X    ;Load SQ channel volume data. If zero, branch to exit.
-  BEQ +++++               ;
   STA VolCntrlAddress     ;
 
 ;  JSR _LoadSQ1SQ2Periods   ;($BA08)Load SQ1 and SQ2 control information.
@@ -1327,12 +1328,10 @@ _MusicBranch06:
   BNE -----               ;Branch always.
 
 _GotoCheckRepeatMusic:
-* JSR _CheckRepeatMusic    ;($B3F0)Resets music flags if music repeats.
-  RTS                     ;
+* JMP _CheckRepeatMusic    ;($B3F0)Resets music flags if music repeats.
 
 _GotoLoadSQ1SQ2Channels:
-* JSR _LoadSQ1SQ2Channels  ;($BA37)Load SQ1 and SQ2 channel data.
-  RTS                     ;
+* JMP _LoadSQ1SQ2Channels  ;($BA37)Load SQ1 and SQ2 channel data.
 
 _LoadCurMusFrameData:
 

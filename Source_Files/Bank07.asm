@@ -926,12 +926,12 @@ InitBank1_RomSwitch:
 ;LC56D:  tay                     ; A == 0
 LC56F:  JSR MMCWriteReg3         ;($C4EF)Load Brinstar memory page into lower 16Kb memory.
         lda #$07
-        sta SpareMemD1
+        sta SpareMemB7
 BrinstarGFX_Loop:
-        ldx SpareMemD1
+        ldx SpareMemB7
         ldy BrinstarGFXTable, x
         JSR LoadGFX
-        dec SpareMemD1
+        dec SpareMemB7
         bpl BrinstarGFX_Loop
 LC575:  JMP NmiOn               ;($C487)Turn on VBlank interrupts.
 
@@ -956,16 +956,16 @@ LoadSamusGFX:
     JSR LoadGFX             ;($C7AB)Load pattern table GFX.
 
     lda #$04
-    sta SpareMemD1
+    sta SpareMemB7
 
     lda JustInBailey
     beq SamusGFX_Loop
-    inc SpareMemD1
+    inc SpareMemB7
 SamusGFX_Loop:
-    ldx SpareMemD1
+    ldx SpareMemB7
     ldy SamusGFXTable, x
     JSR LoadGFX
-    dec SpareMemD1
+    dec SpareMemB7
     bpl SamusGFX_Loop
 SamusGFX_AfterLoop:
     rts
@@ -1070,21 +1070,22 @@ LC81A:  jsr IsEngineRunning     ;($CA18)Check to see if ok to switch lower memor
 MoreInit:
 LC81D:  ldy #$01                ;
 LC81F:  sty PalDataPending      ;Palette data pending = yes.
-LC821:  lxa #$00                ; A and X = 0
+LC821:  ldx #$00                ; A and X = 0
 LC826:  stx AtEnding            ;Not playing ending scenes.
 LC829:  stx DoorStatus          ;Samus not in door.
 LC82B:  stx SamusDoorData       ;Samus is not inside a door.
 LC82D:  stx UpdtngPrjctl        ;No projectiles need to be updated.
-        sta SamusObjAction
+        stx SamusObjAction
 
-LC830:* cpx #$65                ;Check to see if more RAM to clear in $7A thru $DE.
-LC832:  bcs +                   ;
-LC834:  sta $7A,x               ;Clear RAM $7A thru $DE.
-LC836:* cpx #$FF                ;Check to see if more RAM to clear in $300 thru $3FE.
-LC838:  bcs +                   ;
-LC83A:  sta ObjAction,x         ;Clear RAM $300 thru $3FE.
-LC83D:* inx                     ;
-LC83E:  bne ---                 ;Loop until all required RAM is cleared.
+
+;LC830:* cpx #$65                ;Check to see if more RAM to clear in $7A thru $DE.
+;LC832:  bcs +                   ;
+;LC834:  sta $7A,x               ;Clear RAM $7A thru $DE.
+;LC836:* cpx #$FF                ;Check to see if more RAM to clear in $300 thru $3FE.
+;LC838:  bcs +                   ;
+;LC83A:  sta ObjAction,x         ;Clear RAM $300 thru $3FE.
+;LC83D:* inx                     ;
+;LC83E:  bne ---                 ;Loop until all required RAM is cleared.
 
 LC840:  jsr ScreenOff           ;($C439)Turn off Background and visibility.
 LC843:  jsr ClearNameTables     ;($C158)Clear screen data.
@@ -1097,14 +1098,14 @@ LC849:  jsr DestroyEnemies      ;($C8BB)
     ldx #$02  
     stx ScrollDir               ;Set initial scroll direction as left.
 
-    lda $95D7                   ;Get Samus start x pos on map.
+    lda StartingXPosition                   ;Get Samus start x pos on map.
     sta MapPosX                 ;
 
-    lda $95D8                   ;Get Samus start y pos on map.
+    lda StartingYPosition                   ;Get Samus start y pos on map.
     sta MapPosY                 ;
 
 LC860:
-    lda $95DA               ;Get ??? Something to do with palette switch
+    lda StartingPalette         ;Get ??? Something to do with palette switch
     sta PalToggle
 LC86C:
     lda #$00
@@ -1131,15 +1132,18 @@ LC86C:
     sty PPUAddress
     ldy #$00
     sty PPUAddress
+
     ldx #$04    ; prepare to write 4 pages
 *   lda ($00),y
     sta PPUIOReg
     iny
+
     bne -
     inc $01
     dex
     bne -
 
+    ldx #$00
     stx $91
     inx      ; X = 1
     stx PalDataPending
@@ -3564,7 +3568,7 @@ LD80E:
     sta MirrorCntrl
     lda ScrollDir
     and #$01
-    sta ScrollDir   ; JUMANJI
+    sta ScrollDir
     inc ObjAction + $20
     jmp ShowElevator
 
@@ -4300,7 +4304,7 @@ MoveEnemies_Continued:
     sta ObjectCntrl         ;Clear object control byte.
     PLA
     PLA
-    LDX PageIndex
+    ;LDX PageIndex
 LDCFC:  
     ldy EnDataIndex,x
     LDA InArea
@@ -4451,18 +4455,18 @@ MoveEnemies:
         LDA EnCounter,x
         PHA
             AND #$03
-            TAX
+            TAY
             LDA $05
             AND #$3F
-            ORA ExplodeRotationTbl,x
+            ORA ExplodeRotationTbl,y
             STA $05
         PLA
         CMP #$19
-        BNE +
+        BNE ++
             JMP MoveEnemies_Continued
 
 *   LDX PageIndex
-    INY
+*   LDY #$01
     LDA ($00),y
     STA EnRadY,x
 
@@ -5909,10 +5913,11 @@ LE590:
     lda PPUWriteDirectionTable,y    ; A = 0 if vertical scrolling, 1 if horizontal
     sta PPUDataString - 1,x
 
-    ldy #$00
-
     and #$80                            ; ... if bit 7 (PPU inc) of $04 clear                     
     bne _hoizontal_ppu_loop_setup
+
+_vertical_ppu_loop_setup:
+    ldy #$00
 
 _vertical_ppu_loop:
     lda ($00),y
@@ -5931,41 +5936,78 @@ _vertical_ppu_loop:
     sta PPUDataString+3, x
     iny
 
+    lda ($00),y
+    sta PPUDataString+4, x
+    iny
+
+    lda ($00),y
+    sta PPUDataString+5, x
+    iny
+
+    lda ($00),y
+    sta PPUDataString+6, x
+    iny
+
+    lda ($00),y
+    sta PPUDataString+7, x
+    iny
+
     txa
-    sbx #$FC 
+    sbx #$F8
 
     cpy #$20
     bne _vertical_ppu_loop
     beq _loop_end      ;always branch
 
-_inc_01_clear_and_jump_back:
-    clc
-    inc $01
-    bne _after_hoizontal_ppu_loop_inc
-
 _hoizontal_ppu_loop_setup:
-    clc
-    lda #$0F
+    lda #$04
     sta $05
+
 _hoizontal_ppu_loop:
-*   lda ($00),y
+    ldy #$00
+    lda ($00),y 
     sta PPUDataString, x
-    inx
-    tya      
-    adc #$20 
-    tay      
 
+    ldy #$20
     lda ($00),y
-    sta PPUDataString, x
-    inx
-    tya                             
-    adc #$20                        
-    tay                          
+    sta PPUDataString+1, x
 
-    bcs _inc_01_clear_and_jump_back     ;Increment $01(upper address byte) if carry
-_after_hoizontal_ppu_loop_inc:
+    ldy #$40
+    lda ($00),y
+    sta PPUDataString+2, x
+
+    ldy #$60
+    lda ($00),y
+    sta PPUDataString+3, x
+
+    ldy #$80
+    lda ($00),y
+    sta PPUDataString+4, x
+
+    ldy #$A0
+    lda ($00),y
+    sta PPUDataString+5, x
+
+    txa
+    sbx #$F8        ; add 8 to X
+
     dec $05
-    bne _hoizontal_ppu_loop
+    beq _loop_end_horz
+
+    ldy #$C0
+    lda ($00),y
+    sta PPUDataString-2, x
+
+    ldy #$E0
+    lda ($00),y
+    sta PPUDataString-1, x
+
+    inc $01
+    bne _hoizontal_ppu_loop     ; branch always
+
+_loop_end_horz:
+    dex
+    dex
 
 _loop_end:
     stx PPUStrIndex
@@ -6165,6 +6207,7 @@ LE76F:* rts             ;
 
 ;-----------------------------------------------------------------------------------------------------
 
+; Clobbers X and Y
 GrowRadiusY:
     ;ldx PageIndex
     lda EnRadY,x
@@ -6243,7 +6286,7 @@ LE7DE:
     ldx $04
 
 ; object<background crash detection
-LE7E6:
+ObjectBackgrounCollisionCheck:
 ;    jsr MakeCartRAMPtr      ;($E96A)Find object position in room RAM.
     lda $0B   
     and #$01  
@@ -6304,7 +6347,7 @@ IsWalkableTile:
 *   dex
     beq +
     jsr LE98E
-    jmp LE7E6
+    jmp ObjectBackgrounCollisionCheck
 
 *   sec      ; no crash
     Exit16:
@@ -6319,6 +6362,7 @@ LE81E:
     ldx UpdtngPrjctl
     beq ClcExit
     ldx #$06
+    ; $06, $04, $02, $00
 LE81E_Loop:
 *   lda $05
     eor $5D,x
@@ -6635,9 +6679,6 @@ Exit18: rts
 
 ;---------------------------------[ Write PPU attribute table data ]----------------------------------
 
-; ==== ALERT TODO BUG WARNING ERROR PROBLEM ISSUE =====
-; THE COLOR GITCH IS HERE SOMEWHERE.
-
 ; 510 Cycles
 ; 5 Scanlines
 
@@ -6695,24 +6736,24 @@ WritePPUAttribTblLoop:
     sta PPUDataString+3,x
     iny
 
-    lda ($00),y        
-    sta PPUDataString+4,x
-    iny
-
-    lda ($00),y        
-    sta PPUDataString+5,x
-    iny
-
-    lda ($00),y        
-    sta PPUDataString+6,x
-    iny
-
-    lda ($00),y        
-    sta PPUDataString+7,x
-    iny
+    ;lda ($00),y        
+    ;sta PPUDataString+4,x
+    ;iny
+;
+    ;lda ($00),y        
+    ;sta PPUDataString+5,x
+    ;iny
+;
+    ;lda ($00),y        
+    ;sta PPUDataString+6,x
+    ;iny
+;
+    ;lda ($00),y        
+    ;sta PPUDataString+7,x
+    ;iny
 
     txa
-    sbx #$F8
+    sbx #$FC
     
     ; PPU guardrails
     cpx #PPUMaxSize             ;PPU byte writer can only write a maximum of #$6F bytes
@@ -7018,6 +7059,7 @@ LEAA0:  sta StructPtrUB                 ;
         jmp DrawStruct          ;($EF8C)Draw one structure.     ; count_struct_addr in BuildRoomAnalyzer.lua
 
 
+; HCSS - saving 1 cycle
 IncRoomPtrHiByte:
     inc RoomPtr+1
     bne DrawRoom
@@ -7465,6 +7507,7 @@ LED5B_Loop:
     lsr
     tay
 
+PostRoomSetupStuff4:
     ldx #$D0
 
     ; goes from #$D0, #$E0, #$F0
@@ -7488,71 +7531,48 @@ LED5B_Loop:
     tya
     sec
     sbc $032C
-    bne AnotherPostRoomSetupThing
-        sta ElevatorStatus
+    bne +
+    sta ElevatorStatus
 
-.scope
-    AnotherPostRoomSetupThing:
-        lda #$FF
+PostRoomSetupStuff5:    
+*   ldx #$1E
 
-    _check1:
-        ldx $0704 + $1E
-        bne _check2
-            sta $0700 + $1E
-
-    _check2:
-        ldx $0704 + $18
-        bne _check3
-            sta $0700 + $18
-
-    _check3:
-        ldx $0704 + $12
-        bne _check4
-            sta $0700 + $12
-
-    _check4:
-        ldx $0704 + $0C
-        bne _check5
-            sta $0700 + $0C
-
-    _check5:
-        ldx $0704 + $06
-        bne _check6
-            sta $0700 + $06
-
-    _check6:
-        ldx $0704 + $00
-        bne _done
-            sta $0700 + $00
-
-    _done:
-
-.scend
+; Loop here
+*   lda $0704,x
+    bne +
+    lda #$FF
+    sta $0700,x
+*   txa
+    sbx #$06
+    bpl --
 
     cpy $036C
-    bne +
+    bne PostRoomSetupStuff6
         ldx #$00
         stx $0360
 
- ; A == #$FF here
-PipeEnemyPostRoomSetup:
-*   cpy $072C + $18
+PostRoomSetupStuff6:
+    lda #$FF
+    
+    cpy $072C + $18
     bne +
         sta PipeEnemyStatus + $18
+
 *   cpy $072C + $10
     bne +
         sta PipeEnemyStatus + $10
+
 *   cpy $072C + $08
     bne +
-        sta PipeEnemyStatus + $08
+        sta PipeEnemyStatus + $10
+
 *   cpy $072C + $00
     bne +
         sta PipeEnemyStatus + $00
 
 .scope
-
     ; A == #$FF here
-    cpy PowerUpNameTable 
+*   cpy PowerUpNameTable 
     bne _skip1
         sta PowerUpType 
     _skip1:
@@ -7565,7 +7585,7 @@ PipeEnemyPostRoomSetup:
     lda CurrentBank
     cmp #TourianBank
     bne Exit11
-    jmp Bank03_L9C6F    ; Tourian Only
+        jmp Bank03_L9C6F    ; Tourian Only
 .scend
 
 LED65:  
@@ -7960,12 +7980,13 @@ Exit102:
 ;----------------------------------[ Draw structure routines ]----------------------------------------
 .scope
 
-.alias _PositionInStruct        $10
-.alias _MacrosLeftInRow         $0E
-.alias _CloseToAttrTable        $30
-.alias _RoomDataWritePtr_Hi     $27
-.alias _RoomDataWritePtr_Lo     $26
-.alias _RoomDataWritePtr        $26
+.alias _PositionInStruct            $10
+.alias _RoomDataWritePtr_Hi         $27
+.alias _RoomDataWritePtr_Lo         $26
+.alias _RoomDataWritePtr            $26
+.alias _RoomDataWritePtr_Plus20_Hi  $01
+.alias _RoomDataWritePtr_Plus20_Lo  $00
+.alias _RoomDataWritePtr_Plus20     $00
 
 DrawStructExit:
     jmp CheckForNextStruct
@@ -7981,7 +8002,7 @@ IncCartRAMWorkPtrUB:
     clc 
     bcc DrawStruct          ;branch always
 
-DoAnotherMacro:
+DoNextMacro:
     LEF76:  lda _PositionInStruct            ;Load struct index.
 
 AdvanceRow:
@@ -7999,54 +8020,85 @@ UpdateCartRamPtr:
 
 ; Entry point
 DrawStruct:
-LEF8E:  sty _PositionInStruct   ;Reset struct index. y == 0 here
-LEF90:  lax (StructPtr), y      ;Load data byte.
-LEF94:  bmi DrawStructExit      ;If so, branch to exit.
-
-;Draws one row of the structure.
-;A = number of 2x2 tile macros to draw horizontally.
-
 DrawStructRow:
-LEF19:  sta _MacrosLeftInRow      ;Store horizontal macro count.
+    lax (StructPtr), y                  ; Y == 0 here. Load data byte.
+    bmi DrawStructExit                  ;If so, branch to exit.
 
-;High byte of current location in room RAM.
-;Check high byte of room RAM address for both room RAMs
-;to see if the attribute table data for the room RAM has
-;been reached.  If so, branch to check lower byte as well.
-;If not at end of room RAM, branch to draw macro.
+    stx _PositionInStruct               ;Store horizontal macro count.
 
-DrawMacro:
-LEF3F:  inc _PositionInStruct   ;Increase struct data index.       ; count_macro_addr in BuildRoomAnalyzer.lua
-LEF41:  ldy _PositionInStruct   ;Load struct data index into Y.
+    lda _RoomDataWritePtr_Lo   
+    adc #$20                            ;carry known clear from the ASL above
+    sta _RoomDataWritePtr_Plus20_Lo     ;$00/$01 = pointer to the upper tile row, fixed for the whole loop
 
-DrawNext:
-LEF43:  lax (StructPtr),y       ;Get macro number. StructPtr = $35
-;The following table is used to draw macros in room RAM. Each macro is 2 x 2 tiles.
-;The following table contains the offsets required to place the tiles in each macro.
+    tya                                 ; Y == A == 0
+    adc _RoomDataWritePtr_Hi
+    sta _RoomDataWritePtr_Plus20_Hi
 
-        ldy #$20
-        lda MacroUpperRight, x
-        sta (_RoomDataWritePtr),Y
+    txa 
+    bit _PositionInStruct               ;Check if the -X------ bit is set
+    bvs DrawRepeatingMacro 
 
-        iny
-        lda MacroUpperLeft, x
-        sta (_RoomDataWritePtr),Y
+DrawMacroLoop:
+    tay 
 
-        ldy #$01
-        lda MacroLowerLeft, x
-        sta (_RoomDataWritePtr),Y
+    lax (StructPtr),y   
 
-        dey
-        lda MacroLowerRight, x                             ; Doing it like this so Y is 0 when we get out of here
-        sta (_RoomDataWritePtr),Y
+    tya 
+    asl 
+    tay 
 
-        lda _RoomDataWritePtr
-        adc #$02
-        sta _RoomDataWritePtr
+    dey
+    lda MacroLowerLeft, x
+    sta (_RoomDataWritePtr_Plus20),y
 
-LEF72:  dec _MacrosLeftInRow        ;Have all macros been drawn on this row?
-LEF74:  bne DrawMacro               ;If not, branch to draw another macro.
-LEF65:  beq DoAnotherMacro          ;If yes, branch to do another macro.
+    lda MacroUpperLeft, x
+    sta (_RoomDataWritePtr),y
+
+    dey
+    lda MacroLowerRight, x
+    sta (_RoomDataWritePtr_Plus20),y
+
+    lda MacroUpperRight, x
+    sta (_RoomDataWritePtr),y
+
+    tya 
+    lsr
+    bne DrawMacroLoop
+    beq DoNextMacro                     ;branch always Y==0 here
+
+DrawRepeatingMacro:
+    iny
+    lax (StructPtr),y
+
+    lda _PositionInStruct
+    and #$0F
+    asl 
+          
+    sty _PositionInStruct       ; Set _PositionInStruct to #$01 here
+
+    tay
+    dey
+
+DrawRepeatingMacroLoop:
+
+    lda MacroUpperLeft, x 
+    sta (_RoomDataWritePtr),y    
+    lda MacroLowerLeft, x
+    sta (_RoomDataWritePtr_Plus20),y
+
+    dey 
+
+    lda MacroUpperRight, x
+    sta (_RoomDataWritePtr),y
+    lda MacroLowerRight, x
+    sta (_RoomDataWritePtr_Plus20),y
+
+	dey
+    bpl DrawRepeatingMacroLoop
+
+    iny
+    beq DoNextMacro                 ; branch always 
+    ; safe
 
 .scend
 
@@ -8069,8 +8121,8 @@ CollisionDetection:
     sta $07
 
     lda $B2,x
-
     sta $09
+
     lda $B3,x
     eor PPUCNT0ZP
     and #$01
@@ -8395,7 +8447,15 @@ LF1FA:
     sbc #$00
     sta $01
     bpl LF22B
-        jsr LE449
+        lda #$00
+        sec
+        sbc $00
+        sta $00
+
+        lda #$00
+        sbc $01
+        sta $01
+        inc $10
 
 LF22B:
     sec
@@ -8421,7 +8481,15 @@ LF22B:
 *   sbc #$00
     sta $01
     bpl LF256
-        jsr LE449
+        lda #$00
+        sec
+        sbc $00
+        sta $00
+
+        lda #$00
+        sbc $01
+        sta $01
+        inc $10
 
 LF256:
     sec
@@ -8438,9 +8506,7 @@ LF262:
     sta $01
     bpl Exit17
 
-;----------------------------------------------------------------------------------------------------
-
-LE449:
+Bank07_LE449:
     lda #$00
     sec
     sbc $00
@@ -8468,9 +8534,9 @@ LF282:
 *   sta $010F
     tay
     bmi +
-    lda $968B,y
-    and #$10
-    bne Exit17
+        lda $968B,y
+        and #$10
+        bne Exit17
 *   lda $10
     asl
     asl
@@ -8504,8 +8570,8 @@ LF2CA:
 
     ora $030A,y
     sta $030A,y
-*   lda $10
 
+*   lda $10
     eor #$03
     asl
     asl
@@ -8736,15 +8802,10 @@ LF40D:
 
 StartUpdateEnemyAnimation:
     jsr UpdateEnemyAnim
-    ; === Change ====
     lda $0405,X
     asl
     bmi Start_Special_Attrs
-        jsr $8060       ; JUAMNJI changed from $8058
-    ; === End Change ===
-    ; === Before Change ===
-    ; jsr $8058
-    ; === End Before Change
+        jsr $8060
 
 Start_Special_Attrs:
     ldx PageIndex
@@ -10244,16 +10305,6 @@ TileSubroutine1:
     lda #$50
     sta TileDelay,x
 
-    ; TODO : can probably delete the next 4 lines
-    
-    ; Looks like it might be duplicated in DrawTileBlast
-    lda TileWRAMLo,x     ; low WRAM addr of blasted tile
-    sta $00
-
-    ; Looks like it might be duplicated in DrawTileBlast
-    lda TileWRAMHi,x     ; high WRAM addr
-    sta $01
-
 SetupTileAnimationAndDelay:
     lda #$02
     ;LDX PageIndex
@@ -10301,11 +10352,9 @@ Exit28:
 
 TileSubroutine5:
     lda #$00
-    tay                     ; y = 0;
     sta TileRoutine,x       ; tile = respawned
 
     lda TileWRAMLo,x
-    ;clc
     adc #$20        ; Carry is always set here so add #$20 instead of #$21 
     sta $00
 
@@ -10320,7 +10369,6 @@ TileSubroutine5:
     ror $02
 
     lda $00
-    ;and #$1F ; don't think it does anything
     asl
     asl
     asl       ; * 8

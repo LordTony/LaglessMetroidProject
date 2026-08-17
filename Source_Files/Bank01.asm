@@ -89,11 +89,11 @@ Bank01_L9150:  .byte $10, $10, $10, $10, $10, $10, $00, $10, $00, $00, $00, $00,
 
 ;Structure #$01
 Bank01_LAC97:
-    .byte $08, $02, $02, $02, $02, $02, $02, $02, $02
+    .byte $48, $02
     .byte $01, $28
     .byte $01, $28
     .byte $01, $28
-    .byte $08, $02, $02, $02, $02, $02, $02, $02, $02
+    .byte $48, $02
     .byte $FF
 
 ;Structure #$02
@@ -177,7 +177,7 @@ Bank01_Struct_54:
 
 ;Structure #$0C
 Bank01_LAD1A:
-    .byte $02, $20, $20
+    .byte $42, $20
     .byte $FF
 
 ;Structure #$0D
@@ -195,7 +195,7 @@ Bank01_LAD28:
 
 ;Structure #$0F
 Bank01_LAD4D:
-    .byte $08, $2E, $2E, $2E, $2E, $2E, $2E, $2E, $2E
+    .byte $48, $2E
     .byte $FF
 
 ;Structure #$10
@@ -218,12 +218,12 @@ Bank01_LAD7F:
 
 ;Structure #$13
 Bank01_LAD8E:
-    .byte $08, $2B, $2B, $2B, $2B, $2B, $2B, $2B, $2B
+    .byte $48, $2B
     .byte $FF
 
 ;Structure #$14
 Bank01_LAD98:
-    .byte $08, $1A, $1A, $1A, $1A, $1A, $1A, $1A, $1A
+    .byte $48, $1A
     .byte $FF
 
 ;Structure #$15
@@ -237,18 +237,18 @@ Bank01_LADA2:
 
 ;Structure #$16
 Bank01_LADAD:
-    .byte $07, $20, $20, $20, $20, $20, $20, $20
+    .byte $47, $20
     .byte $07, $20, $1A, $20, $1F, $20, $1A, $20
     .byte $FF
 
 ;Structure #$17
 Bank01_LADBE:
-	.byte $08, $0D, $0D, $0D, $0D, $0D, $0D, $0D, $0D
-	.byte $08, $0D, $0D, $0D, $0D, $0D, $0D, $0D, $0D
-	.byte $08, $0D, $0D, $0D, $0D, $0D, $0D, $0D, $0D
+	.byte $48, $0D
+	.byte $48, $0D
+	.byte $48, $0D
 ;Structure #$1C
 Bank01_LAE09:
-	.byte $08, $0D, $0D, $0D, $0D, $0D, $0D, $0D, $0D
+	.byte $48, $0D
 	.byte $FF
 
 ;Structure #$18
@@ -258,26 +258,26 @@ Bank01_LADE3:
 
 ;Structure #$19
 Bank01_LADE6:
-    .byte $04, $0D, $0D, $0D, $0D
+    .byte $44, $0D
     .byte $FF
 
 ;Structure #$1A
 Bank01_Struct_42:
-    .byte $02, $0D, $0D
-    .byte $02, $0D, $0D
-    .byte $02, $0D, $0D
+    .byte $42, $0D
+    .byte $42, $0D
+    .byte $42, $0D
 Bank01_LADEC:
-    .byte $02, $0D, $0D
-    .byte $02, $0D, $0D
+    .byte $42, $0D
+    .byte $42, $0D
 Bank01_Struct_43:
-    .byte $02, $0D, $0D
+    .byte $42, $0D
 Bank01_Struct_44:
-    .byte $02, $0D, $0D
+    .byte $42, $0D
     .byte $FF
 
 ;Structure #$1B
 Bank01_LADF9:
-    .byte $08, $0D, $0D, $0D, $0D, $0D, $0D, $0D, $0D
+    .byte $48, $0D
     .byte $05, $27, $30, $0D, $0D, $30
     .byte $FF
 
@@ -300,7 +300,7 @@ Bank01_LAE18:
 
 ;Structure #$1F
 Bank01_LAE2D:
-    .byte $04, $1D, $1D, $1D, $1D
+    .byte $44, $1D
     .byte $04, $1D, $1C, $1C, $1D
     .byte $04, $1C, $1D, $1C, $1C
     .byte $04, $1D, $1C, $1D, $1D
@@ -308,7 +308,7 @@ Bank01_LAE2D:
 
 ;Structure #$20
 Bank01_LAE42:
-    .byte $04, $33, $33, $33, $33
+    .byte $44, $33
     .byte $FF
 
 ;Structure #$21
@@ -336,7 +336,7 @@ Bank01_LAE5F:
 ;Structure #$24
 Bank01_LAE70:
     .byte $04, $1E, $1E, $1C, $1E
-    .byte $04, $1E, $1E, $1E, $1E
+    .byte $44, $1E
     .byte $04, $1C, $1E, $1E, $1E
     .byte $04, $1E, $1E, $1C, $1E
     .byte $FF
@@ -356,8 +356,8 @@ Bank01_LAE8E:
 
 ;Structure #$27
 Bank01_LAE92:
-    .byte $08, $1E, $1E, $1E, $1E, $1E, $1E, $1E, $1E
-    .byte $08, $1E, $1E, $1E, $1E, $1E, $1E, $1E, $1E
+    .byte $48, $1E
+    .byte $48, $1E
     .byte $FF
 
 ;Structure #$28
@@ -395,8 +395,8 @@ Bank01_LAEC8:
 
 ;Structure #$2D
 Bank01_LAECB:
-    .byte $08, $1F, $1F, $1F, $1F, $1F, $1F, $1F, $1F
-    .byte $08, $1F, $1F, $1F, $1F, $1F, $1F, $1F, $1F
+    .byte $48, $1F
+    .byte $48, $1F
     .byte $FF
 
 ;Structure #$2E
@@ -430,8 +430,8 @@ Bank01_Struct_36:
 	.byte $FF
 
 Bank01_Struct_35:
-	.byte $02, $1E, $1E
-	.byte $02, $1E, $1E
+	.byte $42, $1E
+	.byte $42, $1E
 	.byte $FF
 
 Bank01_Struct_37:
@@ -444,7 +444,7 @@ Bank01_Struct_38:
     .byte $FF
 
 Bank01_Struct_39:
-	.byte $04, $1D, $1D, $1D, $1D
+	.byte $44, $1D
     .byte $04, $1D, $1C, $1C, $1D
 	.byte $FF
 
@@ -467,7 +467,7 @@ Bank01_Struct_3B:
 
 ; Shortened #$0B (5 rows down to 3)
 Bank01_Struct_3C:
-    .byte $02, $36, $36
+    .byte $42, $36
     .byte $02, $1C, $08
     .byte $02, $08, $34
     .byte $FF
@@ -494,7 +494,7 @@ Bank01_Struct_3F:
 
 ;Structure #$1F (4 rows down to 1)
 Bank01_Struct_40:
-    .byte $04, $1D, $1D, $1D, $1D
+    .byte $44, $1D
     .byte $FF
 
 ;Structure #$0E (4 rows down to 3)
@@ -528,7 +528,7 @@ Bank01_Struct_47:
 ;Based on Structure #$24
 Bank01_Struct_4A:
     .byte $04, $1E, $1E, $1C, $1E
-    .byte $04, $1E, $1E, $1E, $1E
+    .byte $44, $1E
     .byte $04, $1C, $1E, $1E, $1E
     .byte $FF
 
@@ -546,9 +546,9 @@ Bank01_Struct_59:
     .byte $FF
 
 Bank01_Struct_4D:
-	.byte $08, $1E, $1E, $1E, $1E, $1E, $1E, $1E, $1E
+	.byte $48, $1E
 	.byte $08, $2B, $03, $03, $2B, $03, $03, $03, $2B
-	.byte $08, $1E, $1E, $1E, $1E, $1E, $1E, $1E, $1E
+	.byte $48, $1E
 	.byte $FF
 
 Bank01_Struct_4F:
@@ -561,7 +561,7 @@ Bank01_Struct_50:
     .byte $03, $1E, $1C, $1C
 	.byte $03, $1E, $1E, $1C
 Bank01_Struct_51:
-	.byte $03, $1E, $1E, $1E
+	.byte $43, $1E
     .byte $FF
 
 Bank01_Struct_52:
@@ -577,22 +577,27 @@ Bank01_Struct_53:
     .byte $FF
 
 Bank01_Struct_55:
-	.byte $02, $33, $33
+	.byte $42, $33
 	.byte $FF
 
 Bank01_Struct_56:
     .byte $04, $1E, $1E, $1C, $1C
-    .byte $04, $1E, $1E, $1E, $1E
+    .byte $44, $1E
     .byte $04, $1C, $1E, $1E, $1E
     .byte $04, $1E, $1E, $1E, $1C
     .byte $FF
 
 Bank01_Struct_57:
-    .byte $04, $1E, $1E, $1E, $1E
+    .byte $44, $1E
     .byte $04, $1C, $1E, $1E, $1E
     .byte $04, $1E, $1E, $1C, $1E
     .byte $04, $1E, $1C, $1C, $1E
     .byte $FF
+
+Bank01_Struct_58:
+    .byte $04, $1E, $1E, $1C, $1E
+    .byte $44, $1E
+	.byte $FF
 
 ; OUT OF ROOM HERE. More Structs scattered around wildly
 
@@ -637,11 +642,16 @@ Bank01_L95CF:  .byte $00           ;Base damage caused by area enemies to upper 
 ;Special room numbers(used to start item room music).
 Bank01_L95D0:  .byte $2B, $2C, $28, $0B, $1C, $0A, $1A
 
+.advance StartingXPosition
 Bank01_L95D7:  .byte $03           ;Samus start x coord on world map.
+.advance StartingYPosition
 Bank01_L95D8:  .byte $0E           ;Samus start y coord on world map.
 Bank01_L95D9:  .byte $B0           ;Samus start verticle screen position.
 
-.advance $95DA
+.alias StartingXPosition        $95D7
+.alias StartingYPosition        $95D8
+.advance StartingPalette
+
 Bank01_L95DA:  .byte $01, $00
 Bank01_L95DC:  .byte $03		; unused
 Bank01_L95DD:  .byte $43, $00, $00, $00, $00, $00, $00 
@@ -821,8 +831,10 @@ Bank01_L99A7:  CMP #$03
 Bank01_L99A9:  BEQ $99B5
 Bank01_L99AB:  LDA $00
 Bank01_L99AD:  JMP StartUpdateEnemyAnimation
+
 Bank01_L99B0:  LDA $01
 Bank01_L99B2:  JMP StartUpdateEnemyAnimation_2
+
 Bank01_L99B5:  JMP Start_Special_Attrs
 
 Bank01_L99B8:  LDA #$09
@@ -832,6 +844,7 @@ Bank01_L99BE:  LDA EnStatus,X
 Bank01_L99C1:  CMP #$03
 Bank01_L99C3:  BEQ $99C8
 Bank01_L99C5:  JSR Bank07_LFB88
+
 Bank01_L99C8:  LDA #$06
 Bank01_L99CA:  STA $00
 Bank01_L99CC:  LDA #$08
@@ -892,90 +905,98 @@ Bank01_L9A3C:  DEY
 Bank01_L9A3D:  BPL $9A22
 Bank01_L9A3F:  LDA #$02
 Bank01_L9A41:  JMP StartUpdateEnemyAnimation
+
 Bank01_L9A44:  LDA #$08
 Bank01_L9A46:  JMP StartUpdateEnemyAnimation_2
 Bank01_L9A49:  JMP Start_Special_Attrs
 
 Bank01_L9A4C:  JSR DoSomethingToFrameCount
 Bank01_L9A4F:  AND #$03
-Bank01_L9A51:  BEQ $9A87
+Bank01_L9A51:  BEQ Bank01_L9A87
 Bank01_L9A53:  LDA $81
 Bank01_L9A55:  CMP #$01
-Bank01_L9A57:  BEQ $9A44
+Bank01_L9A57:  BEQ Bank01_L9A44
 Bank01_L9A59:  CMP #$03
-Bank01_L9A5B:  BEQ $9A49
+Bank01_L9A5B:  BEQ Bank01_L9A49
 Bank01_L9A5D:  LDA EnStatus,X
 Bank01_L9A60:  CMP #$03
-Bank01_L9A62:  BEQ $9A87
+Bank01_L9A62:  BEQ Bank01_L9A87
 Bank01_L9A64:  LDA $040A,X
 Bank01_L9A67:  AND #$03
 Bank01_L9A69:  CMP #$01
-Bank01_L9A6B:  BNE $9A7E
+Bank01_L9A6B:  BNE Bank01_L9A7E
 Bank01_L9A6D:  LDY EnYRoomPos,X
 Bank01_L9A70:  CPY #$E4
-Bank01_L9A72:  BNE $9A7E
-Bank01_L9A74:  JSR $9ABD
+Bank01_L9A72:  BNE Bank01_L9A7E
+
+Bank01_L9A74:  
+	LDA $0405,X
+	EOR #$01
+	STA $0405,X
 Bank01_L9A77:  LDA #$03
 Bank01_L9A79:  STA $040A,X
-Bank01_L9A7C:  BNE $9A84
-Bank01_L9A7E:  JSR $9AE2
-Bank01_L9A81:  JSR $9AA8
-Bank01_L9A84:  JSR $9AC6
+Bank01_L9A7C:  BNE Bank01_L9A84
+Bank01_L9A7E:  JSR Bank01_DispachBankEnemyHandler
+Bank01_L9A81:
+Bank01_L9AA8:  LDX PageIndex
+Bank01_L9AAA:  BCS Bank01_L9A84
+Bank01_L9AAC:  LDA $00
+Bank01_L9AAE:  BEQ Bank01_L9AB0
+	LDA $0405,X
+	EOR #$01
+	STA $0405,X
+Bank01_L9AB0:  LDY $040A,X
+Bank01_L9AB3:  DEY 
+Bank01_L9AB4:  TYA 
+Bank01_L9AB5:  AND #$03
+Bank01_L9AB7:  STA $040A,X
+Bank01_L9ABA:  JSR Bank01_L9A8F
+
+Bank01_L9A84:
+Bank01_L9AC6:  
+	LDY $040A,X
+	INY 
+	TYA 
+	AND #$03
+Bank01_L9AC9:  JSR Bank01_DispachBankEnemyHandler
+Bank01_L9ACC:  LDX PageIndex
+Bank01_L9ACE:  BCC Bank01_L9A87
+Bank01_L9AD0:  
+	LDY $040A,X
+	INY 
+	TYA 
+	AND #$03
+Bank01_L9AD3:  STA $040A,X
+Bank01_L9AD6:  JSR Bank01_L9A8F
+
 Bank01_L9A87:  LDA #$03
 Bank01_L9A89:  JSR UpdateEnemyAnim
 Bank01_L9A8C:  JMP Start_Special_Attrs
+
 Bank01_L9A8F:  LDA $0405,X
 Bank01_L9A92:  LSR 
 Bank01_L9A93:  LDA $040A,X
 Bank01_L9A96:  AND #$03
 Bank01_L9A98:  ROL 
 Bank01_L9A99:  TAY 
-Bank01_L9A9A:  LDA $9AA0,Y
+Bank01_L9A9A:  LDA Bank01_L9AA0,Y
 Bank01_L9A9D:  JMP DoSomethingToAnimationIndecies
 
 Bank01_L9AA0:  .byte $35, $35, $3E, $38, $3B, $3B, $38, $3E 
 
-Bank01_L9AA8:  LDX PageIndex
-Bank01_L9AAA:  BCS $9AC5
-Bank01_L9AAC:  LDA $00
-Bank01_L9AAE:  BNE $9ABD
-Bank01_L9AB0:  LDY $040A,X
-Bank01_L9AB3:  DEY 
-Bank01_L9AB4:  TYA 
-Bank01_L9AB5:  AND #$03
-Bank01_L9AB7:  STA $040A,X
-Bank01_L9ABA:  JMP $9A8F
-Bank01_L9ABD:  LDA $0405,X
-Bank01_L9AC0:  EOR #$01
-Bank01_L9AC2:  STA $0405,X
-Bank01_L9AC5:  RTS
-
-Bank01_L9AC6:  JSR $9ADA
-Bank01_L9AC9:  JSR $9AE2
-Bank01_L9ACC:  LDX PageIndex
-Bank01_L9ACE:  BCC $9AD9
-Bank01_L9AD0:  JSR $9ADA
-Bank01_L9AD3:  STA $040A,X
-Bank01_L9AD6:  JSR $9A8F
-Bank01_L9AD9:  RTS
-
-Bank01_L9ADA:  LDY $040A,X
-Bank01_L9ADD:  INY 
-Bank01_L9ADE:  TYA 
-Bank01_L9ADF:  AND #$03
-Bank01_L9AE1:  RTS
-
+Bank01_DispachBankEnemyHandler:
 Bank01_L9AE2:  LDY $0405,X
 Bank01_L9AE5:  STY $00
 Bank01_L9AE7:  LSR $00
 Bank01_L9AE9:  ROL 
-Bank01_L9AEA:  ASL 
 Bank01_L9AEB:  TAY 
-Bank01_L9AEC:  LDA L8048_Ptr_Table+1,Y
+Bank01_L9AEC:  LDA L8048_Ptr_Table_Hi,Y
 Bank01_L9AEF:  PHA 
-Bank01_L9AF0:  LDA L8048_Ptr_Table,Y
+Bank01_L9AF0:  LDA L8048_Ptr_Table_Lo,Y
 Bank01_L9AF3:  PHA 
 Bank01_L9AF4:  RTS
+
+.advance $9AF5
 
 Bank01_L9AF5:  LDA $81
 Bank01_L9AF7:  CMP #$01
@@ -1038,7 +1059,7 @@ Bank01_L9B7A:  CMP #$02
 Bank01_L9B7C:  BNE $9B95
 Bank01_L9B7E:  JSR $833F
 Bank01_L9B81:  PHA 
-Bank01_L9B82:  JSR $8395
+Bank01_L9B82:  JSR Common_Collision_Func
 Bank01_L9B85:  STA $05
 Bank01_L9B87:  PLA 
 Bank01_L9B88:  STA $04
@@ -2923,6 +2944,7 @@ Bank01_LAAA4:
 	.word FFLabel
 	.byte $FF
 
+; JUMANJI
 Bank01_Room_25_Left:
 	.byte $00, $27
 	.byte $23, $24
@@ -3581,28 +3603,28 @@ Brinstar_DefaultAttrs:
 ;of the macro definition. The bytes correspond to the following position in order: lower right tile,
 ;lower left tile, upper right tile, upper left tile. 
 
-.advance MacroLowerRight
+.advance MacroUpperRight
     .byte $F1, $FF, $64, $D5, $A4, $FF, $A0, $A1, $00, $0B, $03, $08, $0E, $12, $FF, $FF
     .byte $FF, $FF, $34, $3A, $3C, $FF, $44, $45, $FF, $48, $48, $49, $4B, $51, $55, $59
     .byte $5C, $4F, $88, $84, $8C, $FF, $FF, $FF, $FF, $B0, $B4, $B8, $FF, $BB, $C7, $94
     .byte $0D, $FF, $FF, $80, $04, $06, $60, $C1, $0B, $BF, $C0, $FF, $C2, $30, $CD, $D1
     .byte $90
 
-.advance MacroLowerLeft
+.advance MacroUpperLeft
     .byte $F1, $FF, $64, $D6, $FF, $A5, $A0, $A1, $01, $00, $0A, $09, $0F, $13, $FF, $33
     .byte $39, $FF, $35, $3B, $41, $FF, $44, $46, $47, $FF, $47, $49, $4C, $52, $56, $5B
     .byte $5D, $4F, $89, $85, $8D, $FF, $FF, $FF, $FF, $B1, $B5, $B8, $FF, $BB, $C8, $95
     .byte $FF, $FF, $FF, $81, $05, $06, $61, $00, $BE, $01, $01, $C1, $01, $00, $CE, $D2
     .byte $91
 
-.advance MacroUpperRight
+.advance MacroLowerRight
     .byte $F1, $F0, $64, $CB, $A4, $FF, $A0, $A1, $02, $FF, $0A, $02, $10, $14, $FF, $FF
     .byte $FF, $31, $37, $3E, $40, $43, $44, $45, $47, $47, $47, $4A, $4D, $53, $57, $59
     .byte $5E, $4F, $8A, $86, $8E, $FF, $FF, $FF, $FF, $B2, $B6, $B9, $BA, $BB, $C9, $96
     .byte $FF, $59, $5A, $82, $04, $07, $62, $00, $BC, $02, $C0, $FF, $FF, $BC, $CF, $D3
     .byte $92
 
-.advance MacroUpperLeft
+.advance MacroLowerLeft
     .byte $F1, $F0, $64, $CC, $FF, $A5, $A0, $A1, $03, $0B, $FF, $03, $11, $0C, $30, $36
     .byte $3D, $32, $38, $3F, $42, $43, $44, $46, $48, $48, $48, $4A, $50, $54, $58, $5B
     .byte $5F, $4F, $8B, $87, $8F, $FF, $FF, $FF, $FF, $B3, $B7, $B9, $BA, $BB, $CA, $97
@@ -3940,11 +3962,6 @@ Bank01_LB133:  .byte $04           ;Drumbeat 01    +
 Bank01_LB134:  .byte $FF           ;
 
 ;----------------------------[ Cramming structs wherever they will fit]-----------------------------
-
-Bank01_Struct_58:
-    .byte $04, $1E, $1E, $1C, $1E
-    .byte $04, $1E, $1E, $1E, $1E
-	.byte $FF
 
 ; CODE CAVE (~ 6 x 16 bytes)
 

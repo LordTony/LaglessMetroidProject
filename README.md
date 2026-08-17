@@ -21,9 +21,10 @@ The idea here is to attempt to take the Metroid lag as low as possible without a
 The baseline benchmark is Samus standing still in the opening room with 2 of the spikey bois both alive and crawing on the walls.
 
   * Metroid finishes all work for the benchmark frames in **137 to 149** scanlines
-  * Lagless Metroid finishes in **55 to 77** scanlines
-  * Lagless Metroid finishes in **40% to 52%** of the scanlines it takes Metroid
+  * Lagless Metroid finishes work in **55 to 71** scanlines
+  * Lagless Metroid finishes work in **40% to 47%** of the scanlines standard NES Metroid takes
   * The limit might be something like **50** scanlines, so keep pushing
+    * There seems to be only 1 spot left in the game where lag is possible (Brinstar Bank 01 Rooms #$24 and #$25)
 
 ### Code Progress
 * ChooseRoutine has been removed from bank07 and is now only called from outside
@@ -128,6 +129,10 @@ SBX #$F0
 
 ## Bugs
 * Loading can get confused when direction changes right as the load is happening and you can get half of the wrong room.
-* Missiles don't seem to hit spinners from far away (example: The ones hanging on room #$12)
 * Missile count is gitched with the Justin Bailey password
-* Key items don't change name table properly.
+* Breakable blocks switch name tables when they aren't supposed to
+
+## Maybe Bugs (Check Original Game Behavior)
+* Can't collect health + missiles pickups while blinking (normally due to touching lava)
+* Missiles don't seem to hit spinners from far away (example: The ones hanging on room #$12)
+* Pipe spawned enemies can raise through the ceiling

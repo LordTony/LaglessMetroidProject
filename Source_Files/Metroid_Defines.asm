@@ -876,7 +876,9 @@
 ;---------------------------------- [ Constant Locations in Swap Banks ] -----------------------------
 .alias Common_Struct_00         $8000
 .alias TwosCompliment           $8014
-.alias L8048_Ptr_Table          $8048
+.alias L8048_Ptr_Table_Hi       $8048
+.alias L8048_Ptr_Table_Lo       $8050
+.alias Common_Collision_Func    $8395
 .alias ObjectAnimIdxTbl         $8572
 .alias FramePtrTable_Hi         $860B
 .alias FramePtrTable_Lo         $8675
@@ -887,11 +889,16 @@
 .alias PalPntrTbl_Hi            $9560
 .alias PalPntrTbl_Lo            $957C
 .alias SpecItmsTblPtr           $9598
+.alias StartingXPosition        $95D7
+.alias StartingYPosition        $95D8
+.alias StartingPalette          $95DA
 .alias HandleBankEnemies        $95E5
 .alias AreaRoutine              $95C3       ; TODO: Delete
 .alias MemuByte                 $95E4
 .alias EnemyHitPointTbl         $962B
 .alias EnemyInitDelayTbl        $96BB
+
+
 .alias TileFramePtrTbl_Hi       $97AF
 .alias TileFramePtrTbl_Lo       $97C0
 .alias RoomAttrTbl_Hi           $ACB0
@@ -903,10 +910,10 @@
 .alias EnemyPlacePtrTbl_Lo      $AEDC
 .alias RoomPointerTable_Hi      $AEEC
 .alias RoomPointerTable_Lo      $AF1C
-.alias MacroLowerRight          $AF4C
-.alias MacroLowerLeft           $AF91
-.alias MacroUpperRight          $AFD6
-.alias MacroUpperLeft           $B01B
+.alias MacroUpperRight          $AF4C
+.alias MacroUpperLeft           $AF91
+.alias MacroLowerRight          $AFD6
+.alias MacroLowerLeft           $B01B
 .alias SoundEngineOrg           $B200
 .alias SXFInitTables            $B29D
 .alias SoundEngineEntryPoint    $B3CC

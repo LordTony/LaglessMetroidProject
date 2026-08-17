@@ -225,11 +225,13 @@ Bank03_L95CF:  .byte $03           ;Base damage caused by area enemies to upper 
 ;Special room numbers(used to start item room music).
 Bank03_L95D0:  .byte $FF, $FF, $FF, $FF, $FF, $FF, $FF
 
+.advance StartingXPosition
 Bank03_L95D7:  .byte $03           ;Samus start x coord on world map.
+.advance StartingYPosition
 Bank03_L95D8:  .byte $04           ;Samus start y coord on world map.
 Bank03_L95D9:  .byte $6E           ;Samus start verticle screen position.
 
-.advance $95DA
+.advance StartingPalette
 Bank03_L95DA:  .byte $06, $00
 
 Bank03_L95DC:  .byte $03    ; unused
@@ -2720,12 +2722,12 @@ Bank03_Init:
         DEY                     ;
         BPL -                   ;
         lda #$09
-        sta SpareMemD1
+        sta SpareMemB7
 TourianGFX_Loop:
-        ldx SpareMemD1
+        ldx SpareMemB7
         ldy TourianGFXTable, x
         JSR LoadGFX
-        dec SpareMemD1
+        dec SpareMemB7
         bpl TourianGFX_Loop
 LC5A5:  JMP NmiOn               ;($C487)Turn on VBlank interrupts.
 
@@ -2927,25 +2929,25 @@ Tourian_DefaultAttrs:
 ;of the macro definition. The bytes correspond to the following position in order: lower right tile,
 ;lower left tile, upper right tile, upper left tile. 
 
-.advance MacroLowerRight
+.advance MacroUpperRight
     .byte $A7, $FF, $A2, $FF, $A4, $FF, $FF, $4F, $A0, $A1, $04, $10, $00, $08, $18, $1C
     .byte $0C, $09, $7A, $2A, $14, $20, $24, $28, $26, $2A, $2B, $2B, $FF, $31, $35, $3D
     .byte $41, $39, $3B, $0B, $2F, $50, $54, $56, $FF, $5B, $FF, $5D, $63, $65, $6D, $6F
     .byte $71, $45, $FF, $49, $90, $7C
 
-.advance MacroLowerLeft
+.advance MacroUpperLeft
     .byte $A7, $FF, $A2, $FF, $FF, $A5, $79, $4F, $A0, $A1, $05, $11, $01, $08, $19, $1D
     .byte $0D, $09, $7B, $2C, $15, $21, $25, $28, $27, $2B, $2C, $2B, $FF, $32, $36, $3E
     .byte $42, $3A, $3B, $0B, $30, $51, $55, $57, $FF, $5C, $FF, $62, $64, $66, $6E, $70
     .byte $72, $46, $98, $4A, $91, $7D
 
-.advance MacroUpperRight
+.advance MacroLowerRight
     .byte $A7, $A6, $FF, $A3, $A4, $FF, $FF, $4F, $A0, $A1, $06, $12, $02, $08, $1A, $1E
     .byte $0E, $09, $7F, $FF, $16, $22, $20, $29, $26, $FF, $FF, $FF, $FF, $33, $37, $3F
     .byte $43, $39, $3C, $2D, $0B, $52, $54, $58, $FF, $5F, $61, $67, $69, $6B, $73, $75
     .byte $77, $47, $FF, $4B, $90, $4D
 
-.advance MacroUpperLeft
+.advance MacroLowerLeft
     .byte $A7, $A6, $FF, $A3, $FF, $A5, $7E, $4F, $A0, $A1, $07, $13, $03, $08, $1B, $1F
     .byte $0F, $09, $5A, $FF, $17, $23, $21, $29, $27, $FF, $FF, $FF, $FF, $34, $38, $40
     .byte $44, $3A, $3C, $2E, $0B, $53, $55, $59, $5E, $60, $FF, $68, $6A, $6C, $74, $76

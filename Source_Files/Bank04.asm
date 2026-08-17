@@ -212,11 +212,13 @@ Bank04_L95CF:  .byte $02           ;Base damage caused by area enemies to upper 
 ;Special room numbers(used to start item room music).
 Bank04_L95D0:  .byte $FF, $FF, $FF, $FF, $FF, $FF, $FF
 
+.advance StartingXPosition
 Bank04_L95D7:  .byte $07           ;Samus start x coord on world map.
+.advance StartingYPosition
 Bank04_L95D8:  .byte $14           ;Samus start y coord on world map.
 Bank04_L95D9:  .byte $6E           ;Samus start verticle screen position.
 
-.advance $95DA
+.advance StartingPalette
 Bank04_L95DA:  .byte $06, $00
 Bank04_L95DC:  .byte $03    ; unused
 Bank04_L95DD:  .byte $43, $00, $00, $00, $00, $00, $00
@@ -498,13 +500,14 @@ Bank04_L9A31:  LDY $0405,X
 Bank04_L9A34:  STY $00
 Bank04_L9A36:  LSR $00
 Bank04_L9A38:  ROL 
-Bank04_L9A39:  ASL 
+;Bank04_L9A39:  ASL 
 Bank04_L9A3A:  TAY 
-Bank04_L9A3B:  LDA L8048_Ptr_Table+1,Y
+Bank04_L9A3B:  LDA L8048_Ptr_Table_Hi,Y
 Bank04_L9A3E:  PHA 
-Bank04_L9A3F:  LDA L8048_Ptr_Table,Y
+Bank04_L9A3F:  LDA L8048_Ptr_Table_Lo,Y
 Bank04_L9A42:  PHA 
 Bank04_L9A43:  RTS
+            nop
 
 Bank04_L9A44:  LDA $6AF4,X
 Bank04_L9A47:  CMP #$02
@@ -540,7 +543,7 @@ Bank04_L9A8C:  CMP #$02
 Bank04_L9A8E:  BNE $9AA7
 Bank04_L9A90:  JSR $833F
 Bank04_L9A93:  PHA 
-Bank04_L9A94:  JSR $8395
+Bank04_L9A94:  JSR Common_Collision_Func
 Bank04_L9A97:  STA $05
 Bank04_L9A99:  PLA 
 Bank04_L9A9A:  STA $04
@@ -2408,12 +2411,12 @@ InitBank4:
     STA GameMode 
     JSR ScreenNmiOff
     lda #$07
-    sta SpareMemD1
+    sta SpareMemB7
 KraidGFX_Loop:
-        ldx SpareMemD1
+        ldx SpareMemB7
         ldy KraidGFXTable, x
         JSR LoadGFX
-        dec SpareMemD1
+        dec SpareMemB7
         bpl KraidGFX_Loop
         JMP NmiOn
 
@@ -2645,22 +2648,22 @@ Kraid_DefaultAttrs:
 ;of the macro definition. The bytes correspond to the following position in order: lower right tile,
 ;lower left tile, upper right tile, upper left tile. 
 
-.advance MacroLowerRight
+.advance MacroUpperRight
     .byte $F1, $FF, $64, $FF, $A4, $FF, $A0, $A1, $4F, $84, $88, $80, $FF, $BB, $10, $04
     .byte $14, $1C, $09, $0C, $FF, $FF, $51, $55, $EC, $FF, $45, $4B, $FF, $47, $08, $70
     .byte $74, $E0, $E4, $20, $25, $78, $E8, $26, $2A
 
-.advance MacroLowerLeft
+.advance MacroUpperLeft
     .byte $F1, $FF, $64, $FF, $FF, $A5, $A0, $A1, $4F, $85, $89, $81, $FF, $BB, $11, $05
     .byte $15, $1D, $09, $0D, $FF, $FF, $52, $56, $FF, $EE, $46, $4C, $FF, $48, $08, $71
     .byte $75, $E1, $E5, $21, $25, $79, $E9, $27, $2B
 
-.advance MacroUpperRight
+.advance MacroLowerRight
     .byte $F1, $F0, $64, $64, $A4, $FF, $A0, $A1, $4F, $86, $8A, $82, $BA, $BB, $12, $06
     .byte $16, $1E, $09, $0E, $59, $5A, $53, $57, $ED, $FF, $45, $4D, $FF, $47, $08, $72
     .byte $76, $E2, $E6, $22, $24, $7A, $EA, $28, $2C
 
-.advance MacroUpperLeft
+.advance MacroLowerLeft
     .byte $F1, $F0, $64, $64, $FF, $A5, $A0, $A1, $4F, $87, $8B, $83, $BA, $BB, $13, $07
     .byte $17, $1F, $09, $0F, $5A, $5B, $54, $58, $FF, $EF, $46, $50, $FF, $48, $08, $73
     .byte $77, $E3, $E7, $23, $24, $7B, $EB, $29, $2D
