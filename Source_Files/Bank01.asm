@@ -649,8 +649,6 @@ Bank01_L95D7:  .byte $03           ;Samus start x coord on world map.
 Bank01_L95D8:  .byte $0E           ;Samus start y coord on world map.
 Bank01_L95D9:  .byte $B0           ;Samus start verticle screen position.
 
-.alias StartingXPosition        $95D7
-.alias StartingYPosition        $95D8
 .advance StartingPalette
 
 Bank01_L95DA:  .byte $01, $00
@@ -1151,6 +1149,7 @@ Bank01_L9C26:  TAX
 Bank01_L9C27:  BNE $9C1F
 Bank01_L9C29:  RTS
 
+.advance $9C2A
 Bank01_L9C2A:  LDY EnStatus,X
 Bank01_L9C2D:  BEQ $9C55
 Bank01_L9C2F:  LDA EnDataIndex,X
@@ -1203,6 +1202,7 @@ Bank01_L9C8C:  BCC $9CA7
 Bank01_L9C8E:  LDA EnStatus,X
 Bank01_L9C91:  BNE $9C96
 Bank01_L9C93:  INC EnStatus,X
+
 Bank01_L9C96:  LDA $08
 Bank01_L9C98:  STA EnYRoomPos,X
 Bank01_L9C9B:  LDA $09
