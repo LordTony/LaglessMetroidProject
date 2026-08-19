@@ -617,8 +617,6 @@
 
 .alias EndingType       $6872   ;1=worst ending, 5=best ending
 
-.alias SamusDataIndex   $6875   ;Index for Samus saved game stats(not used). #$00, #$10, #$20.
-
 .alias SamusStat00      $6876   ;Unused memory address for storing Samus info.
 .alias KraidStatueStat  $687B   ;bit 0 set, the statues blink, 
 .alias RidlyStatueStat  $687C   ;bit 7 set, statues are up.
@@ -875,7 +873,9 @@
 
 ;---------------------------------- [ Constant Locations in Swap Banks ] -----------------------------
 .alias Common_Struct_00         $8000
-.alias TwosCompliment           $8014
+.alias TwosCompliment           $8005
+.alias Common_UpdateEnAttr_05   $800B
+.alias Common_LF74B             $8012
 .alias L8048_Ptr_Table_Hi       $8048
 .alias L8048_Ptr_Table_Lo       $8050
 .alias Common_Collision_Func    $8395

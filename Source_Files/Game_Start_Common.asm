@@ -15,6 +15,16 @@
     ADC #$01            ;compliment of the value stored in A.
     RTS                 ;
 
+.advance Common_UpdateEnAttr_05
+    ora EnAttr_05,x
+    sta EnAttr_05,x
+    rts
+
+.advance Common_LF74B
+    ldy EnDataIndex,x
+    lda $968B,y
+    rts
+
 .advance L8048_Ptr_Table_Hi
     .byte >_L84FD
     .byte >_L84A6
@@ -90,7 +100,7 @@ _L80CA:  BPL $80EA
 _L80CC:  LDA $6B03,X
 _L80CF:  BEQ $80C1
 _L80D1:  BPL $80D8
-_L80D3:  JSR $81B1
+_L80D3:  JSR _L81B1
 _L80D6:  BEQ $80E2
 _L80D8:  SEC 
 _L80D9:  ROR $0402,X
@@ -124,7 +134,7 @@ _L8116:  CLC
 _L8117:  ROR $0402,X
 _L811A:  ROR EnCounter,X
 _L811D:  JMP $812F
-_L8120:  JSR $81B1
+_L8120:  JSR _L81B1
 _L8123:  LDA $977B,Y
 _L8126:  LSR 
 _L8127:  LSR 
@@ -150,7 +160,7 @@ _L814F:  CLC
 _L8150:  ROR $0403,X
 _L8153:  ROR $0407,X
 _L8156:  JMP $8169
-_L8159:  JSR $81C0
+_L8159:  JSR _L81C0
 _L815C:  BEQ $8169
 _L815E:  LDA $977B,Y
 _L8161:  LSR 
@@ -172,7 +182,7 @@ _L817F:  JMP $81AC
 _L8182:  LDA $6B03,X
 _L8185:  BEQ $817C
 _L8187:  BPL $818E
-_L8189:  JSR $81C0
+_L8189:  JSR _L81C0
 _L818C:  BEQ $8198
 _L818E:  SEC 
 _L818F:  ROR $0403,X
@@ -193,14 +203,14 @@ _L81B0:  RTS
 
 _L81B1: 
     LDA #$20
-    JSR UpdateEnAttr_05
+    JSR Common_UpdateEnAttr_05
     LDA #$00
     STA $6AFE,X
     RTS
 
 _L81C0: 
     LDA #$20
-    JSR UpdateEnAttr_05
+    JSR Common_UpdateEnAttr_05
     LDA #$00
     STA $6AFF,X
     RTS
@@ -226,7 +236,7 @@ _L81EF:  SBC $0403,X
 _L81F2:  STA $0403,X
 _L81F5:  RTS
 
-_L81F6:  JSR LF74B
+_L81F6:  JSR Common_LF74B
 _L81F9:  AND #$20
 _L81FB:  RTS
 
@@ -234,6 +244,8 @@ _L81FC:  JSR $81F6
 _L81FF:  BNE $81F5
 _L8201:  LDA #$04
 _L8203:  JSR _L856B
+
+.advance $8206
 _L8206:  LDA $6AFE,X
 _L8209:  JSR TwosCompliment
 _L820C:  STA $6AFE,X
@@ -367,11 +379,12 @@ _L8308:  EOR #$05
 _L830A:  ORA $968B,Y
 _L830D:  AND #$1F
 _L830F:  STA $0405,X
-_L8312:  JSR $81B1
+_L8312:  JSR _L81B1
 _L8315:  JMP $82A2
 _L8318:  JSR $80B0
 _L831B:  BPL $8320
 _L831D:  JMP Common_Collision_Func
+
 _L8320:  LDA $0405,X
 _L8323:  AND #$20
 _L8325:  EOR #$20
@@ -1512,8 +1525,6 @@ _L8B78:  RTS                     ;
     DoorHandlerTable_Lo:
         .byte <DoorHandlerRoutine1, <DoorHandlerRoutine2, <DoorHandlerRoutine3, <DoorHandlerRoutine4, <DoorHandlerRoutine5, <DoorHandlerRoutine6 
 
-;.advance $8B9D
-
 DoorHandlerRoutine1:
 _L8B9D:  INC $0300,X
 _L8BA0:  LDA #$30
@@ -1523,11 +1534,11 @@ _L8BA8:  LDY $0307,X
 _L8BAB:  LDA DoorHandlerRoutine1_Table, Y
 _L8BAE:  STA $030F,X
 
+; _L8BB1 is jumped and branched but not JSRed
 _L8BB1:  LDA $0307,X
 _L8BB4:  CMP #$03
 _L8BB6:  BNE _L8BBA
-    _L8BB8:  LDA #$01
-
+_L8BB8:  LDA #$01
 _L8BBA:  ORA #$A0
 _L8BBC:  STA ObjectCntrl
 
@@ -1643,6 +1654,7 @@ _L8C6E:  JSR _L8C76
 _L8C71:  
          ;LDX PageIndex
 _L8C73:  JMP _L8BB1
+        ; safe
 
 _L8C76:  LDA #$30
 _L8C78:  STA $0305,X

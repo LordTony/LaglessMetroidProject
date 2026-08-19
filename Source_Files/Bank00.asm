@@ -914,7 +914,10 @@ L8852:  LDA #$00                ;Set IntroSpr0ByteTyp to #$00 after processing.
 L8854:  STA IntroSpr0ByteTyp,X  ;
 
 L8857:  PLA                     ;
-L8858:  JSR Bank00_Adiv16       ;($C2BF)Move upper 4 bits to lower 4 bits.
+L8858:  lsr
+        lsr
+        lsr
+        lsr                     ;($C2BF)Move upper 4 bits to lower 4 bits.
 L885B:  JSR NibbleSubtract      ;($8871)Check if nibble to be converted to twos compliment.
 L885E:  STA SprklSpr0YChange,X  ;Twos compliment stored if Y coord decreasing.
 
@@ -934,9 +937,8 @@ NibbleSubtract:
 L8871:  CMP #$08                    ;If bit 3 is set, nibble is a negative number
 L8873:  BCC +                       ;and lower three bits are converted to twos
 
-L8875:  AND #$07                    ;compliment for subtraction, else exit.
+L8875:  ANC #$07                    ;compliment for subtraction, else exit.
         EOR #$FF
-        CLC
         ADC #$01
 L887A:* RTS                         ;
 

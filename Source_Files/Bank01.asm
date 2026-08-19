@@ -390,6 +390,7 @@ Bank01_LAEBE:
 
 ;Structure #$2C
 Bank01_LAEC8:
+	.byte $42, $33
     .byte $01, $1B
     .byte $FF
 
@@ -670,30 +671,30 @@ Bank01_L95E5:
     JMP (CodePtr)
 
 Bank01_Jump_Table_Hi_Bytes:
-    .byte >Bank01_L99B8
-    .byte >Bank01_L99D3
-    .byte >Bank01_L99E5
-    .byte >Bank01_L99D8
-    .byte >Bank01_L99FA
-    .byte >Bank01_L9A4C
-    .byte >Bank01_L9AF5
-    .byte >Bank01_L9B32
-    .byte >Bank01_L9BA2
-    .byte >Bank01_L9BD2
-    .byte >Bank01_L9C1A
+    .byte >Bank01_HandleBankEnemies0
+    .byte >Bank01_HandleBankEnemies1
+    .byte >Bank01_HandleBankEnemies2
+    .byte >Bank01_HandleBankEnemies3
+    .byte >Bank01_HandleBankEnemies4
+    .byte >Bank01_HandleBankEnemies5
+    .byte >Bank01_HandleBankEnemies6
+    .byte >Bank01_HandleBankEnemies7
+    .byte >Bank01_HandleBankEnemies8
+    .byte >Bank01_HandleBankEnemies9
+    .byte >Bank01_HandleBankEnemies9
 
 Bank01_Jump_Table_Lo_Bytes:
-    .byte <Bank01_L99B8
-    .byte <Bank01_L99D3
-    .byte <Bank01_L99E5
-    .byte <Bank01_L99D8
-    .byte <Bank01_L99FA
-    .byte <Bank01_L9A4C
-    .byte <Bank01_L9AF5
-    .byte <Bank01_L9B32
-    .byte <Bank01_L9BA2
-    .byte <Bank01_L9BD2
-    .byte <Bank01_L9C1A
+    .byte <Bank01_HandleBankEnemies0
+    .byte <Bank01_HandleBankEnemies1
+    .byte <Bank01_HandleBankEnemies2
+    .byte <Bank01_HandleBankEnemies3
+    .byte <Bank01_HandleBankEnemies4
+    .byte <Bank01_HandleBankEnemies5
+    .byte <Bank01_HandleBankEnemies6
+    .byte <Bank01_HandleBankEnemies7
+    .byte <Bank01_HandleBankEnemies8
+    .byte <Bank01_HandleBankEnemies9
+    .byte <Bank01_HandleBankEnemies9
 
 .advance $960B
 
@@ -837,6 +838,7 @@ Bank01_L99B2:  JMP StartUpdateEnemyAnimation_2
 
 Bank01_L99B5:  JMP Start_Special_Attrs
 
+Bank01_HandleBankEnemies0:
 Bank01_L99B8:  LDA #$09
 Bank01_L99BA:  STA $85
 Bank01_L99BC:  STA $86
@@ -851,15 +853,18 @@ Bank01_L99CC:  LDA #$08
 Bank01_L99CE:  STA $01
 Bank01_L99D0:  JMP $99A1
 
+Bank01_HandleBankEnemies1:
 Bank01_L99D3:  LDA #$0F
 Bank01_L99D5:  JMP $99BA
 
+Bank01_HandleBankEnemies3:
 Bank01_L99D8:  LDA EnStatus,X
 Bank01_L99DB:  CMP #$03
 Bank01_L99DD:  BEQ $99E2
 Bank01_L99DF:  JSR Bank07_LFBCA
 Bank01_L99E2:  JMP $99C8
 
+Bank01_HandleBankEnemies2:
 Bank01_L99E5:  LDA #$21
 Bank01_L99E7:  STA $85
 Bank01_L99E9:  LDA #$1E
@@ -872,6 +877,7 @@ Bank01_L99F7:  JMP $99C8
 
 .advance $99FA
 
+Bank01_HandleBankEnemies4:
 Bank01_L99FA:  LDA $81
 Bank01_L99FC:  CMP #$01
 Bank01_L99FE:  BEQ $9A44
@@ -910,6 +916,7 @@ Bank01_L9A44:  LDA #$08
 Bank01_L9A46:  JMP StartUpdateEnemyAnimation_2
 Bank01_L9A49:  JMP Start_Special_Attrs
 
+Bank01_HandleBankEnemies5:
 Bank01_L9A4C:  JSR DoSomethingToFrameCount
 Bank01_L9A4F:  AND #$03
 Bank01_L9A51:  BEQ Bank01_L9A87
@@ -984,7 +991,9 @@ Bank01_L9A9D:  JMP DoSomethingToAnimationIndecies
 
 Bank01_L9AA0:  .byte $35, $35, $3E, $38, $3B, $3B, $38, $3E 
 
+
 Bank01_DispachBankEnemyHandler:
+
 Bank01_L9AE2:  LDY $0405,X
 Bank01_L9AE5:  STY $00
 Bank01_L9AE7:  LSR $00
@@ -998,6 +1007,7 @@ Bank01_L9AF4:  RTS
 
 .advance $9AF5
 
+Bank01_HandleBankEnemies6:
 Bank01_L9AF5:  LDA $81
 Bank01_L9AF7:  CMP #$01
 Bank01_L9AF9:  BEQ $9B2D
@@ -1025,6 +1035,7 @@ Bank01_L9B2A:  JMP Start_Special_Attrs
 Bank01_L9B2D:  LDA #$08
 Bank01_L9B2F:  JMP StartUpdateEnemyAnimation_2
 
+Bank01_HandleBankEnemies7:
 Bank01_L9B32:  LDA EnStatus,X
 Bank01_L9B35:  CMP #$02
 Bank01_L9B37:  BNE $9B71
@@ -1063,7 +1074,7 @@ Bank01_L9B82:  JSR Common_Collision_Func
 Bank01_L9B85:  STA $05
 Bank01_L9B87:  PLA 
 Bank01_L9B88:  STA $04
-Bank01_L9B8A:  JSR $9CA8
+Bank01_L9B8A:  JSR GetXEnemyRoomPosition_09_08_0B
 Bank01_L9B8D:  JSR Bank07_LFD8F
 Bank01_L9B90:  BCC $9B9A
 Bank01_L9B92:  JSR $9C96
@@ -1075,6 +1086,7 @@ Bank01_L9B9F:  RTS
 
 Bank01_L9BA0:  .byte $04, $FC
 
+Bank01_HandleBankEnemies8:
 Bank01_L9BA2:  LDA EnStatus,X
 Bank01_L9BA5:  CMP #$03
 Bank01_L9BA7:  BCC $9BC2
@@ -1095,6 +1107,7 @@ Bank01_L9BCB:  LDA #$0A
 Bank01_L9BCD:  STA $00
 Bank01_L9BCF:  JMP $99CC
 
+Bank01_HandleBankEnemies9:
 Bank01_L9BD2:  LDA $0405,X
 Bank01_L9BD5:  AND #$02
 Bank01_L9BD7:  BEQ $9BE0
@@ -1126,7 +1139,9 @@ Bank01_L9C12:  LDA #$01
 Bank01_L9C14:  JSR UpdateEnemyAnim
 Bank01_L9C17:  JMP Start_Special_Attrs
 
-Bank01_L9C1A:  JMP $9BD2
+nop
+nop
+
 Bank01_L9C1D:  LDX #$50
 Bank01_L9C1F:  JSR $9C2A
 Bank01_L9C22:  TXA 
@@ -1170,9 +1185,9 @@ Bank01_L9C6A:  LSR
 Bank01_L9C6B:  LSR 
 Bank01_L9C6C:  LSR 
 Bank01_L9C6D:  TAY 
-Bank01_L9C6E:  LDA $9CB7,Y
+Bank01_L9C6E:  LDA Bank01_L9CB7,Y
 Bank01_L9C71:  STA $04
-Bank01_L9C73:  LDA $9CC6,Y
+Bank01_L9C73:  LDA Bank01_L9CC6,Y
 Bank01_L9C76:  STA EnDataIndex,X
 Bank01_L9C79:  TYA 
 Bank01_L9C7A:  PLP 
@@ -1181,7 +1196,7 @@ Bank01_L9C7C:  TAY
 Bank01_L9C7D:  LDA $9CBB,Y
 Bank01_L9C80:  STA $05
 Bank01_L9C82:  LDX #$00
-Bank01_L9C84:  JSR $9CA8
+Bank01_L9C84:  JSR GetXEnemyRoomPosition_09_08_0B
 Bank01_L9C87:  JSR Bank07_LFD8F
 Bank01_L9C8A:  LDX PageIndex
 Bank01_L9C8C:  BCC $9CA7
@@ -1197,16 +1212,30 @@ Bank01_L9CA2:  AND #$01
 Bank01_L9CA4:  STA EnNameTable,X
 Bank01_L9CA7:  RTS
 
-Bank01_L9CA8:  LDA EnYRoomPos,X
-Bank01_L9CAB:  STA $08
-Bank01_L9CAD:  LDA EnXRoomPos,X
-Bank01_L9CB0:  STA $09
-Bank01_L9CB2:  LDA EnNameTable,X
-Bank01_L9CB5:  STA $0B
+nop
+nop
+nop
+nop
+nop
+
+nop
+nop
+nop
+nop
+nop
+
+nop
+nop
+nop
+nop
+nop
+
+.advance $9CB7
 Bank01_L9CB7:  RTS
 
-Bank01_L9CB8:  .byte $F5, $FD, $05, $F6, $FE, $0A, $F6, $0C, $F4, $0E, $F2, $F8, $08, $F4, $0C, $09
-Bank01_L9CC8:  .byte $09, $09, $0A, $0A
+Bank01_L9CB8:  .byte $F5, $FD, $05
+Bank01_L9CBB:  .byte $F6, $FE, $0A, $F6, $0C, $F4, $0E, $F2, $F8, $08, $F4
+Bank01_L9CC6:  .byte $0C, $09, $09, $09, $0A, $0A
  
 Bank01_L9CCC:  LDY $7E
 Bank01_L9CCE:  BNE $9CD2
@@ -2346,65 +2375,54 @@ Bank01_Room_12_Right:
 ;Room #$13
 Bank01_LA768:
 	.byte $FF
-	.word Bank01_Room_13_Top_Left
-	.word Bank01_Room_13_Top_Right
-	.word Bank01_Room_13_Bottom_Left
+	.word Bank01_Room_13_Left
+	.word Bank01_Room_13_Right
+	.word FFLabel
+	.byte $FF
 
-Bank01_Room_13_Bottom_Right:
+Bank01_Room_13_Left:
+	.byte $00, $11
+	.byte $07, $10
+	.byte $D0, $10
+	.byte $FF
+
+Bank01_Room_13_Right:
+	.byte $07, $10
+	.byte $0E, $0B
+	.byte $5F, $03
 	.byte $8A, $09
 	.byte $8E, $0B
     .byte $D8, $10
 	.byte $FD
-	.byte $11, $05, $C8			; Enemy
-	.byte $FF
-
-Bank01_Room_13_Top_Left:
-	.byte $00, $11
-	.byte $07, $10
-	.byte $FF
-
-Bank01_Room_13_Top_Right:
-	.byte $07, $10
-	.byte $0E, $0B
-	.byte $5F, $03
-	.byte $FD
 	.byte $02, $A1				; Door
 	.byte $01, $05, $7B			; Enemy
-	.byte $FF
-
-Bank01_Room_13_Bottom_Left:
-	.byte $D0, $10
+	.byte $11, $05, $C8			; Enemy
 	.byte $FF
 
 ;Room #$14
 Bank01_LA78B:
 	.byte $55
-	.word Bank01_Room_14_Top_Left
-	.word Bank01_Room_14_Top_Right
-	.word Bank01_Room_14_Bottom_Left
-
-Bank01_Room_14_Bottom_Right:
-    .byte $D8, $10
+	.word Bank01_Room_14_Left
+	.word Bank01_Room_14_Right
+	.word FFLabel
 	.byte $FF
 
-Bank01_Room_14_Top_Left:
+Bank01_Room_14_Left:
 	.byte $00, $11
+	.byte $D0, $10
 	.byte $FD
 	.byte $51, $04, $14			; Enemy
 	.byte $FF
 
-Bank01_Room_14_Top_Right:
+Bank01_Room_14_Right:
     .byte $08, $11
+	.byte $D8, $10
 	.byte $FD
 	.byte $21, $04, $38			; Enemy
 	.byte $41, $04, $2E			; Enemy
 	.byte $FF
 
-Bank01_Room_14_Bottom_Left:
-	.byte $D0, $10
-	.byte $FF
-
-;Room #$15 (Left and right loads only)
+;Room #$15
 Bank01_LA7A3:
 	.byte $FF
 	.word Bank01_Room_15_Left
@@ -2435,7 +2453,7 @@ Bank01_Room_15_Left:
 	.byte $21, $06, $23			; Enemy
 	.byte $FF
 
-;Room #$16 (Left and right loads only)
+;Room #$16
 Bank01_LA7D0:
 	.byte $55
 	.word Bank01_Room_16_Left
@@ -2944,7 +2962,6 @@ Bank01_LAAA4:
 	.word FFLabel
 	.byte $FF
 
-; JUMANJI
 Bank01_Room_25_Left:
 	.byte $00, $27
 	.byte $23, $24
@@ -2984,8 +3001,8 @@ Bank01_LAAE6:
 Bank01_Room_26_Left:
 	.byte $00, $0E
 	.byte $40, $2B
-	.byte $50, $0E
-	.byte $56, $20
+	.byte $50, $4E
+	.byte $56, $55
 	.byte $60, $2B
 	.byte $80, $27
 	.byte $D0, $00
@@ -2996,8 +3013,7 @@ Bank01_Room_26_Left:
 
 Bank01_Room_26_Right:
 	.byte $08, $27
-	.byte $56, $20
-	.byte $68, $2C
+	.byte $58, $2C
 	.byte $8B, $24
 	.byte $D8, $00
 	.byte $FD
@@ -3041,36 +3057,31 @@ Bank01_Room_27_Right:
 ;Room #$28
 Bank01_LAB48:
 	.byte $A2
-	.word Bank01_Room_28_Top_Left
-	.word Bank01_Room_28_Top_Right
-	.word Bank01_Room_28_Bottom_Left
-
-Bank01_Room_28_Bottom_Right:
-	.byte $87, $14
-	.byte $8F, $28
-	.byte $9A, $15
-	.byte $D8, $2D
+	.word Bank01_Room_28_Left
+	.word Bank01_Room_28_Right
+	.word FFLabel
 	.byte $FF
 
-Bank01_Room_28_Top_Left:
+Bank01_Room_28_Left:
 	.byte $00, $2D
+	.byte $87, $14
+	.byte $C3, $26
+	.byte $D0, $2D
 	.byte $FD
 	.byte $01, $06, $23			; Enemy
 	.byte $FF
 
-Bank01_Room_28_Top_Right:
+Bank01_Room_28_Right:
 	.byte $08, $2D
 	.byte $0F, $28
 	.byte $5F, $03
+	.byte $87, $14
+	.byte $8F, $28
+	.byte $9A, $15
+	.byte $D8, $2D
 	.byte $FD
 	.byte $02, $A1				; Door
 	.byte $31, $05, $7D			; Enemy
-	.byte $FF
-
-Bank01_Room_28_Bottom_Left:
-	.byte $87, $14
-	.byte $C3, $26
-	.byte $D0, $2D
 	.byte $FF
 
 ;Room #$29
