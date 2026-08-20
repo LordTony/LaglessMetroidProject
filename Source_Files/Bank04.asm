@@ -370,7 +370,7 @@ Bank04_L990D:  BEQ $9919
 Bank04_L990F:  LDA $00
 Bank04_L9911:  JMP StartUpdateEnemyAnimation
 Bank04_L9914:  LDA $01
-Bank04_L9916:  JMP StartUpdateEnemyAnimation_2
+Bank04_L9916:  JSR UpdateEnemyAnim
 Bank04_L9919:  JMP Start_Special_Attrs
 Bank04_L991C:  LDA #$09
 Bank04_L991E:  STA $85
@@ -425,7 +425,7 @@ Bank04_L998C:  BPL $9971
 Bank04_L998E:  LDA #$02
 Bank04_L9990:  JMP StartUpdateEnemyAnimation
 Bank04_L9993:  LDA #$08
-Bank04_L9995:  JMP StartUpdateEnemyAnimation_2
+Bank04_L9995:  JSR UpdateEnemyAnim
 Bank04_L9998:  JMP Start_Special_Attrs
 Bank04_L999B:  JSR DoSomethingToFrameCount
 Bank04_L999E:  AND #$03

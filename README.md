@@ -21,8 +21,8 @@ The idea here is to attempt to take the Metroid lag as low as possible without a
 The baseline benchmark is Samus standing still in the opening room with 2 of the spikey bois both alive and crawing on the walls.
 
   * Metroid finishes all work for the benchmark frames in **137 to 149** scanlines
-  * Lagless Metroid finishes work in **55 to 71** scanlines
-  * Lagless Metroid finishes work in **40% to 47%** of the scanlines standard NES Metroid takes
+  * Lagless Metroid finishes work in **54 to 72** scanlines
+  * Lagless Metroid finishes work in **39% to 48%** of the scanlines standard NES Metroid takes
   * The limit might be something like **50** scanlines, so keep pushing
     * There seems to be only 1 spot left in the game where lag is possible (Brinstar Bank 01 Rooms #$24 and #$25)
 
@@ -127,11 +127,11 @@ SBX #$F0
 * The "Visualize Hotspots" lua script can be run and tweaked to find places in the code that are hit more often. It helped me get some big wins.
 * BenchmarkNMI.lua shows how long it takes to reach NMI, min and max, over a second. This can be used to find painful spots
 
-## Bugs
+## Definite Bugs
 * Loading can get confused when direction changes right as the load is happening and you can get half of the wrong room.
-* Breakable blocks switch name tables when they aren't supposed to
 
 ## Maybe Bugs (Check Original Game Behavior)
 * Can't collect health + missiles pickups while blinking (normally due to touching lava)
 * Missiles don't seem to hit spinners from far away (example: The ones hanging on room #$12)
 * Pipe spawned enemies can raise through the ceiling
+* Breakable blocks switch name tables when they aren't supposed to

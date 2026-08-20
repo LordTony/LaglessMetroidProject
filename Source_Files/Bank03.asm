@@ -343,7 +343,7 @@ Bank03_L97EA:  BEQ $97F6
 Bank03_L97EC:  LDA $00
 Bank03_L97EE:  JMP StartUpdateEnemyAnimation
 Bank03_L97F1:  LDA $01
-Bank03_L97F3:  JMP StartUpdateEnemyAnimation_2
+Bank03_L97F3:  JSR UpdateEnemyAnim
 Bank03_L97F6:  JMP Start_Special_Attrs
 Bank03_L97F9:  LDY EndTimerHi
 Bank03_L97FC:  INY 

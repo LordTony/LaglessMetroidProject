@@ -287,7 +287,7 @@ Bank05_L9838:  BEQ $9844
 Bank05_L983A:  LDA $00
 Bank05_L983C:  JMP StartUpdateEnemyAnimation
 Bank05_L983F:  LDA $01
-Bank05_L9841:  JMP StartUpdateEnemyAnimation_2
+Bank05_L9841:  JSR UpdateEnemyAnim
 Bank05_L9844:  JMP Start_Special_Attrs
 Bank05_L9847:  LDA #$42
 Bank05_L9849:  STA $85

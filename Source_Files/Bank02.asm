@@ -350,7 +350,7 @@ Bank02_L9841:  BEQ $984D
 Bank02_L9843:  LDA $00
 Bank02_L9845:  JMP StartUpdateEnemyAnimation
 Bank02_L9848:  LDA $01
-Bank02_L984A:  JMP StartUpdateEnemyAnimation_2
+Bank02_L984A:  JSR UpdateEnemyAnim
 Bank02_L984D:  JMP Start_Special_Attrs
 
 Bank02_L9850:  LDA $6AF4,X
@@ -644,7 +644,7 @@ Bank02_L9AC2:  ORA #$20
 Bank02_L9AC4:  STA $0405,X
 Bank02_L9AC7:  JSR $9A52
 Bank02_L9ACA:  LDA #$02
-Bank02_L9ACC:  JMP StartUpdateEnemyAnimation_2
+Bank02_L9ACC:  JSR UpdateEnemyAnim
 Bank02_L9ACF:  JMP Start_Special_Attrs
 Bank02_L9AD2:  INC $F8,X
 Bank02_L9AD4:  INC $FA,X

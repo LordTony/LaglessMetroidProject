@@ -832,7 +832,7 @@ Bank01_L99AB:  LDA $00
 Bank01_L99AD:  JMP StartUpdateEnemyAnimation
 
 Bank01_L99B0:  LDA $01
-Bank01_L99B2:  JMP StartUpdateEnemyAnimation_2
+Bank01_L99B2:  JSR UpdateEnemyAnim
 
 Bank01_L99B5:  JMP Start_Special_Attrs
 
@@ -911,7 +911,7 @@ Bank01_L9A3F:  LDA #$02
 Bank01_L9A41:  JMP StartUpdateEnemyAnimation
 
 Bank01_L9A44:  LDA #$08
-Bank01_L9A46:  JMP StartUpdateEnemyAnimation_2
+Bank01_L9A46:  JSR UpdateEnemyAnim
 Bank01_L9A49:  JMP Start_Special_Attrs
 
 Bank01_HandleBankEnemies5:

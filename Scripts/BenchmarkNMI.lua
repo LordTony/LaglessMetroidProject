@@ -8,28 +8,12 @@ framesToResetOn = 120
 timer = 0
 scanlines = {}
 
-function calculateAverage(arr)
-    -- Handle empty array edge case
-    if #arr == 0 then return 0 end 
-    
-    local sum = 0
-    
-    -- Loop through all elements
-    for i = 1, #arr do
-        sum = sum + arr[i]
-    end
-    
-    -- Return sum divided by the array length
-    return sum / #arr
-end
-
 function onFrame()
 	timer = timer + 1
 
 	if timer >= framesToResetOn then
 		local min_val = math.min(table.unpack(scanlines))
 		local max_val = math.max(table.unpack(scanlines))
-		local avr_val = calculateAverage(scanlines)
 		emu.drawString(5, 5, "Scanlines to complete frame work", 0xFFFFFF, 0x0, 0, framesToResetOn)
 		emu.drawString(5, 15, "Low " .. min_val, 0xFFFFFF, 0x0, 0, framesToResetOn)
 

@@ -1250,11 +1250,12 @@ GameEngine:
         sta SamusGear               ;missiles and every power-up every frame.
         lda #$05                    ;
         sta MissileCount            ;
+        ora #$A0
+        sta MissileCountOnes
+
         lda #$A0
         sta MissileCountHundreds
         sta MissileCountTens
-        lda #$A5
-        sta MissileCountOnes
 ; ===== THE REAL GUTS OF THE GAME ENGINE! =====
 
 UpdateWorld:
@@ -3474,6 +3475,7 @@ Exit6:  rts
 LD76A:
     txa
     pha
+
     ldy #$00
     lda ($04),y
 
@@ -3503,6 +3505,7 @@ LD77F:
     clc
     adc $0A
     sta $04
+
     lda $0B
     adc #$00
     jmp LD798
@@ -3510,6 +3513,7 @@ LD77F:
 
 LD78B:
     sta $00
+
     lda $0A
     sec
     sbc $00
@@ -4119,8 +4123,19 @@ LDBF3:  JMP SelectSamusPal      ;($CB73)Set Samus new palette.
 
 MissileEnergyPickup:
 LDBF7:* BEQ EnergyTankPickup    ;Branch if item is an energy tank.
-LDBF9:  LDA #$05            ;
-LDBFB:  JSR AddToMaxMissiles        ;($DD97)Increase missile capacity by 5.
+LDBF9:  
+    ; carry always set here 
+    lda #$04
+    adc MissileCount
+    sta MissileCount
+
+    ; overflow should be impossible so carry is clear here
+    lda #$05 
+    adc MaxMissiles
+    sta MaxMissiles
+
+    jsr CacheMissileGraphics
+
 LDBFE:  BNE LDBE3             ;Branch always.
 
 ; HCSS - There are more than 6 energy tanks in the game, but you can only hold 6
@@ -4281,7 +4296,7 @@ LDCCC:  lda Div16Table, x
         and #$03
 LDCD1:  STA $05             ;The following lines take the upper 4 bits in the
 
-LDCD3:  TXA             ;control byte and transfer bits 4 and 5 into $05 bits 0
+LDCD3:  TXA                 ;control byte and transfer bits 4 and 5 into $05 bits 0
 LDCD4:  AND #$C0            ;and 1(sprite color bits).  Bits 6 and 7 are
 LDCD6:  ORA #$20            ;transferred into $05 bits 6 and 7(sprite flip bits).
 LDCD8:  ORA $05             ;bit 5 is then set(sprite always drawn behind background).
@@ -4323,45 +4338,50 @@ LDCFC:
     LDA InArea
     CMP #$13
     BNE +
-    cpy #$04
-    BEQ +++++
-    cpy #$02
-    BEQ +++++
-*   LDA $040C,x
-    ASL
-    BMI OnBossKilled
+        cpy #$04
+        BEQ KillObject_Trampoline
+        cpy #$02
+        BEQ KillObject_Trampoline
 
+*   lda $040C,x
+    asl 
+    bmi OnBossKilled
+
+    ; I think these lines don't do anything
     lda $968B,y
     sta $00
 
-;inlined $80B0
     lda $977B,y
     asl              
-    AND #$20
+    and #$20
+    sta EnDataIndex,x
 
-    STA EnDataIndex,x
-    LDA #$05
-    STA EnStatus,x
-    LDA #$60
-    STA $040D,x
+    lda #$05
+    sta EnStatus,x
+
+    lda #$60
+    sta $040D,x
+
     LDA RandomNumber1
     CMP #$10
     BCC LDD5B
+MoveEnemies_Continued_Loop:
 *   AND #$07
     TAY
     LDA ItemDropTbl,y
     STA EnAnimFrame,x
     CMP #$80
-    BNE ++
-    LDY MaxMissilePickup
-    CPY CrntMslePickups
-    BEQ LDD5B
-    LDA MaxMissiles
-    BEQ LDD5B
-    INC CrntMslePickups
+    BNE TurnEnemyIntoItemDrop
+        LDY MaxMissilePickup
+        CPY CrntMslePickups
+        BEQ LDD5B
+        LDA MaxMissiles
+        BEQ LDD5B
+        INC CrntMslePickups
 EXIT_67:
 *   RTS
 
+TurnEnemyIntoItemDrop:
 *   LDY MaxEnergyPickup
     CPY CrntEnrgyPickups
     BEQ LDD5B
@@ -4372,23 +4392,26 @@ EXIT_67:
     BCS EXIT_67
 
 LDD5B:
-    ldx PageIndex
+    ;ldx PageIndex
     lda InArea
     cmp #$13
-    beq ++
+    beq KeepTrackOfHowManyRoomPickupsHaveDropped
+
+KillObject_Trampoline:
 *   jmp KillObject          ;($FA18)Free enemy data slot.
 
+KeepTrackOfHowManyRoomPickupsHaveDropped:
 *   lda RandomNumber1
     ldy #$00
     sty CrntEnrgyPickups
     sty CrntMslePickups
     iny
-    sty MaxMissilePickup
     sty MaxEnergyPickup
-    bne -----
+    sty MaxMissilePickup
+    bne MoveEnemies_Continued_Loop  ; branch always
+    ; safe
 
 OnBossKilled:
-
 ;PowerUpMusic:
     LDA #MUS_PWR_UP
     ORA MultiSFXFlag
@@ -4399,9 +4422,18 @@ OnBossKilled:
     sta MiniBossKillDly
     lsr
     tay
-    sta MaxMissiles,y
+    sta MaxMissiles,y       ; TODO : I think this is bugged beacuse I moved "MaxMissiles"
+
+    clc                 ; because of the lsr above, we need this
     lda #75
-    jsr AddToMaxMissiles
+    adc MissileCount
+    sta MissileCount
+
+    lda #75
+    adc MaxMissiles
+    sta MaxMissiles
+
+    jsr CacheMissileGraphics
     bne LDD5B               ; Branch always
 
 ; TODO - This kicks off the fat slow
@@ -4419,92 +4451,13 @@ SomethingAboutMovement:
     sta ObjectCntrl
     rts
 
-; AddToMaxMissiles
-; ================
-; Adds A to both MissileCount & MaxMissiles, storing the new count
-; (255 if it overflows)
-
-AddToMaxMissiles:
-    PHA             ;Temp storage of # of missiles to add.
-    CLC
-    ADC MissileCount
-    BCC +               ; Only possible to overflow 255 during loading
-    LDA #$FF
-*   STA MissileCount
-    PLA
-    ADC MaxMissiles
-    STA MaxMissiles
-
-.scope
-CacheMissileGraphics:
-        LDA #0
-        STA MissileCountHundreds
-        STA MissileCountTens
-
-        LDA MissileCount
-
-        ; ---- hundreds digit (0-2): weights 200, 100 ----
-        CMP #200
-        BCC _H1
-        SBC #200
-_H1:    
-        ROL MissileCountHundreds
-        CMP #100
-        BCC _H2
-        SBC #100
-_H2:     
-        ROL MissileCountHundreds
-        CMP #80
-        BCC _T1
-        SBC #80
-_T1:     
-        ROL MissileCountTens
-        CMP #40
-        BCC _T2
-        SBC #40
-_T2:     
-        ROL MissileCountTens
-        CMP #20
-        BCC _T3
-        SBC #20
-_T3:     
-        ROL MissileCountTens
-        CMP #10
-        BCC _T4
-        SBC #10
-_T4:    
-        ROL MissileCountTens
-
-        ORA #$A0
-        STA MissileCountOnes
-
-        LDA MissileCountHundreds
-        ORA #$A0
-        STA MissileCountHundreds
-
-        LDA MissileCountTens
-        ORA #$A0
-        STA MissileCountTens
-
-        RTS
-.scend
-
 MoveEnemies:
-*   LDA EnYRoomPos,x
-    STA $0A  ; Y coord
     
-    LDA EnXRoomPos,x
-    STA $0B  ; X coord
-    
-    LDA EnNameTable,x
-    STA $06  ; hi coord
-;    LDY EnAnimFrame,x
-    
-    LDA EnemyFramePtrTbl_Lo,y
-*   STA $00
+    LDA EnemyFramePtrTbl_Lo,y       ; Y == EnAnimFrame,x (where X == PageIndex) here
+    STA $00
     
     LDA EnemyFramePtrTbl_Hi,y
-*   STA $01
+    STA $01
     
     JSR GetSpriteCntrlData      ;($DCC3)Get place pointer index and sprite control data.
     
@@ -4552,6 +4505,15 @@ MoveEnemies:
     INY
     STY $11
 
+    LDA EnYRoomPos,x
+    STA $0A  ; Y coord
+    
+    LDA EnXRoomPos,x
+    STA $0B  ; X coord
+    
+    LDA EnNameTable,x
+    STA $06  ; hi coord
+    
     JSR IsObjectVisible     ;($DFDF)Determine if object is within screen boundaries.
     ;TXA
     ASL
@@ -4592,7 +4554,7 @@ LDE68:  sta $0B             ;data into $0A, $0B and $06 respectively.
 LDE6A:  lda ObjectHi,x          ;
 LDE6D:  sta $06             ;
 
-LDE74:  lda FramePtrTable_Lo,y     ;
+LDE74:  lda FramePtrTable_Lo,y     ;  y == AnimFrame,x here
 LDE77:  sta $00             ;
 
 LDE79:  lda FramePtrTable_Hi,y       ;Entry from FramePtrTable is stored in $0000.
@@ -4689,9 +4651,8 @@ SamusExplodeDisplacement_2:
     adc ($02),y         ;Add table displacements with sprite placement data.
     bit $04             ;
     bmi NegativeDisplacementY    ;Branch if MSB in $04 is set(Flips object).
-    bpl AfterYDisplacement
-
-; This one is in a weird spot so I can attempt use branches instead of jumps in other places
+    bpl AfterYDisplacement      ; branch always
+    ; safe
 
 .scope
 ExplodeXDisplace:
@@ -4831,7 +4792,7 @@ SkipPlacementData:
     sta $0F
 LDF36:  inc $11                     ;Increment to next data item in frame data.
 LDF38:  bne DrawSpriteObject        ;Branch Always - ($DF19)Draw next sprite.
-
+        ; safe
 .scope
 
 GetNewControlByte:
@@ -4877,6 +4838,7 @@ OffsetObjectPosition:
         sta $11
 
 LDF68:  bne DrawSpriteObject        ;Always branch. Draw next sprite.
+        ; safe
 
 ;---------------------------------[ Check if object is on screen ]----------------------------------
 
@@ -5052,7 +5014,7 @@ LE0C3:
     sta SpriteRam+32,x
     sta SpriteRam+36,x
 
-    ldy #10
+    ldy #$0A
     DisplayBarLoop:
 
         lda Hud_Sprite_Index_Tbl-1, y
@@ -5099,10 +5061,6 @@ LE0EC:  bne DisplayEscapeSequenceTimer      ;If so, branch.
 LE0EE:  ldy MaxMissiles                     ;
 LE0F1:  beq EraseMissileSprite              ;Don't show missile count if Samus has no missile containers.
 
-;------------------------------------[ Convert hex to decimal ]--------------------------------------
-; Display 3-digit missile count. Convert the Hex number of missiles to a 3 digit decimal number
-; The digit sprites (0 - 9) start at $A0 so the #$9F trick is just to get us the proper mapping to the digit sprites
-
 .scope
     DisplayNumberOfMissiles:
         lda MissileCountHundreds
@@ -5121,11 +5079,7 @@ LE0F1:  beq EraseMissileSprite              ;Don't show missile count if Samus h
 EraseMissileSprite:
 ;Samus has no missiles, erase missile sprite.
 LE10A:* lda #$FF                        ;"Blank" tile.
-LE10C:  cpx #$D4                        ;If at last 3 sprites, branch to skip.
-LE10E:  bcs MissileAndTimerDisplayEnd   ;
 LE110:  sta SpriteRAM-19,x              ;Erase left half of missile.
-LE113:  cpx #$D0                        ;If at last 4 sprites, branch to skip.
-LE115:  bcs MissileAndTimerDisplayEnd   ;
 LE117:  sta SpriteRAM-15,x              ;Erase right half of missile.
 LE11A:  bne MissileAndTimerDisplayEnd   ;Branch always.
 
@@ -5159,7 +5113,7 @@ LE144:  sta SpriteRAM-15,x      ;
 
 MissileAndTimerDisplayEnd:
     *   lda TankCount           ;
-LE14F:  beq ++              ;Branch to exit if Samus has no energy tanks.
+LE14F:  beq AddTankExit         ;Branch to exit if Samus has no energy tanks.
 
 ;----------------------------------[ Add energy tanks to display ]------------------------------------
 
@@ -5195,6 +5149,7 @@ AddOneTank:
     LE16E:  bne AddOneTank          ;if not, loop to do another.
 
     LE170:  stx SpritePagePos       ;Store new sprite page position.
+AddTankExit:
     LE172:* rts                     ;
 
 TankXTable:
@@ -8795,14 +8750,6 @@ ChooseEnemySubroutine:
 
     ldy EnStatus,x
     sty $81                 ; Y is EnStatus,x at this point
-;    bne DoEnemySubroutine
-; ==== Couldn't get these bytes to trigger =====
-;    cpy #$07
-;    bcc DoEnemySubroutine
-;KillObject_Duplicate:
-;    lda #$00
-;    sta EnStatus,x
-;    rts
 
 DoEnemySubroutine:
     lda DoOneEnemyTableHiByte - 1, y    ; -1 is because we already handled the 0 case
@@ -8824,6 +8771,7 @@ LF3BE:
     lda EnAttr_05,x
     asl
     bmi HandleBankEnemies_Trampoline
+
     lda #$00
     sta $6B01,x
     sta EnCounter,x
@@ -8832,29 +8780,32 @@ LF3BE:
      ; TODO: Join LF6B9 and LF75B together
     jsr LF6B9
     jsr LF75B
-    jsr LF682
+    jsr LF844
+    lda $963B,y
+    cmp EnResetAnimIndex,x
+    beq +
+        jsr DoSomethingToAnimationIndecies
 
 ;inlined $80B0
-    LDY EnDataIndex,X
+*   LDY EnDataIndex,X
     LDA $977B,Y
     asl              
     asl 
     asl 
     asl 
-    ; TODO: see if "and #$C0" can be removed
     and #$C0
     sta $6B03,x
 
     lda EnDelay,x
     beq +
         jsr LF7BA
-*   jmp LF40A
+*   jmp CheckIfEnemyHasBeenHit
 
 EnemyRoutine_2:
 LF3E6:
     lda $0405,x
     asl
-    bmi ++
+    bmi CheckIfEnemyHasBeenHit
     lda $0405,x
     and #$20
     beq +
@@ -8862,13 +8813,16 @@ LF3E6:
     lda EnemyInitDelayTbl,y     ;($96BB)
     sta EnDelay,x
     dec EnStatus,x
-    bne ++
+    bne CheckIfEnemyHasBeenHit
     ; TODO: Join LF6B9 and LF75B together
 *   jsr LF6B9
     jsr LF75B
     jsr LF51E
-LF40A:
-    * jsr CheckIfEnemyHasBeenHit
+CheckIfEnemyHasBeenHit:
+    lda EnHasBeenHit,x
+    and #$20
+    beq HandleBankEnemies_Trampoline
+    *   jsr EnemyReactToBeingHit
 
 HandleBankEnemies_Trampoline:
 LF40D:
@@ -8915,7 +8869,11 @@ LF43B:
 
 EnemyRoutine_4:
 LF43E:
-    jsr CheckIfEnemyHasBeenHit
+    lda EnHasBeenHit,x
+    and #$20
+    beq EnemyRoutine_4_After_Hit_Check
+        jsr EnemyReactToBeingHit
+EnemyRoutine_4_After_Hit_Check:
     lda EnStatus,x
     cmp #$03
     beq StartUpdateEnemyAnimation
@@ -9020,25 +8978,6 @@ SFX_EnergyPickup:
     sta SQ1SFXFlag
     rts             
 
-PickupMissile:
-    lda #$02
-    ldy EnDataIndex,x
-    beq +
-    lda #$1E
-*   clc
-    adc MissileCount
-    bcs +               ; can't have more than 255 missiles
-    cmp MaxMissiles     ; can Samus hold this many missiles?
-    bcc ++              ; branch if yes
-*   lda MaxMissiles     ; set to max. # of missiles allowed
-*   sta MissileCount
-    jsr CacheMissileGraphics
-SFX_MissilePickup:
-    lda #SFX_MSL_PKUP
-    ora SQ1SFXFlag
-    sta SQ1SFXFlag
-    rts
-
 DecrementEnemyPickupTimer:
 *   lda FrameCount
     and #$03
@@ -9051,6 +8990,88 @@ DecrementEnemyPickupTimer:
     ora #$A0
     sta ObjectCntrl
     jmp Start_Special_Attrs
+
+.scope
+PickupMissile:
+    lda #$01                    ; Carry flag is set here so this is actually adding #$02 (2 missiles)
+    ldy EnDataIndex,x
+    beq _skip30MissileAdd
+        lda #$1D                ; Carry flag is set here so this is actually adding #$1E (30 missiles)
+
+    _skip30MissileAdd:
+        adc MissileCount
+        bcs _capMissiles 
+        cmp MaxMissiles             ; can Samus hold this many missiles?
+        bcc _skipCappingMissles     ; branch if yes
+    _capMissiles:
+            lda MaxMissiles         ; set to max. # of missiles allowed
+
+    _skipCappingMissles:
+        sta MissileCount
+
+    SFX_MissilePickup:
+        lda #SFX_MSL_PKUP
+        ora SQ1SFXFlag
+        sta SQ1SFXFlag
+
+    CacheMissileGraphics:
+        lda #$00
+        sta MissileCountHundreds
+        sta MissileCountTens
+
+        lda MissileCount
+
+        cmp #200
+        bcc _Hundreds1
+            sbc #200
+
+    _Hundreds1:    
+        rol MissileCountHundreds
+        cmp #100
+        bcc _Hundreds2
+            sbc #100
+
+    _Hundreds2:     
+        rol MissileCountHundreds
+        cmp #80
+        bcc _Tens1
+            sbc #80
+
+    _Tens1:     
+        rol MissileCountTens
+        cmp #40
+        bcc _Tens2
+            sbc #40
+
+    _Tens2:     
+        rol MissileCountTens
+        cmp #20
+        bcc _Tens3
+            sbc #20
+
+    _Tens3:     
+        rol MissileCountTens
+        cmp #10
+        bcc _Tens4
+            sbc #10
+
+    _Tens4:    
+        rol MissileCountTens
+
+        ; What is left in A is the 1's place
+        ora #$A0
+        sta MissileCountOnes
+
+        lda MissileCountHundreds
+        ora #$A0
+        sta MissileCountHundreds
+
+        lda MissileCountTens
+        ora #$A0
+        sta MissileCountTens
+
+        rts
+.scend
 
 EnemyRoutine_6:
 LF4EE:
@@ -9099,13 +9120,10 @@ LF51E:
 Exit24:
 *   rts
 
-CheckIfEnemyHasBeenHit:
+EnemyReactToBeingHit:
     lda EnSpecialAttribs,x
     sta $0A
-    lda EnHasBeenHit,x
-    and #$20
-    beq Exit30
-EnemyReactToBeingHit:
+
     lda $040E,x
     cmp #$03
     bne EnemyPlayGetHitSound
@@ -9150,6 +9168,7 @@ HitInvincibleObject:
     sta $040E,x
 
     jmp SFXMetal
+    ; safe
 
 EnemyPlayGetHitSound:
 *   lda EnHitPoints,x
@@ -9254,20 +9273,26 @@ SFX_BigEnemyHit_Inline:
     lda $960B,y
     jsr DoSomethingToAnimationIndecies
     sta EnCounter,x
+
+    ; This fires when an enemy dies from bullet or missile
+    ; #$C0, #$C8, #$D0, #$D8
     ldx #$C0
 *   lda EnStatus,x
     beq +
-    txa
-    sbx #$F8    ; Add 8 to X
-    cpx #$E0
+        txa
+        sbx #$F8        ; Add 8 to X
+        cpx #$E0
     bne -
-    beq GetPageIndex
+    beq GetPageIndex    ; branch always
+    ; safe
 
 *   lda $95DD
     jsr DoSomethingToAnimationIndecies
     lda #$0A
     sta EnCounter,x
+
     inc EnStatus,x
+
     lda #$00
     bit $0A
     bvc +
@@ -9277,8 +9302,10 @@ SFX_BigEnemyHit_Inline:
     ldy PageIndex
     lda EnYRoomPos,y
     sta EnYRoomPos,x
+
     lda EnXRoomPos,y
     sta EnXRoomPos,x
+
     lda EnNameTable,y
     sta EnNameTable,x
 
@@ -9286,11 +9313,6 @@ GetPageIndex:
     ldx PageIndex
     rts
 
-LF682:  
-    jsr LF844
-    lda $963B,y
-    cmp EnResetAnimIndex,x
-    beq +
 DoSomethingToAnimationIndecies:  
     sta EnResetAnimIndex,x
 LF690:  
@@ -10033,6 +10055,7 @@ Bank07_LFBCA:
     beq Exit13
     sta EnResetAnimIndex,x
     jmp LF690
+    ; safe
 
 DoOneSpinnerDestruction:
     dec $A0,x
@@ -10153,6 +10176,7 @@ LFD08:
     sta $B0,x
 AfterLFD08:
 
+    ; TODO - Could inline
     jsr LFD25
     jmp SomethingAboutMovement
 
@@ -10266,6 +10290,7 @@ LFD84:
 Exit21:
     rts
 
+.scope
 Bank07_LFD8F:
     lda ScrollDir
     anc #$02
@@ -10273,27 +10298,29 @@ Bank07_LFD8F:
 
     lda $04
     ;clc
-    bmi +++
+    bmi _CommonPt3
     beq LFDBF
 
     adc $08
-    bcs +
+    bcs _CommonPt1
     cmp #$F0
-    bcc ++
-*   adc #$0F
-    ldy $02
-    bne ClcExit2
-    inc $0B
-*   sta $08
-    jmp LFDBF
+    bcc _Store_8_and_Keep_Going
 
-*   adc $08
-    bcs +
+_CommonPt1:
+    adc #$0F
+    jmp _NewCommonPt_2
+    ; safe
+
+_CommonPt3:
+    adc $08
+    bcs _Store_8_and_Keep_Going
     sbc #$0F
+_NewCommonPt_2:
     ldy $02
     bne ClcExit2
     inc $0B
-*   sta $08
+_Store_8_and_Keep_Going:
+    sta $08
 
 LFDBF:
     lda $05
@@ -10301,7 +10328,7 @@ LFDBF:
     bmi ++
     beq SecExit
     adc $09
-    bcc +
+    bcc +++
     ldy $02
     beq ClcExit2
     inc $0B
@@ -10323,6 +10350,7 @@ ClcExit2:
 Exit26: 
     rts
 
+.scend
 ; Tile degenerate/regenerate
 
 ; TODO: Inline
