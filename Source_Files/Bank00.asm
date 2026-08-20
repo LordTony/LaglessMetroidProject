@@ -2496,23 +2496,26 @@ L9329:  .byte $78               ;All other areas.
 L932A:  .byte $5C               ;Not used.
 
 InitializeStats:
-L932B:  LDA #$00                ;
-L932D:  STA SamusStat00         ;
-L9330:  STA TankCount           ;
-L9333:  STA SamusGear           ;
-L9336:  STA MissileCount        ;
-L9339:  STA MaxMissiles         ;
-L933C:  STA KraidStatueStat     ;Set all of Samus' stats to 0 when starting new game.
-L933F:  STA RidlyStatueStat     ;
-L9342:  STA SamusAgeLo          ;
-L9345:  STA SamusAgeMid         ;
-L9348:  STA SamusAgeHi          ;
-L934B:  STA SamusStat01         ;
-L934E:  STA AtEnding            ;
-L9351:  STA JustInBailey        ;
-L9354:  LDA #$02                ;
-L9356:  STA SwitchPending       ;Prepare to switch to Brinstar memory page.
-L9358:  RTS                     ;
+L932B:  LDA #$00                    ;
+L932D:  STA SamusStat00             ;
+L9330:  STA TankCount               ;
+L9333:  STA SamusGear               ;
+L9336:  STA MissileCount            ;
+        STA MissileCountHundreds    ;
+        STA MissileCountTens        ;
+        STA MissileCountOnes        ;
+L9339:  STA MaxMissiles             ;
+L933C:  STA KraidStatueStat         ;Set all of Samus' stats to 0 when starting new game.
+L933F:  STA RidlyStatueStat         ;
+L9342:  STA SamusAgeLo              ;
+L9345:  STA SamusAgeMid             ;
+L9348:  STA SamusAgeHi              ;
+L934B:  STA SamusStat01             ;
+L934E:  STA AtEnding                ;
+L9351:  STA JustInBailey            ;
+L9354:  LDA #$02                    ;
+L9356:  STA SwitchPending           ;Prepare to switch to Brinstar memory page.
+L9358:  RTS                         ;
 
 DisplayPassword:
 L9359:  LDA Timer2              ;Wait for "GAME OVER" to be displayed

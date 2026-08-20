@@ -1396,20 +1396,11 @@ _L8A9C:  .byte $34, $04, $04, $F2, $FF
 
 _Adiv32:
     lsr
-_Adiv16:
     lsr
     lsr
     lsr
     lsr
     rts
-
-_AMul16:
-    asl
-    asl
-    asl
-    asl
-    rts
-
 .advance $8AC4
 
 ;Kraid statue.
@@ -1624,12 +1615,10 @@ _L8C41:  STA $08
 
 _L8C43:  LDY $50
 _L8C45:  TXA 
-;_L8C46:  JSR _Amul16
          AND #$10
 _L8C49:  BEQ _L8C4D
 
 _L8C4B:  DEY 
-;_L8C4C:  TYA 
 _L8C4D:  JSR Bank07_LDC1E
 _L8C50:  LDA #$00
 _L8C52:  STA $0300,X
@@ -1680,8 +1669,6 @@ _L8C8D:  JSR _L8C76
 _L8C92:  LDA $91
 _L8C94:  BEQ _L8CA7
 
-;_L8C96:  TXA 
-;_L8C97:  JSR _Adiv16
     lda Div16Table, x
 
 _L8C9A:  EOR $91
@@ -1702,7 +1689,7 @@ _L8CB1:  CMP #$03
 _L8CB3:  BNE _L8C71
 
 _L8CB5:  TXA 
-_L8CB6:  JSR _Amul16
+_L8CB6:  AND #$10
 _L8CB9:  BCS _L8CC0
 
 _L8CBB:
@@ -1760,14 +1747,14 @@ _MakeCartRAMPtr:
     lda ObjectHi, x
     and #$01
     ora #$18        
-    sta $05         
+    sta $05             ; $05 == #$18 or #$19 here
 
     lda #$50         
     and #$F8
     asl 
     rol $05         
     asl 
-    rol $05         
+    rol $05             ; $05 == #$64 or #$60
     sta $04         
 
     ldy #$1D
@@ -1780,33 +1767,38 @@ _MakeCartRAMPtr:
     ora $04
     sta $04         
 
-_L8D18:  PLA
+_L8D18:  PLA            ; Loads #$4E or #$FF
 
     ldy #$00
     sta ($04),Y
+
     ldy #$20
     sta ($04),Y
+
     ldy #$40
     sta ($04),Y
+
     ldy #$60
     sta ($04),Y
+
     ldy #$80
     sta ($04),Y
+
     ldy #$A0
     sta ($04),Y
 
-    lax PageIndex
+    txa                 ; X == PageIndex here
     lsr 
     lsr 
     asr #$0C
+    tay 
 
-_L8D2E:  TAY 
-_L8D2F:  LDA $04
-_L8D31:  STA $005C,Y
+    lda $04
+    sta $5C,y 
 
-_L8D34:  LDA $05
-_L8D36:  STA $005D,Y
+    lda $05
+    sta $5D,y 
 
-_L8D39:  RTS
+    rts
 
 .scend

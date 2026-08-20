@@ -1087,10 +1087,11 @@ LC82D:  stx UpdtngPrjctl        ;No projectiles need to be updated.
 ;LC83D:* inx                     ;
 ;LC83E:  bne ---                 ;Loop until all required RAM is cleared.
 
-LC840:  jsr ScreenOff           ;($C439)Turn off Background and visibility.
-LC843:  jsr ClearNameTables     ;($C158)Clear screen data.
-LC846:  jsr EraseAllSprites     ;($C1A3)Erase all sprites from sprite RAM.
-LC849:  jsr DestroyEnemies      ;($C8BB)
+LC840:  jsr ScreenOff               ;($C439)Turn off Background and visibility.
+LC843:  jsr ClearNameTables         ;($C158)Clear screen data.
+LC846:  jsr EraseAllSprites         ;($C1A3)Erase all sprites from sprite RAM.
+LC849:  jsr DestroyEnemies          ;($C8BB)
+        jsr CacheMissileGraphics 
 
     stx DoorOnNameTable3        ;Clear data about doors on the name tables.
     stx DoorOnNameTable0        ;
@@ -1241,15 +1242,19 @@ GameEngine:
 ; ===== HANDLE the debug NARPASSWORD =====
 
     HandleNarPassword:
-        lda NARPASSWORD         ;
-        beq UpdateWorld         ;
-        lda #$03                ;The following code is only accessed if 
-        sta HealthHi            ;NARPASSWORD has been entered at the 
-        lda #$FF                ;password screen. Gives you new health,
-        sta SamusGear           ;missiles and every power-up every frame.
-        lda #$05                ;
-        sta MissileCount        ;
-
+        lda NARPASSWORD             ;
+        beq UpdateWorld             ;
+        lda #$03                    ;The following code is only accessed if 
+        sta HealthHi                ;NARPASSWORD has been entered at the 
+        lda #$FF                    ;password screen. Gives you new health,
+        sta SamusGear               ;missiles and every power-up every frame.
+        lda #$05                    ;
+        sta MissileCount            ;
+        lda #$A0
+        sta MissileCountHundreds
+        sta MissileCountTens
+        lda #$A5
+        sta MissileCountOnes
 ; ===== THE REAL GUTS OF THE GAME ENGINE! =====
 
 UpdateWorld:
@@ -2798,6 +2803,8 @@ SFXMissileLaunch_Inline:
     sta $030F,y     ; # of frames projectile should last
 
     dec MissileCount
+    jsr CacheMissileGraphics
+    lda MissileCount
     bne Exit4       ; exit if not the last missile
 
 ; Samus has no more missiles left
@@ -4404,7 +4411,7 @@ OnBossKilled:
 ; Called from Bank03 and Bank07
 SomethingAboutMovement:
     ; MARU
-    ldx PageIndex          ; Should be loaded from all callers already
+    ;ldx PageIndex          ; Should be loaded from all callers already
     ldy EnAnimFrame,x
     cpy #$F7
     bne MoveEnemies
@@ -4427,7 +4434,60 @@ AddToMaxMissiles:
     PLA
     ADC MaxMissiles
     STA MaxMissiles
-    RTS
+
+.scope
+CacheMissileGraphics:
+        LDA #0
+        STA MissileCountHundreds
+        STA MissileCountTens
+
+        LDA MissileCount
+
+        ; ---- hundreds digit (0-2): weights 200, 100 ----
+        CMP #200
+        BCC _H1
+        SBC #200
+_H1:    
+        ROL MissileCountHundreds
+        CMP #100
+        BCC _H2
+        SBC #100
+_H2:     
+        ROL MissileCountHundreds
+        CMP #80
+        BCC _T1
+        SBC #80
+_T1:     
+        ROL MissileCountTens
+        CMP #40
+        BCC _T2
+        SBC #40
+_T2:     
+        ROL MissileCountTens
+        CMP #20
+        BCC _T3
+        SBC #20
+_T3:     
+        ROL MissileCountTens
+        CMP #10
+        BCC _T4
+        SBC #10
+_T4:    
+        ROL MissileCountTens
+
+        ORA #$A0
+        STA MissileCountOnes
+
+        LDA MissileCountHundreds
+        ORA #$A0
+        STA MissileCountHundreds
+
+        LDA MissileCountTens
+        ORA #$A0
+        STA MissileCountTens
+
+        RTS
+.scend
 
 MoveEnemies:
 *   LDA EnYRoomPos,x
@@ -5044,52 +5104,18 @@ LE0F1:  beq EraseMissileSprite              ;Don't show missile count if Samus h
 ; The digit sprites (0 - 9) start at $A0 so the #$9F trick is just to get us the proper mapping to the digit sprites
 
 .scope
-DisplayNumberOfMissiles:
-    lda MissileCount
-    ldy #$A0
-
-    cmp #100
-    bcc PrintMissileHundredsDigit
-
-    iny
-    cmp #200
-    bcc _Minus100
-
-    iny
-    sbc #100
-
-    _Minus100:
-        sec
-        sbc #100
-
-    PrintMissileHundredsDigit:
-        pha 
-        tya 
+    DisplayNumberOfMissiles:
+        lda MissileCountHundreds
         sta SpriteRAM - 31,x
-        pla 
 
-    DisplayMissleTensDigit:
-        ldy #$9F
-        * iny
-        sbc #10
-        bpl -
-
-        pha
-    ; Ones
-        tya 
+        lda MissileCountTens
         sta SpriteRAM - 27,x
-    PrintMissileTensDigit:
-        pla
-        adc #11
-        tay
-        lda MissileOnesDigitTable, y
-    PrintMissileOnesDigit:
+
+        lda MissileCountOnes
         sta SpriteRAM - 23,x
 
-    bne MissileAndTimerDisplayEnd   ;Branch always.
+        bne MissileAndTimerDisplayEnd   ;Branch always.
 
-    MissileOnesDigitTable:
-        .byte $A0, $A1, $A2, $A3, $A4, $A5, $A6, $A7, $A8, $A9, $A0, $A1, $A2, $A3, $A4, $A5
 .scend
 
 EraseMissileSprite:
@@ -9006,6 +9032,7 @@ PickupMissile:
     bcc ++              ; branch if yes
 *   lda MaxMissiles     ; set to max. # of missiles allowed
 *   sta MissileCount
+    jsr CacheMissileGraphics
 SFX_MissilePickup:
     lda #SFX_MSL_PKUP
     ora SQ1SFXFlag

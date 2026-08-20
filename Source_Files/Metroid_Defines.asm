@@ -282,10 +282,10 @@
 ; unused                $D9
 ; used, but isolated    $DA
 ; used, but isolated    $DB
-.alias Quarter          $DC
-; unused                $DD
-; unused                $DE
-; unused                $DF
+.alias Quarter                  $DC
+.alias MissileCountHundreds     $DD     ; These get set whenever missile counts change
+.alias MissileCountTens         $DE     
+.alias MissileCountOnes         $DF
 
 .alias SFXPtrE0         $E0     ;Pointer used by SFX routines.
 .alias SFXPtrE0LB       $E0     ;Pointer used by SFX routines, lower byte.
@@ -314,7 +314,7 @@
 .alias NARPASSWORD      $F3   ;0 = invinsible Samus not active, 1 = invinsible Samus active.
 .alias JustInBailey     $F4   ;0 = Samus has suit, 1 = Samus is without suit.
 .alias TankCount        $F5   ;Number of energy tanks.
-.alias MissileCount     $F6   ;Stores current number of missiles.
+.alias MissileCount     $F6   
 .alias MaxMissiles      $F7   ;Maximum amount of missiles Samus can carry
 .alias HealthLo         $F8   ;Lower health digit in upper 4 bits.
 .alias HealthHi         $F9   ;Upper health digit in lower 4 bits

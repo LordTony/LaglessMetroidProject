@@ -129,7 +129,6 @@ SBX #$F0
 
 ## Bugs
 * Loading can get confused when direction changes right as the load is happening and you can get half of the wrong room.
-* Missile count is gitched with the Justin Bailey password
 * Breakable blocks switch name tables when they aren't supposed to
 
 ## Maybe Bugs (Check Original Game Behavior)
