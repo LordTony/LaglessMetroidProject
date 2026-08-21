@@ -129,9 +129,13 @@ SBX #$F0
 
 ## Definite Bugs
 * Loading can get confused when direction changes right as the load is happening and you can get half of the wrong room.
+* Breakable blocks switch name tables when they aren't supposed to
+* Little bug things use the wrong sprite (probably an issue with the adjustment to the hud missile sprite display)
+* Seahorses don't spit anything
+* Bank02 Room #$09 needs to be a 4 way scrolling room.
 
 ## Maybe Bugs (Check Original Game Behavior)
 * Can't collect health + missiles pickups while blinking (normally due to touching lava)
 * Missiles don't seem to hit spinners from far away (example: The ones hanging on room #$12)
 * Pipe spawned enemies can raise through the ceiling
-* Breakable blocks switch name tables when they aren't supposed to
+* Bank02 Room #$15 one of the crawler guys gets confused on the eyeball pillar

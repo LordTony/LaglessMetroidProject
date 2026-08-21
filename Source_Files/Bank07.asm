@@ -2263,7 +2263,7 @@ SFX_SamusJump_Inline2:
         AND #gr_HIGHJUMP
         BEQ +                   ; branch if Samus doesn't have High Jump
         ;LDY #$12                ; lower gravity value -> high jump!
-        LDY #$0D                ; HACK - while developing, make her jump higher
+        LDY #$0B                ; HACK - while developing, make her jump higher by lowering the gravity
 *       STY SamusGravity
         RTS
 
@@ -5740,7 +5740,7 @@ ScrollUp:
     jsr SwitchToOppositeNameTable
     ldx #240    ; new Y coord
 *   dex
-    cpx #MidScreenVertical + 20          ; Load just a bit before you reach the half way point vertically
+    cpx #MidScreenVertical + 4          ; Load just a bit before you reach the half way point vertically
     bne SkipScrollUpMidwayMap
         lda #$02
         sta Quarter
