@@ -638,6 +638,7 @@ Bank01_L95CD:  .byte $01           ;Brinstar music init flag.
 Bank01_L95CE:  .byte $80           ;Base damage caused by area enemies to lower health byte.
 Bank01_L95CF:  .byte $00           ;Base damage caused by area enemies to upper health byte.
 
+.advance $95D0
 ;Special room numbers(used to start item room music).
 Bank01_L95D0:  .byte $2B, $2C, $28, $0B, $1C, $0A, $1A
 
@@ -3309,7 +3310,8 @@ Brinstar_1B_Attrs:
 
 ; Fall through
 Brinstar_1E_Attrs:
-	.byte $08, $AA, $F2, $F3, $F4, $F5, $FA, $FB, $FC, $FD
+	.byte $08, $AA
+		.byte $F2, $F3, $F4, $F5, $FA, $FB, $FC, $FD
 
 ; Fall through
 Brinstar_1F_Attrs:

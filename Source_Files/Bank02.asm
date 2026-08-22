@@ -223,6 +223,7 @@ Bank02_L95CD:  .byte $08           ;Norfair music init flag.
 Bank02_L95CE:  .byte $00           ;Base damage caused by area enemies to lower health byte.
 Bank02_L95CF:  .byte $01           ;Base damage caused by area enemies to upper health byte.
 
+.advance $95D0
 ;Special room numbers(used to start item room music).
 Bank02_L95D0:  .byte $10, $05, $27, $04, $0F, $FF, $FF
 
@@ -1431,12 +1432,16 @@ Bank02_Room_04_Right:
 
 ;Room #$05
 Bank02_LA473:
-	.byte $00
+	.byte $A2
 	.word Bank02_Room_05_Top_Left
 	.word Bank02_Room_05_Top_Right
 	.word Bank02_Room_05_Bottom_Left
 
+; JUMANJI
+; Elevator to Ridley
 Bank02_Room_05_Bottom_Right:
+	.byte $80, $0D
+	.byte $87, $02
 	.byte $89, $0D
 	.byte $FF
 
@@ -1452,12 +1457,13 @@ Bank02_Room_05_Top_Left:
 	.byte $FF
 
 Bank02_Room_05_Top_Right:
+	.byte $06, $13
 	.byte $0A, $14
 	.byte $0E, $07
 	.byte $2B, $0C
-	.byte $4B, $14
+	.byte $47, $13
+	.byte $4C, $14
 	.byte $4E, $0C
-	.byte $4F, $14
 	.byte $6B, $09
 	.byte $7A, $09
 	.byte $FF
@@ -1590,35 +1596,44 @@ Bank02_Room_08_Bottom_Left:
 ;Room #$09
 Bank02_LA55F:
 	.byte $FF
-	.word Bank02_Room_09_Top
-	.word FFLabel
-	.word Bank02_Room_09_Bottom
-	.byte $FF
+	.word Bank02_Room_09_Top_Left
+	.word Bank02_Room_09_Top_Right
+	.word Bank02_Room_09_Bottom_Left
 
-Bank02_Room_09_Top:
-	.byte $00, $07
-	.byte $0E, $36
-	.byte $2A, $06
-	.byte $33, $06
-	.byte $35, $06
-	.byte $43, $0A
-	.byte $4E, $36
-	.byte $50, $37
-	.byte $6E, $38
-	.byte $FD
-	.byte $01, $86, $25			; Enemy
-	.byte $41, $06, $79			; Enemy
-	.byte $FF
-
-Bank02_Room_09_Bottom:
+Bank02_Room_09_Bottom_Right:
 	.byte $6E, $07
-	.byte $80, $37
 	.byte $87, $06
 	.byte $97, $0A
 	.byte $BE, $36
+	.byte $D4, $06
+	.byte $FF
+
+Bank02_Room_09_Top_Left:
+	.byte $00, $07
+	.byte $33, $06
+	.byte $35, $06
+	.byte $43, $0A
+	.byte $50, $37
+	.byte $FD
+	.byte $41, $06, $79			; Enemy
+	.byte $FF
+
+Bank02_Room_09_Top_Right:
+	.byte $0E, $36
+	.byte $2A, $06
+	.byte $35, $06
+	.byte $4E, $36
+	.byte $6E, $38
+	.byte $FF
+
+Bank02_Room_09_Bottom_Left:
+	.byte $80, $37
+	.byte $87, $06
+	.byte $97, $0A
 	.byte $C0, $38
 	.byte $D4, $06
 	.byte $FD
+	.byte $01, $86, $25			; Enemy
 	.byte $11, $82, $C5			; Enemy
 	.byte $FF
 
@@ -1796,6 +1811,7 @@ Bank02_LA678:
 
 Bank02_Room_0E_Bottom_Right:
 	.byte $AE, $07
+	.byte $B5, $06
 	.byte $FD
 	.byte $31, $02, $EA			; Enemy
 	.byte $FF
@@ -2069,36 +2085,30 @@ Bank02_Room_15_Right:
 
 ;Room #$16
 Bank02_LA82B:
+	.byte $FE
+	.word Bank02_Room_16_Left
+	.word Bank02_Room_16_Right
+	.word FFLabel
 	.byte $FF
-	.word Bank02_Room_16_Top_Left
-	.word Bank02_Room_16_Top_Right
-	.word Bank02_Room_16_Bottom_Left
 
-Bank02_Room_16_Bottom_Right:
+Bank02_Room_16_Left:
+	.byte $00, $2D
+	.byte $12, $0A
+	.byte $A2, $1D
+	.byte $D0, $00
+	.byte $FD
+	.byte $11, $86, $94			; Enemy
+	.byte $FF
+
+Bank02_Room_16_Right:
+	.byte $08, $2D
+	.byte $1C, $0A
 	.byte $AB, $1D
 	.byte $D8, $00
 	.byte $FD
 	.byte $01, $0D, $E8			; Enemy
 	.byte $21, $86, $9C			; Enemy
-	.byte $FF
-
-Bank02_Room_16_Top_Left:
-	.byte $00, $2D
-	.byte $12, $0A
-	.byte $FF
-
-Bank02_Room_16_Top_Right:
-	.byte $08, $2D
-	.byte $1C, $0A
-	.byte $FD
 	.byte $51, $00, $18			; Enemy
-	.byte $FF
-
-Bank02_Room_16_Bottom_Left:
-	.byte $A2, $1D
-	.byte $D0, $00
-	.byte $FD
-	.byte $11, $86, $94			; Enemy
 	.byte $FF
 
 ;Room #$17 (unused)
@@ -2119,7 +2129,6 @@ Bank02_Room_18_Bottom_Right:
 	.byte $01, $0D, $EC			; Enemy
 	.byte $FF
 
-;JUMANJI
 Bank02_Room_18_Left:
 	.byte $00, $2D
 	.byte $24, $1C
@@ -2809,6 +2818,7 @@ Bank02_LAC99:
 	.word Bank02_Room_2D_Bottom_Left
 
 Bank02_Room_2D_Bottom_Right:
+	.byte $5E, $07
 	.byte $AE, $07
 	.byte $FF
 
@@ -2825,6 +2835,7 @@ Bank02_Room_2D_Top_Right:
 	.byte $FF
 
 Bank02_Room_2D_Bottom_Left:
+	.byte $50, $07
 	.byte $93, $06
 	.byte $A0, $07
 	.byte $C7, $06
@@ -2860,7 +2871,7 @@ Bank02_LACE5:
 	.byte $02, $04, $05
 	.byte $02, $04, $05
 	.byte $02, $04, $05
-	.byte $02, $04, $05
+	;.byte $02, $04, $05		; TODO: Check all the elevators on Bank 02 to make sure this is ok
 	.byte $FF
 
 ;Structure #$03
@@ -2912,8 +2923,6 @@ Bank02_LAD31:
 	.byte $04, $12, $13, $11, $13
 	.byte $01, $13
 	.byte $FF
-
-; TODO: Most Common. May want to double up?
 
 ;Structure #$0B
 Bank02_LAD39: 
@@ -3357,6 +3366,17 @@ NorfairGFX_Loop:
         bpl NorfairGFX_Loop
 		JMP NmiOn               ;($C487)Turn on VBlank interrupts.
 
+Norfair_To_Ridley_Attrs:
+	.byte $06, $FF
+		.byte $C0, $C1, $C2, $C7, $C8, $CF
+	.byte $04, $AA
+		.byte $EB, $EC, $F3, $F4
+	.byte $D0, $AF
+	.byte $E3, $88
+	.byte $E4, $22
+	.byte $00
+
+
 ;-----------------------------------[ Enemy animation data tables ]----------------------------------
 
 .advance RoomAttrTbl_Hi
@@ -3365,7 +3385,7 @@ NorfairGFX_Loop:
     .byte >Norfair_DefaultAttrs         ;Room #$02
     .byte >Norfair_DefaultAttrs         ;Room #$03
     .byte >Norfair_DefaultAttrs         ;Room #$04
-    .byte >Norfair_DefaultAttrs         ;Room #$05
+    .byte >Norfair_To_Ridley_Attrs      ;Room #$05
     .byte >Norfair_DefaultAttrs         ;Room #$06
     .byte >Norfair_DefaultAttrs         ;Room #$07
     .byte >Norfair_DefaultAttrs         ;Room #$08
@@ -3415,7 +3435,7 @@ NorfairGFX_Loop:
     .byte <Norfair_DefaultAttrs         ;Room #$02
     .byte <Norfair_DefaultAttrs         ;Room #$03
     .byte <Norfair_DefaultAttrs         ;Room #$04
-    .byte <Norfair_DefaultAttrs         ;Room #$05
+    .byte <Norfair_To_Ridley_Attrs      ;Room #$05
     .byte <Norfair_DefaultAttrs         ;Room #$06
     .byte <Norfair_DefaultAttrs         ;Room #$07
     .byte <Norfair_DefaultAttrs         ;Room #$08

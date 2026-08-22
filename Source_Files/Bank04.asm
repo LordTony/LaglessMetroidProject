@@ -209,6 +209,7 @@ Bank04_L95CD:  .byte $10           ;Kraid's hideout music init flag.
 Bank04_L95CE:  .byte $00           ;Base damage caused by area enemies to lower health byte.
 Bank04_L95CF:  .byte $02           ;Base damage caused by area enemies to upper health byte.
 
+.advance $95D0
 ;Special room numbers(used to start item room music).
 Bank04_L95D0:  .byte $FF, $FF, $FF, $FF, $FF, $FF, $FF
 

@@ -162,6 +162,7 @@ Bank05_L95CD:  .byte $80           ;Ridley hideout music init flag.
 Bank05_L95CE:  .byte $40           ;Base damage caused by area enemies to lower health byte.
 Bank05_L95CF:  .byte $02           ;Base damage caused by area enemies to upper health byte.
 
+.advance $95D0
 ;Special room numbers(used to start item room music).
 Bank05_L95D0:  .byte $FF, $FF, $FF, $FF, $FF, $FF, $FF
 

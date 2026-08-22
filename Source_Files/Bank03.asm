@@ -222,6 +222,7 @@ Bank03_L95CD:  .byte $40           ;Tourian music init flag.
 Bank03_L95CE:  .byte $00           ;Base damage caused by area enemies to lower health byte.
 Bank03_L95CF:  .byte $03           ;Base damage caused by area enemies to upper health byte.
 
+.advance $95D0
 ;Special room numbers(used to start item room music).
 Bank03_L95D0:  .byte $FF, $FF, $FF, $FF, $FF, $FF, $FF
 

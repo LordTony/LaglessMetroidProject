@@ -6065,7 +6065,7 @@ ScrollLeft:
     bcs ++  ; if function returns CF=1, scrolling left is not possible
     jsr SwitchToOppositeNameTable
 *   dec ScrollX
-    cmp #MidScreenHorizontal - 1      ; Not sure why +4 and not +1. Assembly is hard.
+    cmp #MidScreenHorizontal - 1
     bne SkipScrollLeftMidwayMap
         lda #$02
         sta Quarter
@@ -6122,6 +6122,9 @@ ScrollRightExit:
 ;If valid room number, the room number is stored in $5A.
 
 GetRoomNum:
+        lda Quarter
+        bne +
+
 LE720:  lda ScrollDir           ;
 LE722:  lsr             ;Branch if scrolling vertical.
 LE723:  beq +               ;
@@ -6135,8 +6138,10 @@ LEC93:  lda PPUCNT0ZP       ;
         and #$01            ;return #$01. Else return #$00.
         tay                 ;
 LE72C:  pla                 ;Restore A.
-LE72D:  and $6C,y           ;
+LE72D:  and $006C,y           ;
 LE730:  sec                 ;
+
+; TODO: Bug here. We need to check 
 LE731:  bne +++++           ;Can't load room, a door is in the way. This has the
                             ;effect of stopping the scrolling until Samus walks
                             ;through the door(horizontal scrolling only).
