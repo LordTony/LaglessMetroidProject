@@ -7,11 +7,11 @@ print_y_overflow = False
 print_x_overflow = False
 print_overdraw_map = False
 
-BrinstarData = BankRoom(Bank.NORFAIR)
+TargetData = BankRoom(Bank.TOURIAN)
 
-bank = "Bank02"
-room_objs = BrinstarData.BankRooms
-structs = BrinstarData.BankStructs
+bank = "Bank03"
+room_objs = TargetData.BankRooms
+structs = TargetData.BankStructs
 
 def isInQuad(positionByteStr: str, quad: int):
     xpos = int("0x" + positionByteStr[-1], 16)
