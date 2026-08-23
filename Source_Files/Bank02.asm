@@ -1341,6 +1341,8 @@ Bank02_Room_02_Top:
 	.byte $FF
 
 Bank02_Room_02_Bottom:
+	.byte $40, $07
+	.byte $4E, $07
 	.byte $76, $08
     .byte $79, $08
 	.byte $90, $07
@@ -1437,7 +1439,6 @@ Bank02_LA473:
 	.word Bank02_Room_05_Top_Right
 	.word Bank02_Room_05_Bottom_Left
 
-; JUMANJI
 ; Elevator to Ridley
 Bank02_Room_05_Bottom_Right:
 	.byte $80, $0D
@@ -1591,8 +1592,6 @@ Bank02_Room_08_Bottom_Left:
 	.byte $21, $82, $A3			; Enemy
 	.byte $FF
 
-; BUG - this is a 4 way scroll screen
-; TODO
 ;Room #$09
 Bank02_LA55F:
 	.byte $FF
@@ -1728,34 +1727,31 @@ Bank02_Room_0B_Bottom_Left:
 ;Room #$0C
 Bank02_LA617:
 	.byte $FF
-	.word Bank02_Room_0C_Top_Left
-	.word Bank02_Room_0C_Top_Right
-	.word Bank02_Room_0C_Bottom_Left
+	.word Bank02_Room_0C_Top
+	.word FFLabel
+	.word Bank02_Room_0C_Bottom
+	.byte $FF
 
-Bank02_Room_0C_Bottom_Right:
+Bank02_Room_0C_Top:
+	.byte $00, $07
+	.byte $0D, $18
+	.byte $0E, $07
+	.byte $4D, $18
+	.byte $50, $07
+	.byte $5E, $07
+	.byte $FD
+	.byte $01, $02, $33			; Enemy
+	.byte $FF
+
+Bank02_Room_0C_Bottom:
+	.byte $50, $07
+	.byte $5E, $07
+	.byte $A0, $07
 	.byte $8D, $18
 	.byte $AE, $07
 	.byte $CD, $18
 	.byte $FD
 	.byte $31, $82, $88			; Enemy
-	.byte $FF
-
-Bank02_Room_0C_Top_Left:
-	.byte $00, $07
-	.byte $50, $07
-	.byte $FD
-	.byte $01, $02, $33			; Enemy
-	.byte $FF
-
-Bank02_Room_0C_Top_Right:
-	.byte $0D, $18
-	.byte $0E, $07
-	.byte $4D, $18
-	.byte $5E, $07
-	.byte $FF
-
-Bank02_Room_0C_Bottom_Left:
-	.byte $A0, $07
 	.byte $FF
 
 ;Room #$0D
@@ -1810,6 +1806,7 @@ Bank02_LA678:
 	.word Bank02_Room_0E_Bottom_Left
 
 Bank02_Room_0E_Bottom_Right:
+	.byte $5E, $07
 	.byte $AE, $07
 	.byte $B5, $06
 	.byte $FD
@@ -2185,29 +2182,14 @@ Bank02_Room_19_Right:
 
 ;Room #$1A
 Bank02_LA8DC:
-	.byte $FF
-	.word Bank02_Room_1A_Top_Left
-	.word Bank02_Room_1A_Top_Right
-	.word Bank02_Room_1A_Bottom_Left
-
-Bank02_Room_1A_Bottom_Right:
-	.byte $88, $0D
-	.byte $8C, $20
-	.byte $D8, $00
+	.byte $56
+	.word Bank02_Room_1A_Left
+	.word Bank02_Room_1A_Right
+	.word FFLabel
 	.byte $FF
 
-Bank02_Room_1A_Top_Left:
+Bank02_Room_1A_Left:
 	.byte $00, $30
-	.byte $FF
-
-Bank02_Room_1A_Top_Right:
-	.byte $08, $30
-	.byte $FD
-	.byte $41, $00, $29			; Enemy
-	.byte $51, $00, $2C			; Enemy
-	.byte $FF
-
-Bank02_Room_1A_Bottom_Left:
 	.byte $80, $0D
 	.byte $84, $05
 	.byte $86, $05
@@ -2216,6 +2198,16 @@ Bank02_Room_1A_Bottom_Left:
 	.byte $FD
 	.byte $27, $87, $85			; Zeb Hole
 	.byte $37, $87, $87			; Zeb Hole
+	.byte $FF
+
+Bank02_Room_1A_Right:
+	.byte $08, $30
+	.byte $88, $0D
+	.byte $8C, $20
+	.byte $D8, $00
+	.byte $FD
+	.byte $41, $00, $29			; Enemy
+	.byte $51, $00, $2C			; Enemy
 	.byte $FF
 
 ;Room #$1B
@@ -2508,7 +2500,7 @@ Bank02_Room_23_Left:
 
 Bank02_Room_23_Right:
 	.byte $08, $2F
-	.byte $8D, $24
+	.byte $8D, $4F
 	.byte $8F, $29
 	.byte $97, $24
 	.byte $D8, $00
@@ -3302,6 +3294,7 @@ Bank02_Struct_44:
 Bank02_Struct_45:
 	.byte $43, $2B
 	.byte $43, $2B
+Bank02_Struct_4F:
 	.byte $43, $2B
 	.byte $43, $2B
 	.byte $FF
@@ -3366,65 +3359,119 @@ NorfairGFX_Loop:
         bpl NorfairGFX_Loop
 		JMP NmiOn               ;($C487)Turn on VBlank interrupts.
 
-Norfair_To_Ridley_Attrs:
-	.byte $06, $FF
-		.byte $C0, $C1, $C2, $C7, $C8, $CF
-	.byte $04, $AA
-		.byte $EB, $EC, $F3, $F4
-	.byte $D0, $AF
-	.byte $E3, $88
-	.byte $E4, $22
+Norfair_Room_04_Attrs:
+	.byte $03, $88
+		.byte $CA, $F0, $F8
+	.byte $CB, $AA
+	.byte $D2, $08
+	.byte $D3, $0A
+	.byte $D7, $A0
+	.byte $DF, $AA
+	.byte $F7, $22
+	.byte $FF, $22
 	.byte $00
 
+Norfair_Room_08_Attrs:
+	.byte $09, $55
+		.byte $C6, $CE, $D6, $E3, $E6, $EC, $EE, $F6, $FE
+	.byte $D7, $AF
+	.byte $DF, $AA
+	.byte $00
+
+Norfair_Room_0F_Attrs:
+	.byte $02, $00, $F0, $F8
+	.byte $02, $88, $F1, $F9
+	.byte $D0, $A0
+	.byte $D8, $AA
+	.byte $00
+
+Norfair_Room_10_Attrs:
+	.byte $02, $00, $F7, $FF
+	.byte $02, $22, $F6, $FE
+	.byte $D7, $A0
+	.byte $DF, $AA
+	.byte $00
+
+Norfair_Room_12_Attrs:
+	.byte $04, $FF, $F0, $F1, $F8, $F9
+Norfair_Room_LeftDoor_Attrs:
+	.byte $D0, $AF
+	.byte $D8, $AA
+	.byte $00
+
+Norfair_Room_13_Attrs:
+	.byte $02, $FF, $F7, $FF
+Norfair_Room_RightDoor_Attrs:
+	.byte $D7, $AF
+	.byte $DF, $AA
+	.byte $00
+
+Norfair_Room_27_Attrs:
+	.byte $07, $AA
+		.byte $D8, $E1, $E2, $E3, $E5, $E6, $E7
+	.byte $02, $55
+		.byte $F0, $F8
+	.byte $D0, $A5
+	.byte $E0, $59
+	.byte $00
+
+Norfair_Room_2C_Attrs:
+	.byte $F2, $65
+	.byte $FA, $56
+	.byte $F4, $99
+	.byte $FC, $99
+	.byte $F3, $55
+	.byte $FB, $55
+	.byte $00
 
 ;-----------------------------------[ Enemy animation data tables ]----------------------------------
 
 .advance RoomAttrTbl_Hi
     .byte >Norfair_DefaultAttrs         ;Room #$00
     .byte >Norfair_DefaultAttrs         ;Room #$01
-    .byte >Norfair_DefaultAttrs         ;Room #$02
-    .byte >Norfair_DefaultAttrs         ;Room #$03
-    .byte >Norfair_DefaultAttrs         ;Room #$04
+    .byte >Norfair_Room_02_Attrs        ;Room #$02
+    .byte >Norfair_Room_BothDoor_Attrs  ;Room #$03
+    .byte >Norfair_Room_04_Attrs        ;Room #$04
     .byte >Norfair_To_Ridley_Attrs      ;Room #$05
     .byte >Norfair_DefaultAttrs         ;Room #$06
     .byte >Norfair_DefaultAttrs         ;Room #$07
-    .byte >Norfair_DefaultAttrs         ;Room #$08
+    .byte >Norfair_Room_08_Attrs        ;Room #$08
     .byte >Norfair_DefaultAttrs         ;Room #$09
-    .byte >Norfair_DefaultAttrs         ;Room #$0A
-    .byte >Norfair_DefaultAttrs         ;Room #$0B
-    .byte >Norfair_DefaultAttrs         ;Room #$0C
-    .byte >Norfair_DefaultAttrs         ;Room #$0D
-    .byte >Norfair_DefaultAttrs         ;Room #$0E
-    .byte >Norfair_DefaultAttrs         ;Room #$0F
-    .byte >Norfair_DefaultAttrs         ;Room #$10
-    .byte >Norfair_DefaultAttrs         ;Room #$11
-    .byte >Norfair_DefaultAttrs         ;Room #$12
-    .byte >Norfair_DefaultAttrs         ;Room #$13
-    .byte >Norfair_DefaultAttrs         ;Room #$14
-    .byte >Norfair_DefaultAttrs         ;Room #$15
+    .byte >Norfair_Room_0A_Attrs        ;Room #$0A
+    .byte >Norfair_Room_LeftDoor_Attrs  ;Room #$0B
+    .byte >Norfair_Room_0C_Attrs        ;Room #$0C
+    .byte >Norfair_Room_0D_Attrs        ;Room #$0D
+    .byte >Norfair_Room_LeftDoor_Attrs  ;Room #$0E
+    .byte >Norfair_Room_0F_Attrs        ;Room #$0F
+    .byte >Norfair_Room_10_Attrs        ;Room #$10
+    .byte >Norfair_Room_11_Attrs        ;Room #$11
+    .byte >Norfair_Room_12_Attrs        ;Room #$12
+    .byte >Norfair_Room_13_Attrs        ;Room #$13
+    .byte >Norfair_Room_14_Attrs        ;Room #$14
+    .byte >Norfair_Room_15_Attrs        ;Room #$15
     .byte >Norfair_DefaultAttrs         ;Room #$16
     .byte >Norfair_DefaultAttrs         ;Room #$17
-    .byte >Norfair_DefaultAttrs         ;Room #$18
+    .byte >Norfair_Room_18_Attrs        ;Room #$18
     .byte >Norfair_DefaultAttrs         ;Room #$19
-    .byte >Norfair_DefaultAttrs         ;Room #$1A
-    .byte >Norfair_DefaultAttrs         ;Room #$1B
-    .byte >Norfair_DefaultAttrs         ;Room #$1C
-    .byte >Norfair_DefaultAttrs         ;Room #$1D
-    .byte >Norfair_DefaultAttrs         ;Room #$1E
-    .byte >Norfair_DefaultAttrs         ;Room #$1F
-    .byte >Norfair_DefaultAttrs         ;Room #$20
-    .byte >Norfair_DefaultAttrs         ;Room #$21
-    .byte >Norfair_DefaultAttrs         ;Room #$22
-    .byte >Norfair_DefaultAttrs         ;Room #$23
+    .byte >Norfair_Room_1A_Attrs        ;Room #$1A
+    .byte >Norfair_Room_1B_Attrs        ;Room #$1B
+    .byte >Norfair_Room_1C_Attrs        ;Room #$1C
+    .byte >Norfair_Room_1D_Attrs        ;Room #$1D
+    .byte >Norfair_Room_1E_Attrs        ;Room #$1E
+    .byte >Norfair_Room_1F_Attrs        ;Room #$1F
+    .byte >Norfair_Room_20_Attrs        ;Room #$20
+    .byte >Norfair_Room_LeftDoor_Attrs  ;Room #$21
+    .byte >Norfair_Room_22_Attrs        ;Room #$22
+    .byte >Norfair_Room_23_Attrs        ;Room #$23
     .byte >Norfair_DefaultAttrs         ;Room #$24
-    .byte >Norfair_DefaultAttrs         ;Room #$25
-    .byte >Norfair_DefaultAttrs         ;Room #$26
-    .byte >Norfair_DefaultAttrs         ;Room #$27
-    .byte >Norfair_DefaultAttrs         ;Room #$28
-    .byte >Norfair_DefaultAttrs         ;Room #$29
-    .byte >Norfair_DefaultAttrs         ;Room #$2A
+    .byte >Norfair_Room_25_Attrs        ;Room #$25
+    .byte >Norfair_Room_26_Attrs        ;Room #$26
+    .byte >Norfair_Room_27_Attrs        ;Room #$27
+    .byte >Norfair_Room_28_Attrs        ;Room #$28
+    .byte >Norfair_Room_29_Attrs        ;Room #$29
+    .byte >Norfair_Room_2A_Attrs        ;Room #$2A
     .byte >Norfair_DefaultAttrs         ;Room #$2B
-    .byte >Norfair_DefaultAttrs         ;Room #$2C
+    .byte >Norfair_Room_2C_Attrs        ;Room #$2C
     .byte >Norfair_DefaultAttrs         ;Room #$2D
     .byte >Norfair_DefaultAttrs         ;Room #$2E
     .byte >Norfair_DefaultAttrs         ;Room #$2F
@@ -3432,49 +3479,49 @@ Norfair_To_Ridley_Attrs:
 .advance RoomAttrTbl_Lo
     .byte <Norfair_DefaultAttrs         ;Room #$00
     .byte <Norfair_DefaultAttrs         ;Room #$01
-    .byte <Norfair_DefaultAttrs         ;Room #$02
-    .byte <Norfair_DefaultAttrs         ;Room #$03
-    .byte <Norfair_DefaultAttrs         ;Room #$04
+    .byte <Norfair_Room_02_Attrs        ;Room #$02
+    .byte <Norfair_Room_BothDoor_Attrs  ;Room #$03
+    .byte <Norfair_Room_04_Attrs        ;Room #$04
     .byte <Norfair_To_Ridley_Attrs      ;Room #$05
     .byte <Norfair_DefaultAttrs         ;Room #$06
     .byte <Norfair_DefaultAttrs         ;Room #$07
-    .byte <Norfair_DefaultAttrs         ;Room #$08
+    .byte <Norfair_Room_08_Attrs        ;Room #$08
     .byte <Norfair_DefaultAttrs         ;Room #$09
-    .byte <Norfair_DefaultAttrs         ;Room #$0A
-    .byte <Norfair_DefaultAttrs         ;Room #$0B
-    .byte <Norfair_DefaultAttrs         ;Room #$0C
-    .byte <Norfair_DefaultAttrs         ;Room #$0D
-    .byte <Norfair_DefaultAttrs         ;Room #$0E
-    .byte <Norfair_DefaultAttrs         ;Room #$0F
-    .byte <Norfair_DefaultAttrs         ;Room #$10
-    .byte <Norfair_DefaultAttrs         ;Room #$11
-    .byte <Norfair_DefaultAttrs         ;Room #$12
-    .byte <Norfair_DefaultAttrs         ;Room #$13
-    .byte <Norfair_DefaultAttrs         ;Room #$14
-    .byte <Norfair_DefaultAttrs         ;Room #$15
+    .byte <Norfair_Room_0A_Attrs        ;Room #$0A
+    .byte <Norfair_Room_LeftDoor_Attrs  ;Room #$0B
+    .byte <Norfair_Room_0C_Attrs        ;Room #$0C
+    .byte <Norfair_Room_0D_Attrs        ;Room #$0D
+    .byte <Norfair_Room_LeftDoor_Attrs  ;Room #$0E
+    .byte <Norfair_Room_0F_Attrs        ;Room #$0F
+    .byte <Norfair_Room_10_Attrs        ;Room #$10
+    .byte <Norfair_Room_11_Attrs        ;Room #$11
+    .byte <Norfair_Room_12_Attrs        ;Room #$12
+    .byte <Norfair_Room_13_Attrs        ;Room #$13
+    .byte <Norfair_Room_14_Attrs        ;Room #$14
+    .byte <Norfair_Room_15_Attrs        ;Room #$15
     .byte <Norfair_DefaultAttrs         ;Room #$16
     .byte <Norfair_DefaultAttrs         ;Room #$17
-    .byte <Norfair_DefaultAttrs         ;Room #$18
+    .byte <Norfair_Room_18_Attrs        ;Room #$18
     .byte <Norfair_DefaultAttrs         ;Room #$19
-    .byte <Norfair_DefaultAttrs         ;Room #$1A
-    .byte <Norfair_DefaultAttrs         ;Room #$1B
-    .byte <Norfair_DefaultAttrs         ;Room #$1C
-    .byte <Norfair_DefaultAttrs         ;Room #$1D
-    .byte <Norfair_DefaultAttrs         ;Room #$1E
-    .byte <Norfair_DefaultAttrs         ;Room #$1F
-    .byte <Norfair_DefaultAttrs         ;Room #$20
-    .byte <Norfair_DefaultAttrs         ;Room #$21
-    .byte <Norfair_DefaultAttrs         ;Room #$22
-    .byte <Norfair_DefaultAttrs         ;Room #$23
+    .byte <Norfair_Room_1A_Attrs        ;Room #$1A
+    .byte <Norfair_Room_1B_Attrs        ;Room #$1B
+    .byte <Norfair_Room_1C_Attrs        ;Room #$1C
+    .byte <Norfair_Room_1D_Attrs        ;Room #$1D
+    .byte <Norfair_Room_1E_Attrs        ;Room #$1E
+    .byte <Norfair_Room_1F_Attrs        ;Room #$1F
+    .byte <Norfair_Room_20_Attrs        ;Room #$20
+    .byte <Norfair_Room_LeftDoor_Attrs  ;Room #$21
+    .byte <Norfair_Room_22_Attrs        ;Room #$22
+    .byte <Norfair_Room_23_Attrs        ;Room #$23
     .byte <Norfair_DefaultAttrs         ;Room #$24
-    .byte <Norfair_DefaultAttrs         ;Room #$25
-    .byte <Norfair_DefaultAttrs         ;Room #$26
-    .byte <Norfair_DefaultAttrs         ;Room #$27
-    .byte <Norfair_DefaultAttrs         ;Room #$28
-    .byte <Norfair_DefaultAttrs         ;Room #$29
-    .byte <Norfair_DefaultAttrs         ;Room #$2A
+    .byte <Norfair_Room_25_Attrs        ;Room #$25
+    .byte <Norfair_Room_26_Attrs        ;Room #$26
+    .byte <Norfair_Room_27_Attrs        ;Room #$27
+    .byte <Norfair_Room_28_Attrs        ;Room #$28
+    .byte <Norfair_Room_29_Attrs        ;Room #$29
+    .byte <Norfair_Room_2A_Attrs        ;Room #$2A
     .byte <Norfair_DefaultAttrs         ;Room #$2B
-    .byte <Norfair_DefaultAttrs         ;Room #$2C
+    .byte <Norfair_Room_2C_Attrs        ;Room #$2C
     .byte <Norfair_DefaultAttrs         ;Room #$2D
     .byte <Norfair_DefaultAttrs         ;Room #$2E
     .byte <Norfair_DefaultAttrs         ;Room #$2F
@@ -3812,6 +3859,165 @@ Bank02_LB098:  .byte $FF               ;
 
 .scend
 
+; ==== CODE CAVE ~256 bytes ====
+; Should be enough for everything else 
+
+Norfair_To_Ridley_Attrs:
+	.byte $06, $FF
+		.byte $C0, $C1, $C2, $C7, $C8, $CF
+	.byte $04, $AA
+		.byte $EB, $EC, $F3, $F4
+	.byte $D0, $AF
+	.byte $E3, $88
+	.byte $E4, $22
+	.byte $00
+
+Norfair_Room_02_Attrs:
+	.byte $DB, $55
+	.byte $DC, $55
+	.byte $E3, $05
+	.byte $E4, $05
+	.byte $00
+
+Norfair_Room_0A_Attrs:
+	.byte $04, $AA
+		.byte $E2, $E3, $E4, $E5
+	.byte $C6, $55
+	.byte $CE, $55
+	.byte $D7, $AF
+	.byte $DF, $AA
+	.byte $00
+
+Norfair_Room_0C_Attrs:
+	.byte $08, $55
+		.byte $C6, $CE, $D6, $DE, $E6, $EE, $F6, $FE
+	.byte $00
+
+Norfair_Room_0D_Attrs:
+	.byte $08, $AA
+		.byte $F2, $F3, $F4, $F5, $FA, $FB, $FC, $FD
+Norfair_Room_BothDoor_Attrs:
+	; Left
+	.byte $D0, $AF
+	.byte $D8, $AA
+	; Right
+	.byte $D7, $AF
+	.byte $DF, $AA
+	.byte $00
+
+Norfair_Room_11_Attrs:
+	.byte $04, $AA
+		.byte $EA, $EB, $EC, $ED
+	.byte $04, $FA
+		.byte $F2, $F3, $F4, $F5
+	.byte $D0, $AF
+	.byte $D8, $AA
+	.byte $00
+
+Norfair_Room_14_Attrs:
+	.byte $0C, $55
+		.byte $C8, $C9, $CA, $CD, $CE, $CF, $E0, $E1, $E2, $E5, $E6, $E7
+	.byte $00
+
+Norfair_Room_15_Attrs:
+	.byte $06, $BB
+		.byte $F1, $F3, $F6, $F9, $FB, $FE
+	.byte $F4, $AB
+	.byte $FC, $AA
+	.byte $00
+
+Norfair_Room_18_Attrs:
+	.byte $05, $55
+		.byte $DA, $CF, $D7, $DF, $E7
+	.byte $D2, $5F
+	.byte $E2, $F5
+	.byte $EF, $F5
+	.byte $00
+
+Norfair_Room_1A_Attrs:
+	.byte $04, $00 
+		.byte $E0, $E1, $E4, $E5
+	.byte $02, $5A 
+		.byte $E2, $E3
+	.byte $00
+
+Norfair_Room_1B_Attrs:
+	.byte $D0, $A5
+	.byte $D8, $AA
+	.byte $F0, $55
+	.byte $F8, $55
+	.byte $00
+
+Norfair_Room_1E_Attrs:
+	.byte $EB, $6A
+	.byte $EC, $9A
+Norfair_Room_1C_Attrs:
+	.byte $E8, $6A	
+	.byte $E9, $9A
+	.byte $00
+
+Norfair_Room_1D_Attrs:
+	.byte $EE, $6A
+	.byte $EF, $9A
+	.byte $00
+
+Norfair_Room_1F_Attrs:
+	.byte $EB, $A5
+	.byte $EC, $A5
+	.byte $00
+
+Norfair_Room_20_Attrs:
+	.byte $EA, $55
+Norfair_Room_22_Attrs:
+	.byte $D7, $AF
+	.byte $DF, $AA
+	.byte $F7, $FF
+	.byte $FF, $FF
+Norfair_Room_23_Attrs:
+	.byte $E9, $55
+	.byte $00
+
+Norfair_Room_25_Attrs:
+	.byte $E4, $55
+	.byte $E5, $DA
+	.byte $00
+
+Norfair_Room_26_Attrs:
+	.byte $D8, $FF
+	.byte $DF, $CC
+	.byte $E0, $FF
+	.byte $E7, $CC
+	.byte $00
+
+Norfair_Room_28_Attrs:
+	.byte $C3, $D5
+	.byte $C4, $F5
+	.byte $C5, $75
+	.byte $05, $55
+		.byte $E0, $E1, $E8, $F0, $F8
+	.byte $D0, $A5
+	.byte $D8, $AA
+	.byte $00
+
+Norfair_Room_29_Attrs:
+	.byte $C2, $5D
+	.byte $C3, $5F
+	.byte $00
+
+Norfair_Room_2A_Attrs:
+	.byte $C2, $D5
+	.byte $C3, $F5
+	.byte $C4, $75
+	.byte $D7, $A5
+	.byte $DF, $AA
+	.byte $03, $00
+		.byte $E3, $E4, $E5
+	.byte $02, $A0
+		.byte $F1, $F2
+	.byte $02, $55
+		.byte $F7, $FF
+	.byte $00
+
 ;------------------------------------------[ Sound Engine ]------------------------------------------
 
 .advance SoundEngineOrg
@@ -3899,7 +4105,7 @@ Bank02_LB098:  .byte $FF               ;
     .byte >Bank02_LAED9,        >Bank02_Struct_31,  >Bank02_Struct_32, 	>Bank02_Struct_33, 	>Bank02_Struct_34,	>Bank02_Struct_35,	>Bank02_Struct_36,	>Bank02_Struct_37
 	.byte >Bank02_Struct_38,	>Bank02_Struct_39,	>Bank02_Struct_3A,	>Bank02_Struct_3B,	>Bank02_Struct_3C,	>Bank02_Struct_3D,	>Bank02_Struct_3E,  >Bank02_Struct_3F
 	.byte >Bank02_Struct_40,	>Bank02_Struct_41,	>Bank02_Struct_42,	>Bank02_Struct_43,	>Bank02_Struct_44,	>Bank02_Struct_45,  >Bank02_Struct_46,  >Bank02_Struct_47
-	.byte >Bank02_Struct_48, 	>Bank02_Struct_49, 	>Bank02_Struct_4A, 	>Bank02_Struct_4B,	>Bank02_Struct_4C,	>Bank02_Struct_4D,	>Bank02_Struct_4E
+	.byte >Bank02_Struct_48, 	>Bank02_Struct_49, 	>Bank02_Struct_4A, 	>Bank02_Struct_4B,	>Bank02_Struct_4C,	>Bank02_Struct_4D,	>Bank02_Struct_4E,	>Bank02_Struct_4F
 
 .advance StructPointerTable_Lo
 
@@ -3912,7 +4118,7 @@ Bank02_LB098:  .byte $FF               ;
     .byte <Bank02_LAED9,        <Bank02_Struct_31,  <Bank02_Struct_32, 	<Bank02_Struct_33, 	<Bank02_Struct_34,	<Bank02_Struct_35,	<Bank02_Struct_36,	<Bank02_Struct_37
 	.byte <Bank02_Struct_38,	<Bank02_Struct_39,	<Bank02_Struct_3A,	<Bank02_Struct_3B,	<Bank02_Struct_3C,	<Bank02_Struct_3D,	<Bank02_Struct_3E,  <Bank02_Struct_3F
 	.byte <Bank02_Struct_40,	<Bank02_Struct_41,	<Bank02_Struct_42,	<Bank02_Struct_43,	<Bank02_Struct_44,	<Bank02_Struct_45,  <Bank02_Struct_46,  <Bank02_Struct_47
-	.byte <Bank02_Struct_48, 	<Bank02_Struct_49, 	<Bank02_Struct_4A, 	<Bank02_Struct_4B,	<Bank02_Struct_4C,	<Bank02_Struct_4D,	<Bank02_Struct_4E
+	.byte <Bank02_Struct_48, 	<Bank02_Struct_49, 	<Bank02_Struct_4A, 	<Bank02_Struct_4B,	<Bank02_Struct_4C,	<Bank02_Struct_4D,	<Bank02_Struct_4E,	<Bank02_Struct_4F
 
 ;----------------------------------------------------------------------------------------------------
 
