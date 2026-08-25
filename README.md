@@ -128,7 +128,6 @@ SBX #$F0
 * BenchmarkNMI.lua shows how long it takes to reach NMI, min and max, over a second. This can be used to find painful spots
 
 ## Definite Bugs
-* Breakable blocks switch name tables when they aren't supposed to
 * Little bug things use the wrong sprite (probably an issue with the adjustment to the hud missile sprite display)
 * Seahorses don't spit anything
 

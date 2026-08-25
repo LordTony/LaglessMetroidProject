@@ -7479,18 +7479,18 @@ Setup_LED5B_Loop:
     asl
     tay
 
-ldx #$C0
-
 ; Goes from #$C0, #$B0, #$A0, #$90, #$80, #$70, #$60, #$50, #$40, #$30, #$20, #$10, #$00
+; HCSS - jumping through hoops to get rid of "cpx #$F0"
+ldx #$D0
 LED5B_Loop:
 *   tya
-    eor TileWRAMHi,x
+    eor TileWRAMHi - $10,x
     and #$04
     bne +
-    sta $0500,x
+    sta $0500 - $10,x
 *   txa
     sbx #$10
-    bpl LED5B_Loop
+    bne LED5B_Loop
 
 .scope
     tya
