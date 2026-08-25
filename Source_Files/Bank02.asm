@@ -2076,7 +2076,7 @@ Bank02_Room_15_Right:
 	.byte $DF, $4D
 	.byte $FD
 	.byte $31, $0C, $1B			; Enemy
-	.byte $21, $86, $4B			; Enemy
+	.byte $21, $86, $48			; Enemy
 	.byte $51, $06, $7C			; Enemy
 	.byte $FF
 

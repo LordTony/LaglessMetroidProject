@@ -12,7 +12,7 @@ The idea here is to attempt to take the Metroid lag as low as possible without a
 ## Original Problem Areas
 * The main problem area is the map generation which causes 1 to 3 lag frame spikes while preparing the game
 * General poor performance when there is lots of crap on the screen, pretty much what you would expect
-* The "ChooseRoutine" call is used everywhere and costs about 65 frames.
+* The "ChooseRoutine" call is used everywhere and costs about 65 cycles.
 * Xminus16, YPlus16, Adiv8, Adiv16, Adiv32, Amul8, Amul16, and Amul32 eat up lots of cycles
 * Collision detection code in general eats lots of cycles as well.
 * Ridley is too big for Smash <sub>and 60FPS</sub> 
@@ -128,15 +128,12 @@ SBX #$F0
 * BenchmarkNMI.lua shows how long it takes to reach NMI, min and max, over a second. This can be used to find painful spots
 
 ## Definite Bugs
-* Little bug things use the wrong sprite (probably an issue with the adjustment to the hud missile sprite display)
+* Little bug things (Memus?) use the wrong sprite (probably an issue with the adjustment to the hud missile sprite display)
+* Memus aren't dive bombing correctly. AI is bonked
 * Seahorses don't spit anything Bank02 Norfair
 * Going to the statue room really breaks stuff. Samus stops animating
   * This this has to do with "MaxMissiles" being moved into zero page a long time ago.
   * It looks like the ridley and kraid dead bytes were based on the offset to MaxMissiles.
 
 ## Maybe Bugs (Check Original Game Behavior)
-* Can't collect health + missiles pickups while blinking (normally due to touching lava)
-* Missiles don't seem to hit spinners from far away (example: The ones hanging on room #$12)
-* Pipe spawned enemies can raise through the ceiling
-* Bank02 Room #$15 one of the crawler guys gets confused on the eyeball pillar
-  * They also crawl to the bottom and don't crawl back up
+* Missiles don't seem to hit spinners from far away (example: The ones hanging in Bank01 Room #$12)
