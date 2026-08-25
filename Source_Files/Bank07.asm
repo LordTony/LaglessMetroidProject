@@ -10771,7 +10771,7 @@ LC7A5:  .word GFXExPoint, $1F40, $0010
 ;the Samus fade-in sequence. This creates the fade-in effect.
 
 SamusFadeTmTbl:
-    .byte $1E, $14, $0B, $04    ; Interleaved with FFLabel
+    .byte $1E, $14, $0B, $04, $FF
 
 ;Table used by above subroutine.
 ;Each value is the area bank number plus one.
