@@ -134,6 +134,7 @@ SBX #$F0
 * Going to the statue room really breaks stuff. Samus stops animating
   * This this has to do with "MaxMissiles" being moved into zero page a long time ago.
   * It looks like the ridley and kraid dead bytes were based on the offset to MaxMissiles.
+* curling up into a ball and bombing next to a door while getting hit by a zoomer crashed the game (only saw it once)
 
 ## Maybe Bugs (Check Original Game Behavior)
 * Missiles don't seem to hit spinners from far away (example: The ones hanging in Bank01 Room #$12)
