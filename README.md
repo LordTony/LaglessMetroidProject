@@ -129,7 +129,10 @@ SBX #$F0
 
 ## Definite Bugs
 * Little bug things use the wrong sprite (probably an issue with the adjustment to the hud missile sprite display)
-* Seahorses don't spit anything
+* Seahorses don't spit anything Bank02 Norfair
+* Going to the statue room really breaks stuff. Samus stops animating
+  * This this has to do with "MaxMissiles" being moved into zero page a long time ago.
+  * It looks like the ridley and kraid dead bytes were based on the offset to MaxMissiles.
 
 ## Maybe Bugs (Check Original Game Behavior)
 * Can't collect health + missiles pickups while blinking (normally due to touching lava)
