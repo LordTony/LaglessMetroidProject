@@ -8281,9 +8281,7 @@ LF09F:
                 jsr LF2CA
 
     _next:
-        clc   
-        tya
-        adc #$10
+        lda IdentityTable + $10, y
         tay      ; next projectile slot
     bne _loop
 .scend
@@ -8310,7 +8308,18 @@ NextEnemy:
     bpl LF09F
 
 *   ldx #$00    ; LF2ED needs this to be 0
-    jsr GetSamusCoordData_07_09_0B
+
+;GetSamusCoordData_07_09_0B:
+    lda ObjectY
+    sta $07
+
+    lda ObjectX
+    sta $09
+
+    lda ObjectHi
+    eor PPUCNT0ZP
+    and #$01
+    sta $0B
 
     ldy #$60    ; Loop runs 60, 70, 80, 90, A0, B0
 NextEnemyLoop:
@@ -8351,9 +8360,7 @@ NextEnemyLoop:
         jsr LF1FA
         jsr LF2ED
     NextEnemyLoopContinue:
-    *   tya
-        clc
-        adc #$10
+    *   lda IdentityTable + $10, y
         tay
         cmp #$C0
         bne NextEnemyLoop
@@ -8401,20 +8408,6 @@ GetXEnemyRoomPosition_07_09_0B:
 
     rts
 
-GetSamusCoordData_07_09_0B:
-    lda ObjectY
-    sta $07
-
-    lda ObjectX
-    sta $09
-
-    lda ObjectHi
-    eor PPUCNT0ZP
-    and #$01
-    sta $0B
-
-    rts
-
 GetSamusCoordData_06_08_0A:
     lda ObjectY
     sta $06
@@ -8429,6 +8422,7 @@ GetSamusCoordData_06_08_0A:
 
     rts
 
+; TODO: Maybe inline
 DistFromEn0ToObj1:
     lda EnRadY,x
     ;clc
