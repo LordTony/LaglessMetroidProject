@@ -129,12 +129,12 @@ SBX #$F0
 
 ## Definite Bugs
 * Little bug things (Memus?) use the wrong sprite (probably an issue with the adjustment to the hud missile sprite display)
-* Memus aren't dive bombing correctly. AI is bonked
+  * Memus aren't dive bombing correctly. AI is bonked
 * Seahorses don't spit anything Bank02 Norfair
-* Going to the statue room really breaks stuff. Samus stops animating
+* Mini bosses don't seem to spawn properly
   * This this has to do with "MaxMissiles" being moved into zero page a long time ago.
   * It looks like the ridley and kraid dead bytes were based on the offset to MaxMissiles.
-* curling up into a ball and bombing next to a door while getting hit by a zoomer crashed the game (only saw it once)
 
 ## Maybe Bugs (Check Original Game Behavior)
 * Missiles don't seem to hit spinners from far away (example: The ones hanging in Bank01 Room #$12)
+* curling up into a ball and bombing next to a door while getting hit by a zoomer crashed the game (only saw it once)

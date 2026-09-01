@@ -3935,19 +3935,17 @@ LDA1A:
     iny
     jsr LDAB0
     pla
+    tax
 LDA3D_END:
 
 LDA7C:
-    tax
-    and #$01
-    tay
-
     lda $030F,x
     sta $036D
-
+    txa
+    and #$01
+    tay
     lda LDA39,y
     sta $036E
-
     lda $681B,x
     beq +
     bmi +
