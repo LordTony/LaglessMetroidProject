@@ -1375,10 +1375,10 @@ LCB30:  jsr UpdateProjectiles   ;($D4BF)Display of bullets/missiles/bombs.
 .scend
 
 .scope
-    UpdateKnR:
+    UpdateEnvironmentalEnemies:
         ldx #$B0
 
-    ; goes through B0, A0, 90, 80, 70, 60
+    ; goes through $B0, $A0, $90, $80, $70, $60
     _loop:
         stx PageIndex
         lda $0405,x
@@ -1389,7 +1389,7 @@ LCB30:  jsr UpdateProjectiles   ;($D4BF)Display of bullets/missiles/bombs.
     _check_enemy_status:
         ldy EnStatus,x
         beq _skip
-            jsr DoOneKnRUpdate
+            jsr DoOneEnvironmentalEnemyUpdate
     _skip:
         lax PageIndex
         sbx #$10
@@ -4389,6 +4389,11 @@ TurnEnemyIntoItemDrop:
     LSR $00
     BCS EXIT_67
 
+; TODO: BUG JUMANJI ERROR
+; When in tourian it looks like
+; KeepTrackOfHowManyRoomPickupsHaveDropped goes into an infinite
+; sometimes when a metroid is killed.
+; Tested with NARPASSWORD.
 LDD5B:
     ;ldx PageIndex
     lda InArea
@@ -4441,7 +4446,7 @@ OnBossKilled:
 ; Called from Bank03 and Bank07
 SomethingAboutMovement:
     ; MARU
-    ;ldx PageIndex          ; Should be loaded from all callers already
+    ldx PageIndex          ; This is required (at least in bank 03)
     ldy EnAnimFrame,x
     cpy #$F7
     bne MoveEnemies
@@ -9703,7 +9708,8 @@ LF91D:
 Exit19:
     rts
 
-DoOneKnRUpdate:
+; X is always the enemy index here
+DoOneEnvironmentalEnemyUpdate:
     lda KnRTable_Lo - 1, y
     sta CodePtr
     lda KnRTable_Hi - 1, y
@@ -9712,19 +9718,21 @@ DoOneKnRUpdate:
 
 ; Pointer table to code
 KnRTable_Hi:
-    .byte >KnRRoutine_1
-    .byte >KnRRoutine_2     ; spit dragon's fireball
-    .byte >ExitSub          ;($C45C) rts
-    .byte >KnRRoutine_4
-    .byte >KnRRoutine_5
-KnRTable_Lo:
-    .byte <KnRRoutine_1
-    .byte <KnRRoutine_2       ; spit dragon's fireball
-    .byte <ExitSub            ;($C45C) rts
-    .byte <KnRRoutine_4
-    .byte <KnRRoutine_5
+    .byte >EnvEnemyUpdateRoutine_1
+    .byte >EnvEnemyUpdateRoutine_2  ; spit dragon's fireball
+    .byte >ExitSub
+    .byte >EnvEnemyUpdateRoutine_4
+    .byte >EnvEnemyUpdateRoutine_5
 
-KnRRoutine_1:
+KnRTable_Lo:
+    .byte <EnvEnemyUpdateRoutine_1
+    .byte <EnvEnemyUpdateRoutine_2  ; spit dragon's fireball
+    .byte <ExitSub
+    .byte <EnvEnemyUpdateRoutine_4
+    .byte <EnvEnemyUpdateRoutine_5
+
+EnvEnemyUpdateRoutine_1:
+LF96A:
     jsr LFA5B
     jsr Bank07_LFA1E
     ldx PageIndex
@@ -9738,13 +9746,17 @@ LF97E:
     jsr UpdateEnemyAnim
     jmp SomethingAboutMovement
 
+EnvEnemyUpdateRoutine_2_IncTwiceLoop:
 *   inc $0408,x
+EnvEnemyUpdateRoutine_2_IncOnceLoop:
 LF987:
     inc $0408,x
     lda #$00
     sta EnDelay,x
-    beq +
-KnRRoutine_2:
+    beq +           ; branch always
+    ; safe
+
+EnvEnemyUpdateRoutine_2:
     jsr LFA5B
     LDA $040A,x
     AND #$FE
@@ -9759,10 +9771,11 @@ KnRRoutine_2:
     CMP #$FF
     BNE +
     STA $0408,x
-    JMP LF987
+    JMP EnvEnemyUpdateRoutine_2_IncOnceLoop
 
 *   CMP EnDelay,x
-    BEQ ---
+    BEQ EnvEnemyUpdateRoutine_2_IncTwiceLoop
+
     INC EnDelay,x
     INY
     LDA ($0A),y
@@ -9874,7 +9887,7 @@ LFA49:
 
 *   rts
 
-KnRRoutine_4:
+EnvEnemyUpdateRoutine_4:
     lda EnAnimFrame,x
     cmp #$F7
     beq +
@@ -9883,7 +9896,7 @@ KnRRoutine_4:
 *   jsr KillObject          ;($FA18)Free enemy data slot.
 *   jmp LF97C
 
-KnRRoutine_5:
+EnvEnemyUpdateRoutine_5:
     jsr KillObject          ;($FA18)Free enemy data slot.
     lda #$03                
     jsr DoSomethingToAnimationIndecies

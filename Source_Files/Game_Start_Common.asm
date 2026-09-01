@@ -320,11 +320,12 @@ _L8290:  INC EnDelay,X
 _L8293:  INY 
 _L8294:  LDA ($81),Y
 
+.advance $8296
 _L8296:  ASL 
 _L8297:  PHP 
 _L8298:  JSR _Adiv32              ;($C2BE)Divide by 32.
 _L829B:  PLP 
-_L829C:  BCC $82A2
+_L829C:  BCC _L82A2
 _L829E:  EOR #$FF
 _L82A0:  ADC #$00
 _L82A2:  STA $00
@@ -394,6 +395,7 @@ _L8329:  LDY EnCounter,X
 _L832C:  INY 
 _L832D:  LDA ($81),Y
 
+.advance $832F
 _L832F:  TAX 
 _L8330:  AND #$08
 _L8332:  PHP 

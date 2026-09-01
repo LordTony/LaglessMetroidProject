@@ -128,6 +128,11 @@ SBX #$F0
 * BenchmarkNMI.lua shows how long it takes to reach NMI, min and max, over a second. This can be used to find painful spots
 
 ## Definite Bugs
+* It looks like when a metroid tries to drop an item,
+  the game locked up.
+* Resetting the game doesn't clear the ram properly
+* Pipe spawners looks like they don't die or leave
+  the name tables properly
 * Little bug things (Memus?) use the wrong sprite (probably an issue with the adjustment to the hud missile sprite display)
   * Memus aren't dive bombing correctly. AI is bonked
 * Seahorses don't spit anything Bank02 Norfair

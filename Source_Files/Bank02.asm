@@ -310,7 +310,7 @@ Bank02_L978B:  .byte $00, $00, $00, $00, $4D, $4D, $53, $57, $00, $00, $00, $00,
 Bank02_L979B:  .byte $08, $F8, $00, $00, $00, $00, $08, $F8, $00, $00, $00, $F8 
 
 .advance $97A7
-Bank02_L97A7:  .word $97F7, $9806, $9815, $9824
+Bank02_L97A7:  .word Bank02_L97F7, Bank02_L9806, Bank02_L9815, Bank02_L9824 
 
 .advance TileFramePtrTbl_Hi
 Bank02_L97AF:  .byte >Bank02_L9B9E, 	>Bank02_L9BA3, 	>Bank02_L9BA8,	>Bank02_L9BAD,	>Bank02_L9BB2, 		>Bank02_L9BB7, 		>Bank02_L9BBC, 		>Bank02_L9BC1

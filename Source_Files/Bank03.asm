@@ -236,7 +236,10 @@ Bank03_L95D9:  .byte $6E           ;Samus start verticle screen position.
 Bank03_L95DA:  .byte $06, $00
 
 Bank03_L95DC:  .byte $03    ; unused
-Bank03_L95DD:  .byte $21, $00, $00, $00, $00, $00, $10
+Bank03_L95DD:  .byte $21, $00, $00
+
+.advance $95E0
+Bank03_L95E0:  .byte $00, $00, $00, $10
 
 .advance MemuByte
     .byte $00   ; Only set to 0 in bank 3 when there is a memu
@@ -252,16 +255,19 @@ Bank03_L95E5:
     cmp #$04
     beq Bank03_Is4_Jump
 
-    jmp $97DC
+	; used to be JMP $97DC
+	lda #$00
+	sta $6AF4,X
+	rts
 
 Bank03_LessThan2_Jump:
-    jmp $97F9
+    jmp Bank03_L97F9
 
 Bank03_Is2_Jump:
-    jmp $9A27
+    jmp Bank03_L9A27
 
 Bank03_Is4_Jump:
-    jmp $9A2C
+    jmp Bank03_L9A2C
 
 .advance $960B
 
@@ -312,7 +318,7 @@ Bank03_L978B:  .byte $00, $00, $26, $26, $26, $26, $00, $00, $00, $00, $00, $00,
 Bank03_L979B:  .byte $0C, $F4, $00, $00, $00, $00, $00, $00, $F4, $00, $00, $00
 
 .advance $97A7
-Bank03_L97A7:  .word $97D5, $97D5, $97D8, $97DB
+Bank03_L97A7:  .word Bank03_L97D5, Bank03_L97D5, Bank03_L97D8, Bank03_L97DB
 
 .advance TileFramePtrTbl_Hi
 Bank03_L97AF:  .byte >Bank03_LA32B, >Bank03_LA330, 	>Bank03_LA337,	>Bank03_LA348,	>Bank03_LA359, >Bank03_LA36A, >Bank03_LA37B, >Bank03_LA388
@@ -346,6 +352,7 @@ Bank03_L97EE:  JMP StartUpdateEnemyAnimation
 Bank03_L97F1:  LDA $01
 Bank03_L97F3:  JSR UpdateEnemyAnim
 Bank03_L97F6:  JMP Start_Special_Attrs
+
 Bank03_L97F9:  LDY EndTimerHi
 Bank03_L97FC:  INY 
 Bank03_L97FD:  BEQ $9804
@@ -597,6 +604,7 @@ Bank03_L9A19:  .byte $F8, $08, $30, $D0, $60, $A0, $02, $04, $00, $00, $00, $00,
 
 Bank03_L9A27:  LDA #$01
 Bank03_L9A29:  JMP StartUpdateEnemyAnimation_2
+
 Bank03_L9A2C:  LDY $6AF4,X
 Bank03_L9A2F:  CPY #$02
 Bank03_L9A31:  BNE $9AB0
@@ -716,6 +724,7 @@ Bank03_L9B1D:  LSR
 Bank03_L9B1E:  LSR 
 Bank03_L9B1F:  RTS
 
+.advance $9B20
 Bank03_L9B20:  ASL 
 Bank03_L9B21:  ASL 
 Bank03_L9B22:  ASL 
@@ -841,6 +850,7 @@ Bank03_L9C27:  RTS
 
 Bank03_L9C28:  .byte $0C, $0A, $0E
 
+.advance $9C2B
 Bank03_L9C2B:  LDY $6BF9,X
 Bank03_L9C2E:  LDA $9DC6,Y
 Bank03_L9C31:  STA $6BD7
@@ -1290,6 +1300,7 @@ Bank03_L9FE9:  DEY
 Bank03_L9FEA:  STY MthrBrainStatus
 Bank03_L9FEC:  RTS
 
+.advance $9FED
 Bank03_L9FED:  LDA $9E
 Bank03_L9FEF:  BEQ $A01A
 Bank03_L9FF1:  LDA MultiSFXFlag
@@ -1311,10 +1322,13 @@ Bank03_LA00F:  CMP #$D0
 Bank03_LA011:  BNE $A007
 Bank03_LA013:  INY 
 Bank03_LA014:  LDA #$80
+
+.advance $A016
 Bank03_LA016:  STY MthrBrainStatus
 Bank03_LA018:  STA $9F
 Bank03_LA01A:  RTS
 
+.advance $A01B
 Bank03_LA01B:  DEC $9A
 Bank03_LA01D:  BNE $A02D
 Bank03_LA01F:  LDA $2E
@@ -1468,6 +1482,7 @@ Bank03_LA156:  BCS $A15C
 Bank03_LA158:  LDA #$01
 Bank03_LA15A:  STA $9E
 Bank03_LA15C:  TYA 
+
 Bank03_LA15D:  RTS
 
 Bank03_LA15E:  LDY EndTimerHi
@@ -1554,6 +1569,7 @@ nop
 Bank03_LA211:  ORA #$08
 Bank03_LA213:  STA SQ1SFXFlag
 nop
+
 Bank03_LA216:  LDA EndTimerLo
 Bank03_LA219:  ORA EndTimerHi
 Bank03_LA21C:  BNE $A237
@@ -1570,10 +1586,11 @@ Bank03_LA22F:  LDA #$0C
 Bank03_LA231:  STA $2C
 Bank03_LA233:  LDA #$0B
 Bank03_LA235:  STA $1C
+
 Bank03_LA237:  RTS
 
 Bank03_LA238:  LDA $010D
-Bank03_LA23B:  BEQ $A28A
+Bank03_LA23B:  BEQ Bank03_LA28A
 Bank03_LA23D:  LDA $010C
 Bank03_LA240:  STA $6BDB
 Bank03_LA243:  LDA #$84

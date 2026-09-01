@@ -714,8 +714,8 @@
 ;                       $6B03
 
 
-.alias IdentityTable    $6C00
-.alias MetroidDataRam   $6D20
+.alias MetroidDataRam   $6C80
+.alias IdentityTable    $6CA0
 
 .alias IntroStrSprt00   $6E00   ;thru $6E9F. RAM used for storing intro star sprite data.
 
