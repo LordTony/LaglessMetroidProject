@@ -128,11 +128,8 @@ SBX #$F0
 * BenchmarkNMI.lua shows how long it takes to reach NMI, min and max, over a second. This can be used to find painful spots
 
 ## Definite Bugs
-* It looks like when a metroid tries to drop an item,
-  the game locked up.
 * Resetting the game doesn't clear the ram properly
-* Pipe spawners looks like they don't die or leave
-  the name tables properly
+* Pipe spawners looks like they don't die or leave the name tables properly. (Elevator to Tourian)
 * Little bug things (Memus?) use the wrong sprite (probably an issue with the adjustment to the hud missile sprite display)
   * Memus aren't dive bombing correctly. AI is bonked
 * Seahorses don't spit anything Bank02 Norfair
@@ -143,3 +140,9 @@ SBX #$F0
 ## Maybe Bugs (Check Original Game Behavior)
 * Missiles don't seem to hit spinners from far away (example: The ones hanging in Bank01 Room #$12)
 * curling up into a ball and bombing next to a door while getting hit by a zoomer crashed the game (only saw it once)
+
+## Pre Existing Bugs
+* Killing a Metroid without a Missle Tank will crash or lock the game
+* Opening a door while falling vertically will move the closing door into a wall
+* Loading a room while too many sprites are being rendered (bullets + enemies + room transition) will hit the PPU cap
+  and some room elements will have the wrong palette.

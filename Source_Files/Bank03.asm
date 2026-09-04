@@ -287,6 +287,7 @@ Bank03_L966B:  .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00,
 
 Bank03_L967B:  .byte $00, $00, $00, $00, $02, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
 
+.advance $968B
 Bank03_L968B:  .byte $FE, $FE, $00, $00, $C0, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
 
 Bank03_L969B:  .byte $01, $01, $00, $00, $01, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
@@ -355,7 +356,7 @@ Bank03_L97F6:  JMP Start_Special_Attrs
 
 Bank03_L97F9:  LDY EndTimerHi
 Bank03_L97FC:  INY 
-Bank03_L97FD:  BEQ $9804
+Bank03_L97FD:  BEQ Bank03_L9804
 Bank03_L97FF:  LDA #$00
 Bank03_L9801:  STA $6AF4,X
 Bank03_L9804:  LDA #$0F
@@ -363,19 +364,19 @@ Bank03_L9806:  STA $00
 Bank03_L9808:  STA $01
 Bank03_L980A:  LDA $0405,X
 Bank03_L980D:  ASL 
-Bank03_L980E:  BMI $97E2
+Bank03_L980E:  BMI Bank03_L97E2
 Bank03_L9810:  LDA $6AF4,X
 Bank03_L9813:  CMP #$03
-Bank03_L9815:  BEQ $97E2
-Bank03_L9817:  JSR $99B7
+Bank03_L9815:  BEQ Bank03_L97E2
+Bank03_L9817:  JSR Bank03_L99B7
 Bank03_L981A:  LDA MetroidDataRam + $08,Y
-Bank03_L981D:  BEQ $9822
-Bank03_L981F:  JMP $9899
+Bank03_L981D:  BEQ Bank03_L9822
+Bank03_L981F:  JMP Bank03_L9899
 Bank03_L9822:  LDY $0408,X
 Bank03_L9825:  LDA MetroidDataRam + $06,Y
 Bank03_L9828:  PHA 
 Bank03_L9829:  LDA $0402,X
-Bank03_L982C:  BPL $983B
+Bank03_L982C:  BPL Bank03_L983B
 Bank03_L982E:  PLA 
 Bank03_L982F:  JSR TwosCompliment
 Bank03_L9832:  PHA 
@@ -384,14 +385,14 @@ Bank03_L9835:  CMP $0406,X
 Bank03_L9838:  SBC $0402,X
 Bank03_L983B:  CMP MetroidDataRam + $06,Y
 Bank03_L983E:  PLA 
-Bank03_L983F:  BCC $9849
+Bank03_L983F:  BCC Bank03_L9849
 Bank03_L9841:  STA $0402,X
 Bank03_L9844:  LDA #$00
 Bank03_L9846:  STA $0406,X
 Bank03_L9849:  LDA MetroidDataRam + $06,Y
 Bank03_L984C:  PHA 
 Bank03_L984D:  LDA $0403,X
-Bank03_L9850:  BPL $985F
+Bank03_L9850:  BPL Bank03_L985F
 Bank03_L9852:  PLA 
 Bank03_L9853:  JSR TwosCompliment
 Bank03_L9856:  PHA 
@@ -400,58 +401,58 @@ Bank03_L9859:  CMP $0407,X
 Bank03_L985C:  SBC $0403,X
 Bank03_L985F:  CMP MetroidDataRam + $06,Y
 Bank03_L9862:  PLA 
-Bank03_L9863:  BCC $986D
+Bank03_L9863:  BCC Bank03_L986D
 Bank03_L9865:  STA $0403,X
 Bank03_L9868:  LDA #$00
 Bank03_L986A:  STA $0407,X
 Bank03_L986D:  LDA $0405,X
 Bank03_L9870:  PHA 
-Bank03_L9871:  JSR $9A06
+Bank03_L9871:  JSR Bank03_L9A06
 Bank03_L9874:  STA $6AFF,X
 Bank03_L9877:  PLA 
 Bank03_L9878:  LSR 
 Bank03_L9879:  LSR 
-Bank03_L987A:  JSR $9A06
+Bank03_L987A:  JSR Bank03_L9A06
 Bank03_L987D:  STA $6AFE,X
 Bank03_L9880:  LDA $6AF4,X
 Bank03_L9883:  CMP #$04
-Bank03_L9885:  BNE $9894
+Bank03_L9885:  BNE Bank03_L9894
 Bank03_L9887:  LDY $040B,X
 Bank03_L988A:  INY 
-Bank03_L988B:  BNE $9899
+Bank03_L988B:  BNE Bank03_L9899
 Bank03_L988D:  LDA #$05
 Bank03_L988F:  STA $040B,X
-Bank03_L9892:  BNE $9899
+Bank03_L9892:  BNE Bank03_L9899
 Bank03_L9894:  LDA #$FF
 Bank03_L9896:  STA $040B,X
 Bank03_L9899:  LDA $81
 Bank03_L989B:  CMP #$06
-Bank03_L989D:  BNE $98A9
+Bank03_L989D:  BNE Bank03_L98A9
 Bank03_L989F:  CMP $6AF4,X
-Bank03_L98A2:  BEQ $98A9
+Bank03_L98A2:  BEQ Bank03_L98A9
 Bank03_L98A4:  LDA #$04
 Bank03_L98A6:  STA $6AF4,X
 Bank03_L98A9:  LDA EnHasBeenHit,X
 Bank03_L98AC:  AND #$20
-Bank03_L98AE:  BEQ $990F
-Bank03_L98B0:  JSR $99B7
+Bank03_L98AE:  BEQ Bank03_L990F
+Bank03_L98B0:  JSR Bank03_L99B7
 Bank03_L98B3:  LDA MetroidDataRam + $08,Y
-Bank03_L98B6:  BEQ $98EF
+Bank03_L98B6:  BEQ Bank03_L98EF
 Bank03_L98B8:  LDA $040E,X
 Bank03_L98BB:  CMP #$07
-Bank03_L98BD:  BEQ $98C3
+Bank03_L98BD:  BEQ Bank03_L98C3
 Bank03_L98BF:  CMP #$0A
-Bank03_L98C1:  BNE $9932
+Bank03_L98C1:  BNE Bank03_L9932
 Bank03_L98C3:  LDA $2D
 Bank03_L98C5:  AND #$02
-Bank03_L98C7:  BNE $9932
+Bank03_L98C7:  BNE Bank03_L9932
 Bank03_L98C9:  LDA MetroidDataRam + $08,Y
 Bank03_L98CC:  CLC 
 Bank03_L98CD:  ADC #$10
 Bank03_L98CF:  STA MetroidDataRam + $08,Y
 Bank03_L98D2:  AND #$70
 Bank03_L98D4:  CMP #$50
-Bank03_L98D6:  BNE $9932
+Bank03_L98D6:  BNE Bank03_L9932
 Bank03_L98D8:  LDA #$02
 Bank03_L98DA:  ORA $040F,X
 Bank03_L98DD:  STA $040C,X
@@ -467,23 +468,23 @@ Bank03_L98F4:  STA MetroidDataRam + $08,Y
 Bank03_L98F7:  STA $0406,X
 Bank03_L98FA:  STA $0407,X
 Bank03_L98FD:  LDA $6AFE,X
-Bank03_L9900:  JSR $9A10
+Bank03_L9900:  JSR Bank03_L9A10
 Bank03_L9903:  STA $0402,X
 Bank03_L9906:  LDA $6AFF,X
-Bank03_L9909:  JSR $9A10
+Bank03_L9909:  JSR Bank03_L9A10
 Bank03_L990C:  STA $0403,X
-Bank03_L990F:  JSR $99B7
+Bank03_L990F:  JSR Bank03_L99B7
 Bank03_L9912:  LDA MetroidDataRam + $08,Y
-Bank03_L9915:  BNE $9932
+Bank03_L9915:  BNE Bank03_L9932
 Bank03_L9917:  LDA EnHasBeenHit,X
 Bank03_L991A:  AND #$04
-Bank03_L991C:  BEQ $9964
+Bank03_L991C:  BEQ Bank03_L9964
 Bank03_L991E:  LDA $0403,X
 Bank03_L9921:  AND #$80
 Bank03_L9923:  ORA #$01
 Bank03_L9925:  TAY 
-Bank03_L9926:  JSR $99C3
-Bank03_L9929:  JSR $99BD
+Bank03_L9926:  JSR Bank03_L99C3
+Bank03_L9929:  JSR Bank03_L99BD
 Bank03_L992C:  TYA 
 Bank03_L992D:  STA MetroidDataRam + $08,X
 Bank03_L9930:  TXA 
@@ -494,10 +495,10 @@ Bank03_L9934:  LDA MetroidDataRam + $08,X
 Bank03_L9937:  PHP 
 Bank03_L9938:  AND #$0F
 Bank03_L993A:  CMP #$0C
-Bank03_L993C:  BEQ $9941
+Bank03_L993C:  BEQ Bank03_L9941
 Bank03_L993E:  INC MetroidDataRam + $08,X
 Bank03_L9941:  TAY 
-Bank03_L9942:  LDA $99D7,Y
+Bank03_L9942:  LDA Bank03_L99D7,Y
 Bank03_L9945:  STA $04
 Bank03_L9947:  STY $05
 Bank03_L9949:  LDA #$0C
@@ -505,18 +506,18 @@ Bank03_L994B:  SEC
 Bank03_L994C:  SBC $05
 Bank03_L994E:  LDX $4B
 Bank03_L9950:  PLP 
-Bank03_L9951:  BMI $9956
+Bank03_L9951:  BMI Bank03_L9956
 Bank03_L9953:  JSR TwosCompliment
 Bank03_L9956:  STA $05
-Bank03_L9958:  JSR $99E4
+Bank03_L9958:  JSR Bank03_L99E4
 Bank03_L995B:  JSR Bank07_LFD8F
-Bank03_L995E:  JSR $99F4
-Bank03_L9961:  JMP $9967
-Bank03_L9964:  JSR $99AE
+Bank03_L995E:  JSR Bank03_L99F4
+Bank03_L9961:  JMP Bank03_L9967
+Bank03_L9964:  JSR Bank03_L99AE
 Bank03_L9967:  LDA $6AF4,X
 Bank03_L996A:  CMP #$03
 Bank03_L996C:  BNE $9971
-Bank03_L996E:  JSR $99AE
+Bank03_L996E:  JSR Bank03_L99AE
 Bank03_L9971:  LDY #$00
 Bank03_L9973:  LDA MetroidDataRam + $08
 Bank03_L9976:  ORA MetroidDataRam + $09
@@ -526,12 +527,12 @@ Bank03_L997F:  ORA MetroidDataRam + $0C
 Bank03_L9982:  ORA MetroidDataRam + $0D
 Bank03_L9985:  AND #$0C
 Bank03_L9987:  CMP #$0C
-Bank03_L9989:  BNE $999E
+Bank03_L9989:  BNE Bank03_L999E
 Bank03_L998B:  LDA HealthLo
 nop
 Bank03_L998E:  ORA HealthHi
 nop
-Bank03_L9991:  BEQ $999E
+Bank03_L9991:  BEQ Bank03_L999E
 Bank03_L9993:  STY $6F
 Bank03_L9995:  LDY #$04
 Bank03_L9997:  STY $6E
@@ -539,22 +540,23 @@ Bank03_L9999:  JSR SubtractHealth
 Bank03_L999C:  LDY #$01
 Bank03_L999E:  STY $92
 Bank03_L99A0:  LDA $6B
-Bank03_L99A2:  BMI $99AB
+Bank03_L99A2:  BMI Bank03_L99AB
 Bank03_L99A4:  LDA EnDataIndex,X
 Bank03_L99A7:  ORA #$A2
 Bank03_L99A9:  STA $6B
-Bank03_L99AB:  JMP $97E2
-Bank03_L99AE:  JSR $99B7
+Bank03_L99AB:  JMP Bank03_L97E2
+Bank03_L99AE:  JSR Bank03_L99B7
 Bank03_L99B1:  LDA #$00
 Bank03_L99B3:  STA MetroidDataRam + $08,Y
 Bank03_L99B6:  RTS
 
 Bank03_L99B7:  TXA 
-Bank03_L99B8:  JSR $9B1B
+Bank03_L99B8:  JSR Bank03_Div16
 Bank03_L99BB:  TAY 
-Bank03_L99BC:  RTS 
+Bank03_L99BC:  RTS
+
 Bank03_L99BD:  TXA 
-Bank03_L99BE:  JSR $9B1B
+Bank03_L99BE:  JSR Bank03_Div16
 Bank03_L99C1:  TAX 
 Bank03_L99C2:  RTS
 
@@ -607,12 +609,12 @@ Bank03_L9A29:  JMP StartUpdateEnemyAnimation_2
 
 Bank03_L9A2C:  LDY $6AF4,X
 Bank03_L9A2F:  CPY #$02
-Bank03_L9A31:  BNE $9AB0
+Bank03_L9A31:  BNE Bank03_L9AB0
 Bank03_L9A33:  DEY 
 Bank03_L9A34:  CPY $81
-Bank03_L9A36:  BNE $9AB0
+Bank03_L9A36:  BNE Bank03_L9AB0
 Bank03_L9A38:  LDA #$00
-Bank03_L9A3A:  JSR $99D1
+Bank03_L9A3A:  JSR Bank03_L99D1
 Bank03_L9A3D:  STA $6AFC,X
 Bank03_L9A40:  STA $6AFD,X
 Bank03_L9A43:  LDA $030E
@@ -623,7 +625,7 @@ Bank03_L9A4C:  LDA $0405,X
 Bank03_L9A4F:  PHA 
 Bank03_L9A50:  LSR 
 Bank03_L9A51:  PHA 
-Bank03_L9A52:  BCC $9A5A
+Bank03_L9A52:  BCC Bank03_L9A5A
 Bank03_L9A54:  LDA #$00
 Bank03_L9A56:  SBC $01
 Bank03_L9A58:  STA $01
@@ -634,7 +636,7 @@ Bank03_L9A61:  STA $00
 Bank03_L9A63:  PLA 
 Bank03_L9A64:  LSR 
 Bank03_L9A65:  LSR 
-Bank03_L9A66:  BCC $9A6E
+Bank03_L9A66:  BCC Bank03_L9A6E
 Bank03_L9A68:  LDA #$00
 Bank03_L9A6A:  SBC $00
 Bank03_L9A6C:  STA $00
@@ -642,19 +644,19 @@ Bank03_L9A6E:  LDA $00
 Bank03_L9A70:  ORA $01
 Bank03_L9A72:  LDY #$03
 Bank03_L9A74:  ASL 
-Bank03_L9A75:  BCS $9A7A
+Bank03_L9A75:  BCS Bank03_L9A7A
 Bank03_L9A77:  DEY 
-Bank03_L9A78:  BNE $9A74
+Bank03_L9A78:  BNE Bank03_L9A74
 Bank03_L9A7A:  DEY 
-Bank03_L9A7B:  BMI $9A83
+Bank03_L9A7B:  BMI Bank03_L9A83
 Bank03_L9A7D:  LSR $00
 Bank03_L9A7F:  LSR $01
-Bank03_L9A81:  BPL $9A7A
-Bank03_L9A83:  JSR $9AF9
+Bank03_L9A81:  BPL Bank03_L9A7A
+Bank03_L9A83:  JSR Bank03_L9AF9
 Bank03_L9A86:  PLA 
 Bank03_L9A87:  LSR 
 Bank03_L9A88:  PHA 
-Bank03_L9A89:  BCC $9A9B
+Bank03_L9A89:  BCC Bank03_L9A9B
 Bank03_L9A8B:  LDA #$00
 Bank03_L9A8D:  SBC $0407,X
 Bank03_L9A90:  STA $0407,X
@@ -664,7 +666,7 @@ Bank03_L9A98:  STA $0403,X
 Bank03_L9A9B:  PLA 
 Bank03_L9A9C:  LSR 
 Bank03_L9A9D:  LSR 
-Bank03_L9A9E:  BCC $9AB0
+Bank03_L9A9E:  BCC Bank03_L9AB0
 Bank03_L9AA0:  LDA #$00
 Bank03_L9AA2:  SBC $0406,X
 Bank03_L9AA5:  STA $0406,X
@@ -673,7 +675,7 @@ Bank03_L9AAA:  SBC $0402,X
 Bank03_L9AAD:  STA $0402,X
 Bank03_L9AB0:  LDA $0405,X
 Bank03_L9AB3:  ASL 
-Bank03_L9AB4:  BMI $9AF4
+Bank03_L9AB4:  BMI Bank03_L9AF4
 Bank03_L9AB6:  LDA $0406,X
 Bank03_L9AB9:  CLC 
 Bank03_L9ABA:  ADC $6AFC,X
@@ -695,29 +697,30 @@ Bank03_L9AE0:  STA $09
 Bank03_L9AE2:  LDA $6AFB,X
 Bank03_L9AE5:  STA $0B
 Bank03_L9AE7:  JSR Bank07_LFD8F
-Bank03_L9AEA:  BCS $9AF1
+Bank03_L9AEA:  BCS Bank03_L9AF1
 Bank03_L9AEC:  LDA #$00
 Bank03_L9AEE:  STA $6AF4,X
-Bank03_L9AF1:  JSR $99F4
+Bank03_L9AF1:  JSR Bank03_L99F4
 Bank03_L9AF4:  LDA #$08
 Bank03_L9AF6:  JMP StartUpdateEnemyAnimation_2
 Bank03_L9AF9:  LDA $00
 Bank03_L9AFB:  PHA 
-Bank03_L9AFC:  JSR $9B1B
+Bank03_L9AFC:  JSR Bank03_Div16
 Bank03_L9AFF:  STA $0402,X
 Bank03_L9B02:  PLA 
-Bank03_L9B03:  JSR $9B20
+Bank03_L9B03:  JSR Bank03_Amul16
 Bank03_L9B06:  STA $0406,X
 Bank03_L9B09:  LDA $01
 Bank03_L9B0B:  PHA 
-Bank03_L9B0C:  JSR $9B1B
+Bank03_L9B0C:  JSR Bank03_Div16
 Bank03_L9B0F:  STA $0403,X
 Bank03_L9B12:  PLA 
-Bank03_L9B13:  JSR $9B20
+Bank03_L9B13:  JSR Bank03_Amul16
 Bank03_L9B16:  STA $0407,X
 Bank03_L9B19:  RTS
 
-Bank03_L9B1A:  LSR 
+Bank03_L9B1A:  LSR
+Bank03_Div16: 
 Bank03_L9B1B:  LSR 
 Bank03_L9B1C:  LSR 
 Bank03_L9B1D:  LSR 
@@ -725,6 +728,7 @@ Bank03_L9B1E:  LSR
 Bank03_L9B1F:  RTS
 
 .advance $9B20
+Bank03_Amul16:
 Bank03_L9B20:  ASL 
 Bank03_L9B21:  ASL 
 Bank03_L9B22:  ASL 
@@ -732,44 +736,45 @@ Bank03_L9B23:  ASL
 Bank03_L9B24:  RTS
 
 Bank03_Area_Routine:
-Bank03_L9B25:  JSR $9B37
-Bank03_L9B28:  JSR $9DD4
-Bank03_L9B2B:  JSR $A1E7
-Bank03_L9B2E:  JSR $A238
-Bank03_L9B31:  JSR $A28B
-Bank03_L9B34:  JMP $A15E
+Bank03_L9B25:  JSR Bank03_L9B37
+Bank03_L9B28:  JSR Bank03_L9DD4
+Bank03_L9B2B:  JSR Bank03_LA1E7
+Bank03_L9B2E:  JSR Bank03_LA238
+Bank03_L9B31:  JSR Bank03_LA28B
+Bank03_L9B34:  JMP Bank03_LA15E
+
 Bank03_L9B37:  LDX #$78
-Bank03_L9B39:  JSR $9B44
+Bank03_L9B39:  JSR Bank03_L9B44
 Bank03_L9B3C:  LDA $97
 Bank03_L9B3E:  SEC 
 Bank03_L9B3F:  SBC #$08
 Bank03_L9B41:  TAX 
-Bank03_L9B42:  BNE $9B39
+Bank03_L9B42:  BNE Bank03_L9B39
 Bank03_L9B44:  STX $97
 Bank03_L9B46:  LDY $6BF4,X
-Bank03_L9B49:  BNE $9B4C
+Bank03_L9B49:  BNE Bank03_L9B4C
 Bank03_L9B4B:  RTS
 
-Bank03_L9B4C:  JSR $9C4D
+Bank03_L9B4C:  JSR Bank03_L9C4D
 Bank03_L9B4F:  TYA 
-Bank03_L9B50:  BNE $9B4B
+Bank03_L9B50:  BNE Bank03_L9B4B
 Bank03_L9B52:  LDY EndTimerHi
 Bank03_L9B55:  INY 
-Bank03_L9B56:  BNE $9B65
+Bank03_L9B56:  BNE Bank03_L9B65
 Bank03_L9B58:  LDA $6BF8,X
 Bank03_L9B5B:  CMP #$05
-Bank03_L9B5D:  BEQ $9B4B
+Bank03_L9B5D:  BEQ Bank03_L9B4B
 Bank03_L9B5F:  JSR $9B70
 Bank03_L9B62:  JMP $9C2B
 Bank03_L9B65:  LDA $2D
 Bank03_L9B67:  AND #$02
-Bank03_L9B69:  BNE $9B4B
+Bank03_L9B69:  BNE Bank03_L9B4B
 Bank03_L9B6B:  LDA #$19
-Bank03_L9B6D:  JMP $9C31
+Bank03_L9B6D:  JMP Bank03_L9C31
 Bank03_L9B70:  LDY $6BF8,X
 Bank03_L9B73:  LDA $6BFA,X
-Bank03_L9B76:  BNE $9B81
-Bank03_L9B78:  LDA $9D8F,Y
+Bank03_L9B76:  BNE Bank03_L9B81
+Bank03_L9B78:  LDA Bank03_L9D8F,Y
 Bank03_L9B7B:  STA $6BFA,X
 Bank03_L9B7E:  INC $6BFB,X
 Bank03_L9B81:  DEC $6BFA,X
@@ -853,6 +858,7 @@ Bank03_L9C28:  .byte $0C, $0A, $0E
 .advance $9C2B
 Bank03_L9C2B:  LDY $6BF9,X
 Bank03_L9C2E:  LDA $9DC6,Y
+
 Bank03_L9C31:  STA $6BD7
 Bank03_L9C34:  LDA $6BF5,X
 Bank03_L9C37:  STA $04E0
@@ -954,7 +960,7 @@ Bank03_L9CF1:  TAX
 Bank03_L9CF2:  BPL $9CE8
 Bank03_L9CF4:  BMI $9D20
 Bank03_L9CF6:  LDA ($00),Y
-Bank03_L9CF8:  JSR $9B1B
+Bank03_L9CF8:  JSR Bank03_Div16
 Bank03_L9CFB:  STA $6BF8,X
 Bank03_L9CFE:  LDA #$01
 Bank03_L9D00:  STA $6BF4,X
@@ -966,7 +972,7 @@ Bank03_L9D0A:  AND #$F0
 Bank03_L9D0C:  ORA #$07
 Bank03_L9D0E:  STA $6BF5,X
 Bank03_L9D11:  PLA 
-Bank03_L9D12:  JSR $9B20
+Bank03_L9D12:  JSR Bank03_Amul16
 Bank03_L9D15:  ORA #$07
 Bank03_L9D17:  STA $6BF6,X
 Bank03_L9D1A:  JSR $9D88
@@ -1021,7 +1027,7 @@ Bank03_L9D73:  LDX #$00
 Bank03_L9D75:  LDA $8B,X
 Bank03_L9D77:  BPL $9D87
 Bank03_L9D79:  LDA ($00),Y
-Bank03_L9D7B:  JSR $9B1B
+Bank03_L9D7B:  JSR Bank03_Div16
 Bank03_L9D7E:  STA $8B,X
 Bank03_L9D80:  JSR $9D88
 Bank03_L9D83:  STA $8C,X
@@ -1038,7 +1044,8 @@ Bank03_L9D9F:  .byte $FD, $03, $02, $01, $FF, $00, $07, $06, $FE, $05, $04, $FE,
 Bank03_L9DAF:  .byte $02, $03, $FC, $04, $05, $06, $05, $FC, $04, $03, $FF, $02, $03, $FC, $04, $03
 Bank03_L9DBF:  .byte $FF, $06, $05, $FC, $04, $05, $FF, $06, $07, $08, $09, $0A, $0B, $0C, $0D, $09
 
-Bank03_L9DCF:  .byte $F7, $00, $09, $09, $0B, $A5, $98, $F0, $19, $20, $24, $80, $CB, $95, $22, $9E
+Bank03_L9DCF:  .byte $F7, $00, $09, $09, $0B
+Bank03_L9DD4:  .byte $A5, $98, $F0, $19, $20, $24, $80, $CB, $95, $22, $9E
 Bank03_L9DDF:  .byte $36, $9E, $52, $9E, $86, $9E, $02, $9F, $49, $9F, $C0, $9F, $02, $9F, $DA, $9F
 Bank03_L9DEF:  .byte $CB, $95, $60
 
@@ -1173,7 +1180,7 @@ Bank03_L9EE8:  AND #$F0
 Bank03_L9EEA:  ORA #$07
 Bank03_L9EEC:  STA $0400,X
 Bank03_L9EEF:  PLA 
-Bank03_L9EF0:  JSR $9B20
+Bank03_L9EF0:  JSR Bank03_Amul16
 Bank03_L9EF3:  ORA #$07
 Bank03_L9EF5:  STA $0401,X
 Bank03_L9EF8:  RTS
@@ -1706,7 +1713,7 @@ Bank03_LA31D:  STA $92
 Bank03_LA31F:  RTS
 
 Bank03_LA320:  TXA 
-Bank03_LA321:  JSR $9B1B
+Bank03_LA321:  JSR Bank03_Div16
 Bank03_LA324:  TAY 
 Bank03_LA325:  JSR $99B1
 Bank03_LA328:  STA $92
@@ -2457,41 +2464,34 @@ Bank03_Room_0A_Bottom_Left:
 ;Room #$0B
 Bank03_LAA33:
 	.byte $FF
-	.word Bank03_Room_0B_Top_Left
-	.word Bank03_Room_0B_Top_Right
-	.word Bank03_Room_0B_Bottom_Left
-
-Bank03_Room_0B_Bottom_Right:
-	.byte $8F, $19
-	.byte $98, $12
-	.byte $AE, $1A
-	.byte $CB, $1B
-	.byte $FD
-	.byte $11, $00, $89			; Enemy
+	.word Bank03_Room_0B_Top
+	.word FFLabel
+	.word Bank03_Room_0B_Bottom
 	.byte $FF
 
-Bank03_Room_0B_Top_Left:
+Bank03_Room_0B_Top:
 	.byte $00, $19
 	.byte $01, $1A
+	.byte $09, $12
+	.byte $0E, $1A
+	.byte $0F, $19
 	.byte $23, $12
+	.byte $4B, $12
 	.byte $51, $1A
+	.byte $5E, $1A
 	.byte $66, $1B
 	.byte $FD
 	.byte $01, $01, $45			; Enemy
 	.byte $FF
 
-Bank03_Room_0B_Top_Right:
-	.byte $09, $12
-	.byte $0E, $1A
-	.byte $0F, $19
-	.byte $4B, $12
-	.byte $5E, $1A
-	.byte $FF
-
-Bank03_Room_0B_Bottom_Left:
+Bank03_Room_0B_Bottom:
 	.byte $80, $19
+	.byte $8F, $19
 	.byte $82, $12
+	.byte $98, $12
 	.byte $A1, $1A
+	.byte $AE, $1A
+	.byte $CB, $1B
 	.byte $D5, $12
 	.byte $FD
 	.byte $21, $01, $D4			; Enemy
@@ -2576,35 +2576,30 @@ Bank03_Room_0D_Bottom_Left:
 ;Room #$0E
 Bank03_LAAE3:
 	.byte $FF
-	.word Bank03_Room_0E_Top_Left
-	.word Bank03_Room_0E_Top_Right
-	.word Bank03_Room_0E_Bottom_Left
-
-Bank03_Room_0E_Bottom_Right:
-	.byte $8F, $19
-	.byte $9E, $1A
-	.byte $BB, $1B
-	.byte $EE, $1A
+	.word Bank03_Room_0E_Top
+	.word FFLabel
+	.word Bank03_Room_0E_Bottom
 	.byte $FF
 
-Bank03_Room_0E_Top_Left:
+Bank03_Room_0E_Top:
 	.byte $00, $19
-	.byte $01, $18
-	.byte $41, $1A
-	.byte $FF
-
-Bank03_Room_0E_Top_Right:
 	.byte $08, $18
+	.byte $01, $18
 	.byte $0F, $19
+	.byte $41, $1A
 	.byte $4E, $1A
 	.byte $FF
 
-Bank03_Room_0E_Bottom_Left:
-	.byte $80, $19
+Bank03_Room_0E_Bottom:
+	.byte $80, $20
 	.byte $86, $1D
+	.byte $8F, $20
 	.byte $91, $1A
+	.byte $9E, $1A
+	.byte $BB, $1B
 	.byte $C3, $1B
-	.byte $E1, $1A
+	.byte $E1, $1C
+	.byte $EE, $1C
 	.byte $FF
 
 ;Room #$0F
@@ -2926,11 +2921,26 @@ Bank03_LADED:  .byte $07, $18, $0A, $10, $0A, $0A, $10, $18, $07, $0D, $17, $17,
 Bank03_LADFD:  .byte $FF
 
 ;Structure #$19
-Bank03_LADFE:  .byte $01, $0A, $01, $0A, $01, $0A, $01, $0A, $01, $0A, $01, $0A, $01, $0A, $01, $0A
-Bank03_LAE0E:  .byte $FF
+Bank03_LADFE:  
+	.byte $01, $0A
+Bank03_Struct_20:
+	.byte $01, $0A
+	.byte $01, $0A
+	.byte $01, $0A
+	.byte $01, $0A
+	.byte $01, $0A
+	.byte $01, $0A
+	.byte $01, $0A
+	.byte $FF
 
 ;Structure #$1A
-Bank03_LAE0F:  .byte $01, $0D, $01, $18, $01, $18, $01, $18, $01, $18, $FF
+Bank03_LAE0F:
+	.byte $01, $0D
+	.byte $01, $18
+	.byte $01, $18
+	.byte $01, $18
+	.byte $01, $18
+	.byte $FF
 
 ;Structure #$1B
 Bank03_LAE1A:  .byte $02, $19, $1A, $FF
@@ -2939,7 +2949,10 @@ Bank03_LAE1A:  .byte $02, $19, $1A, $FF
 Bank03_LAE1E:  .byte $01, $0D, $FF
 
 ;Structure #$1D
-Bank03_LAE21:  .byte $04, $14, $1C, $1C, $14, $04, $0A, $0A, $0A, $0A, $FF
+Bank03_LAE21:
+	.byte $04, $14, $1C, $1C, $14
+	.byte $44, $0A
+	.byte $FF
 
 ;Structure #$1E
 Bank03_LAE2C:  .byte $08, $0D, $22, $22, $22, $22, $22, $22, $0D, $FF
@@ -3725,6 +3738,7 @@ MetroidData:
     .byte >Bank03_LACA4,        >Bank03_LACB5, >Bank03_LACC6, >Bank03_LACD0, >Bank03_LACF9, >Bank03_LAD26, >Bank03_LAD2D, >Bank03_LAD3C
     .byte >Bank03_LAD3F,        >Bank03_LAD48, >Bank03_LAD61, >Bank03_LAD66, >Bank03_LAD6B, >Bank03_LAD99, >Bank03_LADAC, >Bank03_LADC8
     .byte >Bank03_LADDD,        >Bank03_LADFE, >Bank03_LAE0F, >Bank03_LAE1A, >Bank03_LAE1E, >Bank03_LAE21, >Bank03_LAE2C, >Bank03_LAE36
+	.byte >Bank03_Struct_20
 
 .advance StructPointerTable_Lo
 
@@ -3732,6 +3746,7 @@ MetroidData:
     .byte <Bank03_LACA4,        <Bank03_LACB5, <Bank03_LACC6, <Bank03_LACD0, <Bank03_LACF9, <Bank03_LAD26, <Bank03_LAD2D, <Bank03_LAD3C
     .byte <Bank03_LAD3F,        <Bank03_LAD48, <Bank03_LAD61, <Bank03_LAD66, <Bank03_LAD6B, <Bank03_LAD99, <Bank03_LADAC, <Bank03_LADC8
     .byte <Bank03_LADDD,        <Bank03_LADFE, <Bank03_LAE0F, <Bank03_LAE1A, <Bank03_LAE1E, <Bank03_LAE21, <Bank03_LAE2C, <Bank03_LAE36
+	.byte <Bank03_Struct_20
 
 ;------------------------------------------------------------------------------------------------------
 
