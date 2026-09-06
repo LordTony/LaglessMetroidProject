@@ -1928,24 +1928,28 @@ LCD4B:
 ;------------------------------[ Check if screw attack is active ]-----------------------------------
 
 IsScrewAttackActive:
-    SEC                     ;Assume screw attack is not active.
-    LDY SamusObjAction      ;
-    DEY                     ;Is Samus running?
-    BNE ScrewAttackExit     ;If not, branch to exit.
-    LDA SamusGear           ;
-    AND #gr_SCREWATTACK     ;Does Samus have screw attack?
-    BEQ ScrewAttackExit     ;If not, branch to exit.
-    LDA AnimResetIndex      ;
-    CMP #an_SamusSalto      ;Is Samus summersaulting?
-    BEQ +                   ;If so, branch to clear carry(screw attack active).
-        CMP #an_SamusJump   ;
-        SEC                 ;Is Samus jumping?
-        BNE ScrewAttackExit ;If not, branch to exit.
-        BIT ObjVertSpeed    ;If Samus is jumping and still moving upwards, screw 
-        BPL ScrewAttackExit ;attack is active.
-*   CMP AnimIndex           ;Screw attack will still be active if not spinning, but
+    sec                     ;Assume screw attack is not active.
+    ldy SamusObjAction      ;
+    dey                     ;Is Samus running?
+    bne ScrewAttackExit     ;If not, branch to exit. Screw attack is not active
+
+    lda SamusGear           ;
+    and #gr_SCREWATTACK     ;Does Samus have screw attack?
+    beq ScrewAttackExit     ;If not, branch to exit. Screw attack is not active
+
+    lda AnimResetIndex      ;
+    cmp #an_SamusSalto      ;Is Samus summersaulting?
+    beq +                   ;If so, branch to clear carry(screw attack active).
+        cmp #an_SamusJump   ;
+        sec                 ;Is Samus jumping?
+        bne ScrewAttackExit ;If not, branch to exit.
+
+        bit ObjVertSpeed    ;If Samus is jumping and still moving upwards, screw 
+        bpl ScrewAttackExit ;attack is active.
+    
+*   cmp AnimIndex           ;Screw attack will still be active if not spinning, but
 ScrewAttackExit:
-    RTS                     ;jumping while running and still moving upwards.
+    rts                     ;jumping while running and still moving upwards.
 
 ;----------------------------------------------------------------------------------------------------
 
@@ -4113,10 +4117,10 @@ LDBE0:  STA SamusGear           ;Update Samus gear with new beam weapon.
 LDBE3:* LDA #$FF            ;
 LDBE5:  STA PowerUpDelay        ;Initiate delay while power up music plays.
 LDBE8:  STA PowerUpType,x       ;Clear out item data from RAM.
-LDBEB:  LDY ItemRmMusicSts     ;Is Samus not in an item room?
+LDBEB:  LDY ItemRmMusicSts      ;Is Samus not in an item room?
 LDBED:  BEQ LDBF1               ;If not, branch.
-LDBEF:  LDY #$01            ;Restart item room music after special item music is done.
-LDBF1:* STY ItemRmMusicSts     ;
+            LDY #$01            ;Restart item room music after special item music is done.
+LDBF1:* STY ItemRmMusicSts      ;
 LDBF3:  JMP SelectSamusPal      ;($CB73)Set Samus new palette.
 
 MissileEnergyPickup:
@@ -7365,8 +7369,10 @@ LEC57:
     ldx #$20
 ZebHoleLoop:
 *   txa
-    sbx #$08
+    sec
+    sbc #$08
     bmi +
+    tax
     ldy PipeEnemyStatus,x
     iny
     bne ZebHoleLoop
@@ -7894,23 +7900,23 @@ CannonHandler:
 LEEA6:
     ; The only time we will ever even get here is in bank 3
     ; so no need to guard here
-    jsr Bank03_L9CE6 
+    jsr Bank03_Cannon_Handler 
 *   jmp SetATo2AndJumpToHandlerRoutine                ;($EDD6)Exit handler routines.
 
 ; Tourian Only
 MotherBrainHandler:
 LEEAE: 
-    jsr Bank03_L9D21 
+    jsr Bank03_Mother_Brain_Handler 
     lda #$38
     sta $07
     lda #$00
     sta $06
     jsr CheckForItem
     bcc SetATo1AndJumpToHandlerRoutine
-    lda #$08
-    sta MthrBrainStatus
-    lda #$00
-    sta MotherBrainHits
+        lda #$08
+        sta MthrBrainStatus
+        lda #$00
+        sta MotherBrainHits
 SetATo1AndJumpToHandlerRoutine:  
     lda #$01
     bne ChooseHandlerRoutine_Trampoline
@@ -7918,7 +7924,7 @@ SetATo1AndJumpToHandlerRoutine:
 ; Tourian Only
 ZeebetiteHandler:
 LEECA:
-    jsr Bank03_L9D3D 
+    jsr Bank03_ZeebititeHandler 
     txa
     lsr
     adc #$3C
@@ -7927,19 +7933,19 @@ LEECA:
     sta $06
     jsr CheckForItem
     bcc +
-    lda #$81
-    sta $0758,x
+        lda #$81
+        sta $0758,x
 
-    lda #$01
-    sta $075D,x
+        lda #$01
+        sta $075D,x
 
-    lda #$07
-    sta $075B,x
+        lda #$07
+        sta $075B,x
 *   bne SetATo1AndJumpToHandlerRoutine
 
 ; Tourian Only
 RinkaHandler:
-    jsr Bank03_L9D6C 
+    jsr Bank03_Rinka_Handler 
     jmp SetATo1AndJumpToHandlerRoutine
 
 SpecialDoorHandler:
@@ -8393,6 +8399,7 @@ NextEnemyLoop:
     sbx #$10
     cpx #$C0
     bne ---
+
 SubtractHealth_Trampoline:
 *   jmp SubtractHealth      ;($CE92)
     ; safe
@@ -8615,6 +8622,7 @@ LF2E8:
     lda $10
     eor #$03
     bne --
+
 LF2ED:  
     bcs +
     lda $10
@@ -10913,7 +10921,11 @@ Table18:
     .byte $FE
     .byte $01
     .byte $FF
+    ;.byte $02 - interwoven with LoadDoorTable
+
+LoadDoorTable:
     .byte $02
+    .byte $01
 
 ; Table used for indexing the animations in TileBlastAnim
 Table19:
@@ -10985,10 +10997,6 @@ PPUWriteDirectionTable:
 DoorXs:
     .byte $F0    ; X coord of RIGHT door
     .byte $10    ; X coord of LEFT door
-
-LoadDoorTable:
-    .byte $02
-    .byte $01
     
 LoadDoorTable_2:  
     .byte $80
