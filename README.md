@@ -128,11 +128,9 @@ SBX #$F0
 * BenchmarkNMI.lua shows how long it takes to reach NMI, min and max, over a second. This can be used to find painful spots
 
 ## Definite Bugs
-* Resetting the game doesn't clear the ram properly
 * Pipe spawners looks like they don't die or leave the name tables properly. (Elevator to Tourian)
 * Little bug things (Memus?) use the wrong sprite (probably an issue with the adjustment to the hud missile sprite display)
   * Memus aren't dive bombing correctly. AI is bonked
-* Seahorses don't spit anything Bank02 Norfair
 * Mini bosses don't seem to spawn properly
   * This this has to do with "MaxMissiles" being moved into zero page a long time ago.
   * It looks like the ridley and kraid dead bytes were based on the offset to MaxMissiles.

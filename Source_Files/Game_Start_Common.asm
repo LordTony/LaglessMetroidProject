@@ -90,9 +90,9 @@ _L80B6:  ASL                     ;*2
 _L80B7:  RTS
 
 _L80B8:  LDX PageIndex
-_L80BA:  BCS $80FA
+_L80BA:  BCS _L80FA
 _L80BC:  LDA $0405,X
-_L80BF:  BPL $80C7
+_L80BF:  BPL _L80C7
 _L80C1:  JSR $81FC
 _L80C4:  JMP $80F6
 _L80C7:  JSR $80B0
@@ -382,15 +382,15 @@ _L830A:  ORA $968B,Y
 _L830D:  AND #$1F
 _L830F:  STA $0405,X
 _L8312:  JSR _L81B1
-_L8315:  JMP $82A2
-_L8318:  JSR $80B0
-_L831B:  BPL $8320
+_L8315:  JMP _L82A2
+_L8318:  JSR _L80B0
+_L831B:  BPL _L8320
 _L831D:  JMP Common_Collision_Func
 
 _L8320:  LDA $0405,X
 _L8323:  AND #$20
 _L8325:  EOR #$20
-_L8327:  BEQ $833C
+_L8327:  BEQ _L833C
 _L8329:  LDY EnCounter,X
 _L832C:  INY 
 _L832D:  LDA ($81),Y
@@ -402,24 +402,24 @@ _L8332:  PHP
 _L8333:  TXA 
 _L8334:  AND #$07
 _L8336:  PLP 
-_L8337:  BEQ $833C
+_L8337:  BEQ _L833C
 _L8339:  JSR TwosCompliment
 _L833C:  STA $00
 _L833E:  RTS
 
 _L833F:  LDY #$0E
 _L8341:  LDA $6AFE,X
-_L8344:  BMI $835E
+_L8344:  BMI _L835E
 _L8346:  CLC 
 _L8347:  ADC EnCounter,X
 _L834A:  STA EnCounter,X
 _L834D:  LDA $0402,X
 _L8350:  ADC #$00
 _L8352:  STA $0402,X
-_L8355:  BPL $8376
+_L8355:  BPL _L8376
 _L8357:  JSR TwosCompliment
 _L835A:  LDY #$F2
-_L835C:  BNE $8376
+_L835C:  BNE _L8376
 _L835E:  JSR TwosCompliment
 _L8361:  SEC 
 _L8362:  STA $00
@@ -429,9 +429,9 @@ _L8369:  STA EnCounter,X
 _L836C:  LDA $0402,X
 _L836F:  SBC #$00
 _L8371:  STA $0402,X
-_L8374:  BMI $8357
+_L8374:  BMI _L8357
 _L8376:  CMP #$0E
-_L8378:  BCC $8383
+_L8378:  BCC _L8383
 _L837A:  LDA #$00
 _L837C:  STA EnCounter,X
 _L837F:  TYA 
@@ -610,11 +610,10 @@ _L84C7:  LDA ScrollDir
 _L84C9:  CMP #$02
 _L84CB:  BCC _L84DA
 _L84CD:  LDA ScrollX
-_L84CF:  BEQ _L84F1
+_L84CF:  BEQ _L84D4
 _L84D1:  JSR _L8563
-
-;_L84D4:  CLC 
-_L84D5:  BEQ _L84F1
+_L84D4:  CLC 
+_L84D5:  BEQ _L84FD
 _L84D7:  JSR _L855A
 
 _L84DA:  DEC EnXRoomPos,X
@@ -655,9 +654,12 @@ _L851E:  LDA ScrollDir
 _L8520:  CMP #$02
 _L8522:  BCC _L8536
 _L8524:  LDA ScrollX
-_L8526:  BEQ _L854A
+_L8526:  BEQ _L852D
 _L8528:  JSR _L8563
-_L852B:  BNE _L854A
+_L852B:  BEQ _L8533
+_L852D:  DEC EnXRoomPos,X
+_L8530:  CLC 
+_L8531:  BCC _L8559
 _L8533:  JSR _L855A
 
 _L8536:  LDA EnXRoomPos,X
@@ -1442,7 +1444,7 @@ _L8B2C:  EOR #$01                ;
 _L8B2E:  AND #$01                ;Erase name table door data for new room.
 _L8B30:  TAY                     ;
 _L8B31:  LSR                     ;
-_L8B32:  STA $006C,Y             ;
+_L8B32:  STA $006C,Y             ;Checks 6C or 6D
 _L8B35:  LDA ScrollDir           ;
 _L8B37:  AND #$02                ;Is Samus scrolling horizontally?-->
 _L8B39:  BNE +                   ;If so, branch.
@@ -1514,10 +1516,20 @@ _L8B78:  RTS                     ;
         jmp (CodePtr)
 
     DoorHandlerTable_Hi:
-        .byte >DoorHandlerRoutine1, >DoorHandlerRoutine2, >DoorHandlerRoutine3, >DoorHandlerRoutine4, >DoorHandlerRoutine5, >DoorHandlerRoutine6 
+        .byte >DoorHandlerRoutine1 
+        .byte >DoorHandlerRoutine2 
+        .byte >DoorHandlerRoutine3 
+        .byte >DoorHandlerRoutine4 
+        .byte >DoorHandlerRoutine5 
+        .byte >DoorHandlerRoutine6 
 
     DoorHandlerTable_Lo:
-        .byte <DoorHandlerRoutine1, <DoorHandlerRoutine2, <DoorHandlerRoutine3, <DoorHandlerRoutine4, <DoorHandlerRoutine5, <DoorHandlerRoutine6 
+        .byte <DoorHandlerRoutine1 
+        .byte <DoorHandlerRoutine2 
+        .byte <DoorHandlerRoutine3 
+        .byte <DoorHandlerRoutine4 
+        .byte <DoorHandlerRoutine5 
+        .byte <DoorHandlerRoutine6 
 
 DoorHandlerRoutine1:
 _L8B9D:  INC $0300,X
@@ -1731,7 +1743,7 @@ _L8CDB:  SBC #$03
 _L8CDD:  JSR SetProjectileAnimWithoutReset
 _L8CE0:  JSR SFXDoor
 _L8CE3:  JSR SelectSamusPal
-_L8CE6:  LDX PageIndex          ; Necessary for now
+_L8CE6:  LDX PageIndex          ; Necessary for now ; Could probably move this 
 _L8CE8:  LDA #$02
 _L8CEA:  STA $0300,X
 

@@ -277,6 +277,7 @@ Bank03_L960B:  .byte $08, $08, $08, $08, $16, $16, $18, $18, $1F, $1F, $00, $00,
 
 Bank03_L961B:  .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
 
+.advance EnemyHitPointTbl
 Bank03_L962B:  .byte $FF, $FF, $01, $FF, $01, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
 
 Bank03_L963B:  .byte $05, $05, $05, $05, $16, $16, $18, $18, $1B, $1B, $00, $00, $00, $00, $00, $00
@@ -1415,6 +1416,7 @@ Bank03_LA06C:  RTS
 
 Bank03_LA06D:  .byte $13, $14, $15, $16, $17
 
+; TODO - tables look mangled
 Bank03_LA072:  LDY MotherBrainHits
 Bank03_LA074:  BEQ $A086
 Bank03_LA076:  LDA $A0C0,Y

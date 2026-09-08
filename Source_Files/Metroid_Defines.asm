@@ -58,6 +58,8 @@
 .alias MainRoutine      $1E     ;5=Game paused, 3=Game engine running
 .alias TitleRoutine     $1F     ;Stores title routine number currently running.
 .alias NextRoutine      $20     ;Stores next routine to jump to after WaitTimer expires.
+; unused                $21
+; unused                $22
 .alias CurrentBank      $23     ;0 thru 7. current memory page in lower memory block.
 .alias SwitchPending    $24     ;Switch memory page. Page #=SwitchPending-1.
 .alias MMCReg0Cntrl     $25     ;Stores bits to be loaded into MMC1 Register 0.

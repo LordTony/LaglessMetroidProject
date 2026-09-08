@@ -1066,32 +1066,32 @@ LC818:  lda #$10                ;Prepare to load Brinstar memory page.
 LC81A:  jsr IsEngineRunning     ;($CA18)Check to see if ok to switch lower memory page.
 
 ;------------------------------------------[ MoreInit ]---------------------------------------------
-
 MoreInit:
 LC81D:  ldy #$01                ;
 LC81F:  sty PalDataPending      ;Palette data pending = yes.
-LC821:  ldx #$00                ; A and X = 0
+LC821:  lxa #$00                ; A and X = 0
 LC826:  stx AtEnding            ;Not playing ending scenes.
 LC829:  stx DoorStatus          ;Samus not in door.
 LC82B:  stx SamusDoorData       ;Samus is not inside a door.
 LC82D:  stx UpdtngPrjctl        ;No projectiles need to be updated.
-        stx SamusObjAction
+        sta SamusObjAction
+        sta MissileToggle
+        
+LC830:* cpx #$65                ;Check to see if more RAM to clear in $7A thru $DE.
+LC832:  bcs +                   ;
+LC834:  sta $7A,x               ;Clear RAM $7A thru $DE.
+LC836:* cpx #$FF                ;Check to see if more RAM to clear in $300 thru $3FE.
+LC838:  bcs +                   ;
+LC83A:  sta ObjAction,x         ;Clear RAM $300 thru $3FE.
+LC83D:* inx                     ;
+LC83E:  bne ---                 ;Loop until all required RAM is cleared.
 
+LC840:  jsr ScreenOff           ;($C439)Turn off Background and visibility.
+LC843:  jsr ClearNameTables     ;($C158)Clear screen data.
+LC846:  jsr EraseAllSprites     ;($C1A3)Erase all sprites from sprite RAM.
+LC849:  jsr DestroyEnemies      ;($C8BB)
 
-;LC830:* cpx #$65                ;Check to see if more RAM to clear in $7A thru $DE.
-;LC832:  bcs +                   ;
-;LC834:  sta $7A,x               ;Clear RAM $7A thru $DE.
-;LC836:* cpx #$FF                ;Check to see if more RAM to clear in $300 thru $3FE.
-;LC838:  bcs +                   ;
-;LC83A:  sta ObjAction,x         ;Clear RAM $300 thru $3FE.
-;LC83D:* inx                     ;
-;LC83E:  bne ---                 ;Loop until all required RAM is cleared.
-
-LC840:  jsr ScreenOff               ;($C439)Turn off Background and visibility.
-LC843:  jsr ClearNameTables         ;($C158)Clear screen data.
-LC846:  jsr EraseAllSprites         ;($C1A3)Erase all sprites from sprite RAM.
-LC849:  jsr DestroyEnemies          ;($C8BB)
-        jsr CacheMissileGraphics 
+    jsr CacheMissileGraphics 
 
     stx DoorOnNameTable3        ;Clear data about doors on the name tables.
     stx DoorOnNameTable0        ;
@@ -1105,12 +1105,9 @@ LC849:  jsr DestroyEnemies          ;($C8BB)
     lda StartingYPosition                   ;Get Samus start y pos on map.
     sta MapPosY                 ;
 
-LC860:
     lda StartingPalette         ;Get ??? Something to do with palette switch
-    sta PalToggle
-LC86C:
-    lda #$00
-    sta Quarter
+    sta PalToggle 
+
     jsr GetRoomNum          ;($E720)Put room number at current map pos in $5A.
 *   jsr SetupRoom           ;($EA2B)
     ldy RoomNumber          ;load room number
@@ -7188,6 +7185,8 @@ EnemySlotIsNotTaken:
 GetEnemyDataExit:    
 rts             ;
 
+; Clobbers Y and A
+; Doesn't touch X
 GetEnemyType:
     pha             ;Store enemy type.
     and #$C0            ;If MSB is set, the "tough" version of the enemy  
@@ -7214,10 +7213,19 @@ EnemyIsKraidOrRidley:
 
 Bank07_LEB6E:
     asl EnAttr_05,x         ;*2
-    jsr LFB7B
 
 UpdateEnemyHitpoints:
-    ldy EnDataIndex,x
+
+;inlined LFB7B
+;inlined $80B0
+*   ldy EnDataIndex,x
+    lda $977B,y
+    asl              
+
+    ror EnAttr_05,x
+    lda EnemyInitDelayTbl,y     ;($96BB)Load initial delay for enemy movement.
+    sta EnDelay,x       ;
+
     lda $969B,y
     sta $040D,x
     lda EnemyHitPointTbl,y      ;($962B)
@@ -7443,32 +7451,18 @@ UpdateDoorDataNext:
     sbx #$10
     bpl UpdateDoorDataLoop
 
-.scope   
-    _check1:
-        tya
-        eor $B3 + $18
-        bne _check2
-            sta $B0 + $18
+.scope
+    ldx #$18   
+*   tya
+    eor $B3,x
+    lsr
+    bcs +
+        lda #$00
+        sta $B0,x
+*   txa
+    sbx #$08
+    bpl --
 
-    _check2:
-        tya
-        eor $B3 + $10
-        bne _check3
-            sta $B0 + $10
-
-    _check3:
-        tya
-        eor $B3 + $08
-        bne _check4
-            sta $B0 + $08
-
-    _check4:
-        tya
-        eor $B3 + $00
-        bne _end
-            sta $B0 + $00
-
-    _end:
 .scend
 
     jsr LED65
@@ -9601,7 +9595,7 @@ DoSomethingToFrameCount:
 Exit_45:
     rts
 
-; Used only in Other Banks
+; Used only in Other Banks (Bank02 and Bank05)
 ; TODO: Move to Game_Start_Common.asm or inline it?
 Bank07_LF870:  
     lda EnAttr_05,x
@@ -9618,18 +9612,18 @@ Bank07_LF870:
         ldy $6B01,x
         bne Exit_45
 
+; Monsters That spit lava
 LF8E8:                  ; inlined
     ldy #$60
-    ; clc
+    clc
 LavaJumpLoop:
     lda EnStatus,y
     beq AfterLavaJumpLoop
-    tya
-    clc
-    adc #$10
-    tay
-    cmp #$C0
-    bne LavaJumpLoop
+        tya
+        adc #$10
+        tay
+        cmp #$C0
+        bne LavaJumpLoop
 AfterLavaJumpLoop:
 
     bcs Exit33
@@ -9955,7 +9949,6 @@ DoOnePipeEnemy:
     ldx $0729,y
     lda EnStatus,x
     beq +
-
         lda EnAttr_05,x
         and #$02
         bne Exit29
@@ -9994,15 +9987,13 @@ DoOnePipeEnemy:
     jsr DistFromEn0ToObj1
     jsr LF1FA
     bcc Exit29
-
-    lda #$01
-    sta EnDelay,x
-    sta EnStatus,x
-    and ScrollDir
-    asl
-    sta $0405,x
-    jsr LFB7B
-    jmp UpdateEnemyHitpoints
+        lda #$01
+        sta EnDelay,x
+        sta EnStatus,x
+        and ScrollDir
+        asl
+        sta $0405,x
+        jmp UpdateEnemyHitpoints
 
 *   sta EnDataIndex,x
 
@@ -10013,19 +10004,6 @@ DoOnePipeEnemy:
     sta EnStatus,x
 Exit29:
     rts 
-
-LFB7B:
-;inlined $80B0
-*   ldy EnDataIndex,x
-    lda $977B,y
-    asl              
-
-    ror EnAttr_05,x
-    lda EnemyInitDelayTbl,y     ;($96BB)Load initial delay for enemy movement.
-    sta EnDelay,x       ;
-
-Exit13: 
-    rts             ;Exit from multiple routines.
 
 Bank07_LFB88:
     ldx PageIndex
@@ -10045,13 +10023,13 @@ Bank07_LFB88:
 *   cmp #$08
     bcc +
     cmp #$10
-    bcs Exit13
+    bcs Exit29
     tya
     and #$01
     tay
-    lda $0085,y
+    lda $85,y
     cmp EnResetAnimIndex,x
-    beq Exit13
+    beq Exit29
     sta EnAnimIndex,x
     dec EnAnimIndex,x
 Bank07_LFBB9:
@@ -10062,7 +10040,7 @@ Bank07_LFBB9:
 
 *   lda $963B,y
     cmp EnResetAnimIndex,x
-    beq Exit13
+    beq Exit29
     jmp DoSomethingToAnimationIndecies
 
 ; Move to Common?
@@ -10070,7 +10048,7 @@ Bank07_LFBCA:
     jsr LF844
     lda $965B,y
     cmp EnResetAnimIndex,x
-    beq Exit13
+    beq Exit29
     sta EnResetAnimIndex,x
     jmp LF690
     ; safe
