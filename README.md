@@ -129,15 +129,20 @@ SBX #$F0
 
 ## Definite Bugs
 * Pipe spawners looks like they don't die or leave the name tables properly. (Elevator to Tourian)
-* Little bug things (Memus?) use the wrong sprite (probably an issue with the adjustment to the hud missile sprite display)
-  * Memus aren't dive bombing correctly. AI is bonked
 * Mini bosses don't seem to spawn properly
   * This this has to do with "MaxMissiles" being moved into zero page a long time ago.
   * It looks like the ridley and kraid dead bytes were based on the offset to MaxMissiles.
 * Zeebitites don't stay dead.
+* End Credits have their graphics corrupted
+* Can't get into the Mother Brain door
+  * Can launch yourself through the door by curling up into a ball and bombing yourself to the left
+* Killing 4 or 5 metroids at once crashes the game.
+  * Sprite index overflows to 0 and starts writing at $0x1DD and a few other places around there
+  * Probably need to cut it off early or figure out what I did to break it.
+* Missiles don't seem to hit spinners from far away (example: The ones hanging in Bank01 Room #$12)
+  * Could be because I keep deleting clc and sec instructions
 
 ## Maybe Bugs (Check Original Game Behavior)
-* Missiles don't seem to hit spinners from far away (example: The ones hanging in Bank01 Room #$12)
 * curling up into a ball and bombing next to a door while getting hit by a zoomer crashed the game (only saw it once)
 
 ## Pre Existing Bugs (or quirks; whatever. The original metroid sucks)

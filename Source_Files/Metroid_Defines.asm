@@ -59,12 +59,12 @@
 .alias TitleRoutine     $1F     ;Stores title routine number currently running.
 .alias NextRoutine      $20     ;Stores next routine to jump to after WaitTimer expires.
 ; unused                $21
-; unused                $22
+.alias InTourianBank    $22     ;0 = not in tourian, if not zero, you are in tourian
 .alias CurrentBank      $23     ;0 thru 7. current memory page in lower memory block.
 .alias SwitchPending    $24     ;Switch memory page. Page #=SwitchPending-1.
 .alias MMCReg0Cntrl     $25     ;Stores bits to be loaded into MMC1 Register 0.
-;unused                 $26
-;unused                 $27
+;used in room routine   $26
+;used in room routine  $27
 ;unused                 $28     
 .alias Timer2Delay      $29     ;Count down from 9 to 0. Decremented every frame.
 .alias Timer1           $2A     ;Decremented every frame after set.
@@ -106,12 +106,18 @@
 .alias TriangleSFXFlag  $3D     ;Initialization flags for triangle SFX
 .alias MultiSFXFlag     $3E     ;Initialization flags for SFX and some music
 .alias MusicInitFlag    $3F     ;Music init flags
-.alias CurrentMusic     $41     ;Stores the flag of the current music being played
-.alias SamusInLava      $42     ;#$01=Samus in lava, #$00=She is not.
-.alias PalToggle        $43
-.alias ShouldUpdateAttrs $44
-; These are now unused
-; $45, $46, $47, $48
+
+;Samus RAM.
+.alias SamusObjAction       $40     ;moved from $0300
+
+.alias CurrentMusic         $41     ;Stores the flag of the current music being played
+.alias PalToggle            $43
+.alias ShouldUpdateAttrs    $44
+
+.alias SamusVertSpeed       $45     ;moved from $0308
+.alias SamusHorzSpeed       $46     ;moved from $0309
+.alias SamusObjRadY         $47     ;moved from $0301
+.alias SamusObjRadX         $48     ;moved from $0302
 
 .alias ScrollDir        $49     ;0=Up, 1=Down, 2=Left, 3=Right.
 
@@ -153,6 +159,7 @@
 .alias RoomNumber       $5A     ;Room number currently being loaded.
 .alias SpritePagePos    $5B     ;Index into sprite RAM used to load object sprite data.
 ; used $5C - $64                ;Some routing eor $5C,x oer $5D,x where x == #$06 and counts down
+.alias SamusInLava      $64     ;#$01=Samus in lava, #$00=She is not.
 .alias ObjectCounter    $65     ;Counts such things as object explosion time.
 ; used                  $66
 .alias RoomPal_Lo_Nib   $67     ; Isolated to Room Drawing Routines
@@ -210,7 +217,7 @@
 ; used                  $87
 ; used                  $88
 ; unused                $89
-.alias StableRoomNumber $90
+; used in tourinan door $90
 ; used in door routine  $91
 
 ;----------------------------------------------------------------------------------------------------
@@ -242,7 +249,37 @@
 ;used in bank 3         $9E
 ;used in bank 3         $9F
 
-; TODO: Check on $90 - $B6 State unknown
+; TODO: Check on $90 - $9F State unknown
+
+; Moved $A0 from spinner destruction to more useful ZP used throughout the game
+
+.alias SamusJmpDsplcmnt $A0   ;Number of pixels vertically displaced from jump point.
+.alias VertCntrNonLinr  $A1   ;Verticle movement counter. Exponential change in speed.
+.alias HorzCntrLinear   $A2   ;Horizontal movement counter. Linear change in speed.
+.alias SamusGravity     $A3   ;Value used in calculating vertical acceleration on Samus.
+.alias SamusHorzAccel   $A4   ;Value used in calculating horizontal acceleration on Samus.
+.alias SamusHorzSpdMax  $A5   ;Value used in calculating horizontal acceleration on Samus.
+.alias Quarter          $A6
+
+; These get set whenever missile counts change
+.alias MissileCountHundreds $A7
+.alias MissileCountTens     $A8
+.alias MissileCountOnes     $A9
+
+.alias StableRoomNumber     $AA
+; unused                    $AB
+; unused                    $AC
+; unused                    $AD
+; unused                    $AE
+; unused                    $AF
+
+.alias MemuProp0        $B0   ; Memu props will use the stack from $0110 - $012F 
+.alias MemuProp1        $B1
+.alias MemuProp2        $B2
+.alias MemuProp3        $B3
+.alias MemuProp4        $B4
+.alias MemuProp5        $B5
+.alias MemuProp6        $B6
 
 .alias SpareMemB7       $B7     ;Written to in title routine and accessed by unsed routine.
 .alias SpareMemB8       $B8     ;Written to in title routine and accessed by unsed routine.
@@ -265,17 +302,13 @@
 .alias DrawCross        $C7     ;#$01=Draw cross on screen during crosshairs routine.
 .alias SpriteLoadPend   $C8     ;Set to #$00 after sprite RAM load complete.
 
-.alias SamusJmpDsplcmnt $C9   ;Number of pixels vertically displaced from jump point.
-.alias VertCntrNonLinr  $CB   ;Verticle movement counter. Exponential change in speed.
-.alias HorzCntrLinear   $CE   ;Horizontal movement counter. Linear change in speed.
-.alias SamusGravity     $CF   ;Value used in calculating vertical acceleration on Samus.
 
 .alias SpareMemD0       $D0     ;Spare me that can be relied on to always be zero.
 .alias SpareMemD1       $D1     ;Written to in title routine, but never accessed.
 .alias CurrentSFXFlags  $D1     ;Stores flags of SFX currently being processed.
 
-.alias SamusHorzAccel   $D2   ;Value used in calculating horizontal acceleration on Samus.
-.alias SamusHorzSpdMax  $D3   ;Used to calc maximum horizontal speed Samus can reach.
+;.alias SamusHorzAccel   $D2   ;Value used in calculating horizontal acceleration on Samus.
+;.alias SamusHorzSpdMax  $D3   ;Used to calc maximum horizontal speed Samus can reach.
 ; used, but isolated    $D4     ; D4, D5, and D6 are set, used, and then are completely free afterwards
 ; used, but isolated    $D5
 ; used, but isolated    $D6
@@ -284,10 +317,6 @@
 ; unused                $D9
 ; used, but isolated    $DA
 ; used, but isolated    $DB
-.alias Quarter                  $DC
-.alias MissileCountHundreds     $DD     ; These get set whenever missile counts change
-.alias MissileCountTens         $DE     
-.alias MissileCountOnes         $DF
 
 .alias SFXPtrE0         $E0     ;Pointer used by SFX routines.
 .alias SFXPtrE0LB       $E0     ;Pointer used by SFX routines, lower byte.
@@ -339,15 +368,17 @@
 .alias EndTimerLo       $010A   ;Lower byte of end game escape timer.
 .alias EndTimerHi       $010B   ;Upper byte of end game escape timer.    ; Use 9 times in bank 7
 
+.alias SpinnerProp0     $0110
+.alias SpinnerProp1     $0111
+.alias SpinnerProp2     $0112
+.alias SpinnerProp3     $0113
+
 .alias SpriteRAM        $0200   ;Through $02FF. Sprite RAM.
 
 ;-----------------------------------------[ Object RAM ]---------------------------------------------
 
 ; TODO: good candidates for ZP
 ; ObjectY (32), ObjectX (23), SamusGravity (14), SamusHorzAccel (10), SamusHit (10), VertCntrLinear (9), HorzCntrLinear (6), SamusJmpDsplcmnt (6)
-
-;Samus RAM.
-.alias SamusObjAction   $40     ;moved from $0300
 
 .alias ObjAction        $0300   ;Status of object. 0=object slot not in use.
 .alias ObjRadY          $0301   ;Distance in pixels from object center to top or bottom.
@@ -878,6 +909,8 @@
 .alias TwosCompliment           $8005
 .alias Common_UpdateEnAttr_05   $800B
 .alias Common_LF74B             $8012
+.alias GrowRadiusX              $8019
+.alias ShrinkRadiusX            $8022
 .alias L8048_Ptr_Table_Hi       $8048
 .alias L8048_Ptr_Table_Lo       $8050
 .alias Common_Collision_Func    $8395

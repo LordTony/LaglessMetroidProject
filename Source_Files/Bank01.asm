@@ -896,13 +896,13 @@ Bank01_L9A1B:  LDA #$00
 Bank01_L9A1D:  STA EnStatus,X
 Bank01_L9A20:  LDY #$0C
 Bank01_L9A22:  LDA #$0A
-Bank01_L9A24:  STA $00A0,Y
+Bank01_L9A24:  STA SpinnerProp0,Y
 Bank01_L9A27:  LDA EnYRoomPos,X
-Bank01_L9A2A:  STA $00A1,Y
+Bank01_L9A2A:  STA SpinnerProp1,Y
 Bank01_L9A2D:  LDA EnXRoomPos,X
-Bank01_L9A30:  STA $00A2,Y
+Bank01_L9A30:  STA SpinnerProp2,Y
 Bank01_L9A33:  LDA EnNameTable,X
-Bank01_L9A36:  STA $00A3,Y
+Bank01_L9A36:  STA SpinnerProp3,Y
 Bank01_L9A39:  DEY 
 Bank01_L9A3A:  DEY 
 Bank01_L9A3B:  DEY 
@@ -1538,6 +1538,7 @@ Bank01_LA2AE:  .byte $00           ;Lower byte of PPU palette adress.
 Bank01_LA2AF:  .byte $10           ;Palette data length.
 ;The following values are written to the background palette:
 Bank01_LA2B0:  .byte $0F, $20, $10, $00, $0F, $28, $19, $17, $0F, $27, $11, $07, $0F, $28, $16, $17
+
 Bank01_LA2C0:  .byte $3F           ;Upper byte of PPU palette adress.
 Bank01_LA2C1:  .byte $14           ;Lower byte of PPU palette adress.
 Bank01_LA2C2:  .byte $0C           ;Palette data length.

@@ -25,6 +25,24 @@
     lda $968B,y
     rts
 
+.advance GrowRadiusX
+    ;ldx PageIndex
+    lda EnRadX,x
+    clc
+    adc #$08
+    jmp _RadiusXSharedPart
+
+.advance ShrinkRadiusX
+    ;ldx PageIndex
+    lda #$00
+    sec
+    sbc EnRadX,x
+_RadiusXSharedPart:
+    sta $03
+    jsr GetXEnemyRoomPosition_09_08_0B
+    ldy EnRadY,x
+    jmp Bank07_LE89B
+
 .advance L8048_Ptr_Table_Hi
     .byte >_L84FD
     .byte >_L84A6
