@@ -1619,13 +1619,35 @@ ClearTopLeftCore_6400:
 
     `stx_12_bytes $6504
     `stx_12_bytes $6524
+
     ; left door
-    `stx_14_bytes $6542
-    `stx_14_bytes $6562
-    `stx_14_bytes $6582
-    `stx_14_bytes $65A2
-    `stx_14_bytes $65C2
-    `stx_14_bytes $65E2
+    `stx_13_bytes $6543
+    `stx_13_bytes $6563
+    `stx_13_bytes $6583
+    `stx_13_bytes $65A3
+    `stx_13_bytes $65C3
+    `stx_13_bytes $65E3
+
+    .scope
+        ; Mother brain door hack
+        ; Splitting the room loads into quarters causes the special
+        ; ScanItems door room load to write #$4E and then the second half of
+        ; the room load erases it. It causes the door junk to never load in properly
+        ; This hack just won't erase door tiles if they happen to be #4E in the $6400 table
+        pha
+        lda $6542
+        cmp #$4E
+        beq _afterMotherBrainDoorHack
+            stx $6542
+            stx $6562
+            stx $6582
+            stx $65A2
+            stx $65C2
+            stx $65E2
+        _afterMotherBrainDoorHack:
+        pla
+    .scend
+    
     rts
     
 ClearTopRightCore_6400:
@@ -1709,6 +1731,22 @@ ClearLeftDoor_6000:
     stx _1 + $0B
     stx _1 + $0C
     stx _1 + $0D
+.macend
+
+.macro stx_13_bytes
+    stx _1
+    stx _1 + $01
+    stx _1 + $02
+    stx _1 + $03
+    stx _1 + $04
+    stx _1 + $05
+    stx _1 + $06
+    stx _1 + $07
+    stx _1 + $08
+    stx _1 + $09
+    stx _1 + $0A
+    stx _1 + $0B
+    stx _1 + $0C
 .macend
 
 .macro stx_12_bytes

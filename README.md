@@ -134,20 +134,20 @@ SBX #$F0
   * It looks like the ridley and kraid dead bytes were based on the offset to MaxMissiles.
 * Zeebitites don't stay dead.
 * End Credits have their graphics corrupted
-* Can't get into the Mother Brain door
-  * Can launch yourself through the door by curling up into a ball and bombing yourself to the left
 * Killing 4 or 5 metroids at once crashes the game.
+  * This crash also happens when bombing multiple enemies at the same time. Probably just need to limit the sprites?
   * Sprite index overflows to 0 and starts writing at $0x1DD and a few other places around there
   * Probably need to cut it off early or figure out what I did to break it.
+  * You can see $01E5 and $01E9 written to when this crash is happening.
 * Missiles don't seem to hit spinners from far away (example: The ones hanging in Bank01 Room #$12)
   * Could be because I keep deleting clc and sec instructions
 
 ## Maybe Bugs (Check Original Game Behavior)
-* curling up into a ball and bombing next to a door while getting hit by a zoomer crashed the game (only saw it once)
+* Sometimes freezing metroids in place ends up seemingly teleporting them to random spots
 
 ## Pre Existing Bugs (or quirks; whatever. The original metroid sucks)
 * Killing a Metroid without a Missle Tank will crash or lock the game
-* Opening a door while falling vertically will move the closing door into a wall
+* Shooting a door open while falling vertically past it will move the closing door into a wall
 * Loading a room while too many sprites are being rendered (bullets + enemies + room transition) will hit the PPU cap
   and some room elements will have the wrong palette.
 * Can't pickup items while blinking (from lava)

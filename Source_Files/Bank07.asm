@@ -3797,6 +3797,7 @@ SamusOnElevatorOrEnemy:
     and #$01
     sta $0A
 
+StandingOnFrozenEnemyCheck:
     ldx #$50
 StandingOnFrozenEnemyLoop:
 *   lda EnStatus,x
@@ -4619,8 +4620,8 @@ LDEBC:
         ; Handle PageIndex == 0 aka Samus Case
             sta SamusObjRadY   
             sbc #$10
-            ;bcs +              ; radius should never be zero
-            ;    lda #$00
+            bcs +              ; radius should never be zero
+                lda #$00
         *   sta $08 
 
             iny        
@@ -4635,8 +4636,8 @@ LDEC1:
 
     ; Reduce Y Radius
       sbc #$10              ;Subtract #$10 from object y radius.
-      ;bcs +                 ;If number is still a positive number, branch to store value.
-      ;lda #$00              ;Number is negative.  Set Y radius to #$00.
+      bcs +                 ;If number is still a positive number, branch to store value.
+        lda #$00            ;Number is negative.  Set Y radius to #$00.
     * sta $08               ;Store result and return.
 
 LDEC6:  iny                 ;Increment to third frame data byte.
@@ -6344,13 +6345,14 @@ ObjectBackgrounCollisionCheck:
     cmp #$A0    ; is tile >= A0h? (walkable tile)
     bcs IsWalkableTile
     jmp IsBlastTile  ; tile is $80-$9F (blastable tiles)
+    ; safe
 
 IsWalkableTile:
     ldy IsSamus
     beq ++
     ; special case for Samus
     dey      ; = 0
-    sty SamusDoorData
+    sty SamusDoorData    ; y == 0
     cmp #$A0    ; crash with tile #$A0? (scroll toggling door)
     beq +
     cmp #$A1    ; crash with tile #$A1? (horizontal scrolling door)
@@ -6358,10 +6360,34 @@ IsWalkableTile:
     inc SamusDoorData
 *   inc SamusDoorData
 *   dex
-    beq +
-    jsr LE98E
-    jmp ObjectBackgrounCollisionCheck
+    beq SetCarryAndExit3
 
+;LE98E:
+    lda $02
+    clc
+    adc $06
+    sta $02
+    cmp #$F0
+    bcc +
+    adc #$0F
+    sta $02
+    lda ScrollDir
+    anc #$02
+    bne +
+    inc $0B
+*   lda $03
+    ;clc
+    adc $07
+    sta $03
+    bcc +
+    lda ScrollDir
+    and #$02
+    beq +
+    inc $0B
+*   jmp ObjectBackgrounCollisionCheck
+    ; safe
+
+SetCarryAndExit3:
 *   sec      ; no crash
     Exit16:
     rts
@@ -6591,33 +6617,6 @@ LD79F:  ldy PageIndex           ;Load index into object RAM to find proper objec
 
     rts
 
-;---------------------------------------------------------------------------------------------------
-
-; TODO: Easy - Inline 
-LE98E:
-    lda $02
-    clc
-    adc $06
-    sta $02
-    cmp #$F0
-    bcc +
-    adc #$0F
-    sta $02
-    lda ScrollDir
-    anc #$02
-    bne +
-    inc $0B
-*   lda $03
-    ;clc
-    adc $07
-    sta $03
-    bcc +
-    lda ScrollDir
-    and #$02
-    beq +
-    inc $0B
-*   rts
-
 SwitchToOppositeNameTable: 
     lda PPUCNT0ZP
     eor #$03
@@ -6845,10 +6844,11 @@ LEA37:  bcs AttribTableWrite        ;Branch if time to write PPU attribute table
 ; Only do this stuff if we are drawing the first quarter
 lda Quarter
 bne SetupFromRoomStart
-    jsr UpdateRoomSpriteInfo 
+    jsr UpdateRoomSpriteInfo
     jsr ScanForItems 
 
-SetupFromRoomStart:                 ; start_counting_stuff_addr in BuildRoomAnalyzer.lua
+SetupFromRoomStart:
+
 LEA3F:  ldy RoomNumber              ;Room number to load.
         sty StableRoomNumber        
 LEA43:  lda RoomPointerTable_Lo,y 
@@ -8691,12 +8691,7 @@ _IsObjectVisible:
     tay                    
     sec                    
     sbc ScrollY            
-    sta $10                
-
-    lda EnXRoomPos,x       
-    sec                    
-    sbc ScrollX            
-    sta $0E                
+    sta $10             
 
     lda ScrollDir          
     and #$02               
@@ -8718,16 +8713,22 @@ _VertScrollCheck:
     adc $10                    
     cmp #$F0                   
     bcc ChooseEnemySubroutine 
-    bcs EXIT22                 
+    rts                
+     ; safe
 
 _VertBccCheck:
     bcc EXIT22 
     lda EnRadX,x 
     cmp $10      
-    bcs EXIT22
     bcc ChooseEnemySubroutine
+    rts
 
 _HorzScrollCheck:
+    lda EnXRoomPos,x       
+    sec                    
+    sbc ScrollX            
+    sta $0E  
+
     lda EnNameTable,x        
     eor PPUCNT0ZP            
     and #$01                 
@@ -8737,13 +8738,14 @@ _HorzScrollCheck:
     lda EnRadX,x             
     adc $0E                  
     bcc ChooseEnemySubroutine
-    bcs EXIT22 
+    rts
 
 _HorzBccCheck:
     bcc EXIT22  
     lda EnRadX,x
     cmp $0E     
     bcs EXIT22
+    ; fall through
 
 ChooseEnemySubroutine:
 
@@ -8759,7 +8761,7 @@ ChooseEnemySubroutine:
     sta EnAttr_05,x
 
     ldy EnStatus,x
-    sty $81                 ; Y is EnStatus,x at this point
+    sty $81
 
 DoEnemySubroutine:
     lda DoOneEnemyTableHiByte - 1, y    ; -1 is because we already handled the 0 case
@@ -10121,7 +10123,6 @@ Exit34:
     sta SpinnerProp0,x
     rts
 
-LFC65:
 UpdateMellowMemu: 
     ldx #$F0
     stx PageIndex
@@ -10130,15 +10131,12 @@ UpdateMellowMemu:
     bne KillObject_Trampoline2
     lda #$03
     jsr UpdateEnemyAnimWithPreloadedPageIndex
-    lda RandomNumber1
-    sta $8A
 
 SetupMellowMemuLoop:
-    lda #$18
-
+    ldx #$18
 UpdateMellowMemuLoop:
-*   pha
-    tax
+*   txa
+    pha
     lda MemuProp0,x
     beq NextMemuLoopItem        ; if 0
         jsr ChooseMemuRoutine
@@ -10150,8 +10148,7 @@ NextMemuLoopItem:
     and #$F8
     sta MemuProp6,x
     txa
-    sec
-    sbc #$08
+    sbx #$08
     bpl UpdateMellowMemuLoop
 
 MemuExit:
@@ -10160,47 +10157,6 @@ MemuExit:
 KillObject_Trampoline2:
 *  jmp KillObject           ;($FA18)Free enemy data slot.
 
-MemuRoutine1:
-;LFD84:
-    lda MemuProp6,x
-    and #$04
-    beq +
-        lda #$03
-        sta MemuProp0,x
-
-; LFD08:
-*   lda #$00
-    sta MemuProp5,x
-    tay                 ; y == 0
-    lda ObjectX
-    sec
-    sbc MemuProp2,x
-    bpl +
-        iny                 ; y == 1
-
-        eor #$FF
-        clc                 ;TODO: Stick a breakpoint here and see what the carry bit is
-        adc #$01
-
-*   cmp #$10
-    bcs AfterLFD08
-        tya
-        sta MemuProp4,x
-        lda #$02
-        sta MemuProp0,x
-AfterLFD08:
-
-    jsr LFD25
-    jmp SomethingAboutMovement
-    ; safe
-
-ChooseMemuRoutine:
-    cmp #$02
-    beq MemuRoutine2    ; if = 2
-    bcs MemuRoutine3    ; if > 2     (in practice this is == 3)
-    bcc MemuRoutine1    ; if = 1 jmp always 
-    ; safe
-
 MemuRoutine2:  
     ;LFD84:
     lda MemuProp6,x
@@ -10208,8 +10164,6 @@ MemuRoutine2:
         beq +
         lda #$03
         sta MemuProp0,x
-
-; JUMANJI TODO MEMU MOVEMENT 
 ;LFCC1:
 *   jsr LFD5F
     lda MemuProp4,x
@@ -10248,6 +10202,46 @@ MemuRoutine2:
 AfterLFCC1:
     jmp SomethingAboutMovement
 
+ChooseMemuRoutine:
+    cmp #$02
+    beq MemuRoutine2    ; if = 2
+    bcs MemuRoutine3    ; if > 2     (in practice this is == 3)
+    ; Fall through to MemuRoutine1
+
+MemuRoutine1:
+;LFD84:
+    lda MemuProp6,x
+    and #$04
+    beq +
+        lda #$03
+        sta MemuProp0,x
+
+; LFD08:
+*   lda #$00
+    sta MemuProp5,x
+    tay                     ; y == 0
+    lda ObjectX
+    sec
+    sbc MemuProp2,x
+    bpl +
+        iny                 ; y == 1
+
+        eor #$FF
+        clc                 ;TODO: Stick a breakpoint here and see what the carry bit is
+        adc #$01
+
+*   cmp #$10
+    bcs AfterLFD08
+        tya
+        sta MemuProp4,x
+        lda #$02
+        sta MemuProp0,x
+AfterLFD08:
+
+    jsr LFD25
+    jmp SomethingAboutMovement
+    ; safe
+
 MemuRoutine3:
     lda #$00
     sta MemuProp0,x
@@ -10259,11 +10253,11 @@ SFX_EnemyHit:
 
 ; TODO: inline?
 LFD25:
-    txa
+    txa         ; X == Memu Offset here $00, $08, $10, or $18
     lsr
     lsr
     lsr
-    adc $8A
+    adc RandomNumber1 
     sta $8A
     lsr $8A
     and #$03
@@ -10344,7 +10338,7 @@ _NewCommonPt_2:
     inc $0B
 _Store_8_and_Keep_Going:
     sta $08
-
+    ; Fall through
 LFDBF:
     lda $05
     clc
@@ -10355,12 +10349,14 @@ LFDBF:
     ldy $02
     beq ClcExit2
     inc $0B
-*   jmp ++
+Store_A_in_09_And_Return:
+*   sta $09
+    rts
 
 *   adc $09
-    bcs +
+    bcs Store_A_in_09_And_Return
     ldy $02
-    beq ClcExit2
+    beq Exit26  ; carry is already clear here so no need to branch to ClcExit2 
     inc $0B
 
 *   sta $09
