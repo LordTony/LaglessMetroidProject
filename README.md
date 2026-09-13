@@ -129,6 +129,7 @@ SBX #$F0
 
 ## Definite Bugs
 * Pipe spawners looks like they don't die or leave the name tables properly. (Elevator to Tourian)
+  * It looks like they also don't quite spawn in properly. Will need to research how these things even worked from the start
 * Mini bosses don't seem to spawn properly
   * This this has to do with "MaxMissiles" being moved into zero page a long time ago.
   * It looks like the ridley and kraid dead bytes were based on the offset to MaxMissiles.

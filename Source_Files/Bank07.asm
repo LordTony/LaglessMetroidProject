@@ -7431,11 +7431,11 @@ UpdateDoorData:
     eor #$03          ;
     tax
 
-    and $6C         ;Moves door info from one name table to the next
-    sta $6C         ;when the room is transferred across name tables.
+    and DoorOnNameTable3         ;Moves door info from one name table to the next
+    sta DoorOnNameTable3         ;when the room is transferred across name tables.
     txa               
-    and $6D         ;Moves door info from one name table to the next
-    sta $6D         ;when the room is transferred across name tables.
+    and DoorOnNameTable0         ;Moves door info from one name table to the next
+    sta DoorOnNameTable0         ;when the room is transferred across name tables.
 
 ; Loop goes 50, 40, 30, 20, 10, 00
 SetupUpdateDoorDataLoop:
@@ -7480,7 +7480,7 @@ LED5B:
     eor #$01
     tay
     lda #$00
-    sta $006C,y
+    sta $6C,y
 
 Setup_LED5B_Loop:
     pla

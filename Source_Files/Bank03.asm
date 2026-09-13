@@ -145,6 +145,14 @@ Bank03_L9510:  .byte $04, $02, $31, $5B, $7B, $7E, $3E, $18, $00, $00, $00, $1A,
 ;----------------------------------------------------------------------------------------------------
 .scope
 
+;Structure #$2B
+Bank03_Struct_2B:  
+	.byte $02, $09, $36
+	.byte $02, $09, $36
+	.byte $02, $09, $36
+	.byte $FF
+
+
 .advance PalPntrTbl_Hi
 
     .byte >_Palette00         ;($A718)
@@ -2309,7 +2317,7 @@ Bank03_LA95E:
 
 Bank03_Room_05_Left:
 	.byte $00, $14
-	.byte $50, $04
+	.byte $50, $2B
 	.byte $80, $14
 	.byte $D0, $2A
 	.byte $FF
@@ -3360,25 +3368,25 @@ Tourian_Room_0A_Attrs:
     .byte $A7, $FF, $A2, $FF, $A4, $FF, $FF, $4F, $A0, $A1, $04, $10, $00, $08, $18, $1C
     .byte $0C, $09, $7A, $2A, $14, $20, $24, $28, $26, $2A, $2B, $2B, $FF, $31, $35, $3D
     .byte $41, $39, $3B, $0B, $2F, $50, $54, $56, $FF, $5B, $FF, $5D, $63, $65, $6D, $6F
-    .byte $71, $45, $FF, $49, $90, $7C
+    .byte $71, $45, $FF, $49, $90, $7C, $4E
 
 .advance MacroUpperLeft
     .byte $A7, $FF, $A2, $FF, $FF, $A5, $79, $4F, $A0, $A1, $05, $11, $01, $08, $19, $1D
     .byte $0D, $09, $7B, $2C, $15, $21, $25, $28, $27, $2B, $2C, $2B, $FF, $32, $36, $3E
     .byte $42, $3A, $3B, $0B, $30, $51, $55, $57, $FF, $5C, $FF, $62, $64, $66, $6E, $70
-    .byte $72, $46, $98, $4A, $91, $7D
+    .byte $72, $46, $98, $4A, $91, $7D, $FF
 
 .advance MacroLowerRight
     .byte $A7, $A6, $FF, $A3, $A4, $FF, $FF, $4F, $A0, $A1, $06, $12, $02, $08, $1A, $1E
     .byte $0E, $09, $7F, $FF, $16, $22, $20, $29, $26, $FF, $FF, $FF, $FF, $33, $37, $3F
     .byte $43, $39, $3C, $2D, $0B, $52, $54, $58, $FF, $5F, $61, $67, $69, $6B, $73, $75
-    .byte $77, $47, $FF, $4B, $90, $4D
+    .byte $77, $47, $FF, $4B, $90, $4D, $4E
 
 .advance MacroLowerLeft
     .byte $A7, $A6, $FF, $A3, $FF, $A5, $7E, $4F, $A0, $A1, $07, $13, $03, $08, $1B, $1F
     .byte $0F, $09, $5A, $FF, $17, $23, $21, $29, $27, $FF, $FF, $FF, $FF, $34, $38, $40
     .byte $44, $3A, $3C, $2E, $0B, $53, $55, $59, $5E, $60, $FF, $68, $6A, $6C, $74, $76
-    .byte $78, $48, $98, $4C, $91, $FF
+    .byte $78, $48, $98, $4C, $91, $FF, $FF
     
 .scend
 
@@ -3916,7 +3924,7 @@ MetroidData:
     .byte >Bank03_LAD3F,        >Bank03_LAD48, 		>Bank03_LAD61, 		>Bank03_LAD66, 		>Bank03_LAD6B, 		>Bank03_LAD99, 		>Bank03_LADAC, 		>Bank03_LADC8
     .byte >Bank03_LADDD,        >Bank03_LADFE, 		>Bank03_LAE0F, 		>Bank03_LAE1A, 		>Bank03_LAE1E, 		>Bank03_LAE21, 		>Bank03_LAE2C, 		>Bank03_LAE36
 	.byte >Bank03_Struct_20,	>Bank03_Struct_21,	>Bank03_Struct_22,	>Bank03_Struct_23,	>Bank03_Struct_24,	>Bank03_Struct_25,	>Bank03_Struct_26,	>Bank03_Struct_27
-	.byte >Bank03_Struct_28,	>Bank03_Struct_29,	>Bank03_Struct_2A 
+	.byte >Bank03_Struct_28,	>Bank03_Struct_29,	>Bank03_Struct_2A,	>Bank03_Struct_2B 
 
 .advance StructPointerTable_Lo
 
@@ -3925,7 +3933,7 @@ MetroidData:
     .byte <Bank03_LAD3F,    	<Bank03_LAD48, 		<Bank03_LAD61, 		<Bank03_LAD66, 		<Bank03_LAD6B, 		<Bank03_LAD99, 		<Bank03_LADAC, 		<Bank03_LADC8
     .byte <Bank03_LADDD,    	<Bank03_LADFE, 		<Bank03_LAE0F, 		<Bank03_LAE1A, 		<Bank03_LAE1E, 		<Bank03_LAE21, 		<Bank03_LAE2C, 		<Bank03_LAE36
 	.byte <Bank03_Struct_20,	<Bank03_Struct_21,	<Bank03_Struct_22,	<Bank03_Struct_23,	<Bank03_Struct_24,	<Bank03_Struct_25,	<Bank03_Struct_26,	<Bank03_Struct_27
-	.byte <Bank03_Struct_28,	<Bank03_Struct_29,	<Bank03_Struct_2A 
+	.byte <Bank03_Struct_28,	<Bank03_Struct_29,	<Bank03_Struct_2A,	<Bank03_Struct_2B 
 
 ;------------------------------------------------------------------------------------------------------
 
