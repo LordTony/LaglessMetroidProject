@@ -1553,38 +1553,40 @@ _done:
 
 jsr UpdateItems             ;($DB37)Display of power-up items.
 
-; Don't kow what this is doing. Seems to be some kind of timer thing
 .scope
-    LFDE3:  
-        lda EndTimerHi
-        cmp #$99
-        bne _loopPrep
-        clc
-        sbc EndTimerLo      ; A = zero if timer just started
-        bne _loopPrep      ; branch if not
-        sta $06
-        lda #$38
-        sta $07
-        jsr LDC54
-    _loopPrep:
-        ldx #$20
-    _loop:
-        lda $0758,x
-        sec
-        sbc #$02
-        bne _endloop
-        sta $06
-        inc $0758,x
-        txa
-        lsr
-        adc #$3C
-        sta $07
-        jsr LDC54
-        txa
-        sbx #$08
-        bne _Loop
-        jsr LDC54
-    _endloop:
+    UpdateZeebetite:
+            lda EndTimerHi
+            cmp #$99
+            bne _loopPrep
+                clc
+                sbc EndTimerLo      ; A = zero if timer just started
+                bne _loopPrep      ; branch if not
+                    sta $06
+                    lda #$38
+                    sta $07
+                    jsr AddItemToHistoryWithPreloadedItemID
+                    
+        lda InTourianBank
+        beq _skip 
+        _loopPrep:
+            ldx #$20
+        _loop:
+            lda $0758,x
+            sec
+            sbc #$02
+            bne _loopNext
+                sta $06
+                inc $0758,x
+                txa
+                lsr
+                adc #$3C
+                sta $07
+                jsr AddItemToHistoryWithPreloadedItemID
+        _loopNext:
+            txa
+            sbx #$08
+            bpl _Loop
+    _skip:
 .scend
 
 ; Clear ram from unused objects
@@ -4267,6 +4269,7 @@ LDC4F:  STA $06             ;item y position before writing to unique item histo
 
 AddItemToHistory:
 LDC51:  JSR CreateItemID        ;($DC67)Create an item ID to put into unique item history.
+AddItemToHistoryWithPreloadedItemID:
 LDC54:  LDY NumUniqueItems     ;Store number of uniqie items in Y.
 LDC57:  LDA $06             ;
 LDC59:  STA UnqItmHist,y     ;Store item ID in inuque item history.

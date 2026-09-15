@@ -128,11 +128,10 @@ SBX #$F0
 * BenchmarkNMI.lua shows how long it takes to reach NMI, min and max, over a second. This can be used to find painful spots
 
 ## Definite Bugs
-* Zeebitites don't stay dead.
 * Mini bosses don't seem to spawn properly
   * This this has to do with "MaxMissiles" being moved into zero page a long time ago.
   * It looks like the ridley and kraid dead bytes were based on the offset to MaxMissiles.
-* End Credits have their graphics corrupted
+* End credits have their graphics corrupted
 * Killing 4 or 5 metroids at once crashes the game.
   * This crash also happens when bombing multiple enemies at the same time. Probably just need to limit the sprites?
   * Sprite index overflows to 0 and starts writing at $0x1DD and a few other places around there

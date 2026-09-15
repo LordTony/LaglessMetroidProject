@@ -240,6 +240,9 @@ _L81CA:  BNE _L81F5
 _L81CC:  LDA #$01
 _L81CE:  JSR _L856B
 
+; Temporary Hack - TODO: Remove this and get it all pretty again
+jmp _L81D1
+
 .advance $81D1                  ; Called in Bank 07 only
 _L81D1:  LDA $6AFF,X
 _L81D4:  JSR TwosCompliment
@@ -271,6 +274,9 @@ _L8203:  JSR _L856B
 .advance $8206                  ; Called in Bank 07 only
 _L8209:  JSR TwosCompliment
 _L820C:  STA $6AFE,X
+
+; Temporary Hack - TODO: Remove this and get it all pretty again
+jmp _L820F
 
 .advance $820F                  ; Called in Bank 07 only
 _L820F:  JSR _L81F6
