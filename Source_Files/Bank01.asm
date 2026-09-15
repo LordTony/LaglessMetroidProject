@@ -879,35 +879,33 @@ Bank01_L99F7:  JMP $99C8
 Bank01_HandleBankEnemies4:
 Bank01_L99FA:  LDA $81
 Bank01_L99FC:  CMP #$01
-Bank01_L99FE:  BEQ $9A44
+Bank01_L99FE:  BEQ Bank01_L9A44
 Bank01_L9A00:  CMP #$03
-Bank01_L9A02:  BEQ $9A49
+Bank01_L9A02:  BEQ Bank01_L9A49
 Bank01_L9A04:  LDA EnCounter,X
 Bank01_L9A07:  CMP #$0F
-Bank01_L9A09:  BCC $9A3F
+Bank01_L9A09:  BCC Bank01_L9A3F
 Bank01_L9A0B:  CMP #$11
-Bank01_L9A0D:  BCS $9A16
+Bank01_L9A0D:  BCS Bank01_L9A16
 Bank01_L9A0F:  LDA #$3A
 Bank01_L9A11:  STA $6B01,X
-Bank01_L9A14:  BNE $9A3F
+Bank01_L9A14:  BNE Bank01_L9A3F
 Bank01_L9A16:  DEC $6B01,X
-Bank01_L9A19:  BNE $9A3F
+Bank01_L9A19:  BNE Bank01_L9A3F
 Bank01_L9A1B:  LDA #$00
 Bank01_L9A1D:  STA EnStatus,X
-Bank01_L9A20:  LDY #$0C
+Bank01_L9A20:  LDY #$18
 Bank01_L9A22:  LDA #$0A
-Bank01_L9A24:  STA SpinnerProp0,Y
+Bank01_L9A24:  STA SpinnerStatus,Y
 Bank01_L9A27:  LDA EnYRoomPos,X
-Bank01_L9A2A:  STA SpinnerProp1,Y
+Bank01_L9A2A:  STA SpinnerYPos,Y
 Bank01_L9A2D:  LDA EnXRoomPos,X
-Bank01_L9A30:  STA SpinnerProp2,Y
+Bank01_L9A30:  STA SpinnerXPos,Y
 Bank01_L9A33:  LDA EnNameTable,X
-Bank01_L9A36:  STA SpinnerProp3,Y
-Bank01_L9A39:  DEY 
-Bank01_L9A3A:  DEY 
-Bank01_L9A3B:  DEY 
-Bank01_L9A3C:  DEY 
-Bank01_L9A3D:  BPL $9A22
+Bank01_L9A36:  STA SpinnerNameTbl,Y
+               lda IdentityTable - $08, y
+               tay 
+Bank01_L9A3D:  BPL Bank01_L9A22
 Bank01_L9A3F:  LDA #$02
 Bank01_L9A41:  JMP StartUpdateEnemyAnimation
 
@@ -915,6 +913,7 @@ Bank01_L9A44:  LDA #$08
 Bank01_L9A46:  JSR UpdateEnemyAnim
 Bank01_L9A49:  JMP Start_Special_Attrs
 
+.advance $9A4C
 Bank01_HandleBankEnemies5:
 Bank01_L9A4C:  JSR DoSomethingToFrameCount
 Bank01_L9A4F:  AND #$03
@@ -1074,7 +1073,7 @@ Bank01_L9B85:  STA $05
 Bank01_L9B87:  PLA 
 Bank01_L9B88:  STA $04
 Bank01_L9B8A:  JSR GetXEnemyRoomPosition_09_08_0B
-Bank01_L9B8D:  JSR Bank07_LFD8F
+Bank01_L9B8D:  JSR UpdateObjectLocation
 Bank01_L9B90:  BCC $9B9A
 Bank01_L9B92:  JSR $9C96
 Bank01_L9B95:  LDA #$03
@@ -1197,7 +1196,7 @@ Bank01_L9C7D:  LDA $9CBB,Y
 Bank01_L9C80:  STA $05
 Bank01_L9C82:  LDX #$00
 Bank01_L9C84:  JSR GetXEnemyRoomPosition_09_08_0B
-Bank01_L9C87:  JSR Bank07_LFD8F
+Bank01_L9C87:  JSR UpdateObjectLocation
 Bank01_L9C8A:  LDX PageIndex
 Bank01_L9C8C:  BCC $9CA7
 Bank01_L9C8E:  LDA EnStatus,X
@@ -2451,8 +2450,8 @@ Bank01_Room_15_Left:
 	.byte $C4, $05
 	.byte $D0, $10
 	.byte $FD
-	.byte $17, $07, $C5			; Zeb Hole
 	.byte $21, $06, $23			; Enemy
+	.byte $17, $07, $C5			; Zeb Hole
 	.byte $FF
 
 ;Room #$16

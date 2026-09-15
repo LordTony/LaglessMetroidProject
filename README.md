@@ -24,7 +24,7 @@ The baseline benchmark is Samus standing still in the opening room with 2 of the
   * Lagless Metroid finishes work in **54 to 72** scanlines
   * Lagless Metroid finishes work in **39% to 48%** of the scanlines standard NES Metroid takes
   * The limit might be something like **50** scanlines, so keep pushing
-    * There seems to be only 1 spot left in the game where lag is possible (Brinstar Bank 01 Rooms #$24 and #$25)
+    * Lag seems to be nearly gone except in the most severe places
 
 ### Code Progress
 * ChooseRoutine has been removed from bank07 and is now only called from outside
@@ -128,12 +128,10 @@ SBX #$F0
 * BenchmarkNMI.lua shows how long it takes to reach NMI, min and max, over a second. This can be used to find painful spots
 
 ## Definite Bugs
-* Pipe spawners looks like they don't die or leave the name tables properly. (Elevator to Tourian)
-  * It looks like they also don't quite spawn in properly. Will need to research how these things even worked from the start
+* Zeebitites don't stay dead.
 * Mini bosses don't seem to spawn properly
   * This this has to do with "MaxMissiles" being moved into zero page a long time ago.
   * It looks like the ridley and kraid dead bytes were based on the offset to MaxMissiles.
-* Zeebitites don't stay dead.
 * End Credits have their graphics corrupted
 * Killing 4 or 5 metroids at once crashes the game.
   * This crash also happens when bombing multiple enemies at the same time. Probably just need to limit the sprites?
@@ -145,6 +143,7 @@ SBX #$F0
 
 ## Maybe Bugs (Check Original Game Behavior)
 * Sometimes freezing metroids in place ends up seemingly teleporting them to random spots
+* Holding forward while walking into an enemy shows a frame or two of the screw attack.
 
 ## Pre Existing Bugs (or quirks; whatever. The original metroid sucks)
 * Killing a Metroid without a Missle Tank will crash or lock the game

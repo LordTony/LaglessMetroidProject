@@ -503,7 +503,7 @@ L82B7:  AND #$FC                ;
 L82B9:  STA PPUCNT0ZP           ;
 
 L82BB:  INY                     ;Y=0.
-L82BC:  STY SpareMemB7          ;Accessed by unused routine.
+L82BC:  STY SpareMemB7          ;Used by Memu code
 L82BE:  STY SpareMemB8          ;Accessed by unused routine.
 L82C0:  STY PalDataIndex        ;
 L82C2:  STY ScrnFlashPalInd     ;Clear all index values from these addresses.
@@ -5826,6 +5826,12 @@ CreateIdentityTable:
         inx
         bne _main
         ldx #$0F
+
+     _lower:
+        txa
+        sta IdentityTable - $100,x
+        inx
+        bne _lower
     rts
 .scend
 

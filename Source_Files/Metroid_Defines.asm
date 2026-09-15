@@ -64,7 +64,7 @@
 .alias SwitchPending    $24     ;Switch memory page. Page #=SwitchPending-1.
 .alias MMCReg0Cntrl     $25     ;Stores bits to be loaded into MMC1 Register 0.
 ;used in room routine   $26
-;used in room routine  $27
+;used in room routine   $27
 ;unused                 $28     
 .alias Timer2Delay      $29     ;Count down from 9 to 0. Decremented every frame.
 .alias Timer1           $2A     ;Decremented every frame after set.
@@ -158,7 +158,7 @@
 .alias DoorDelay        $59     ;Number of frames to delay when Samus entering/exiting doors.
 .alias RoomNumber       $5A     ;Room number currently being loaded.
 .alias SpritePagePos    $5B     ;Index into sprite RAM used to load object sprite data.
-; used $5C - $64                ;Some routing eor $5C,x oer $5D,x where x == #$06 and counts down
+; used $5C - $63                ;Some routing eor $5C,x oer $5D,x where x == #$06 and counts down
 .alias SamusInLava      $64     ;#$01=Samus in lava, #$00=She is not.
 .alias ObjectCounter    $65     ;Counts such things as object explosion time.
 ; used                  $66
@@ -267,19 +267,34 @@
 .alias MissileCountOnes     $A9
 
 .alias StableRoomNumber     $AA
-; unused                    $AB
-; unused                    $AC
+
+; These two hit by the sound engine about 5 to 8 times per frame.
+.alias ThisSoundChannel     $AB ; Prev $064B   ;Least sig. byte of current channel(00,04,08 or 0C)
+.alias MusicInitIndex       $AC ; Prev $065E   ;index for loading $62B thru $637(base=$BD31).
 ; unused                    $AD
 ; unused                    $AE
 ; unused                    $AF
 
-.alias MemuProp0        $B0   ; Memu props will use the stack from $0110 - $012F 
-.alias MemuProp1        $B1
-.alias MemuProp2        $B2
-.alias MemuProp3        $B3
-.alias MemuProp4        $B4
-.alias MemuProp5        $B5
-.alias MemuProp6        $B6
+; 4 Memu slots in memory.
+; Memu 1        $B0 - $B1
+; Memu 2        $B8 - $B9
+; Memu 3        $C0 - $C1
+; Memu 4        $C8 - $C9
+
+.alias MemuStatus       $B0 
+.alias MemuNameTbl      $B1
+
+; Pipe Enemy 1  $B2 - $B3
+; Pipe Enemy 2  $BA - $BB
+; Pipe Enemy 3  $C2 - $C3
+; Pipe Enemy 4  $CA - $CB
+
+.alias PipeEnemyStatus  $B2
+.alias PipeEnemyNameTbl $B3
+
+; Spinners - $B4, $BC, $C4, $CC
+.alias SpinnerStatus    $B4
+
 
 .alias SpareMemB7       $B7     ;Written to in title routine and accessed by unsed routine.
 .alias SpareMemB8       $B8     ;Written to in title routine and accessed by unsed routine.
@@ -368,10 +383,20 @@
 .alias EndTimerLo       $010A   ;Lower byte of end game escape timer.
 .alias EndTimerHi       $010B   ;Upper byte of end game escape timer.    ; Use 9 times in bank 7
 
-.alias SpinnerProp0     $0110
-.alias SpinnerProp1     $0111
-.alias SpinnerProp2     $0112
-.alias SpinnerProp3     $0113
+; used in bank 03       $010C
+; used in bank 03       $010D
+
+; used in bank 07       $010F
+
+.alias SpinnerYPos      $0111
+.alias SpinnerXPos      $0112
+.alias SpinnerNameTbl   $0113
+
+.alias MemuProp1        $0131
+.alias MemuProp2        $0132
+.alias MemuProp4        $0134
+.alias MemuProp5        $0135
+.alias MemuProp6        $0136
 
 .alias SpriteRAM        $0200   ;Through $02FF. Sprite RAM.
 
@@ -379,6 +404,8 @@
 
 ; TODO: good candidates for ZP
 ; ObjectY (32), ObjectX (23), SamusGravity (14), SamusHorzAccel (10), SamusHit (10), VertCntrLinear (9), HorzCntrLinear (6), SamusJmpDsplcmnt (6)
+
+; ObjAction 0300, ObjRadY 0301, ObjRadX 0302, ObjVertSpeed $0308, ObjHorzSpeed $0309
 
 .alias ObjAction        $0300   ;Status of object. 0=object slot not in use.
 .alias ObjRadY          $0301   ;Distance in pixels from object center to top or bottom.
@@ -521,15 +548,12 @@
 .alias MusicSQ2Sweep    $0649   ;Value is loaded into SQ2Cntrl1 when playing music
 .alias TriangleSweep    $064A   ;Loaded into TriangleCntrl1(not used)
 
-.alias ThisSoundChannel $064B   ;Least sig. byte of current channel(00,04,08 or 0C)
-
 .alias NoiseInUse       $0652     ;Noise in use? (Not used)
 .alias SQ1InUse         $0653     ;1=SQ1 channel being used by SFX, 0=not in use
 .alias SQ2InUse         $0654     ;2=SQ2 channel being used by SFX, 0=not in use
 .alias TriangleInUse    $0655     ;3=Triangle channel being used by SFX, 0=not in use
 
 .alias CrntMusicRepeat  $065D   ;Stores flags of music to repeat
-.alias MusicInitIndex   $065E   ;index for loading $62B thru $637(base=$BD31).
 
 .alias NoiseSFXLength   $0660   ;Stores number of frames to play Noise SFX
 .alias SQ1SFXLength     $0661   ;Stores number of frames to play SQ1 SFX
@@ -565,7 +589,10 @@
 .alias TriangleContSFX  $068B   ;Continuation flags for Triangle SFX
 .alias MultiContSFX     $068C   ;Continuation flags for Multi SFX
 
-.alias PipeEnemyStatus  $0728
+;.alias PipeEnemyStatus  $0728
+.alias PipeEnemyYPos    $072A
+.alias PipeEnemyXPos    $072B
+;.alias PipeEnemyNameTbl $072C
 
 .alias PowerUpType      $0748   ;Holds the byte describing what power-up is on name table.
 .alias PowerUpYCoord    $0749   ;Y coordinate of the power-up.

@@ -412,25 +412,25 @@ Bank04_L9965:  DEC $6B01,X
 Bank04_L9968:  BNE $998E
 Bank04_L996A:  LDA #$00
 Bank04_L996C:  STA $6AF4,X
-Bank04_L996F:  LDY #$0C
+Bank04_L996F:  LDY #$18
 Bank04_L9971:  LDA #$0A
-Bank04_L9973:  STA SpinnerProp0,Y
+Bank04_L9973:  STA SpinnerStatus,Y          ; TODO: Might be screwed up now
 Bank04_L9976:  LDA $0400,X
-Bank04_L9979:  STA SpinnerProp1,Y
+Bank04_L9979:  STA SpinnerYPos,Y
 Bank04_L997C:  LDA $0401,X
-Bank04_L997F:  STA SpinnerProp2,Y
+Bank04_L997F:  STA SpinnerXPos,Y
 Bank04_L9982:  LDA $6AFB,X
-Bank04_L9985:  STA SpinnerProp3,Y
-Bank04_L9988:  DEY
-Bank04_L9989:  DEY
-Bank04_L998A:  DEY
-Bank04_L998B:  DEY
-Bank04_L998C:  BPL $9971
+Bank04_L9985:  STA SpinnerNameTbl,Y
+               lda IdentityTable, y
+               tay 
+Bank04_L998C:  BPL Bank04_L9971
 Bank04_L998E:  LDA #$02
 Bank04_L9990:  JMP StartUpdateEnemyAnimation
 Bank04_L9993:  LDA #$08
 Bank04_L9995:  JSR UpdateEnemyAnim
 Bank04_L9998:  JMP Start_Special_Attrs
+
+.advance $999B
 Bank04_L999B:  JSR DoSomethingToFrameCount
 Bank04_L999E:  AND #$03
 Bank04_L99A0:  BEQ $99D6
@@ -465,7 +465,7 @@ Bank04_L99E2:  LDA $040A,X
 Bank04_L99E5:  AND #$03
 Bank04_L99E7:  ROL 
 Bank04_L99E8:  TAY 
-Bank04_L99E9:  LDA $99EF,Y
+Bank04_L99E9:  LDA Bank04_L99EF,Y
 Bank04_L99EC:  JMP DoSomethingToAnimationIndecies
 
 Bank04_L99EF:  .byte $35, $35, $3E, $38, $3B, $3B, $38, $3E
@@ -552,7 +552,7 @@ Bank04_L9A97:  STA $05
 Bank04_L9A99:  PLA 
 Bank04_L9A9A:  STA $04
 Bank04_L9A9C:  JSR $9BBC
-Bank04_L9A9F:  JSR Bank07_LFD8F
+Bank04_L9A9F:  JSR UpdateObjectLocation
 Bank04_L9AA2:  BCC $9AAC
 Bank04_L9AA4:  JSR $9BAA
 Bank04_L9AA7:  LDA #$03
@@ -672,7 +672,7 @@ Bank04_L9B96:  LDX #$00
 Bank04_L9B98:  JSR $9BBC
 Bank04_L9B9B:  PLA 
 Bank04_L9B9C:  TAX 
-Bank04_L9B9D:  JSR Bank07_LFD8F
+Bank04_L9B9D:  JSR UpdateObjectLocation
 Bank04_L9BA0:  BCC $9BBB
 Bank04_L9BA2:  LDA $6AF4,X
 Bank04_L9BA5:  BNE $9BAA

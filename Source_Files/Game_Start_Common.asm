@@ -15,11 +15,13 @@
     ADC #$01            ;compliment of the value stored in A.
     RTS                 ;
 
+; TODO: Called once. Inline
 .advance Common_UpdateEnAttr_05
     ora EnAttr_05,x
     sta EnAttr_05,x
     rts
 
+; TODO: Called once. Inline
 .advance Common_LF74B
     ldy EnDataIndex,x
     lda $968B,y
@@ -28,14 +30,14 @@
 .advance GrowRadiusX
     ;ldx PageIndex
     lda EnRadX,x
-    clc
-    adc #$08
+    ;clc                ; We know the carry flag always set here
+    adc #$07
     jmp _RadiusXSharedPart
 
 .advance ShrinkRadiusX
     ;ldx PageIndex
-    lda #$00
-    sec
+    ;lda #$00       ; The only place this is called sets A to 0 already
+    ;sec            ; The only place this is called set the carry flag
     sbc EnRadX,x
 _RadiusXSharedPart:
     sta $03
@@ -63,41 +65,35 @@ _RadiusXSharedPart:
     .byte <_L83F4
     .byte <_L83F4
 
-_L8058:  LDX PageIndex
-_L805A:  LDA $0405,X
-_L805D:  ASL 
-_L805E:  BMI ++++++++
-_L8060:  LDA EnStatus,X
-_L8063:  CMP #$02
-_L8065:  BNE ++++++++
-_L8067:  JSR $8244
+.advance $8058
+_L8067:  JSR _L8244
 _L806A:  LDA $00
 _L806C:  BPL ++
 _L806E:  JSR TwosCompliment
 _L8071:  STA $66
-_L8073:* JSR $83F5
-_L8076:  JSR $80B8
+_L8073:* JSR _L83F5
+_L8076:  JSR _L80B8
 _L8079:  DEC $66
 _L807B:  BNE -
 _L807D:* BEQ ++
 _L807F:  STA $66
 _L8081:* JSR _L844B
-_L8084:  JSR $80FB
+_L8084:  JSR _L80FB
 _L8087:  DEC $66
 _L8089:  BNE -
-_L808B:* JSR $8318
+_L808B:* JSR _L8318
 _L808E:  LDA $00
 _L8090:  BPL ++
 _L8092:  JSR TwosCompliment
 _L8095:  STA $66
 _L8097:* JSR _L84A7
-_L809A:  JSR $816E
+_L809A:  JSR _L816E
 _L809D:  DEC $66
 _L809F:  BNE -
 _L80A1:* BEQ ++
 _L80A3:  STA $66
 _L80A5:* JSR _L84FE
-_L80A8:  JSR $8134
+_L80A8:  JSR _L8134
 _L80AB:  DEC $66
 _L80AD:  BNE -
 _L80AF:* RTS
@@ -107,112 +103,118 @@ _L80B3:  LDA $977B,Y
 _L80B6:  ASL                     ;*2 
 _L80B7:  RTS
 
+; TODO: Called once, inline
 _L80B8:  LDX PageIndex
 _L80BA:  BCS _L80FA
 _L80BC:  LDA $0405,X
 _L80BF:  BPL _L80C7
-_L80C1:  JSR $81FC
-_L80C4:  JMP $80F6
-_L80C7:  JSR $80B0
-_L80CA:  BPL $80EA
+_L80C1:  JSR _L81FC
+_L80C4:  JMP _L80F6
+_L80C7:  JSR _L80B0
+_L80CA:  BPL _L80EA
 _L80CC:  LDA $6B03,X
-_L80CF:  BEQ $80C1
-_L80D1:  BPL $80D8
+_L80CF:  BEQ _L80C1
+_L80D1:  BPL _L80D8
 _L80D3:  JSR _L81B1
-_L80D6:  BEQ $80E2
+_L80D6:  BEQ _L80E2
 _L80D8:  SEC 
 _L80D9:  ROR $0402,X
 _L80DC:  ROR EnCounter,X
-_L80DF:  JMP $80F6
+_L80DF:  JMP _L80F6
+
 _L80E2:  STA $0402,X
 _L80E5:  STA EnCounter,X
-_L80E8:  BEQ $80F6
+_L80E8:  BEQ _L80F6
 _L80EA:  LDA $977B,Y
 _L80ED:  LSR 
 _L80EE:  LSR 
-_L80EF:  BCC $80F6
+_L80EF:  BCC _L80F6
 _L80F1:  LDA #$04
 _L80F3:  JSR _L856B
 _L80F6:  LDA #$01
 _L80F8:  STA $66
 _L80FA:  RTS
 
+; TODO: Called once
 _L80FB:  LDX PageIndex
-_L80FD:  BCS $8133
+_L80FD:  BCS _L8133
 _L80FF:  LDA $0405,X
-_L8102:  BPL $810A
-_L8104:  JSR $81FC
-_L8107:  JMP $812F
-_L810A:  JSR $80B0
-_L810D:  BPL $8123
+_L8102:  BPL _L810A
+_L8104:  JSR _L81FC
+_L8107:  JMP _L812F
+_L810A:  JSR _L80B0
+_L810D:  BPL _L8123
 _L810F:  LDA $6B03,X
-_L8112:  BEQ $8104
-_L8114:  BPL $8120
+_L8112:  BEQ _L8104
+_L8114:  BPL _L8120
 _L8116:  CLC 
 _L8117:  ROR $0402,X
 _L811A:  ROR EnCounter,X
-_L811D:  JMP $812F
+_L811D:  JMP _L812F
 _L8120:  JSR _L81B1
 _L8123:  LDA $977B,Y
 _L8126:  LSR 
 _L8127:  LSR 
-_L8128:  BCC $812F
+_L8128:  BCC _L812F
 _L812A:  LDA #$04
 _L812C:  JSR _L856B
 _L812F:  LDA #$01
 _L8131:  STA $66
 _L8133:  RTS
 
+; TODO: Called once, inline
 _L8134:  LDX PageIndex
-_L8136:  BCS $816D
-_L8138:  JSR $80B0
-_L813B:  BPL $815E
+_L8136:  BCS _L816D
+_L8138:  JSR _L80B0
+_L813B:  BPL _L815E
 _L813D:  LDA $0405,X
-_L8140:  BMI $8148
-_L8142:  JSR $81C7
-_L8145:  JMP $8169
+_L8140:  BMI _L8148
+_L8142:  JSR _L81C7
+_L8145:  JMP _L8169
 _L8148:  LDA $6B03,X
-_L814B:  BEQ $8142
-_L814D:  BPL $8159
+_L814B:  BEQ _L8142
+_L814D:  BPL _L8159
 _L814F:  CLC 
 _L8150:  ROR $0403,X
 _L8153:  ROR $0407,X
-_L8156:  JMP $8169
+_L8156:  JMP _L8169
 _L8159:  JSR _L81C0
-_L815C:  BEQ $8169
+_L815C:  BEQ _L8169
 _L815E:  LDA $977B,Y
 _L8161:  LSR 
-_L8162:  BCC $8169
+_L8162:  BCC _L8169
 _L8164:  LDA #$01
 _L8166:  JSR _L856B
 _L8169:  LDA #$01
 _L816B:  STA $66
 _L816D:  RTS
 
+; TODO: Called once, inline
+
 _L816E:  LDX PageIndex
-_L8170:  BCS $81B0
-_L8172:  JSR $80B0
-_L8175:  BPL $81A0
+_L8170:  BCS _L81B0
+_L8172:  JSR _L80B0
+_L8175:  BPL _L81A0
 _L8177:  LDA $0405,X
-_L817A:  BMI $8182
-_L817C:  JSR $81C7
-_L817F:  JMP $81AC
+_L817A:  BMI _L8182
+_L817C:  JSR _L81C7
+_L817F:  JMP _L81AC
 _L8182:  LDA $6B03,X
-_L8185:  BEQ $817C
-_L8187:  BPL $818E
+_L8185:  BEQ _L817C
+_L8187:  BPL _L818E
 _L8189:  JSR _L81C0
-_L818C:  BEQ $8198
+_L818C:  BEQ _L8198
 _L818E:  SEC 
 _L818F:  ROR $0403,X
 _L8192:  ROR $0407,X
-_L8195:  JMP $81AC
+_L8195:  JMP _L81AC
 _L8198:  STA $0403,X
 _L819B:  STA $0407,X
-_L819E:  BEQ $81AC
-_L81A0:  JSR $80B0
+_L819E:  BEQ _L81AC
+_L81A0:  JSR _L80B0
 _L81A3:  LSR 
 _L81A4:  LSR 
-_L81A5:  BCC $81AC
+_L81A5:  BCC _L81AC
 _L81A7:  LDA #$01
 _L81A9:  JSR _L856B
 _L81AC:  LDA #$01
@@ -233,19 +235,22 @@ _L81C0:
     STA $6AFF,X
     RTS
 
-_L81C7:  JSR $81F6
-_L81CA:  BNE $81F5
+_L81C7:  JSR _L81F6
+_L81CA:  BNE _L81F5
 _L81CC:  LDA #$01
 _L81CE:  JSR _L856B
+
+.advance $81D1                  ; Called in Bank 07 only
 _L81D1:  LDA $6AFF,X
 _L81D4:  JSR TwosCompliment
 _L81D7:  STA $6AFF,X
 
-_L81DA:  JSR $81F6
-_L81DD:  BNE $81F5
-_L81DF:  JSR $80B0
+.advance $81DA                  ; Called in Bank 07 only
+_L81DA:  JSR _L81F6
+_L81DD:  BNE _L81F5
+_L81DF:  JSR _L80B0
 _L81E2:  SEC 
-_L81E3:  BPL $81ED
+_L81E3:  BPL _L81ED
 _L81E5:  LDA #$00
 _L81E7:  SBC $0407,X
 _L81EA:  STA $0407,X
@@ -258,21 +263,21 @@ _L81F6:  JSR Common_LF74B
 _L81F9:  AND #$20
 _L81FB:  RTS
 
-_L81FC:  JSR $81F6
-_L81FF:  BNE $81F5
+_L81FC:  JSR _L81F6
+_L81FF:  BNE _L81F5
 _L8201:  LDA #$04
 _L8203:  JSR _L856B
 
-.advance $8206
-_L8206:  LDA $6AFE,X
+.advance $8206                  ; Called in Bank 07 only
 _L8209:  JSR TwosCompliment
 _L820C:  STA $6AFE,X
 
-_L820F:  JSR $81F6
-_L8212:  BNE $822A
-_L8214:  JSR $80B0
+.advance $820F                  ; Called in Bank 07 only
+_L820F:  JSR _L81F6
+_L8212:  BNE _L822A
+_L8214:  JSR _L80B0
 _L8217:  SEC 
-_L8218:  BPL $8222
+_L8218:  BPL _L8222
 _L821A:  LDA #$00
 _L821C:  SBC EnCounter,X
 _L821F:  STA EnCounter,X
@@ -283,7 +288,7 @@ _L8227:  STA $0402,X
 _L822A:  RTS 
 
 _L822B:  LDA $0405,X
-_L822E:  BPL $8232
+_L822E:  BPL _L8232
 _L8230:  LSR 
 _L8231:  LSR 
 _L8232:  LSR 
@@ -297,48 +302,49 @@ _L823E:  LDA $96DC,Y
 _L8241:  STA $82
 _L8243:  RTS
 
-_L8244:  JSR $80B0
-_L8247:  BPL $824C
-_L8249:  JMP $833F
+.advance $8244          ; called in Bank 01 and Bank 02
+_L8244:  JSR _L80B0
+_L8247:  BPL _L824C
+_L8249:  JMP _L833F
 _L824C:  LDA $0405,X
 _L824F:  AND #$20
 _L8251:  EOR #$20
-_L8253:  BEQ $82A2
-_L8255:  JSR $822B
+_L8253:  BEQ _L82A2
+_L8255:  JSR _L822B
 _L8258:  LDY EnCounter,X
 
 _L825B:  LDA ($81),Y
 _L825D:  CMP #$F0
-_L825F:  BCC $827F
+_L825F:  BCC _L827F
 _L8261:  CMP #$FA
-_L8263:  BEQ $827C
+_L8263:  BEQ _L827C
 _L8265:  CMP #$FB
-_L8267:  BEQ $82B0
+_L8267:  BEQ _L82B0
 _L8269:  CMP #$FC
-_L826B:  BEQ $82B3
+_L826B:  BEQ _L82B3
 _L826D:  CMP #$FD
-_L826F:  BEQ $82A5
+_L826F:  BEQ _L82A5
 _L8271:  CMP #$FE
-_L8273:  BEQ $82DE
+_L8273:  BEQ _L82DE
 _L8275:  LDA #$00
 _L8277:  STA EnCounter,X
-_L827A:  BEQ $8258
-_L827C:  JMP $8312
+_L827A:  BEQ _L8258
+_L827C:  JMP _L8312
 
 _L827F:  SEC 
 _L8280:  SBC EnDelay,X
-_L8283:  BNE $8290
+_L8283:  BNE _L8290
 _L8285:  STA EnDelay,X
 _L8288:  INY 
 _L8289:  INY 
 _L828A:  TYA 
 _L828B:  STA EnCounter,X
-_L828E:  BNE $825B
+_L828E:  BNE _L825B
 _L8290:  INC EnDelay,X
 _L8293:  INY 
 _L8294:  LDA ($81),Y
 
-.advance $8296
+.advance $8296          ; called in bank 07
 _L8296:  ASL 
 _L8297:  PHP 
 _L8298:  JSR _Adiv32              ;($C2BE)Divide by 32.
@@ -353,47 +359,47 @@ _L82A5:  INC EnCounter,X
 _L82A8:  INY 
 _L82A9:  LDA #$00
 _L82AB:  STA $6B01,X
-_L82AE:  BEQ $825B
+_L82AE:  BEQ _L825B
 _L82B0:  PLA 
 _L82B1:  PLA 
 _L82B2:  RTS
 
 _L82B3:  LDA $6B03,X
-_L82B6:  BPL $82BE
+_L82B6:  BPL _L82BE
 _L82B8:  JSR GrowRadiusY
-_L82BB:  JMP $82C3
-_L82BE:  BEQ $82D2
+_L82BB:  JMP _L82C3
+_L82BE:  BEQ _L82D2
 _L82C0:  JSR ShrinkRadiusY
 _L82C3:  LDX PageIndex
-_L82C5:  BCS $82D2
+_L82C5:  BCS _L82D2
 _L82C7:  LDY EnCounter,X
 _L82CA:  INY 
 _L82CB:  LDA #$00
 _L82CD:  STA $6B03,X
-_L82D0:  BEQ $82D7
+_L82D0:  BEQ _L82D7
 _L82D2:  LDY EnCounter,X
 _L82D5:  DEY 
 _L82D6:  DEY 
 _L82D7:  TYA 
 _L82D8:  STA EnCounter,X
-_L82DB:  JMP $825B
+_L82DB:  JMP _L825B
 _L82DE:  DEY 
 _L82DF:  DEY 
 _L82E0:  TYA 
 _L82E1:  STA EnCounter,X
 _L82E4:  LDA $6B03,X
-_L82E7:  BPL $82EF
+_L82E7:  BPL _L82EF
 _L82E9:  JSR GrowRadiusY
-_L82EC:  JMP $82F4
-_L82EF:  BEQ $82FB
+_L82EC:  JMP _L82F4
+_L82EF:  BEQ _L82FB
 _L82F1:  JSR ShrinkRadiusY
 _L82F4:  LDX PageIndex
-_L82F6:  BCC $82FB
-_L82F8:  JMP $8258
+_L82F6:  BCC _L82FB
+_L82F8:  JMP _L8258
 _L82FB:  LDY EnDataIndex,X
 _L82FE:  LDA $968B,Y
 _L8301:  AND #$20
-_L8303:  BEQ $8312
+_L8303:  BEQ _L8312
 _L8305:  LDA $0405,X
 _L8308:  EOR #$05
 _L830A:  ORA $968B,Y
@@ -413,7 +419,7 @@ _L8329:  LDY EnCounter,X
 _L832C:  INY 
 _L832D:  LDA ($81),Y
 
-.advance $832F
+.advance $832F      ; Called twice in bank 07 - wave bullet and enemy routine. Probably something to do with sin waves
 _L832F:  TAX 
 _L8330:  AND #$08
 _L8332:  PHP 
@@ -425,6 +431,7 @@ _L8339:  JSR TwosCompliment
 _L833C:  STA $00
 _L833E:  RTS
 
+.advance $833F          ; called in lots of banks. Will need to update the ptrs
 _L833F:  LDY #$0E
 _L8341:  LDA $6AFE,X
 _L8344:  BMI _L835E
@@ -833,7 +840,7 @@ _L8603:  .byte $67, $67, $67, $68, $68, $69, $F7, $00
 
 .advance FramePtrTable_Hi
 
-    .byte >$87CB, >$87CB, >$87CB, >$87CB, >$87DD, >$87F0, >$8802, >$8802
+    .byte >_Frame_SamusRun1, >_Frame_SamusRun1, >_Frame_SamusRun1, >_Frame_SamusRun1, >_Frame_SamusRun2, >_Frame_SamusRun3, >_Frame_SamusFacingForward, >_Frame_SamusFacingForward 
     .byte >$8818, >$882C, >$882C, >$882C, >$882C, >$883E, >$8851, >$8863
     .byte >$8863, >$8874, >$8874, >$8885, >$8885, >$8885, >$8885, >$8885
     .byte >$888F, >$8899, >$88A3, >$88AD, >$88B8, >$88C3, >$88CE, >$88D9
@@ -851,7 +858,7 @@ _L8603:  .byte $67, $67, $67, $68, $68, $69, $F7, $00
 
 .advance FramePtrTable_Lo
 
-    .byte <$87CB, <$87CB, <$87CB, <$87CB, <$87DD, <$87F0, <$8802, <$8802
+    .byte <_Frame_SamusRun1, <_Frame_SamusRun1, <_Frame_SamusRun1, <_Frame_SamusRun1, <_Frame_SamusRun2, <_Frame_SamusRun3, <_Frame_SamusFacingForward, <_Frame_SamusFacingForward 
     .byte <$8818, <$882C, <$882C, <$882C, <$882C, <$883E, <$8851, <$8863
     .byte <$8863, <$8874, <$8874, <$8885, <$8885, <$8885, <$8885, <$8885
     .byte <$888F, <$8899, <$88A3, <$88AD, <$88B8, <$88C3, <$88CE, <$88D9
@@ -1228,18 +1235,22 @@ _L87C1:  .byte $F0, $F8, $F0, $00, $F8, $F0, $F8, $F8, $F8, $00
 ;as the object's x radius.
 
 ;Samus run.
+_Frame_SamusRun1:
 _L87CB:  .byte $40, $0F, $04, $00, $01, $FD, $20, $FE, $41, $40, $FD, $60, $20, $21, $FE, $FE
 _L87DB:  .byte $31, $FF
 
 ;Samus run.
+_Frame_SamusRun2:
 _L87DD:  .byte $40, $0F, $04, $02, $03, $FD, $20, $FE, $43, $42, $FD, $60, $22, $23, $FE, $32
 _L87ED:  .byte $33, $34, $FF
 
 ;Samus run.
+_Frame_SamusRun3:
 _L87F0:  .byte $40, $0F, $04, $05, $06, $FD, $20, $FE, $45, $44, $FD, $60, $25, $26, $27, $35
 _L8800:  .byte $36, $FF
 
 ;Samus facing forward.
+_Frame_SamusFacingForward:
 _L8802:  .byte $00, $0F, $04, $09, $FD, $60, $09, $FD, $20, $FE, $19, $1A, $FD, $20, $29, $2A
 _L8812:  .byte $FE, $39, $FD, $60, $39, $FF
 
@@ -1652,6 +1663,7 @@ _L8C45:  TXA
 _L8C49:  BEQ _L8C4D
 
 _L8C4B:  DEY 
+         TYA 
 _L8C4D:  JSR Bank07_LDC1E
 _L8C50:  LDA #$00
 _L8C52:  STA $0300,X
