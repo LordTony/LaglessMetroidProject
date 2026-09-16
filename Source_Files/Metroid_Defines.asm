@@ -1047,7 +1047,7 @@
 .alias sa_Door          5
 .alias sa_PntJump       6
 .alias sa_Elevator      7
-.alias sa_Dead          8
+.alias sa_Dead          8   ; HCSS - messed with sa_Dead and sa_Dead2
 .alias sa_Dead2         9
 .alias sa_FadeIn0       20
 .alias sa_FadeIn1       21

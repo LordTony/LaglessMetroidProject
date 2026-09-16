@@ -5820,13 +5820,14 @@ GenerateRamHelperFunctions:
 CreateIdentityTable:
     ldx #$00
 
+    ; Main identity table
     _main:
         txa
         sta IdentityTable,x
         inx
         bne _main
-        ldx #$0F
-
+    
+    ldx #$F0
      _lower:
         txa
         sta IdentityTable - $100,x

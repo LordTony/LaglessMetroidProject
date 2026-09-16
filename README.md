@@ -132,16 +132,14 @@ SBX #$F0
   * This this has to do with "MaxMissiles" being moved into zero page a long time ago.
   * It looks like the ridley and kraid dead bytes were based on the offset to MaxMissiles.
 * End credits have their graphics corrupted
-* Killing 4 or 5 metroids at once crashes the game.
-  * This crash also happens when bombing multiple enemies at the same time. Probably just need to limit the sprites?
-  * Sprite index overflows to 0 and starts writing at $0x1DD and a few other places around there
-  * Probably need to cut it off early or figure out what I did to break it.
-  * You can see $01E5 and $01E9 written to when this crash is happening.
 * Missiles don't seem to hit spinners from far away (example: The ones hanging in Bank01 Room #$12)
   * Could be because I keep deleting clc and sec instructions
 
 ## Maybe Bugs (Check Original Game Behavior)
 * Sometimes freezing metroids in place ends up seemingly teleporting them to random spots
+  * Getting hit or bombing while in ball mode sometimes teleports samus around
+    * Could be cause by some math overflows, underflows or just weird junk,
+    * Also could be due to my aggressive removal of clc and sec instructions
 * Holding forward while walking into an enemy shows a frame or two of the screw attack.
 
 ## Pre Existing Bugs (or quirks; whatever. The original metroid sucks)
