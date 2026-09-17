@@ -1651,22 +1651,19 @@ jsr UpdateItems             ;($DB37)Display of power-up items.
 .scend
 
 ; Clear ram from unused objects
-; Could possibly cause bugs if the SpritePagePos is really high
     ldx SpritePagePos
+    lda #$F4
 ClearSpriteRamLoop:
-    ldy SpriteRAM,x
-    cpy #$F4
-    beq AfterClearSpriteRam
-        lda #$F4
+    cmp SpriteRAM,x
+    beq AfterClearSpriteRamLoop
         sta SpriteRAM,x
-        sta SpriteRAM+4,x
-        sta SpriteRAM+8,x
-        sta SpriteRAM+12,x
-        txa
-        sbx #$F0
-        bne ClearSpriteRamLoop      ; always branch
+        inx
+        inx
+        inx
+        inx
+    bne ClearSpriteRamLoop 
 
-AfterClearSpriteRam:
+AfterClearSpriteRamLoop:
 
 LC948:  lda MiniBossKillDly     ;
 LC94B:  ora PowerUpDelay        ;Check if mini boss was just killed or powerup aquired.
@@ -4883,6 +4880,7 @@ LDEDC:  beq SetObjectCntrlToA   ;
 DoDrawSpriteObject:
 LDEDE:  ldx SpritePagePos       ;Load index into next unused sprite RAM segment.
 LDEE0:  jmp DrawSpriteObject        ;($DF19)Start drawing object.
+        ; safe
 
 SetObjectCntrlToA:
     sta ObjectCntrl         ;Clear object control byte.
@@ -4905,6 +4903,7 @@ SamusExplodeDisplacement_2:
     adc ($02),y         ;Add table displacements with sprite placement data.
     bit $04             ;
     bmi NegativeDisplacementY    ;Branch if MSB in $04 is set(Flips object).
+    clc
     bpl AfterYDisplacement      ; branch always
     ; safe
 
@@ -4959,9 +4958,10 @@ ExplodeYDisplace:
     lda ExplodeIndexTbl,y       ;Index into ExplodePlacementTbl.
     ldy IsSamus         ;
     bne SamusExplodeDisplacement  ;Is Samus the object exploding? if so, branch.
-    ldy PageIndex           ;Load index to proper enemy data.
-    adc EnCounter,y         ;Increment every frame enemy is exploding. Initial=#$01.
-    jmp SamusExplodeDisplacement_2 ;Jump to load explode placement data.
+        ldy PageIndex           ;Load index to proper enemy data.
+        adc EnCounter,y         ;Increment every frame enemy is exploding. Initial=#$01.
+        jmp SamusExplodeDisplacement_2 ;Jump to load explode placement data.
+        ; safe
 
 NegativeDisplacementY:
     eor #$FF            ;
@@ -5067,6 +5067,7 @@ GetNewControlByte:
     ;SpriteFlipBitsOverride
         ; TODO - Search the other SpriteFlipBitsOverride and try to do the same trick
         lsr ObjectCntrl             ;Restore MSB.
+        ;lda ($00),y
         and #$C0                    ;Extract the two sprite flip bytes from theoriginal
         ora ObjectCntrl             ;control byte and set any additional bits from ObjectCntrl.
         sta $05                     ;Store modified byte to load in sprite control byte later.
@@ -5242,11 +5243,11 @@ LE0C3:
     lax SpritePagePos               ; Load current sprite index.
     pha                             ; Store the starting SpritePagePos
 
-    cmp HudCacheIndex               ; Adding a cache to skip writing hud sprites
-    stx HudCacheIndex               ; As long as they are all in the same place
-    bne DoHudSpriteWrite
-        sbx #$D8                    ; Add #$28 or #40 using one of the best illigal opcodes
-        bne AfterDisplayBarLoop     ; Branch always
+    ;cmp HudCacheIndex               ; Adding a cache to skip writing hud sprites
+    ;stx HudCacheIndex               ; As long as they are all in the same place
+    ;bne DoHudSpriteWrite
+    ;    sbx #$D8                    ; Add #$28 or #40 using one of the best illigal opcodes
+    ;    bne AfterDisplayBarLoop     ; Branch always
 
 ; HCSS - crash bug fix
 DoHudSpriteWrite:
@@ -5290,11 +5291,14 @@ LE0DA:  and #$0F                ;Extract upper health digit.
         ora #$A0
         sta SpriteRAM+1,x
 
+        txa
+        sbx #$FC
+
 PrintHealthOnesDigit:
 LE0DF:  ldy HealthLo 
 LE0E2:  lda Div16Table, y
         ora #$A0                
-        sta SpriteRAM+5,x
+        sta SpriteRAM+1,x
 
 LE0E8:  ldy EndTimerHi                      ;
 LE0EB:  iny                                 ;Is Samus in escape sequence?
@@ -5307,24 +5311,38 @@ LE0F1:  beq MissileAndTimerDisplayEnd       ;Don't show missile count if Samus h
 ; Then these writes will cause issues
 .scope
     DisplayNumberOfMissiles:
-        ; Left Missile Half
-        lda #$5E
-        sta SpriteRAM + 21,x
-
-        ; Right Missile Half
-        lda #$5F
-        sta SpriteRAM + 25,x
 
         ; These missile graphics cache ZP vars
         ; already point to the proper graphic
+        txa
+        sbx #$FC
+
         lda MissileCountHundreds
-        sta SpriteRAM + 9,x
+        sta SpriteRAM + 1,x
+
+        txa
+        sbx #$FC
 
         lda MissileCountTens
-        sta SpriteRAM + 13,x
+        sta SpriteRAM + 1,x
+
+        txa
+        sbx #$FC
 
         lda MissileCountOnes
-        sta SpriteRAM + 17,x
+        sta SpriteRAM + 1,x
+
+        txa
+        sbx #$FC
+
+        lda #$5E
+        sta SpriteRAM + 1,x
+
+        txa
+        sbx #$FC
+
+        lda #$5F
+        sta SpriteRAM + 1,x
 
         bne MissileAndTimerDisplayEnd   ;Branch always.
 

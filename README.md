@@ -136,10 +136,6 @@ SBX #$F0
   * Could be because I keep deleting clc and sec instructions
 
 ## Maybe Bugs (Check Original Game Behavior)
-* Sometimes freezing metroids in place ends up seemingly teleporting them to random spots
-  * Getting hit or bombing while in ball mode sometimes teleports samus around
-    * Could be cause by some math overflows, underflows or just weird junk,
-    * Also could be due to my aggressive removal of clc and sec instructions
 * Holding forward while walking into an enemy shows a frame or two of the screw attack.
 
 ## Pre Existing Bugs (or quirks; whatever. The original metroid sucks)

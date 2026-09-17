@@ -164,7 +164,6 @@
 ; used                  $66
 .alias RoomPal_Lo_Nib   $67     ; Isolated to Room Drawing Routines
 .alias RoomPal_Hi_Nib   $68     ; Isolated to Room Drawing Routines
-.alias HudCacheIndex    $69     ; Isolated to DisplayBar draw
 .alias TempY            $6A     ; Isolated to ChooseRoutine used in bank 00
 .alias ObjectCntrl      $6B     ;Controls object properties such as mirroring and color
                                 ;bits. Bit 4 controls object mirroring.
