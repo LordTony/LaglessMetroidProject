@@ -45,25 +45,25 @@ _RadiusXSharedPart:
     ldy EnRadY,x
     jmp Bank07_LE89B
 
-.advance L8048_Ptr_Table_Hi
-    .byte >_L84FD
-    .byte >_L84A6
-    .byte >_L844A
-    .byte >_L844A
-    .byte >_L84A6
-    .byte >_L84FD
-    .byte >_L83F4
-    .byte >_L83F4
+.advance Bank_Enemy_Dispatch_Tbl_Hi
+    .byte >[Bank_Enemy_Dispatch_0_And_5 - 1]      ; 000
+    .byte >[Bank_Enemy_Dispatch_1_And_4 - 1]      ; 001
+    .byte >[Bank_Enemy_Dispatch_2_And_3 - 1]      ; 010
+    .byte >[Bank_Enemy_Dispatch_2_And_3 - 1]      ; 011
+    .byte >[Bank_Enemy_Dispatch_1_And_4 - 1]      ; 100
+    .byte >[Bank_Enemy_Dispatch_0_And_5 - 1]      ; 101
+    .byte >[Bank_Enemy_Dispatch_6_And_7 - 1]      ; 110
+    .byte >[Bank_Enemy_Dispatch_6_And_7 - 1]      ; 111
 
-.advance L8048_Ptr_Table_Lo
-    .byte <_L84FD
-    .byte <_L84A6
-    .byte <_L844A
-    .byte <_L844A
-    .byte <_L84A6
-    .byte <_L84FD
-    .byte <_L83F4
-    .byte <_L83F4
+.advance Bank_Enemy_Dispatch_Tbl_Lo
+    .byte <[Bank_Enemy_Dispatch_0_And_5 - 1]
+    .byte <[Bank_Enemy_Dispatch_1_And_4 - 1]
+    .byte <[Bank_Enemy_Dispatch_2_And_3 - 1]
+    .byte <[Bank_Enemy_Dispatch_2_And_3 - 1]
+    .byte <[Bank_Enemy_Dispatch_1_And_4 - 1]
+    .byte <[Bank_Enemy_Dispatch_0_And_5 - 1]
+    .byte <[Bank_Enemy_Dispatch_6_And_7 - 1]
+    .byte <[Bank_Enemy_Dispatch_6_And_7 - 1]
 
 .advance $8058
 _L8067:  JSR _L8244
@@ -71,13 +71,13 @@ _L806A:  LDA $00
 _L806C:  BPL ++
 _L806E:  JSR TwosCompliment
 _L8071:  STA $66
-_L8073:* JSR _L83F5
+_L8073:* JSR Bank_Enemy_Dispatch_6_And_7
 _L8076:  JSR _L80B8
 _L8079:  DEC $66
 _L807B:  BNE -
 _L807D:* BEQ ++
 _L807F:  STA $66
-_L8081:* JSR _L844B
+_L8081:* JSR Bank_Enemy_Dispatch_2_And_3
 _L8084:  JSR _L80FB
 _L8087:  DEC $66
 _L8089:  BNE -
@@ -86,13 +86,13 @@ _L808E:  LDA $00
 _L8090:  BPL ++
 _L8092:  JSR TwosCompliment
 _L8095:  STA $66
-_L8097:* JSR _L84A7
+_L8097:* JSR Bank_Enemy_Dispatch_1_And_4
 _L809A:  JSR _L816E
 _L809D:  DEC $66
 _L809F:  BNE -
 _L80A1:* BEQ ++
 _L80A3:  STA $66
-_L80A5:* JSR _L84FE
+_L80A5:* JSR Bank_Enemy_Dispatch_0_And_5
 _L80A8:  JSR _L8134
 _L80AB:  DEC $66
 _L80AD:  BNE -
@@ -130,7 +130,9 @@ _L80ED:  LSR
 _L80EE:  LSR 
 _L80EF:  BCC _L80F6
 _L80F1:  LDA #$04
-_L80F3:  JSR _L856B
+_L80F3:
+    EOR $0405,X
+    STA $0405,X
 _L80F6:  LDA #$01
 _L80F8:  STA $66
 _L80FA:  RTS
@@ -157,7 +159,9 @@ _L8126:  LSR
 _L8127:  LSR 
 _L8128:  BCC _L812F
 _L812A:  LDA #$04
-_L812C:  JSR _L856B
+_L812C:
+    EOR $0405,X
+    STA $0405,X
 _L812F:  LDA #$01
 _L8131:  STA $66
 _L8133:  RTS
@@ -170,23 +174,24 @@ _L813B:  BPL _L815E
 _L813D:  LDA $0405,X
 _L8140:  BMI _L8148
 _L8142:  JSR _L81C7
-_L8145:  JMP _L8169
+_L8145:  JMP _L812F
 _L8148:  LDA $6B03,X
 _L814B:  BEQ _L8142
 _L814D:  BPL _L8159
 _L814F:  CLC 
 _L8150:  ROR $0403,X
 _L8153:  ROR $0407,X
-_L8156:  JMP _L8169
+_L8156:  JMP _L812F
 _L8159:  JSR _L81C0
-_L815C:  BEQ _L8169
+_L815C:  BEQ _L812F
 _L815E:  LDA $977B,Y
 _L8161:  LSR 
-_L8162:  BCC _L8169
-_L8164:  LDA #$01
-_L8166:  JSR _L856B
-_L8169:  LDA #$01
-_L816B:  STA $66
+_L8162:  BCC _L812F
+_L8164:  
+    LDA #$01
+    STA $66
+    EOR $0405,X
+    STA $0405,X
 _L816D:  RTS
 
 ; TODO: Called once, inline
@@ -216,7 +221,9 @@ _L81A3:  LSR
 _L81A4:  LSR 
 _L81A5:  BCC _L81AC
 _L81A7:  LDA #$01
-_L81A9:  JSR _L856B
+_L81A9:
+    EOR $0405,X
+    STA $0405,X
 _L81AC:  LDA #$01
 _L81AE:  STA $66
 _L81B0:  RTS
@@ -238,10 +245,11 @@ _L81C0:
 _L81C7:  JSR _L81F6
 _L81CA:  BNE _L81F5
 _L81CC:  LDA #$01
-_L81CE:  JSR _L856B
-
-; Temporary Hack - TODO: Remove this and get it all pretty again
-jmp _L81D1
+_L81CE:
+    EOR $0405,X
+    STA $0405,X
+nop
+nop
 
 .advance $81D1                  ; Called in Bank 07 only
 _L81D1:  LDA $6AFF,X
@@ -269,14 +277,13 @@ _L81FB:  RTS
 _L81FC:  JSR _L81F6
 _L81FF:  BNE _L81F5
 _L8201:  LDA #$04
-_L8203:  JSR _L856B
+_L8203:  
+    EOR $0405,X
+    STA $0405,X
 
-.advance $8206                  ; Called in Bank 07 only
+.advance $8209                  ; Called in Bank 07 only
 _L8209:  JSR TwosCompliment
 _L820C:  STA $6AFE,X
-
-; Temporary Hack - TODO: Remove this and get it all pretty again
-jmp _L820F
 
 .advance $820F                  ; Called in Bank 07 only
 _L820F:  JSR _L81F6
@@ -350,6 +357,7 @@ _L8290:  INC EnDelay,X
 _L8293:  INY 
 _L8294:  LDA ($81),Y
 
+; Doesn't clobber X or Y
 .advance $8296          ; called in bank 07
 _L8296:  ASL 
 _L8297:  PHP 
@@ -425,17 +433,16 @@ _L8329:  LDY EnCounter,X
 _L832C:  INY 
 _L832D:  LDA ($81),Y
 
-.advance $832F      ; Called twice in bank 07 - wave bullet and enemy routine. Probably something to do with sin waves
-_L832F:  TAX 
-_L8330:  AND #$08
-_L8332:  PHP 
-_L8333:  TXA 
-_L8334:  AND #$07
-_L8336:  PLP 
-_L8337:  BEQ _L833C
-_L8339:  JSR TwosCompliment
-_L833C:  STA $00
-_L833E:  RTS
+.advance $832F  ; Called in Bank 07 - Reworked to not clobber X
+_L832F:
+    AND #$0F
+    CMP #$08
+    BCC _L833C
+        EOR #$FF
+        ADC #$08
+_L833C:
+    STA $00
+    RTS
 
 .advance $833F          ; called in lots of banks. Will need to update the ptrs
 _L833F:  LDY #$0E
@@ -528,7 +535,8 @@ _L83EF:  ADC $0403,X
 _L83F2:  STA $00
 _L83F4:  RTS
 
-_L83F5:  LDX PageIndex
+Bank_Enemy_Dispatch_6_And_7:
+;_L83F5:  LDX PageIndex
 _L83F7:  LDA EnYRoomPos,X
 _L83FA:  SEC 
 _L83FB:  SBC EnRadY,X
@@ -573,7 +581,8 @@ _L8446:  INC $6B01,X
 _L8449:  SEC 
 _L844A:  RTS
 
-_L844B:  LDX PageIndex
+Bank_Enemy_Dispatch_2_And_3:
+;_L844B:  LDX PageIndex
 _L844D:  LDA EnYRoomPos,X
 _L8450:  CLC 
 _L8451:  ADC EnRadY,X
@@ -621,7 +630,8 @@ _L84A2:  DEC $6B01,X
 _L84A5:  SEC 
 _L84A6:  RTS
 
-_L84A7:  LDX PageIndex
+Bank_Enemy_Dispatch_1_And_4:
+;_L84A7:  LDX PageIndex
 _L84A9:  LDA EnXRoomPos,X
 _L84AC:  SEC 
 _L84AD:  SBC EnRadX,X
@@ -666,7 +676,8 @@ _L84F9:  INC $6B01,X
 _L84FC:  SEC 
 _L84FD:  RTS
 
-_L84FE:  LDX PageIndex
+Bank_Enemy_Dispatch_0_And_5:
+;_L84FE:  LDX PageIndex
 _L8500:  LDA EnXRoomPos,X
 _L8503:  CLC 
 _L8504:  ADC EnRadX,X
@@ -723,9 +734,9 @@ _L8566:  EOR PPUCNT0ZP
 _L8568:  AND #$01
 _L856A:  RTS
 
-_L856B:  EOR $0405,X
-_L856E:  STA $0405,X
-_L8571:  RTS
+;_L856B:  EOR $0405,X
+;_L856E:  STA $0405,X
+;_L8571:  RTS
 ;---------------------------------[ Object animation data tables ]----------------------------------
 
 ;The following tables are indices into the FramePtrTable that correspond to various animations. The
@@ -1529,44 +1540,43 @@ _L8B78:  RTS                     ;
     ldy ObjAction + $B0
     beq +
         ldx #$B0
-        jsr DoorHandlerDispatch
+        jsr _DoorHandlerDispatch
 *   ldy ObjAction + $A0
     beq +
         ldx #$A0
-        jsr DoorHandlerDispatch
+        jsr _DoorHandlerDispatch
 *   ldy ObjAction + $90
     beq +
         ldx #$90
-        jsr DoorHandlerDispatch
+        jsr _DoorHandlerDispatch
 *   ldy ObjAction + $80
     beq _L8B78
         ldx #$80
 
-    DoorHandlerDispatch:
+    _DoorHandlerDispatch:
         stx PageIndex
-        lda DoorHandlerTable_Lo - 1, y      ; -1 because the 0 case is already handled 
-        sta CodePtr
-        lda DoorHandlerTable_Hi - 1, y
-        sta CodePtr + 1
-        jmp (CodePtr)
+        cpy #$04
+        bcs _DoorHandlerHighHalf
 
-    DoorHandlerTable_Hi:
-        .byte >DoorHandlerRoutine1 
-        .byte >DoorHandlerRoutine2 
-        .byte >DoorHandlerRoutine3 
-        .byte >DoorHandlerRoutine4 
-        .byte >DoorHandlerRoutine5 
-        .byte >DoorHandlerRoutine6 
+    _DoorHandlerLowHalf:    
+        cpy #$02
+        beq _DoorHandlerRoutine2     ; Y == 2
+        bcs _DoorHandlerRoutine3     ; Y == 3
+        bcc _DoorHandlerRoutine1     ; Y == 1
 
-    DoorHandlerTable_Lo:
-        .byte <DoorHandlerRoutine1 
-        .byte <DoorHandlerRoutine2 
-        .byte <DoorHandlerRoutine3 
-        .byte <DoorHandlerRoutine4 
-        .byte <DoorHandlerRoutine5 
-        .byte <DoorHandlerRoutine6 
+    _DoorHandlerHighHalf:
+        cpy #$05
+        bcc _DoorHandlerRoutine4_Trampoline  ; Y == 4
+        beq _DoorHandlerRoutine5_Trampoline  ; Y == 5
+        jmp _DoorHandlerRoutine6             ; Y == 6
 
-DoorHandlerRoutine1:
+    _DoorHandlerRoutine4_Trampoline:
+        jmp _DoorHandlerRoutine4
+
+    _DoorHandlerRoutine5_Trampoline:
+        jmp _DoorHandlerRoutine5
+
+_DoorHandlerRoutine1:
 _L8B9D:  INC $0300,X
 _L8BA0:  LDA #$30
 _L8BA2:  JSR SetProjectileAnim       ;($D2FA)
@@ -1598,7 +1608,7 @@ _L8BCE:  JMP AnimDrawObject
 DoorHandlerRoutine1_Table:
 _L8BD1:  .byte $05, $01, $0A, $01
 
-DoorHandlerRoutine2:
+_DoorHandlerRoutine2:
 _L8BD5:  LDA $030A,X
 _L8BD8:  AND #$04
 _L8BDA:  BEQ _L8BB1
@@ -1625,8 +1635,9 @@ _L8BF8:  STA $0305,X
 _L8BFB:  SEC 
 _L8BFC:  SBC #$03
 _L8BFE:  JMP _L8C7E
+; Safe
 
-DoorHandlerRoutine3:
+_DoorHandlerRoutine3:
 _L8C01:  LDA DoorStatus
 _L8C03:  BEQ _L8C1D
 
@@ -1709,7 +1720,7 @@ SFXDoor:
     STA TriangleSFXFlag
     RTS    
 
-DoorHandlerRoutine4:
+_DoorHandlerRoutine4:
 _L8C84:  LDA DoorStatus
 _L8C86:  CMP #$05
 _L8C88:  BCS _L8CC3
@@ -1760,7 +1771,7 @@ SetMusicInitFlag:
 
 _L8CC3:  BNE _L8C71      ; branch always
 
-DoorHandlerRoutine5:
+_DoorHandlerRoutine5:
 _L8CC6:  LDA DoorStatus
 _L8CC8:  CMP #$05
 _L8CCA:  BNE _L8CED
@@ -1785,7 +1796,7 @@ _L8CEA:  STA $0300,X
 
 _L8CED:  JMP _L8BB1
 
-DoorHandlerRoutine6:
+_DoorHandlerRoutine6:
 _L8CF0:  LDA DoorStatus
 _L8CF2:  BNE _L8CED
 _L8CF4:  JMP _L8C61         ; branch always

@@ -506,9 +506,9 @@ Bank04_L9A36:  LSR $00
 Bank04_L9A38:  ROL 
 ;Bank04_L9A39:  ASL 
 Bank04_L9A3A:  TAY 
-Bank04_L9A3B:  LDA L8048_Ptr_Table_Hi,Y
+Bank04_L9A3B:  LDA Bank_Enemy_Dispatch_Tbl_Hi,Y
 Bank04_L9A3E:  PHA 
-Bank04_L9A3F:  LDA L8048_Ptr_Table_Lo,Y
+Bank04_L9A3F:  LDA Bank_Enemy_Dispatch_Tbl_Lo,Y
 Bank04_L9A42:  PHA 
 Bank04_L9A43:  RTS
             nop

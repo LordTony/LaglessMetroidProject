@@ -498,9 +498,9 @@ Bank05_L9A05:  LSR $00
 Bank05_L9A07:  ROL 
 ;Bank05_L9A08:  ASL 
 Bank05_L9A09:  TAY 
-Bank05_L9A0A:  LDA L8048_Ptr_Table_Hi,Y
+Bank05_L9A0A:  LDA Bank_Enemy_Dispatch_Tbl_Hi,Y
 Bank05_L9A0D:  PHA 
-Bank05_L9A0E:  LDA L8048_Ptr_Table_Lo,Y
+Bank05_L9A0E:  LDA Bank_Enemy_Dispatch_Tbl_Lo,Y
 Bank05_L9A11:  PHA 
 Bank05_L9A12:  RTS
                nop

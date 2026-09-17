@@ -730,7 +730,7 @@ LC406:  STA $01                 ;
 LC408:  LDA $02                 ;
 LC40A:  ADC #$0F                ;Adjust $02 to account for borrowing.
 LC40C:  STA $02                 ;
-LC40E:* LDA $03                 ;Keep upper 4 bits of HealthLo/HealthHi in A.
+LC40E:* LDA $03                 ;Keep upper 4 bits of HealthLo/ in A.
 LC410:  AND #$F0                ;
 LC412:  SEC                     ;
 LC413:  SBC $02                 ;If result is greater than zero, branch to finish.
@@ -1349,7 +1349,13 @@ LCB30:  jsr UpdateProjectiles   ;($D4BF)Display of bullets/missiles/bombs.
 .scend
 
 .scope
-    UpdateEnemyDestruction:  
+    UpdateEnemyDestruction:
+        lda EnStatus + $C0
+        ora EnStatus + $C8
+        ora EnStatus + $D0
+        ora EnStatus + $D8
+        beq _skip4
+
         lda EnStatus + $C0
         beq _skip1
             ldx #$C0
@@ -1458,6 +1464,13 @@ LCB30:  jsr UpdateProjectiles   ;($D4BF)Display of bullets/missiles/bombs.
 
 ; destruction of green spinners
 UpdateSpinnerDestruction:
+    
+    ;lda SpinnerStatus + $00
+    ;ora SpinnerStatus + $08
+    ;ora SpinnerStatus + $10
+    ;ora SpinnerStatus + $18
+    ;beq _skip4
+
     lda SpinnerStatus + $18
     beq _skip1
         ldx #$18
@@ -1493,13 +1506,61 @@ HandleSamusEnterDoor:
     _skip:
 .scend
 
-LCB4E:  jsr DoorHandler         ; display of doors
+.scope
+    lda ObjAction + $B0
+    ora ObjAction + $A0
+    ora ObjAction + $90
+    ora ObjAction + $80
+    beq _skip
+        jsr DoorHandler         ; display of doors
+    _skip:
+.scend
 
-LCB51:  jsr UpdateTiles         ; tile de/regeneration
+.scope
+; Loop runs for:
+; #$C0, #$B0, #$A0, #$90, #$80, #$70, #$60, #$50, #$40, #$30, #$20, #$10, #$00
+
+UpdateTiles:
+    lda TileRoutine + $00
+    ora TileRoutine + $10
+    ora TileRoutine + $20
+    ora TileRoutine + $30
+    ora TileRoutine + $40
+    ora TileRoutine + $50
+    ora TileRoutine + $60
+    ora TileRoutine + $70
+    ora TileRoutine + $80
+    ora TileRoutine + $90
+    ora TileRoutine + $A0
+    ora TileRoutine + $B0
+    ora TileRoutine + $C0
+    beq _skip
+
+    ldx #$D0
+    txa
+_loop:
+*   sbx #$10
+    lda TileRoutine,x 
+    beq +
+        stx PageIndex
+        jsr DoOneTile
+        ldx PageIndex
+*   txa
+    bne _loop
+    _skip: 
+.scend
+
 LCB54:  jsr CollisionDetection  ; Samus < enemies crash detection
 LCB57:  jsr DisplayBar          ;($E0C1)Display of status bar.
 
 .scope
+    lda PipeEnemyStatus + $00
+    and PipeEnemyStatus + $08
+    and PipeEnemyStatus + $10
+    and PipeEnemyStatus + $18
+    cmp #$FF
+    beq _skip4
+
     UpdatePipeEnemies:
         ldx PipeEnemyStatus + $18
         inx
@@ -3247,20 +3308,19 @@ UpdateWaveBullet:
     bne +
     sta $0500,x
     jmp LD522
+    ; safe
 
 *   cmp $0501,x
     beq ---
     inc $0501,x
     iny
     lda ($0A),y
-    jsr $8296
+    pha
+        jsr $8296           ; doesn't clobber X
+        sta ObjVertSpeed,x
+    pla
+    jsr $832F               ; doesn't clobber X
 
-    ldx PageIndex
-    sta ObjVertSpeed,x
-    lda ($0A),y
-    jsr $832F           ; TODO: What is this?
-
-    ldx PageIndex
     sta ObjHorzSpeed,x
     tay
     lda $0502,x
@@ -5165,70 +5225,54 @@ Return_Invisible:
 Hud_Sprite_X_Tbl:
     .byte $28, $20, $18, $20, $18, $38, $30, $28, $38, $30
 
+Hud_Sprite_Pal_Tbl:
+    .byte $00, $01, $01, $00, $00, $01, $01, $01, $01, $01
+
+; Changed the logic for the missile drawing
+; now we just draw a blank tile and then draw a missile
+; if we have any to draw
 Hud_Sprite_Index_Tbl:
-    .byte $3A, $7F, $76, $5F, $5E, $FF, $FF, $FF, $A0, $A0
+    .byte $3A, $7F, $76, $FF, $FF, $FF, $FF, $FF, $A0, $A0
+
+Hud_Sprite_Y_Tbl:
+    .byte $21, $21, $21, $2B, $2B, $2B, $2B, $2B, $21, $21
 
 DisplayBar:
 LE0C3:  
     lax SpritePagePos               ; Load current sprite index.
+    pha                             ; Store the starting SpritePagePos
 
     cmp HudCacheIndex               ; Adding a cache to skip writing hud sprites
     stx HudCacheIndex               ; As long as they are all in the same place
-    bne DoHudSpriteSetup
+    bne DoHudSpriteWrite
         sbx #$D8                    ; Add #$28 or #40 using one of the best illigal opcodes
         bne AfterDisplayBarLoop     ; Branch always
 
-    DoHudSpriteSetup:
+; HCSS - crash bug fix
+DoHudSpriteWrite:
 
-    ; Load the Hud sprite palette color data
-    lda #$01
-    sta SpriteRAM+2,x
-    sta SpriteRAM+6,x
-    sta SpriteRAM+10,x
-    sta SpriteRAM+14,x
-    sta SpriteRAM+18,x
-    sta SpriteRAM+30,x
-    sta SpriteRAM+34,x
-
-    lda #$00
-    sta SpriteRAM+22,x
-    sta SpriteRAM+26,x
-    sta SpriteRAM+38,x
-
-    ; Load the Hud sprite Y position data
-    lda #$2B
-    sta SpriteRAM+8,x
-    sta SpriteRAM+12,x
-    sta SpriteRAM+16,x
-    sta SpriteRAM+20,x
-    sta SpriteRAM+24,x
-
-    lda #$21
-    sta SpriteRAM,x
-    sta SpriteRam+4,x
-    sta SpriteRam+28,x
-    sta SpriteRam+32,x
-    sta SpriteRam+36,x
+    ; The expected behavior is to overflow X here.
+    ; Because of that we can't do more than sprite at a time
+    ; Otherwise we risk writing to bad memory or overwriting
+    ; a sprite we don't want to overwrite.
 
     ldy #$0A
     DisplayBarLoop:
 
+        lda Hud_Sprite_Y_Tbl-1, y
+        sta SpriteRAM,x
+
         lda Hud_Sprite_Index_Tbl-1, y
         sta SpriteRAM+1,x
+
+        lda Hud_Sprite_Pal_Tbl-1, y
+        sta SpriteRAM+2,x
 
         lda Hud_Sprite_X_Tbl-1, y
         sta SpriteRAM+3,x
 
-        dey
-
-        lda Hud_Sprite_Index_Tbl-1, y
-        sta SpriteRAM+5,x
-
-        lda Hud_Sprite_X_Tbl-1, y
-        sta SpriteRAM+7,x
-
         txa
-        sbx #$F8        ; Add 8 to X register
+        sbx #$FC                ; Add 4 to X register
 
         dey
 
@@ -5238,76 +5282,83 @@ AfterDisplayBarLoop:
 
 ;Display 2-digit health count.
 LE0D3:  stx SpritePagePos       ;Save new location in sprite RAM.
-
+        pla                     ;Load the starting SpritePagePos
+        tax
 PrintHealthTensDigit:
 LE0D7:  lda HealthHi            ;
 LE0DA:  and #$0F                ;Extract upper health digit.
         ora #$A0
-        sta SpriteRAM-39,x
+        sta SpriteRAM+1,x
 
 PrintHealthOnesDigit:
 LE0DF:  ldy HealthLo 
 LE0E2:  lda Div16Table, y
         ora #$A0                
-        sta SpriteRAM-35,x
+        sta SpriteRAM+5,x
 
 LE0E8:  ldy EndTimerHi                      ;
 LE0EB:  iny                                 ;Is Samus in escape sequence?
 LE0EC:  bne DisplayEscapeSequenceTimer      ;If so, branch.
 LE0EE:  ldy MaxMissiles                     ;
-LE0F1:  beq EraseMissileSprite              ;Don't show missile count if Samus has no missile containers.
+LE0F1:  beq MissileAndTimerDisplayEnd       ;Don't show missile count if Samus has no missile containers.
 
+; TODO: There still might be some sprite problems
+; If the SpritePagePos > 228 (or around there somewhere)
+; Then these writes will cause issues
 .scope
     DisplayNumberOfMissiles:
+        ; Left Missile Half
+        lda #$5E
+        sta SpriteRAM + 21,x
+
+        ; Right Missile Half
+        lda #$5F
+        sta SpriteRAM + 25,x
+
+        ; These missile graphics cache ZP vars
+        ; already point to the proper graphic
         lda MissileCountHundreds
-        sta SpriteRAM - 31,x
+        sta SpriteRAM + 9,x
 
         lda MissileCountTens
-        sta SpriteRAM - 27,x
+        sta SpriteRAM + 13,x
 
         lda MissileCountOnes
-        sta SpriteRAM - 23,x
+        sta SpriteRAM + 17,x
 
         bne MissileAndTimerDisplayEnd   ;Branch always.
 
 .scend
 
-EraseMissileSprite:
-;Samus has no missiles, erase missile sprite.
-LE10A:* lda #$FF                        ;"Blank" tile.
-        cpx #$F4                        ;If at last 3 sprites, branch to skip.
-        bcs MissileAndTimerDisplayEnd
-LE110:  sta SpriteRAM-19,x              ;Erase left half of missile.
-LE117:  sta SpriteRAM-15,x              ;Erase right half of missile.
-LE11A:  bne MissileAndTimerDisplayEnd   ;Branch always.
-
+; Note: When the escape timer is on there should be no way to have too many sprites on the screen
+; I believe we are safe here
 DisplayEscapeSequenceTimer:
 ;Display 3-digit end sequence timer.
 LE11C:* ldy EndTimerHi          ;
         lda Div16Table, y
         ora #$A0            ;#$A0 is index into pattern table for numbers.
-        sta SpriteRAM-31,x     ;Store proper nametable pattern in sprite RAM.
+        sta SpriteRAM+9,x     ;Store proper nametable pattern in sprite RAM.
 
 LE125:  lda EndTimerHi          ;
 LE128:  and #$0F                ;Middle timer digit.
         ora #$A0               ;#$A0 is index into pattern table for numbers.
-        sta SpriteRAM-27,x     ;Store proper nametable pattern in sprite RAM.
+        sta SpriteRAM+13,x     ;Store proper nametable pattern in sprite RAM.
 
 LE12D:  ldy EndTimerLo          ;
         lda Div16Table, y       
         ora #$A0               ;#$A0 is index into pattern table for numbers.
-        sta SpriteRAM-23,x     ;Store proper nametable pattern in sprite RAM.
+        sta SpriteRAM+17,x     ;Store proper nametable pattern in sprite RAM.
 
 LE136:  lda #$58                ;"TI" sprite(left half of "TIME").
-LE138:  sta SpriteRAM-19,x      ;
+LE138:  sta SpriteRAM+21,x      ;
         lda #$01
-LE13B:  sta SpriteRAM-18,x      ;Change color of sprite to pal 1
+LE13B:  sta SpriteRAM+22,x      ;Change color of sprite to pal 1
 
 LE13E:  cpx #$DC                ;If at last sprite, branch to skip.
 LE140:  bcs MissileAndTimerDisplayEnd
-        sta SpriteRAM-14,x      ;Change color of sprite to pal 1               ;
+        sta SpriteRAM+26,x      ;Change color of sprite to pal 1               ;
 LE142:  lda #$59                ;"ME" sprite(right half of "TIME").
-LE144:  sta SpriteRAM-15,x      ;
+LE144:  sta SpriteRAM+27,x      ;
 
 MissileAndTimerDisplayEnd:
     *   lda TankCount           ;
@@ -6394,13 +6445,16 @@ GrowRadiusY:
     lda EnRadY,x
     clc
     adc #$08
-    jmp LE783
+    jmp GrowShrinkRadiusCommonPart
 
+; Cobbers X and Y
 ShrinkRadiusY:
     ;ldx PageIndex
     lda #$00
     sec
     sbc EnRadY,x
+
+GrowShrinkRadiusCommonPart:
 LE783:
     sta $02
 
@@ -9668,7 +9722,7 @@ LF699:
 
 *   and #$04
     beq +
-    jsr $8206       ; Something in common
+    jsr $8209       ; Something in common
 
 *   lda #$DF
     and $0405,x
@@ -9878,13 +9932,14 @@ EnvEnemyUpdateRoutine_2:
 
     INC EnDelay,x
     INY
-    LDA ($0A),y
-    JSR $8296
-    LDX PageIndex
-    STA $0402,x
-    LDA ($0A),y
-    JSR $832F
-    LDX PageIndex
+
+    lda ($0A),y
+    pha
+        jsr $8296           ; Doesn't clobber X
+        sta $0402,x 
+    pla
+    jsr $832F           ; Doesn't clobber X
+
     STA $0403,x
     TAY
     LDA $040A,x
@@ -10450,24 +10505,7 @@ Exit26:
 .scend
 ; Tile degenerate/regenerate
 
-; TODO: Inline - might be a pain in the butt
-LFE14:
-UpdateTiles:
-    ldx #$C0
-*   stx PageIndex
-    lda TileRoutine,x
-    beq +
-        jsr DoOneTile
-*   lax PageIndex
-    sbx #$10
-    bne --
-; A bit of jank for seeing if you should skip the last one
-    stx PageIndex
-    lda TileRoutine
-    beq Exit26
-
 DoOneTile:
-    ; 0                     = RTS
     ; 1 (001)               = LFE3D TileSubroutine1
     ; 2 and 4 (010 and 100) = LFE54 SetupTileAnimationAndDelay
     ; 3 (011)               = LFE59 TileSubroutine3

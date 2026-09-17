@@ -938,8 +938,8 @@
 .alias Common_LF74B             $8012
 .alias GrowRadiusX              $8019
 .alias ShrinkRadiusX            $8022
-.alias L8048_Ptr_Table_Hi       $8048
-.alias L8048_Ptr_Table_Lo       $8050
+.alias Bank_Enemy_Dispatch_Tbl_Hi       $8048
+.alias Bank_Enemy_Dispatch_Tbl_Lo       $8050
 .alias Common_Collision_Func    $8395
 .alias ObjectAnimIdxTbl         $8572
 .alias FramePtrTable_Hi         $860B

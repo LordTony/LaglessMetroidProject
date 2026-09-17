@@ -997,9 +997,9 @@ Bank01_L9AE5:  STY $00
 Bank01_L9AE7:  LSR $00
 Bank01_L9AE9:  ROL 
 Bank01_L9AEB:  TAY 
-Bank01_L9AEC:  LDA L8048_Ptr_Table_Hi,Y
+Bank01_L9AEC:  LDA Bank_Enemy_Dispatch_Tbl_Hi,Y
 Bank01_L9AEF:  PHA 
-Bank01_L9AF0:  LDA L8048_Ptr_Table_Lo,Y
+Bank01_L9AF0:  LDA Bank_Enemy_Dispatch_Tbl_Lo,Y
 Bank01_L9AF3:  PHA 
 Bank01_L9AF4:  RTS
 
