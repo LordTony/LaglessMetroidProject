@@ -1310,7 +1310,33 @@ LCB2B:  stx SpritePagePos
 
 .scend 
 
-LCB30:  jsr UpdateProjectiles   ;($D4BF)Display of bullets/missiles/bombs.
+LCB30:
+
+; UpdateProjectiles
+; =================
+
+UpdateProjectiles:
+
+.scope
+    ldy ObjAction + $D0
+    beq _skip1
+        ldx #$D0
+        jsr DoOneProjectile
+    _skip1:
+
+    ldy ObjAction + $E0
+    beq _skip2
+        ldx #$E0
+        jsr DoOneProjectile
+    _skip2:
+
+    ldy ObjAction + $F0
+    beq _skip3
+        ldx #$F0
+        jsr DoOneProjectile
+    _skip3:
+.scend
+
 
 ;--------------------------------------[ Update Samus ]----------------------------------------------
 
@@ -1350,32 +1376,52 @@ LCB30:  jsr UpdateProjectiles   ;($D4BF)Display of bullets/missiles/bombs.
 
 .scope
     UpdateEnemyDestruction:
+
         lda EnStatus + $C0
         ora EnStatus + $C8
         ora EnStatus + $D0
         ora EnStatus + $D8
-        beq _skip4
+        beq _end                ; Check all the slots and bail out early if there are no enemies to destroy
 
-        lda EnStatus + $C0
-        beq _skip1
-            ldx #$C0
-            jsr DoDestroyOneEnemy
-        _skip1:
-        lda EnStatus + $C8
-        beq _skip2
-            ldx #$C8
-            jsr DoDestroyOneEnemy
-        _skip2:
-        lda EnStatus + $D0
-        beq _skip3
-            ldx #$D0
-            jsr DoDestroyOneEnemy
-        _skip3:
-        lda EnStatus + $D8
-        beq _skip4
-            ldx #$D8
-            jsr DoDestroyOneEnemy
-        _skip4:
+        ldx #$C0
+        _loop:
+            lda EnStatus, x
+            beq _next
+
+            DoDestroyOneEnemy:
+                stx PageIndex
+                dec EnCounter,x
+                bne ++
+                    lda #$0C
+                    sta EnCounter,x
+                    dec $0407,x
+                    bmi +
+                        bne ++
+            *       jsr KillObject          ;($FA18)Free enemy data slot.
+            *   lda EnCounter,x
+                cmp #$09
+                bne +
+                    lda $0407,x
+                    asl
+                    tay
+                    lda Table16,y
+                    sta $04
+
+                    lda Table16+1,y
+                    sta $05
+
+                    jsr LFA41
+            *   lda #$80
+                sta ObjectCntrl
+                lda #$03
+                jsr LF97E
+                ldx PageIndex
+        _next:
+            txa
+            sbx #$F8
+            cpx #$E0
+            bne _loop
+        _end:
 .scend
 
 .scope
@@ -1397,48 +1443,36 @@ LCB30:  jsr UpdateProjectiles   ;($D4BF)Display of bullets/missiles/bombs.
             stx PageIndex
             jsr UpdateEnemyAnimWithPreloadedPageIndex
 
-        _MelloMemu4:
-            lda MemuStatus + $18
-            beq _MelloMemu3
-                ldx #$18
+        ldx #$18
+        _loop:
+            lda MemuStatus, x
+            beq _next
+                stx $D7     ; Keep track of which memu with a scratch var
                 jsr ChooseMemuRoutine
-                lda MemuProp6 + $18
+                ldx $D7
+                lda MemuProp6, x
                 and #$F8 
-                sta MemuProp6 + $18
-
-        _MelloMemu3:
-            lda MemuStatus + $10
-            beq _MelloMemu2
-                ldx #$10
-                jsr ChooseMemuRoutine
-                lda MemuProp6 + $10
-                and #$F8 
-                sta MemuProp6 + $10
-
-        _MelloMemu2:
-            lda MemuStatus + $08
-            beq _MelloMemu1
-                ldx #$08
-                jsr ChooseMemuRoutine
-                lda MemuProp6 + $08
-                and #$F8
-                sta MemuProp6 + $08
-
-        _MelloMemu1:
-            lda MemuStatus + $00
-            beq AfterUpdateMellowMemu
-                ldx #$00
-                jsr ChooseMemuRoutine
-                lda MemuProp6 + $00
-                and #$F8
-                sta MemuProp6 + $00
-                
+                sta MemuProp6, x
+        _next:
+            txa
+            sbx #$08
+            bpl _loop
     AfterUpdateMellowMemu:
 .scend
 
 .scope
     UpdateEnvironmentalEnemies:
-        ldx #$B0
+
+    lda $0405 + $B0
+    ora $0405 + $A0
+    ora $0405 + $90
+    ora $0405 + $80
+    ora $0405 + $70
+    ora $0405 + $60
+    and #02
+    beq _end
+
+    ldx #$B0
 
     ; goes through $B0, $A0, $90, $80, $70, $60
     _loop:
@@ -1457,6 +1491,7 @@ LCB30:  jsr UpdateProjectiles   ;($D4BF)Display of bullets/missiles/bombs.
         sbx #$10
         cpx #$50
         bne _loop
+    _end:
 
 .scend
 
@@ -1465,35 +1500,24 @@ LCB30:  jsr UpdateProjectiles   ;($D4BF)Display of bullets/missiles/bombs.
 ; destruction of green spinners
 UpdateSpinnerDestruction:
     
-    ;lda SpinnerStatus + $00
-    ;ora SpinnerStatus + $08
-    ;ora SpinnerStatus + $10
-    ;ora SpinnerStatus + $18
-    ;beq _skip4
-
-    lda SpinnerStatus + $18
-    beq _skip1
-        ldx #$18
-        jsr DoOneSpinnerDestruction
-    _skip1:
-
-    lda SpinnerStatus + $10
-    beq _skip2
-        ldx #$10
-        jsr DoOneSpinnerDestruction
-    _skip2:
-
-    lda SpinnerStatus + $08
-    beq _skip3
-        ldx #$08
-        jsr DoOneSpinnerDestruction
-    _skip3:
-
     lda SpinnerStatus + $00
-    beq _skip4
-        ldx #$00
-        jsr DoOneSpinnerDestruction
-    _skip4:
+    ora SpinnerStatus + $08
+    ora SpinnerStatus + $10
+    ora SpinnerStatus + $18
+    beq _end
+
+    ldx #$18
+    _loop:
+        lda SpinnerStatus, x
+        beq _next
+            stx $D7
+            jsr DoOneSpinnerDestruction
+            ldx $D7
+    _next:
+        txa
+        sbx #$08
+        bpl _loop
+    _end:
 .scend
 
 .scope
@@ -1652,6 +1676,8 @@ jsr UpdateItems             ;($DB37)Display of power-up items.
 
 ; Clear ram from unused objects
     ldx SpritePagePos
+    cpx #$38                        ; Assume there will always be at least 14 sprites on screen
+    bcc AfterClearSpriteRamLoop
     lda #$F4
 ClearSpriteRamLoop:
     cmp SpriteRAM,x
@@ -1661,7 +1687,7 @@ ClearSpriteRamLoop:
         inx
         inx
         inx
-    bne ClearSpriteRamLoop 
+    bne ClearSpriteRamLoop
 
 AfterClearSpriteRamLoop:
 
@@ -3182,38 +3208,13 @@ LD47E:
 EXIT_33:
 *   rts
 
-; UpdateProjectiles
-; =================
-
-UpdateProjectiles:
-
-.scope
-    lda ObjAction + $D0
-    beq _skip1
-        ldx #$D0
-        jsr DoOneProjectile
-    _skip1:
-
-    lda ObjAction + $E0
-    beq _skip2
-        ldx #$E0
-        jsr DoOneProjectile
-    _skip2:
-
-    lda ObjAction + $F0
-    beq Exit_33
-        ldx #$F0
-        ; Fall through
-.scend
 
 DoOneProjectile:
     stx PageIndex
-    tax
-    lda DoOneProjectileTable_LoBytes - 1, x
+    lda DoOneProjectileTable_LoBytes - 1, y
     sta CodePtr
-    lda DoOneProjectileTable_HiBytes - 1, x
+    lda DoOneProjectileTable_HiBytes - 1, y
     sta CodePtr + 1
-    ldx PageIndex
     jmp (CodePtr)
 
     DoOneProjectileTable_HiBytes:
@@ -3269,7 +3270,7 @@ CheckBulletStat:
 
 *   lda ObjAction,x
     beq +
-    jsr LD5E4
+        jsr LD5E4
 DrawBullet:
     lda #$01
     jsr AnimDrawObject
@@ -3482,6 +3483,7 @@ LayBomb3and6:
     bne +
     sta ObjAction,x     ; kill bomb
 *   jmp DrawBomb
+    ; safe
 
 LD6A7:
     jsr GetObjCoords
@@ -3924,7 +3926,7 @@ StandingOnFrozenEnemyLoop:
 StandingOnElevator:
 *   lda ElevatorStatus
     beq +
-    ldy #$00
+    ;ldy #$00
     ldx #$20
     jsr GetObject0CoordData
     bcs +
@@ -4091,6 +4093,7 @@ LDA7C:
     lsr
     bcc Exit31    ; only display statue at odd frames
 *   jmp DrawFrame       ; display statue
+    ; safe
 
 LDAB0:
     lda Table0E,y
@@ -4180,9 +4183,9 @@ LDBA0:  STA SpriteRAM+6,x     ;Store power up color for beam weapon.
 LDBA3:  LDA #$FF            ;Indicate power up obtained is a beam weapon.
 
 LDBA5:* PHA                 ;Temporarily store power up type.
-LDBA8:  LDY #$00            ;Index to object 0(Samus).
+;LDBA8:  LDY #$00            ;Index to object 0(Samus).
 LDBA6:  LDX #$40            ;Index to object 1(power up).
-LDBAA:  JSR AreObjectsTouching      ;($DC7F)Determine if Samus is touching power up.
+LDBAA:  JSR IsSamusTouchingObjectX      ;($DC7F)Determine if Samus is touching power up.
 LDBAD:  PLA             ;Restore power up type byte.
 LDBAE:  BCS Exit31           ;Carry clear=Samus touching power up. Carry set=not touching.
 
@@ -4332,7 +4335,7 @@ LDC66:  RTS             ;
 
 ;-----------------------------------------------------------------------------------------------------
 
-AreObjectsTouching:
+IsSamusTouchingObjectX:
     lda ObjectY
     sta $06
     
@@ -6633,11 +6636,6 @@ SetCarryAndExit3:
     Exit16:
     rts
 
-;HCSS
-; Only every other byte is used
-ASL_ASL_ASL_ORA_80_Table:
-.byte $80, $FF, $90, $FF, $A0, $FF, $B0
-
 LE81E:
     ldx UpdtngPrjctl
     beq ClcExit
@@ -6652,9 +6650,15 @@ LE81E_Loop:
     eor $5C,x
     and #$1F
     bne LE81E_Next
-    ldy ASL_ASL_ASL_ORA_80_Table, x
+    txa
+    asl
+    asl
+    asl
+    ora #$80
+    tay
     lda ObjAction,y
     beq LE81E_Next
+    
     lda $0307,y
     lsr
     bcs ++
@@ -6662,6 +6666,7 @@ LE81E_Loop:
     lda ObjAction,x
     eor #$0B
     beq +
+
     lda ObjAction,x
     eor #$04
     bne SFXMetal
@@ -7766,15 +7771,15 @@ PostRoomSetupStuff4:
         lda ObjAction,x
         cmp #$05
         bcc _afterLoop
-        tya
-        eor ObjectHi,x
-        lsr
-        bcs _afterLoop
-        sta ObjAction,x
-        txa
-        ; HCSS - SBX for adding
-        sbx #$F0            ; Add 16 to X
-        bne _loop
+            tya
+            eor ObjectHi,x
+            lsr
+            bcs _afterLoop
+                sta ObjAction,x
+                txa
+                ; HCSS - SBX for adding
+                sbx #$F0            ; Add 16 to X
+                bne _loop
     _afterLoop:
 
 .scend
@@ -7838,6 +7843,7 @@ CleanUpPipeEnemies:
         jmp Bank03_L9C6F    ; Tourian Only
 .scend
 
+    ; Doors
     ; #$B0, #$A0, #$90, #$80
 LED65:  
     ldx #$B0
@@ -8362,6 +8368,9 @@ DrawRepeatingMacroLoop:
 ; Collision detection
 ; ===============
 
+DoorCollision_Trampoline:
+    jmp DoorCollision
+
 AfterMemuCollisionCheck_Trampoline:
     jmp AfterMemuCollisionCheck
 
@@ -8370,9 +8379,16 @@ CollisionDetection:
     lda #$FF
     sta $73
     sta $010F
+
+    lda MemuStatus + $18
+    ora MemuStatus + $10
+    ora MemuStatus + $08
+    ora MemuStatus + $00
+    beq DoorCollision_Trampoline
+
 ; check for crash with Memus
     ldx #$18
-CollisionDetectionLoop:
+MemuCollisionDetectionLoop:
 *   lda MemuStatus,x
     beq AfterMemuCollisionCheck_Trampoline             ; branch if no Memu in slot
     cmp #$03
@@ -8422,9 +8438,10 @@ CollisionDetectionLoop:
 
     .scope
 *   ldy #$D0
+EnemyToBulletCollisionLoop:
 ; loop
     *   lda ObjAction,y       ; projectile active?
-        beq ++                  ; try next one if not
+        beq _next             ; try next one if not
         cmp #wa_BulletExplode
         bcc +
         cmp #$07
@@ -8432,7 +8449,7 @@ CollisionDetectionLoop:
         cmp #wa_BombExplode
         beq +
         cmp #wa_Missile
-        bne ++
+        bne _next
     
     *   lda ObjectY,y
         sta $06
@@ -8451,60 +8468,75 @@ CollisionDetectionLoop:
         sta $04
 
         lda #$08
+        clc
         adc ObjRadX,y
         sta $05
 
         jsr LF1FA
 
-        bcs +
-        lda $10
-        ora $030A,y
-        sta $030A,y
-        jsr LF2BF
-    *   tya
-        clc
-        adc #$10
+        bcs _next
+            lda $10
+            ora $030A,y
+            sta $030A,y
+            jsr LF2BF
+    _next:   
+        lda IdentityTable + $10, y
         tay
-        bne ---
+        bne EnemyToBulletCollisionLoop
 .scend
 
 AfterMemuCollisionCheck:
 *   txa
     sbx #$08
-    bmi AfterCollisionDetectionLoop
-    jmp CollisionDetectionLoop
+    bmi DoorCollision
+    jmp MemuCollisionDetectionLoop
 
-AfterCollisionDetectionLoop:
+DoorCollision:
+    lda ObjAction + $B0
+    ora ObjAction + $A0
+    ora ObjAction + $90
+    ora ObjAction + $80
+    and #$02
+    beq AfterDoorCollisionDetection
+
     ldx #$B0
+DoorCollisionLoop:
 *   lda ObjAction,x
     cmp #$02
     bne +
-    ldy #$00
-    ;jsr IsSamusDead
-    lda SamusObjAction
-    and #$08
-    bne ++
-    jsr AreObjectsTouching      ;($DC7F)
-    bcs +
-    lda $10
-    ora $030A   ;not ora $030A,y because y is always zero here
-    sta $030A   ;not sta $030A,y because y is always zero here
+        ;ldy #$00
+        ;jsr IsSamusDead
+        lda SamusObjAction
+        and #$08
+        bne ++
+            jsr IsSamusTouchingObjectX      ;($DC7F)
+            bcs +
+                lda $10
+                ora $030A   ;not ora $030A,y because y is always zero here
+                sta $030A   ;not sta $030A,y because y is always zero here
 *   txa
     sbx #$10
-    bmi --
+    bmi DoorCollisionLoop
+
+AfterDoorCollisionDetection:
+    ; check all of the bullets up front to skip the loop
+
 ; enemy < bullet/missile/bomb detection
 *   ldx #$50        ; start with enemy slot #5
-LF09F:
+
+EnemyCollisionLoop:
     lda EnStatus,x       ; slot active?
     beq NextEnemy          ; branch if not
     cmp #$03
 *   beq NextEnemy      ; next slot
+    
     jsr GetXEnemyRoomPosition_07_09_0B
     lda EnStatus,x
     cmp #$05
     beq AfterBulletLoop
 
 .scope
+
     ldy #$D0        ; first projectile slot
 
     _loop:
@@ -8514,9 +8546,9 @@ LF09F:
         bcc _doStuff
         cmp #$07                    ; if A == 7     My guess is Ice beam exploding 4 == bullet explostion && 3 == ice beam
         beq _doStuff
-        cmp #wa_BombExplode         ; if A == 10
+        cmp #wa_BombExplode         ; if A == 10        or #$0A 
         beq _doStuff
-        cmp #wa_Missile     
+        cmp #wa_Missile             ; wa_Missile == 11 or #$0C 
         bne _next
 
         ; check if enemy is actually hit
@@ -8552,28 +8584,32 @@ LF09F:
 .scend
 
 AfterBulletLoop:
-*   ldy #$00
-    lda SamusBlink
-    bne NextEnemy
-
-    ;jsr IsSamusDead
+*   ;ldy #$00
     lda SamusObjAction
-    anc #$08
+    and #$08
+    ora SamusBlink
     bne NextEnemy
-    ; y == 0 here
-    ; carry == 0 here
-    jsr DistFromXEnemyToSamus
-    jsr GetSamusCoordData_06_08_0A
-    jsr LF1FA
-    bcs NextEnemy
-        jsr LF282
+        ; y == 0 here
+        ; carry == 0 here
+        jsr DistFromXEnemyToSamus
+        jsr GetSamusCoordData_06_08_0A
+        jsr LF1FA
+        bcs NextEnemy
+            jsr LF282
+
 NextEnemy:
     txa
     sbx #$10
-    bpl LF09F
+    bpl EnemyCollisionLoop
 
 *   ldx #$00    ; LF2ED needs this to be 0
 
+    lda SamusObjAction
+    and #$08
+    ora SamusBlink
+    bne AfterEnemyLoop
+
+EnemyVsSamusCollision:
 ;GetSamusCoordData_07_09_0B:
     lda ObjectY
     sta $07
@@ -8583,7 +8619,7 @@ NextEnemy:
 
     lda ObjectHi
     eor PPUCNT0ZP
-    and #$01
+    anc #$01
     sta $0B
 
     ldy #$60    ; Loop runs 60, 70, 80, 90, A0, B0
@@ -8594,19 +8630,19 @@ NextEnemyLoop:
         cmp #$05
         beq NextEnemyLoopContinue
 
-        lda SamusBlink
-        bne NextEnemyLoopContinue
-
-        lda SamusObjAction
-        anc #$08
-        bne NextEnemyLoopContinue
-
 ;DistFromObj0ToEn1: 
+
+        ; anc above clears the carry
         lda SamusObjRadY
-        ;clc
         adc EnRadY,y
         sta $04
 
+        lda EnNameTable,y     ; hi coord
+        eor PPUCNT0ZP
+        anc #$01
+        sta $0A
+
+        ; anc above clears the carry again
         lda SamusObjRadX
         adc EnRadX,y
         sta $05
@@ -8617,11 +8653,6 @@ NextEnemyLoop:
         lda EnXRoomPos,y     ; X coord
         sta $08
 
-        lda EnNameTable,y     ; hi coord
-        eor PPUCNT0ZP
-        and #$01
-        sta $0A
-
         jsr LF1FA
         jsr LF2ED
     NextEnemyLoopContinue:
@@ -8630,7 +8661,8 @@ NextEnemyLoop:
         cmp #$C0
         bne NextEnemyLoop
 
-    ldy #$00
+AfterEnemyLoop:
+    ldy #$00        ; This is required or the bomb doesn't offset samus
         
     ;jsr IsSamusDead
     lda SamusObjAction
@@ -8640,8 +8672,10 @@ NextEnemyLoop:
     ; Samus is not dead
     jsr GetSamusCoordData_06_08_0A
 
+HandleBombKnockback:
     ldx #$F0
 
+BombKnockbackLoop:
 *   lda ObjAction,x
     cmp #$07
     beq +
@@ -8654,7 +8688,7 @@ NextEnemyLoop:
 *   txa
     sbx #$10
     cpx #$C0
-    bne ---
+    bne BombKnockbackLoop
 
 SubtractHealth_Trampoline:
     lda HealthLoChange
@@ -8709,7 +8743,7 @@ Exit21:
 LF282:
     jsr LF2E8 
     jsr IsScrewAttackActive     ;($CD9C)Check if screw attack active.
-    ldy #$00
+    ;ldy #$00
     bcc +++
     lda EnStatus,x
     cmp #$04
@@ -8988,8 +9022,20 @@ LF3E6:
     bne CheckIfEnemyHasBeenHit
     ; TODO: Join LF6B9 and LF75B together
 *   jsr LF6B9
-    jsr LF75B
-    jsr LF51E
+    jsr LF75B   ; Doesn't clobber X
+
+LF51E:
+    lda ScrollDir
+    ;ldx PageIndex
+    cmp #$02
+    bcc CheckIfEnemyHasBeenHit
+    lda EnYRoomPos,x     ; Y coord
+    cmp #$EC
+    bcc CheckIfEnemyHasBeenHit
+    ; Kill
+    lda #$00      
+    sta EnStatus,x
+
 CheckIfEnemyHasBeenHit:
     lda EnHasBeenHit,x
     and #$20
@@ -9277,19 +9323,6 @@ LF4EE:
 *   lda #$A0
     jmp LF423
     ; safe
-
-LF51E:
-    lda ScrollDir
-    ldx PageIndex
-    cmp #$02
-    bcc Exit24
-    lda EnYRoomPos,x     ; Y coord
-    cmp #$EC
-    bcc Exit24
-    jmp KillObject          ;($FA18)Free enemy data slot.
-    ; safe
-Exit24:
-*   rts
 
 EnemyReactToBeingHit:
     lda EnSpecialAttribs,x
@@ -9599,9 +9632,11 @@ EXIT_44:
 LF75B:
     lda #$E7
     sta $06
+
     lda #$18
     ora $0405,x
     sta $0405,x
+
     ldy EnDataIndex,x
     lda $96AB,y
     beq +++++
@@ -9917,6 +9952,7 @@ LF97C:
 LF97E:
     jsr UpdateEnemyAnim
     jmp SomethingAboutMovement
+    ; safe
 
 EnvEnemyUpdateRoutine_2_IncTwiceLoop:
 *   inc $0408,x
@@ -10097,34 +10133,6 @@ LFA60:
     sta EnStatus,x
 Exit20: rts
 
-DoDestroyOneEnemy:
-    stx PageIndex
-    dec EnCounter,x
-    bne ++
-    lda #$0C
-    sta EnCounter,x
-    dec $0407,x
-    bmi +
-    bne ++
-*   jsr KillObject          ;($FA18)Free enemy data slot.
-*   lda EnCounter,x
-    cmp #$09
-    bne +
-    lda $0407,x
-    asl
-    tay
-    lda Table16,y
-    sta $04
-    
-    lda Table16+1,y
-    sta $05
-
-    jsr LFA41
-*   lda #$80
-    sta ObjectCntrl
-    lda #$03
-    jmp LF97E
-
 ; X is pipe enemy status
 ; Y is PageIndex    ($00, $08, $10, or $18)
 DoOnePipeEnemy:  
@@ -10283,9 +10291,8 @@ DoOneSpinnerDestruction:
     jsr DrawFrame
     lda SamusBlink
     bne +
-    ldy #$00
     ldx #$40
-    jsr AreObjectsTouching      ;($DC7F)
+    jsr IsSamusTouchingObjectX      ;($DC7F)
     bcs +
     jsr IsScrewAttackActive     ;($CD9C)Check if screw attack active.
     ldy #$00

@@ -152,6 +152,10 @@ Bank03_Struct_2B:
 	.byte $02, $09, $36
 	.byte $FF
 
+;Structure #$0A
+Bank03_Struct_2D:  
+	.byte $44, $0B
+	.byte $FF
 
 .advance PalPntrTbl_Hi
 
@@ -2233,17 +2237,19 @@ Bank03_Room_02_Left:
 	.byte $E0, $0A
 	.byte $FF
 
+; JUMANJI
 Bank03_Room_02_Right:
 	.byte $08, $0C
-	.byte $0F, $09
+	.byte $0F, $2C
 	.byte $5F, $04
 	.byte $6A, $13
 	.byte $8A, $0E
 	.byte $8D, $12
-	.byte $8F, $09
+	.byte $8F, $2C
 	.byte $C8, $0F
-	.byte $DB, $0A
-	.byte $EA, $0A
+	.byte $D3, $10
+	.byte $DB, $2D
+	.byte $E8, $0A
 	.byte $FF
 
 ;Room #$03
@@ -2874,6 +2880,7 @@ Bank03_LACA4:
 ;Structure #$09
 Bank03_LACB5:
 	.byte $01, $0B
+Bank03_Struct_2C:
 	.byte $01, $0B
 	.byte $01, $0B
 	.byte $01, $0B
@@ -3163,8 +3170,8 @@ Tourian_Room_14_Attrs:
     .byte >Tourian_DefaultAttrs         ;Room #$00
     .byte >Tourian_DefaultAttrs         ;Room #$01
     .byte >Tourian_Room_02_Attrs        ;Room #$02
-    .byte >Tourian_DefaultAttrs         ;Room #$03
-    .byte >Tourian_DefaultAttrs         ;Room #$04
+    .byte >Tourian_Room_02_Attrs        ;Room #$03
+    .byte >Tourian_Room_02_Attrs        ;Room #$04
     .byte >Tourian_Room_Left_Door_Attrs ;Room #$05
     .byte >Tourian_DefaultAttrs         ;Room #$06
     .byte >Tourian_DefaultAttrs         ;Room #$07
@@ -3186,8 +3193,8 @@ Tourian_Room_14_Attrs:
     .byte <Tourian_DefaultAttrs         ;Room #$00
     .byte <Tourian_DefaultAttrs         ;Room #$01
     .byte <Tourian_Room_02_Attrs        ;Room #$02
-    .byte <Tourian_DefaultAttrs         ;Room #$03
-    .byte <Tourian_DefaultAttrs         ;Room #$04
+    .byte <Tourian_Room_02_Attrs        ;Room #$03
+    .byte <Tourian_Room_02_Attrs        ;Room #$04
     .byte <Tourian_Room_Left_Door_Attrs ;Room #$05
     .byte <Tourian_DefaultAttrs         ;Room #$06
     .byte <Tourian_DefaultAttrs         ;Room #$07
@@ -3923,7 +3930,7 @@ MetroidData:
     .byte >Bank03_LAD3F,        >Bank03_LAD48, 		>Bank03_LAD61, 		>Bank03_LAD66, 		>Bank03_LAD6B, 		>Bank03_LAD99, 		>Bank03_LADAC, 		>Bank03_LADC8
     .byte >Bank03_LADDD,        >Bank03_LADFE, 		>Bank03_LAE0F, 		>Bank03_LAE1A, 		>Bank03_LAE1E, 		>Bank03_LAE21, 		>Bank03_LAE2C, 		>Bank03_LAE36
 	.byte >Bank03_Struct_20,	>Bank03_Struct_21,	>Bank03_Struct_22,	>Bank03_Struct_23,	>Bank03_Struct_24,	>Bank03_Struct_25,	>Bank03_Struct_26,	>Bank03_Struct_27
-	.byte >Bank03_Struct_28,	>Bank03_Struct_29,	>Bank03_Struct_2A,	>Bank03_Struct_2B 
+	.byte >Bank03_Struct_28,	>Bank03_Struct_29,	>Bank03_Struct_2A,	>Bank03_Struct_2B,	>Bank03_Struct_2C,	>Bank03_Struct_2D 
 
 .advance StructPointerTable_Lo
 
@@ -3932,7 +3939,7 @@ MetroidData:
     .byte <Bank03_LAD3F,    	<Bank03_LAD48, 		<Bank03_LAD61, 		<Bank03_LAD66, 		<Bank03_LAD6B, 		<Bank03_LAD99, 		<Bank03_LADAC, 		<Bank03_LADC8
     .byte <Bank03_LADDD,    	<Bank03_LADFE, 		<Bank03_LAE0F, 		<Bank03_LAE1A, 		<Bank03_LAE1E, 		<Bank03_LAE21, 		<Bank03_LAE2C, 		<Bank03_LAE36
 	.byte <Bank03_Struct_20,	<Bank03_Struct_21,	<Bank03_Struct_22,	<Bank03_Struct_23,	<Bank03_Struct_24,	<Bank03_Struct_25,	<Bank03_Struct_26,	<Bank03_Struct_27
-	.byte <Bank03_Struct_28,	<Bank03_Struct_29,	<Bank03_Struct_2A,	<Bank03_Struct_2B 
+	.byte <Bank03_Struct_28,	<Bank03_Struct_29,	<Bank03_Struct_2A,	<Bank03_Struct_2B,	<Bank03_Struct_2C,	<Bank03_Struct_2D 
 
 ;------------------------------------------------------------------------------------------------------
 

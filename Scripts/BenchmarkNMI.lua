@@ -4,7 +4,7 @@
 
 nmi_addr = 0xC0D6
 return_from_nmi_addr = 0xC212
-framesToResetOn = 120
+framesToResetOn = 300
 timer = 0
 scanlines = {}
 
@@ -14,8 +14,9 @@ function onFrame()
 	if timer >= framesToResetOn then
 		local min_val = math.min(table.unpack(scanlines))
 		local max_val = math.max(table.unpack(scanlines))
+
 		emu.drawString(5, 5, "Scanlines to complete frame work", 0xFFFFFF, 0x0, 0, framesToResetOn)
-		emu.drawString(5, 15, "Low " .. min_val, 0xFFFFFF, 0x0, 0, framesToResetOn)
+		emu.drawString(5, 15, "Low " .. round(min_val) , 0xFFFFFF, 0x0, 0, framesToResetOn)
 
 		local color = 0xFFFFFF
 		if max_val >= 220 then
@@ -24,7 +25,7 @@ function onFrame()
 		if max_val >= 240 then
 			color = 0xFF0000
 		end
-		emu.drawString(50, 15, "High " .. max_val, color, 0x0, 0, framesToResetOn)
+		emu.drawString(70, 15, "High " .. round(max_val), color, 0x0, 0, framesToResetOn)
 		
 		timer = 0
 		scanlines = {}
@@ -33,7 +34,7 @@ end
 
 function noteCycleAndScanline(address)
 	local state = emu.getState()
-	scanlines[#scanlines + 1] = state["ppu.scanline"]
+	scanlines[#scanlines + 1] = state["ppu.scanline"] + ( state["ppu.cycle"] / 341 )
 end
 
 function printHex(num)
