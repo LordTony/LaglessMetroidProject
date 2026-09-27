@@ -7994,9 +7994,9 @@ LF2ED:  bcs +
     sta $010F
     jsr LF332
     jsr LF270
-LF306:  lda AreaEnemyDmg_LowByte
+LF306:  lda $95CE
     sta HealthLoChange
-    lda AreaEnemyDmg_HiByte
+    lda $95CF
     sta HealthHiChange
 *   rts
 
