@@ -233,7 +233,10 @@ Bank03_L95CC:  .byte $FF           ;Boss music byte. Only unsed in bank 04 - 05
 
 Bank03_L95CD:  .byte $40           ;Tourian music init flag.
 
+.advance AreaEnemyDmg_LowByte
 Bank03_L95CE:  .byte $00           ;Base damage caused by area enemies to lower health byte.
+
+.advance AreaEnemyDmg_HiByte
 Bank03_L95CF:  .byte $03           ;Base damage caused by area enemies to upper health byte.
 
 .advance $95D0

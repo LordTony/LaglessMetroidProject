@@ -356,7 +356,7 @@
 .alias ABStatus         $F0   ;Stores A and B button status in AreaInit. Never used.
 .alias HorzCntrNonLinr  $F1   ;Horizontal movement counter. Exponential change in speed.
 .alias VertCntrLinear   $F2   ;Verticle movement counter. Linear change in speed.
-.alias NARPASSWORD      $F3   ;0 = invinsible Samus not active, 1 = invinsible Samus active.
+.alias NARPASSWORD      $F3   ;0 = invinsible Samus not active, 1 = invinsible Samus active.    old = $69B2
 .alias JustInBailey     $F4   ;0 = Samus has suit, 1 = Samus is without suit.
 .alias TankCount        $F5   ;Number of energy tanks.
 .alias MissileCount     $F6   
@@ -955,6 +955,8 @@
 .alias StartingPalette          $95DA
 .alias HandleBankEnemies        $95E5
 .alias AreaRoutine              $95C3       ; TODO: Delete
+.alias AreaEnemyDmg_LowByte     $95CE
+.alias AreaEnemyDmg_HiByte      $95CF
 .alias MemuByte                 $95E4
 .alias EnemyHitPointTbl         $962B
 .alias EnemyInitDelayTbl        $96BB

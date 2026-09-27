@@ -207,7 +207,10 @@ Bank04_L95CC:  .byte $1D           ;Kraid's room.
 
 Bank04_L95CD:  .byte $10           ;Kraid's hideout music init flag.
 
+.advance AreaEnemyDmg_LowByte
 Bank04_L95CE:  .byte $00           ;Base damage caused by area enemies to lower health byte.
+
+.advance AreaEnemyDmg_HiByte
 Bank04_L95CF:  .byte $02           ;Base damage caused by area enemies to upper health byte.
 
 .advance $95D0
@@ -466,7 +469,7 @@ Bank04_L99E5:  AND #$03
 Bank04_L99E7:  ROL 
 Bank04_L99E8:  TAY 
 Bank04_L99E9:  LDA Bank04_L99EF,Y
-Bank04_L99EC:  JMP DoSomethingToAnimationIndecies
+Bank04_L99EC:  JMP SetAnimationIndex
 
 Bank04_L99EF:  .byte $35, $35, $3E, $38, $3B, $3B, $38, $3E
 

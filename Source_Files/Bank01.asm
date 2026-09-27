@@ -635,7 +635,9 @@ Bank01_L95CC:  .byte $FF
                 
 Bank01_L95CD:  .byte $01           ;Brinstar music init flag.
 
+.advance AreaEnemyDmg_LowByte
 Bank01_L95CE:  .byte $80           ;Base damage caused by area enemies to lower health byte.
+.advance AreaEnemyDmg_HiByte
 Bank01_L95CF:  .byte $00           ;Base damage caused by area enemies to upper health byte.
 
 .advance $95D0
@@ -652,7 +654,13 @@ Bank01_L95D9:  .byte $B0           ;Samus start verticle screen position.
 
 Bank01_L95DA:  .byte $01, $00
 Bank01_L95DC:  .byte $03		; unused
-Bank01_L95DD:  .byte $43, $00, $00, $00, $00, $00, $00 
+Bank01_L95DD:  .byte $43, $00, $00
+
+.advance $95E0      ; called once in Bank07
+Bank01_L95E0:  .byte $00, $00
+
+.advance $95E2      ; called once in Bank07
+Bank01_L95E2:  .byte $00, $00 
 
 .advance MemuByte
     .byte $69
@@ -824,18 +832,6 @@ Bank01_L9983:  .byte $07, $C2, $06, $A2, $05, $92, $05, $12, $06, $22, $07, $42,
 
 Bank01_L9992:  .byte $05, $C2, $04, $A2, $03, $92, $03, $12, $04, $22, $05, $42, $50, $72, $FF
 
-Bank01_L99A1:  LDA $81
-Bank01_L99A3:  CMP #$01
-Bank01_L99A5:  BEQ $99B0
-Bank01_L99A7:  CMP #$03
-Bank01_L99A9:  BEQ $99B5
-Bank01_L99AB:  LDA $00
-Bank01_L99AD:  JMP StartUpdateEnemyAnimation
-
-Bank01_L99B0:  LDA $01
-Bank01_L99B2:  JSR UpdateEnemyAnim
-
-Bank01_L99B5:  JMP Start_Special_Attrs
 
 Bank01_HandleBankEnemies0:
 Bank01_L99B8:  LDA #$09
@@ -843,45 +839,51 @@ Bank01_L99BA:  STA $85
 Bank01_L99BC:  STA $86
 Bank01_L99BE:  LDA EnStatus,X
 Bank01_L99C1:  CMP #$03
-Bank01_L99C3:  BEQ $99C8
+Bank01_L99C3:  BEQ Bank01_L99C8
 Bank01_L99C5:  JSR Bank07_LFB88
 
 Bank01_L99C8:  LDA #$06
 Bank01_L99CA:  STA $00
-Bank01_L99CC:  LDA #$08
-Bank01_L99CE:  STA $01
-Bank01_L99D0:  JMP $99A1
+Bank01_L99A1:  LDA $81
+Bank01_L99A3:  CMP #$01
+Bank01_L99A5:  BEQ Bank01_L99B0
+Bank01_L99A7:  CMP #$03
+Bank01_L99A9:  BEQ Bank01_L99B5
+Bank01_L99AB:  LDA $00
+Bank01_L99AD:  JMP StartUpdateEnemyAnimation
 
 Bank01_HandleBankEnemies1:
 Bank01_L99D3:  LDA #$0F
-Bank01_L99D5:  JMP $99BA
+Bank01_L99D5:  BNE Bank01_L99BA
+			   ; safe
 
 Bank01_HandleBankEnemies3:
 Bank01_L99D8:  LDA EnStatus,X
 Bank01_L99DB:  CMP #$03
-Bank01_L99DD:  BEQ $99E2
+Bank01_L99DD:  BEQ Bank01_L99C8
 Bank01_L99DF:  JSR Bank07_LFBCA
-Bank01_L99E2:  JMP $99C8
+Bank01_L99E2:  JMP Bank01_L99C8
 
 Bank01_HandleBankEnemies2:
 Bank01_L99E5:  LDA #$21
 Bank01_L99E7:  STA $85
 Bank01_L99E9:  LDA #$1E
-Bank01_L99EB:  STA $86
-Bank01_L99ED:  LDA EnStatus,X
-Bank01_L99F0:  CMP #$03
-Bank01_L99F2:  BEQ $99F7
-Bank01_L99F4:  JSR Bank07_LFB88
-Bank01_L99F7:  JMP $99C8
+			   bne Bank01_L99BC
+			   ;safe
 
-.advance $99FA
+Bank01_L99B0:  LDA #$08
+Bank01_L99B2:  JSR UpdateEnemyAnim
+
+Bank01_L99B5:  JMP Start_Special_Attrs
+
+;.advance $99FA
 
 Bank01_HandleBankEnemies4:
 Bank01_L99FA:  LDA $81
 Bank01_L99FC:  CMP #$01
-Bank01_L99FE:  BEQ Bank01_L9A44
+Bank01_L99FE:  BEQ Bank01_L99B0
 Bank01_L9A00:  CMP #$03
-Bank01_L9A02:  BEQ Bank01_L9A49
+Bank01_L9A02:  BEQ Bank01_L99B5
 Bank01_L9A04:  LDA EnCounter,X
 Bank01_L9A07:  CMP #$0F
 Bank01_L9A09:  BCC Bank01_L9A3F
@@ -909,20 +911,16 @@ Bank01_L9A3D:  BPL Bank01_L9A22
 Bank01_L9A3F:  LDA #$02
 Bank01_L9A41:  JMP StartUpdateEnemyAnimation
 
-Bank01_L9A44:  LDA #$08
-Bank01_L9A46:  JSR UpdateEnemyAnim
-Bank01_L9A49:  JMP Start_Special_Attrs
-
-.advance $9A4C
+;.advance $9A4C
 Bank01_HandleBankEnemies5:
 Bank01_L9A4C:  JSR DoSomethingToFrameCount
 Bank01_L9A4F:  AND #$03
 Bank01_L9A51:  BEQ Bank01_L9A87
 Bank01_L9A53:  LDA $81
 Bank01_L9A55:  CMP #$01
-Bank01_L9A57:  BEQ Bank01_L9A44
+Bank01_L9A57:  BEQ Bank01_L99B0
 Bank01_L9A59:  CMP #$03
-Bank01_L9A5B:  BEQ Bank01_L9A49
+Bank01_L9A5B:  BEQ Bank01_L99B5
 Bank01_L9A5D:  LDA EnStatus,X
 Bank01_L9A60:  CMP #$03
 Bank01_L9A62:  BEQ Bank01_L9A87
@@ -985,23 +983,47 @@ Bank01_L9A96:  AND #$03
 Bank01_L9A98:  ROL 
 Bank01_L9A99:  TAY 
 Bank01_L9A9A:  LDA Bank01_L9AA0,Y
-Bank01_L9A9D:  JMP DoSomethingToAnimationIndecies
+Bank01_L9A9D:  JMP SetAnimationIndex
 
 Bank01_L9AA0:  .byte $35, $35, $3E, $38, $3B, $3B, $38, $3E 
 
-
+.scope
 Bank01_DispachBankEnemyHandler:
+	LDY $0405,X
+	STY $00
+	LSR $00
+	lsr 
+	bcs _OddValuesCheck
+	eor $0405,X
+    lsr 
+    bcc _Dispatch_0_And_5 
+    jmp Bank_Enemy_Dispatch_1_And_4 
 
-Bank01_L9AE2:  LDY $0405,X
-Bank01_L9AE5:  STY $00
-Bank01_L9AE7:  LSR $00
-Bank01_L9AE9:  ROL 
-Bank01_L9AEB:  TAY 
-Bank01_L9AEC:  LDA Bank_Enemy_Dispatch_Tbl_Hi,Y
-Bank01_L9AEF:  PHA 
-Bank01_L9AF0:  LDA Bank_Enemy_Dispatch_Tbl_Lo,Y
-Bank01_L9AF3:  PHA 
-Bank01_L9AF4:  RTS
+_OddValuesCheck:
+    beq _Dispatch_2_And_3 
+    jmp Bank_Enemy_Dispatch_6_And_7 
+
+_Dispatch_0_And_5:
+    jmp Bank_Enemy_Dispatch_0_And_5 
+
+_Dispatch_2_And_3:
+    jmp Bank_Enemy_Dispatch_2_And_3 
+
+.scend
+
+nop
+nop
+nop
+nop
+nop
+nop
+nop
+nop
+nop
+nop
+nop
+nop
+nop
 
 .advance $9AF5
 
@@ -1036,21 +1058,21 @@ Bank01_L9B2F:  JMP StartUpdateEnemyAnimation_2
 Bank01_HandleBankEnemies7:
 Bank01_L9B32:  LDA EnStatus,X
 Bank01_L9B35:  CMP #$02
-Bank01_L9B37:  BNE $9B71
+Bank01_L9B37:  BNE Bank01_L9B71
 Bank01_L9B39:  LDA $0403,X
-Bank01_L9B3C:  BNE $9B71
+Bank01_L9B3C:  BNE Bank01_L9B71
 Bank01_L9B3E:  LDA $6AFE,X
-Bank01_L9B41:  BNE $9B55
+Bank01_L9B41:  BNE Bank01_L9B55
 Bank01_L9B43:  LDA $030D
 Bank01_L9B46:  SEC 
 Bank01_L9B47:  SBC EnYRoomPos,X
 Bank01_L9B4A:  CMP #$40
-Bank01_L9B4C:  BCS $9B71
+Bank01_L9B4C:  BCS Bank01_L9B71
 Bank01_L9B4E:  LDA #$7F
 Bank01_L9B50:  STA $6AFE,X
-Bank01_L9B53:  BNE $9B71
+Bank01_L9B53:  BNE Bank01_L9B71
 Bank01_L9B55:  LDA $0402,X
-Bank01_L9B58:  BMI $9B71
+Bank01_L9B58:  BMI Bank01_L9B71
 Bank01_L9B5A:  LDA #$00
 Bank01_L9B5C:  STA $0402,X
 Bank01_L9B5F:  STA EnCounter,X
@@ -1058,14 +1080,15 @@ Bank01_L9B62:  STA $6AFE,X
 Bank01_L9B65:  LDA $0405,X
 Bank01_L9B68:  AND #$01
 Bank01_L9B6A:  TAY 
-Bank01_L9B6B:  LDA $9BA0,Y
+Bank01_L9B6B:  LDA Bank01_L9BA0,Y
 Bank01_L9B6E:  STA $0403,X
+
 Bank01_L9B71:  LDA $0405,X
 Bank01_L9B74:  ASL 
-Bank01_L9B75:  BMI $9B95
+Bank01_L9B75:  BMI Bank01_L9B95
 Bank01_L9B77:  LDA EnStatus,X
 Bank01_L9B7A:  CMP #$02
-Bank01_L9B7C:  BNE $9B95
+Bank01_L9B7C:  BNE Bank01_L9B95
 Bank01_L9B7E:  JSR $833F
 Bank01_L9B81:  PHA 
 Bank01_L9B82:  JSR Common_Collision_Func
@@ -1074,53 +1097,54 @@ Bank01_L9B87:  PLA
 Bank01_L9B88:  STA $04
 Bank01_L9B8A:  JSR GetXEnemyRoomPosition_09_08_0B
 Bank01_L9B8D:  JSR UpdateObjectLocation
-Bank01_L9B90:  BCC $9B9A
-Bank01_L9B92:  JSR $9C96
+Bank01_L9B90:  BCC Bank01_L9B9A
+Bank01_L9B92:  JSR Bank01_L9C96
 Bank01_L9B95:  LDA #$03
 Bank01_L9B97:  JMP StartUpdateEnemyAnimation_2
 Bank01_L9B9A:  LDA #$00
 Bank01_L9B9C:  STA EnStatus,X
 Bank01_L9B9F:  RTS
 
+; TODO: I think this table exists in bank 07
 Bank01_L9BA0:  .byte $04, $FC
 
 Bank01_HandleBankEnemies8:
 Bank01_L9BA2:  LDA EnStatus,X
 Bank01_L9BA5:  CMP #$03
-Bank01_L9BA7:  BCC $9BC2
-Bank01_L9BA9:  BEQ $9BAF
+Bank01_L9BA7:  BCC Bank01_L9BC2
+Bank01_L9BA9:  BEQ Bank01_L9BAF
 Bank01_L9BAB:  CMP #$05
-Bank01_L9BAD:  BNE $9BCB
+Bank01_L9BAD:  BNE Bank01_L9BCB
 Bank01_L9BAF:  LDA #$00
 Bank01_L9BB1:  STA $6B04
 Bank01_L9BB4:  STA $6B14
 Bank01_L9BB7:  STA $6B24
 Bank01_L9BBA:  STA $6B34
 Bank01_L9BBD:  STA $6B44
-Bank01_L9BC0:  BEQ $9BCB
-Bank01_L9BC2:  JSR $9C1D
-Bank01_L9BC5:  JSR $9CCC
-Bank01_L9BC8:  JSR $9D05
+Bank01_L9BC0:  BEQ Bank01_L9BCB
+Bank01_L9BC2:  JSR Bank01_L9C1D
+Bank01_L9BC5:  JSR Bank01_L9CCC
+Bank01_L9BC8:  JSR Bank01_L9D05
 Bank01_L9BCB:  LDA #$0A
 Bank01_L9BCD:  STA $00
-Bank01_L9BCF:  JMP $99CC
+Bank01_L9BCF:  JMP Bank01_L99A1
 
 Bank01_HandleBankEnemies9:
 Bank01_L9BD2:  LDA $0405,X
 Bank01_L9BD5:  AND #$02
-Bank01_L9BD7:  BEQ $9BE0
+Bank01_L9BD7:  BEQ Bank01_L9BE0
 Bank01_L9BD9:  LDA EnStatus,X
 Bank01_L9BDC:  CMP #$03
-Bank01_L9BDE:  BNE $9BE7
+Bank01_L9BDE:  BNE Bank01_L9BE7
 Bank01_L9BE0:  LDA #$00
 Bank01_L9BE2:  STA EnStatus,X
-Bank01_L9BE5:  BEQ $9C12
+Bank01_L9BE5:  BEQ Bank01_L9C12
 Bank01_L9BE7:  LDA $0405,X
 Bank01_L9BEA:  ASL 
-Bank01_L9BEB:  BMI $9C12
+Bank01_L9BEB:  BMI Bank01_L9C12
 Bank01_L9BED:  LDA EnStatus,X
 Bank01_L9BF0:  CMP #$02
-Bank01_L9BF2:  BNE $9C12
+Bank01_L9BF2:  BNE Bank01_L9C12
 Bank01_L9BF4:  JSR $8244
 Bank01_L9BF7:  LDX PageIndex
 Bank01_L9BF9:  LDA $00
@@ -1130,50 +1154,49 @@ Bank01_L9C01:  LDX PageIndex
 Bank01_L9C03:  LDA $00
 Bank01_L9C05:  STA $0403,X
 Bank01_L9C08:  JSR Bank07_LFA1E
-Bank01_L9C0B:  BCS $9C12
+Bank01_L9C0B:  BCS Bank01_L9C12
 Bank01_L9C0D:  LDA #$03
 Bank01_L9C0F:  STA EnStatus,X
 Bank01_L9C12:  LDA #$01
 Bank01_L9C14:  JSR UpdateEnemyAnim
 Bank01_L9C17:  JMP Start_Special_Attrs
 
-nop
-nop
-
 Bank01_L9C1D:  LDX #$50
-Bank01_L9C1F:  JSR $9C2A
+Bank01_L9C1F:  JSR Bank01_L9C2A
 Bank01_L9C22:  TXA 
-Bank01_L9C23:  SEC 
-Bank01_L9C24:  SBC #$10
-Bank01_L9C26:  TAX 
-Bank01_L9C27:  BNE $9C1F
+Bank01_L9C23:  SBX #$10
+Bank01_L9C27:  BNE Bank01_L9C1F
 Bank01_L9C29:  RTS
 
 .advance $9C2A
 Bank01_L9C2A:  LDY EnStatus,X
-Bank01_L9C2D:  BEQ $9C55
+Bank01_L9C2D:  BEQ Bank01_L9C55
 Bank01_L9C2F:  LDA EnDataIndex,X
 Bank01_L9C32:  CMP #$0A
-Bank01_L9C34:  BEQ $9C3A
+Bank01_L9C34:  BEQ Bank01_L9C3A
 Bank01_L9C36:  CMP #$09
-Bank01_L9C38:  BNE $9CA7
+Bank01_L9C38:  BNE Bank01_L9CA7		; rts
+
 Bank01_L9C3A:  LDA $0405,X
 Bank01_L9C3D:  AND #$02
-Bank01_L9C3F:  BEQ $9C55
+Bank01_L9C3F:  BEQ Bank01_L9C55
 Bank01_L9C41:  DEY 
-Bank01_L9C42:  BEQ $9C60
+Bank01_L9C42:  BEQ Bank01_L9C60
 Bank01_L9C44:  CPY #$02
-Bank01_L9C46:  BEQ $9C55
+Bank01_L9C46:  BEQ Bank01_L9C55
 Bank01_L9C48:  CPY #$03
-Bank01_L9C4A:  BNE $9CA7
+Bank01_L9C4A:  BNE Bank01_L9CA7		; rts
 Bank01_L9C4C:  LDA $040C,X
 Bank01_L9C4F:  CMP #$01
-Bank01_L9C51:  BNE $9CA7
-Bank01_L9C53:  BEQ $9C60
+Bank01_L9C51:  BNE Bank01_L9CA7		; rts
+Bank01_L9C53:  BEQ Bank01_L9C60
+			   ; safe
+
 Bank01_L9C55:  LDA #$00
 Bank01_L9C57:  STA EnStatus,X
 Bank01_L9C5A:  STA EnSpecialAttribs,X
 Bank01_L9C5D:  JSR Bank07_LEB6E
+
 Bank01_L9C60:  LDA $0405
 Bank01_L9C63:  STA $0405,X
 Bank01_L9C66:  LSR 
@@ -1192,15 +1215,15 @@ Bank01_L9C79:  TYA
 Bank01_L9C7A:  PLP 
 Bank01_L9C7B:  ROL 
 Bank01_L9C7C:  TAY 
-Bank01_L9C7D:  LDA $9CBB,Y
+Bank01_L9C7D:  LDA Bank01_L9CBB,Y
 Bank01_L9C80:  STA $05
 Bank01_L9C82:  LDX #$00
 Bank01_L9C84:  JSR GetXEnemyRoomPosition_09_08_0B
 Bank01_L9C87:  JSR UpdateObjectLocation
 Bank01_L9C8A:  LDX PageIndex
-Bank01_L9C8C:  BCC $9CA7
+Bank01_L9C8C:  BCC Bank01_L9CA7
 Bank01_L9C8E:  LDA EnStatus,X
-Bank01_L9C91:  BNE $9C96
+Bank01_L9C91:  BNE Bank01_L9C96
 Bank01_L9C93:  INC EnStatus,X
 
 Bank01_L9C96:  LDA $08

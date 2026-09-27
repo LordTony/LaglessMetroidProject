@@ -222,7 +222,9 @@ Bank02_L95CC:  .byte $FF		   ;Boss Music Byte. Only used in bank 04 and 05
 
 Bank02_L95CD:  .byte $08           ;Norfair music init flag.
 
+.advance AreaEnemyDmg_LowByte
 Bank02_L95CE:  .byte $00           ;Base damage caused by area enemies to lower health byte.
+.advance AreaEnemyDmg_HiByte
 Bank02_L95CF:  .byte $01           ;Base damage caused by area enemies to upper health byte.
 
 .advance $95D0
@@ -540,7 +542,7 @@ Bank02_L99E3:  AND #$03
 Bank02_L99E5:  ROL 
 Bank02_L99E6:  TAY 
 Bank02_L99E7:  LDA $99ED,Y
-Bank02_L99EA:  JMP DoSomethingToAnimationIndecies
+Bank02_L99EA:  JMP SetAnimationIndex
 
 Bank02_L99ED:  .byte $69, $69, $72, $6C, $6F, $6F, $6C, $72
 
@@ -700,7 +702,7 @@ Bank02_L9B2E:  LDA $0405,X
 Bank02_L9B31:  AND #$01
 Bank02_L9B33:  TAY 
 Bank02_L9B34:  LDA $0083,Y
-Bank02_L9B37:  JSR DoSomethingToAnimationIndecies
+Bank02_L9B37:  JSR SetAnimationIndex
 Bank02_L9B3A:  BEQ $9B59
 Bank02_L9B3C:  CMP #$0F
 Bank02_L9B3E:  BCC $9B59
@@ -708,7 +710,7 @@ Bank02_L9B40:  LDA $0405,X
 Bank02_L9B43:  AND #$01
 Bank02_L9B45:  TAY 
 Bank02_L9B46:  LDA $9B62,Y
-Bank02_L9B49:  JSR DoSomethingToAnimationIndecies
+Bank02_L9B49:  JSR SetAnimationIndex
 Bank02_L9B4C:  JMP $9B59
 Bank02_L9B4F:  LDA $6AF4,X
 Bank02_L9B52:  CMP #$03

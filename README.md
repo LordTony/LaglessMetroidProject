@@ -128,12 +128,12 @@ SBX #$F0
 * BenchmarkNMI.lua shows how long it takes to reach NMI, min and max, over a second. This can be used to find painful spots
 
 ## Definite Bugs
+* Bank 02 Pipe Enemies don't clear names tables properly
+* Bank 02 Ball Enemies don't bounce properly
 * Mini bosses don't seem to spawn properly
   * This this has to do with "MaxMissiles" being moved into zero page a long time ago.
   * It looks like the ridley and kraid dead bytes were based on the offset to MaxMissiles.
 * End credits have their graphics corrupted
-* Missiles don't seem to hit spinners from far away (example: The ones hanging in Bank01 Room #$12)
-  * Could be because I keep deleting clc and sec instructions
 
 ## Maybe Bugs (Check Original Game Behavior)
 * Holding forward while walking into an enemy shows a frame or two of the screw attack.

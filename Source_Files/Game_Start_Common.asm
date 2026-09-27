@@ -420,7 +420,9 @@ _L830A:  ORA $968B,Y
 _L830D:  AND #$1F
 _L830F:  STA $0405,X
 _L8312:  JSR _L81B1
-_L8315:  JMP _L82A2
+_L8315:  BEQ _L82A2     ; branch always
+
+.advance $8318          ; called in Bank01 and Bank04       ; This is off by one now
 _L8318:  JSR _L80B0
 _L831B:  BPL _L8320
 _L831D:  JMP Common_Collision_Func
@@ -483,11 +485,8 @@ _L838F:  ADC $0402,X
 _L8392:  STA $00
 _L8394:  RTS
 
+; This is that swooper bird thing
 .advance Common_Collision_Func
-_L8395:  LDA #$00
-_L8397:  STA $00
-_L8399:  STA $02
-
 _L839B:  LDA #$0E
 _L839D:  STA $01
 _L839F:  STA $03
@@ -498,7 +497,11 @@ _L83A5:  ADC $6AFF,X
 _L83A8:  STA $0407,X
 _L83AB:  STA $04
 
+; HCSS - simple before and after
 _L83AD:  LDA #$00
+_L8397:  STA $00
+_L8399:  STA $02
+
 _L83AF:  LDY $6AFF,X
 _L83B2:  BPL _L83B6
 _L83B4:  LDA #$FF

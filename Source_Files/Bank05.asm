@@ -159,7 +159,9 @@ Bank05_L95CC:  .byte $12           ;Ridley's room.
 
 Bank05_L95CD:  .byte $80           ;Ridley hideout music init flag.
 
+.advance AreaEnemyDmg_LowByte
 Bank05_L95CE:  .byte $40           ;Base damage caused by area enemies to lower health byte.
+.advance AreaEnemyDmg_HiByte
 Bank05_L95CF:  .byte $02           ;Base damage caused by area enemies to upper health byte.
 
 .advance $95D0
@@ -458,7 +460,7 @@ Bank05_L99B4:  AND #$03
 Bank05_L99B6:  ROL 
 Bank05_L99B7:  TAY 
 Bank05_L99B8:  LDA $99BE,Y
-Bank05_L99BB:  JMP DoSomethingToAnimationIndecies
+Bank05_L99BB:  JMP SetAnimationIndex
 
 Bank05_L99BE:  .byte $4A, $4A, $53, $4D, $50, $50, $4D, $53
 
