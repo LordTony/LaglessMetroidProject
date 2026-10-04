@@ -513,6 +513,7 @@ _ClrCrntSFXFlags:
 
 _IncrementSFXFrame:
   LDX ChannelType         ;Load SFX channel number.
+  ; TOOD: Replace with ISC
   INC ThisNoiseFrame,X    ;increment current frame to play on given channel.
   LDA ThisNoiseFrame,X    ;Load current frame to play on given channel.
   CMP NoiseSFXLength,X    ;Check to see if current frame is last frame to play.
@@ -1468,8 +1469,9 @@ _PeriodInformationFound:
 * LDA SQ1DutyEnvelope,X   ;Store channel duty cycle and volume info in $EA.
   STA Cntrl0Data          ;
 * TXA                     ;
-  DEC SQ1InUse,X          ;
-  CMP SQ1InUse,X          ;If SQ1 or SQ2 are being used by SFX routines, branch.
+  ;DEC SQ1InUse,X          ;
+  ;CMP SQ1InUse,X          ;If SQ1 or SQ2 are being used by SFX routines, branch.
+  DCP SQ1InUse,X          ; Illigal opcode dropin replacement for the two lines above this
   BEQ +++                 ;
   INC SQ1InUse,X          ;Restore not in use status of SQ1 or SQ2.
   LDY ThisSoundChannel    ;

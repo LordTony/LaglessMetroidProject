@@ -1369,6 +1369,7 @@ Bank03_L9FEF:  BEQ Bank03_LA01A
 Bank03_L9FF1:  LDA MultiSFXFlag
 Bank03_L9FF4:  ORA #$02
 Bank03_L9FF6:  STA MultiSFXFlag
+; TOOD: Replace with ISC
 Bank03_L9FF9:  INC MotherBrainHits
 Bank03_L9FFB:  LDA MotherBrainHits
 Bank03_L9FFD:  CMP #$20
@@ -1605,6 +1606,7 @@ Bank03_LA1C5:  TAY
 Bank03_LA1C6:  LDA Bank03_LA1DB,Y
 Bank03_LA1C9:  JSR Bank03_L9EE7
 Bank03_LA1CC:  LDX PageIndex
+; TOOD: Replace with ISC
 Bank03_LA1CE:  INC $8D,X
 Bank03_LA1D0:  LDA $8D,X
 Bank03_LA1D2:  CMP #$06

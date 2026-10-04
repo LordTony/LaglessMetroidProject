@@ -117,7 +117,9 @@
 .alias SamusVertSpeed       $45     ;moved from $0308
 .alias SamusHorzSpeed       $46     ;moved from $0309
 .alias SamusObjRadY         $47     ;moved from $0301
-.alias SamusObjRadX         $48     ;moved from $0302
+
+;TODO - is SamusObjRadX always #$04? If so we might be able to clean up some code
+;.alias SamusObjRadX         $48     ;moved from $0302
 
 .alias ScrollDir        $49     ;0=Up, 1=Down, 2=Left, 3=Right.
 
@@ -929,6 +931,11 @@
 .alias IntroSpr7YRise   $6F1D   ;y displacement of sprite movement(rise).
 .alias IntroSpr7XDir    $6F1E   ;MSB set=decrease sprite x pos, else increase sprite  x pos.
 .alias IntroSpr7YDir    $6F1F   ;MSB set=decrease sprite y pos, else increase sprite  y pos.
+
+.alias BulletSlotCache      $6F00   
+.alias BulletSlot1Cache     $6FD0
+.alias BulletSlot2Cache     $6FE0
+.alias BulletSlot3Cache     $6FF0
 
 ;---------------------------------- [ Constant Locations in Swap Banks ] -----------------------------
 .alias Common_Struct_00         $8000
