@@ -4460,6 +4460,7 @@ GetObjectXCoordData:
 
 .scope
 ; Does not clobber X or Y
+; Carry bit is set if samus can fall. Carry bit is clear if samus is standing on something 
 LF1FA:
 
     lda #$02
@@ -5978,11 +5979,10 @@ MoveSamusRight:
     lda ObjectX
     clc
     adc #$04       ; Samus is always X radius 4
-    and #$07
+    anc #$07
     bne +          ; only call crash detection every 8th pixel
 ;CheckMoveRight:
-    sec
-    sbc #$04    ; Samus is always X radius 4
+    sbc #$03    ; Samus is always X radius 4
     jsr CheckMoveRightLeftSharedPart
     bcc ResetDoorData       ; branch if yes! (CF = 0)
 
@@ -6459,7 +6459,7 @@ LE626:
     ;ldx #$00
     ;lda SamusObjRadX
     ;clc
-    adc #$0C        ; Samus is always SamusObjRadX == 4
+    lda #$0C        ; Samus is always SamusObjRadX == 4
     jsr CheckMoveRightLeftSharedPart
     bcc ResetDoorDataCopy    ; branch if yes! (CF = 0)
 
