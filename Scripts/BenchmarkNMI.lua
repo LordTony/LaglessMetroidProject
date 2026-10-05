@@ -4,7 +4,7 @@
 
 nmi_addr = 0xC0D6
 return_from_nmi_addr = 0xC212
-framesToResetOn = 300
+framesToResetOn = 60
 timer = 0
 scanlines = {}
 

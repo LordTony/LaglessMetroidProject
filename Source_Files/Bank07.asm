@@ -4661,53 +4661,6 @@ UpdateObjAnimLoop:
 *   LDY AnimResetIndex,x    ; reset anim frame index
     JMP UpdateObjAnimLoop   ; do first frame of animation
 
-;--------------------------------[ Get sprite control byte ]-----------------------------------------
-
-;The sprite control byte extracted from the frame data has the following format: AABBXXXX.
-;Where AA are the two bits used to control the horizontal and verticle mirroring of the
-;sprite and BB are the two bits used control the sprite colors. XXXX is the entry number
-;in the PlacePtrTbl used to place the sprite on the screen.
-
-; Input             $00 ptr, ObjectCntrl
-; Output            $04 ptr, sets $0F to zero, sets Y to 0, sets X to bottom nibble of $00 ptr
-
-GetSpriteCntrlData:
-LDCC3:  LDY #$00            ;
-LDCC5:  STY $0F             ;Clear index into placement data.
-
-LDCC7:  LAX ($00),y         ;Load control byte from frame pointer data.
-LDCC9:  STA $04             ;Store value in $04 for processing below. ;Keep a copy of the value in x as well.
-
-LDCCC:
-        AND #$C0            ;keep bits 6-7 (pre-mirror flip bits)
-        ORA #$20            ;set bit 5 (draw behind background)
-        ORA Div16Table, x   ;OR in raw table byte (X still = control byte)
-        AND #$E3            ;strip table's stray bits 2-4, keep 7,6,5,1,0
-        STA $05
-
-LDCDC:  LDA ObjectCntrl     ;Extract bit from control byte that controls the
-LDCDE:  AND #$10            ;object mirroring.
-LDCE0:  ASL                 ;
-LDCE1:  ASL                 ;
-LDCE2:  EOR $04             ;Move it to the bit 6 position and use it to flip the
-LDCE4:  STA $04             ;horizontal mirroring of the sprite if set.
-
-LDCE6:  LDA ObjectCntrl     ;
-LDCE8:  BPL +               ;If MSB is set in ObjectCntrl, use its flip bits(6 and 7).
-
-; SpriteFlipBitsOverride
-    and #$3F
-    sta $D4                 ; scratch ZP
-    txa 
-    and #$C0                ;Extract the two sprite flip bytes from theoriginal
-    ora $D4                 ;control byte and set any additional bits from ObjectCntrl.
-    sta $05                 ;Store modified byte to load in sprite control byte later.
-
-LDCEF:* TXA             ;Discard upper nibble so only entry number into
-LDCF0:  AND #$0F            ;PlacePtrTbl remains.
-LDCF3:  TAX             ;Transfer to X to use as an index to find proper
-LDCF4:  RTS             ;placement data segment.
-
 ;-----------------------------------------------------------------------------------------------------
 
 MoveEnemies_Continued:
@@ -4856,8 +4809,40 @@ MoveEnemies:
     LDA EnemyFramePtrTbl_Hi,y
     STA $01
     
-    JSR GetSpriteCntrlData      ;($DCC3)Get place pointer index and sprite control data.
-    
+    LDY #$00            
+    STY $0F
+
+    LAX ($00),y         
+    STA $04             
+
+    AND #$C0         
+    ORA #$20         
+    ORA Div16Table, x
+    AND #$E3         
+    STA $05
+
+    lda ObjectCntrl
+    bpl +
+
+        ; $04 still contains the original source byte.
+        ; Combine source bits 6–7 with ObjectCntrl bits 0–5.
+        eor $04
+        and #$3F
+        eor $04
+        sta $05
+
+        lda ObjectCntrl
+
+*   and #$10
+    asl 
+    asl 
+    eor $04
+    sta $04
+
+    txa             ;Discard upper nibble so only entry number into
+    and #$0F        ;PlacePtrTbl remains.
+    tax             ;Transfer to X to use as an index to find proper
+
     LDA EnemyPlacePtrTbl_Lo,x
     STA $02
     
@@ -4939,128 +4924,157 @@ LDE77:  sta $00             ;
 LDE79:  lda FramePtrTable_Hi,y       ;Entry from FramePtrTable is stored in $0000.
 LDE7C:  sta $01             ;
 
-LDE7E:  jsr GetSpriteCntrlData      ;($DCC3)Get place pointer index and sprite control data.
+;GetSpriteCntrlData:
+    ldy #$00            ;
+    sty $0F             ;Clear index into placement data.   
 
-LDE81:  lda PlacePtrTable_Lo,x     ;
-LDE84:  sta $02             ;
+    lax ($00),y         ;Load control byte from frame pointer data.
+    sta $04             ;Store value in $04 for processing below. ;Keep a copy of the value in x as well.   
 
-LDE86:  lda PlacePtrTable_Hi,x       ;Store pointer from PlacePtrTbl in $0002.
-LDE89:  sta $03             ;
+    and #$C0            ;keep bits 6-7 (pre-mirror flip bits)
+    ora #$20            ;set bit 5 (draw behind background)
+    ora Div16Table, x   ;OR in raw table byte (X still = control byte)
+    and #$E3            ;strip table's stray bits 2-4, keep 7,6,5,1,0
+    sta $05 
 
-;Special case for Samus exploding.
-LDE8F:  cpx #$07                    ;Is Samus exploding?
-LDE91:  bne DrawFramePPUPart        ;If not, branch to skip this section of code.
+    lda ObjectCntrl
+    bpl +
 
-LDE95:  inc ObjectCounter           ;Incremented every frame during explode sequence.
-LDE97:  lda ObjectCounter           ;Bottom two bits used for index into ExplodeRotationTbl.
-;LDE99:  pha                         ;Save value of A.
-LDE9A:  and #$03                    ;Use 2 LSBs for index into ExplodeRotationTbl.
-LDE9C:  tax                         ;
-LDE9D:  lda $05                     ;Drop mirror control bits from sprite control byte.
-LDE9F:  and #$3F                    ;
-LDEA1:  ora ExplodeRotationTbl,x    ;Use mirror control bytes from table(Base is $DC8B).
-LDEA4:  sta $05                     ;Save modified sprite control byte.
-;LDEA6:  pla                         ;Restore A
+        ; $04 still contains the original source byte.
+        ; Combine source bits 6–7 with ObjectCntrl bits 0–5.
+        eor $04
+        and #$3F
+        eor $04
+        sta $05
+    
+        lda ObjectCntrl
+
+*   and #$10
+    asl
+    asl
+    eor $04
+    sta $04
+
+    txa                       ;Discard upper nibble so only entry number into
+    and #$0F                  ;PlacePtrTbl remains.
+    tax                       ;Transfer to X to use as an index to find proper placement data segment.
+
+    lda PlacePtrTable_Lo,x 
+    sta $02                
+
+    lda PlacePtrTable_Hi,x       ;Store pointer from PlacePtrTbl in $0002.
+    sta $03 
+
+    ;Special case for Samus exploding.
+    cpx #$07                        ;Is Samus exploding?
+    bne DrawFramePPUPart            ;If not, branch to skip this section of code.       
+        inc ObjectCounter           ;Incremented every frame during explode sequence.
+        lda ObjectCounter           ;Bottom two bits used for index into ExplodeRotationTbl.
+        and #$03                    ;Use 2 LSBs for index into ExplodeRotationTbl.
+        tax                         ;
+
+        lda $05                     ;Drop mirror control bits from sprite control byte.
+        and #$3F                    ;
+        ora ExplodeRotationTbl,x    ;Use mirror control bytes from table(Base is $DC8B).
+        sta $05                     ;Save modified sprite control byte.
+
         lda ObjectCounter
-LDEA7:  cmp #$19                    ;After 25 frames, Move on to second part of death 
-LDEA9:  bne DrawFramePPUPart        ;handler, else branch to skip the rest of this code.
+        cmp #$19                    ;After 25 frames, Move on to second part of death 
+        bne DrawFramePPUPart        ;handler, else branch to skip the rest of this code.   
 
-LDEAD:  lda #sa_Dead2           ;
-LDEAF:  sta SamusObjAction         ;Move to next part of the death handler.
+            lda #sa_Dead2           ;
+            sta SamusObjAction      ;Move to next part of the death handler.
 
-LDEB2:  lda #$28            ;
-LDEB4:  sta AnimDelay       ;Set animation delay for 40 frames(.667 seconds).
+            lda #$28                ;
+            sta AnimDelay           ;Set animation delay for 40 frames(.667 seconds).       
+            pla                     ;Pull last return address off of the stack.
+            pla                     ;
 
-LDEB7:  pla                 ;Pull last return address off of the stack.
-LDEB8:  pla                 ;
-        sty ObjectCntrl     ;Y = 0 here; Clear object control byte.
-        rts                 ;
+            sty ObjectCntrl         ;Y = 0 here; Clear object control byte.
+            rts                     ;
 
 DrawFramePPUPart:
-LDEBC:
-*   iny
+    iny
     lda ($00),y
     ldx PageIndex       ;
     bne DrawEnemyFramePPUPart
 
-        ; Handle PageIndex == 0 aka Samus Case
-        DrawSamusFramePPUPart:
-            ; Samus Radius Y is either #$08 if she's rolled up or #$0F if she's standing
-            ; Samus Radius X is always #$04 no matter what so we don't need to set it 
+    ; Handle PageIndex == 0 aka Samus Case
+    DrawSamusFramePPUPart:
+        ; Samus Radius Y is either #$08 if she's rolled up or #$0F if she's standing
+        ; Samus Radius X is always #$04 no matter what so we don't need to set it 
 
-            ; TODO: Move the SamusObjRadY to her getting in and out of "ball" form
-            ; if we can do that, it doesn't need to be reset every frame and can save a bit of time
-            sta SamusObjRadY 
+        ; TODO: Move the SamusObjRadY to her getting in and out of "ball" form
+        ; if we can do that, it doesn't need to be reset every frame and can save a bit of time
+        sta SamusObjRadY 
 
-            iny
-            iny
-            sty $11
+        iny
+        iny
+        sty $11
 
-            ; Pulling positional updates out of "IsObjectVisible" while just assuming Samus will always be visible
+        ; Pulling positional updates out of "IsObjectVisible" while just assuming Samus will always be visible
+        ; Update X position
+        lda ObjectX            
+        sec                
+        sbc ScrollX        
+        sta $0E   
 
-            ; Update X position
-            lda ObjectX            
-            sec                
-            sbc ScrollX        
-            sta $0E   
+        ; update Y position
+        lda ObjectY                          
+        sec                ; Needed
+        sbc ScrollY        
+        sta $10 
 
-            ; update Y position
-            lda ObjectY                          
-            sec                ; Needed
-            sbc ScrollY        
-            sta $10 
+        ; Since the Screen height is only 240 and not 255, when we are moving between
+        ; name tables (screens) vertically, we need to adjust by subtracting 10 to handle that case
+        lda ObjectHi
+        eor PPUCNT0ZP
+        and #$01  
+        beq + 
+        bcs + 
 
-            ; Since the Screen height is only 240 and not 255, when we are moving between
-            ; name tables (screens) vertically, we need to adjust by subtracting 10 to handle that case
-            lda ObjectHi
-            eor PPUCNT0ZP
-            and #$01  
-            beq + 
-            bcs + 
+            lda $10
+            sbc #$0F        ; Carry is clear: subtract $10
+            sta $10
 
-                lda $10
-                sbc #$0F        ; Carry is clear: subtract $10
-                sta $10
-
-            ; We also jump to GetNextFrameByte because Y is already what it needs to be to kick off that chain.
-        *   ldx SpritePagePos   
-            jmp GetNextFrameByte        ; I don't think SpritePagePos can ever be zero for samus 
-            ; safe
+        ; We also jump to GetNextFrameByte because Y is already what it needs to be to kick off that chain.
+    *   ldx SpritePagePos   
+        jmp GetNextFrameByte        ; I don't think SpritePagePos can ever be zero for samus 
+        ; safe
 
 DrawEnemyFramePPUPart:      
-LDEC1:
 
-    lda ObjectY,x           ;
-    sta $0A             ;   
+    lda ObjectY,x 
+    sta $0A        
 
-    lda ObjectX,x           ;Copy object y and x room position and name table
-    sta $0B             ;data into $0A, $0B and $06 respectively.   
+    lda ObjectX,x               ;Copy object y and x room position and name table
+    sta $0B                     ;data into $0A, $0B and $06 respectively.   
 
-    lda ObjectHi,x          ;
-    sta $06             ;
+    lda ObjectHi,x 
+    sta $06 
 
-    sta ObjRadY,x           ;Get verticle radius in pixles of object.
+    sta ObjRadY,x               ;Get verticle radius in pixles of object.
     sec
     ; Reduce Y Radius
-      sbc #$10              ;Subtract #$10 from object y radius.
-      bcs +                 ;If number is still a positive number, branch to store value.
-        lda #$00            ;Number is negative.  Set Y radius to #$00.
-    * sta $08               ;Store result and return.
+    sbc #$10                    ;Subtract #$10 from object y radius.
+    bcs +                       ;If number is still a positive number, branch to store value.
+        lda #$00                ;Number is negative.  Set Y radius to #$00.
+    * sta $08                   ;Store result and return.
 
-LDEC6:  iny                 ;Increment to third frame data byte.
-LDEC7:  lda ($00),y         ;Get horizontal radius in pixels of object.
-LDEC9:  sta ObjRadX,x       ;
+LDEC6:  iny                     ;Increment to third frame data byte.
+LDEC7:  lda ($00),y             ;Get horizontal radius in pixels of object.
+LDEC9:  sta ObjRadX,x       
 
-LDECB:  sta $09             ;Temp storage for object x radius.
+LDECB:  sta $09                 ;Temp storage for object x radius.
 
-LDECD:  iny                 ;Set index to 4th byte of frame data.
-LDECE:  sty $11             ;Store current index into frame data.
+LDECD:  iny                     ;Set index to 4th byte of frame data.
+LDECE:  sty $11                 ;Store current index into frame data.
 
 LDED0:  jsr IsObjectVisible     ;($DFDF)Determine if object is within the screen boundaries.
                                 ;X == Page index here
 LDED6:  sta ObjectOnScreen,x    ;Store visibility status of object.
 
-LDEDB:  tax                     ;
+;LDEDB:  tax                     ;
 LDEDC:  beq SetObjectCntrlToA   ;
 
 DoDrawSpriteObject:
@@ -8405,6 +8419,8 @@ Exit102:
 ;----------------------------------[ Draw structure routines ]----------------------------------------
 .scope
 
+.alias _NextMacroIndex              $48
+
 .alias _PositionInStruct            $10
 .alias _RoomDataWritePtr_Hi         $27
 .alias _RoomDataWritePtr_Lo         $26
@@ -8417,80 +8433,107 @@ DrawStructExit:
     jmp CheckForNextStruct
 
 IncStructPtrUB:
-    inc StructPtrUB         ;Update high byte of struct pointer if carry occured.
-    clc                     
-    bcc UpdateCartRamPtr    ;branch always
+    inc StructPtrUB
+    clc
+    bcc UpdateCartRamPtr
 
-IncCartRAMWorkPtrUB:
-    inc CartRAMWorkPtrUB    ;Increment high byte of pointer if necessary.
-    inc _RoomDataWritePtr_Hi
-    clc 
-    bcc DrawStruct          ;branch always
-
-DoNextMacro:
-    LEF76:  lda _PositionInStruct            ;Load struct index.
-
-AdvanceRow:
-    LEF78:  sec                         ;Since carry bit is set,
-    LEF79:  adc StructPtrLB             ;addition will be one more than expected.
-    LEF7B:  sta StructPtrLB             ;Update the struct pointer.
-    LEF7D:  bcs IncStructPtrUB          ;Branching is 1 cycle slower than not branching
-
-UpdateCartRamPtr:
-    LEF81:  lda CartRAMWorkPtrLB        ;
-    LEF84:  adc #$40                    ;Advance to next macro row in room RAM(two tile rows).
-    LEF86:  sta CartRAMWorkPtrLB        ;
-            sta _RoomDataWritePtr_Lo
-    LEF88:  bcs IncCartRAMWorkPtrUB     ;Branching is 1 cycle slower than not branching
-
-; Entry point
+; Entry point: Y == 0, C == 0; both destination pointers agree.
 DrawStruct:
 DrawStructRow:
-    lax (StructPtr), y                  ; Y == 0 here. Load data byte.
-    bmi DrawStructExit                  ;If so, branch to exit.
+    lax (StructPtr),y
+    bmi DrawStructExit
 
-    stx _PositionInStruct               ;Store horizontal macro count.
+    stx _PositionInStruct
 
-    lda _RoomDataWritePtr_Lo   
-    adc #$20                            ;carry known clear from the ASL above
-    sta _RoomDataWritePtr_Plus20_Lo     ;$00/$01 = pointer to the upper tile row, fixed for the whole loop
+    lda _RoomDataWritePtr_Lo
+    adc #$20                  ; C is clear on entry, not from an ASL.
+    sta _RoomDataWritePtr_Plus20_Lo
 
-    tya                                 ; Y == A == 0
+    tya
     adc _RoomDataWritePtr_Hi
     sta _RoomDataWritePtr_Plus20_Hi
- 
-    bit _PositionInStruct               ;Check if the -X------ bit is set
-    bvs DrawRepeatingMacro 
+
+    bit _PositionInStruct
+    bvs DrawRepeatingMacro
 
 DrawMacro:
     txa
+    lsr                         ; C = original width bit 0.
+    txa                         ; Restore width without changing C.
+    bcc DrawMacroPair            ; Even: draw a full pair immediately.
+
+    ; Odd: prepare one macro, then share the pair's final drawing code.
+    tay
+    lax (StructPtr),y
+    tya
+    asl
+    tay
+    dey
+    bne DrawMacroLastInPair      ; Always: 2*N-1 is nonzero.
 
 DrawMacroLoop:
-    tay 
-    lax (StructPtr),y   
-
-    tya 
-    asl 
-    tay 
-
+DrawMacroPair:
+    tay                         ; Source index N, known even and nonzero.
+    lax (StructPtr),y            ; X = macro N.
     dey
-    lda MacroLowerLeft, x
-    sta (_RoomDataWritePtr_Plus20),y
+    lda (StructPtr),y            ; Fetch macro N-1 while Y is a source index.
+    sta _NextMacroIndex
 
-    lda MacroUpperLeft, x
+    tya                         ; A = N-1.
+    asl
+    tay
+    iny                         ; Y = 2*N-1: first macro's destination.
+
+    lda MacroLowerLeft,x
+    sta (_RoomDataWritePtr_Plus20),y
+    lda MacroUpperLeft,x
+    sta (_RoomDataWritePtr),y
+    dey
+    lda MacroLowerRight,x
+    sta (_RoomDataWritePtr_Plus20),y
+    lda MacroUpperRight,x
     sta (_RoomDataWritePtr),y
 
-    dey
-    lda MacroLowerRight, x
-    sta (_RoomDataWritePtr_Plus20),y
+    dey                         ; Y = 2*N-3: second macro's destination.
+    ldx _NextMacroIndex          ; No second source/destination conversion.
 
-    lda MacroUpperRight, x
+DrawMacroLastInPair:
+    lda MacroLowerLeft,x
+    sta (_RoomDataWritePtr_Plus20),y
+    lda MacroUpperLeft,x
+    sta (_RoomDataWritePtr),y
+    dey
+    lda MacroLowerRight,x
+    sta (_RoomDataWritePtr_Plus20),y
+    lda MacroUpperRight,x
     sta (_RoomDataWritePtr),y
 
-    tya 
-    lsr
-    bne DrawMacroLoop
-    beq DoNextMacro                     ;branch always Y==0 here
+    tya
+    lsr                         ; A = N-2 (or width-1 after the odd prefix).
+    bne DrawMacroPair
+
+; Y == 0; fall through into row advancement.
+DoNextMacro:
+    lda _PositionInStruct
+
+AdvanceRow:
+    sec
+    adc StructPtrLB
+    sta StructPtrLB
+    bcs IncStructPtrUB
+
+UpdateCartRamPtr:
+    lda CartRAMWorkPtrLB
+    adc #$40
+    sta CartRAMWorkPtrLB
+    sta _RoomDataWritePtr_Lo
+    bcc DrawStruct           ; Carry set falls into the handler below.
+
+IncCartRAMWorkPtrUB:
+    inc CartRAMWorkPtrUB
+    inc _RoomDataWritePtr_Hi
+    clc
+    bcc DrawStruct
 
 DrawRepeatingMacro:
     iny
@@ -8498,33 +8541,30 @@ DrawRepeatingMacro:
 
     lda _PositionInStruct
     and #$0F
-    asl 
-          
-    sty _PositionInStruct       ; Set _PositionInStruct to #$01 here
+    asl
+    sty _PositionInStruct
 
     tay
     dey
 
 DrawRepeatingMacroLoop:
-
-    lda MacroUpperLeft, x 
-    sta (_RoomDataWritePtr),y    
-    lda MacroLowerLeft, x
-    sta (_RoomDataWritePtr_Plus20),y
-
-    dey 
-
-    lda MacroUpperRight, x
+    lda MacroUpperLeft,x
     sta (_RoomDataWritePtr),y
-    lda MacroLowerRight, x
+    lda MacroLowerLeft,x
     sta (_RoomDataWritePtr_Plus20),y
 
-	dey
+    dey
+
+    lda MacroUpperRight,x
+    sta (_RoomDataWritePtr),y
+    lda MacroLowerRight,x
+    sta (_RoomDataWritePtr_Plus20),y
+
+    dey
     bpl DrawRepeatingMacroLoop
 
     iny
-    beq DoNextMacro                 ; branch always 
-    ; safe
+    beq DoNextMacro
 
 .scend
 

@@ -988,7 +988,7 @@
 .alias SXFInitTables            $B29D
 .alias SoundEngineEntryPoint    $B3CC
 .alias StructPointerTable_Hi    $BF0F
-.alias StructPointerTable_Lo    $BF69
+.alias StructPointerTable_Lo    $BF6B
 .alias InterruptVectors         $BFFA
 
 ;----------------------------------------------------------------------------------------------------

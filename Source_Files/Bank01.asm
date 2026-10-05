@@ -352,6 +352,8 @@ Bank01_LAE8E:
     .byte $02, $3E, $3F
     .byte $FF
 
+Bank01_Struct_5A:
+    .byte $08, $1C, $1E, $1E, $1E, $1E, $1E, $1C, $1E
 ;Structure #$27
 Bank01_LAE92:
     .byte $48, $1E
@@ -363,6 +365,7 @@ Bank01_LAEA5:
     .byte $01, $1F
     .byte $01, $1F
     .byte $01, $1F
+;Structure #$33
 Bank01_Struct_33:
     .byte $01, $1F
 ;Structure #$2F
@@ -428,6 +431,7 @@ Bank01_Struct_36:
     .byte $01, $08
 	.byte $FF
 
+;Structure #$35
 Bank01_Struct_35:
 	.byte $42, $1E
 	.byte $42, $1E
@@ -2996,12 +3000,9 @@ Bank01_Room_25_Left:
 	.byte $FF
 
 Bank01_Room_25_Right:
-	.byte $08, $35
-	.byte $0A, $0E
-	.byte $4A, $13
+	.byte $08, $35 
+	.byte $0A, $5B 
 	.byte $59, $34
-	.byte $5A, $37
-	.byte $6A, $2B
 	.byte $79, $46
 	.byte $89, $2B
 	.byte $98, $46
@@ -3025,10 +3026,10 @@ Bank01_LAAE6:
 Bank01_Room_26_Left:
 	.byte $00, $0E
 	.byte $40, $2B
-	.byte $50, $4E
+	.byte $50, $37
 	.byte $56, $55
 	.byte $60, $2B
-	.byte $80, $27
+	.byte $70, $5A
 	.byte $D0, $00
 	.byte $FD
 	.byte $51, $05, $67			; Enemy
@@ -3391,6 +3392,17 @@ Brinstar_Chozo_Attrs:
     .byte $D7, $B0
     .byte $DF, $AA
     .byte $00
+
+;Structure #$5B
+Bank01_Struct_5B:
+    .byte $06, $1E, $1E, $1C, $1C, $1E, $1E
+    .byte $06, $1E, $1E, $1E, $1E, $1C, $1E
+    .byte $06, $1C, $1E, $1E, $1E, $1E, $1E
+    .byte $06, $1E, $1E, $1E, $1C, $1E, $1C
+	.byte $46, $2B
+	.byte $06, $1E, $1E, $1C, $1C, $1E, $1E
+	.byte $06, $2B, $03, $03, $2B, $03, $03
+    .byte $FF
 
 ;Intro and end tile patterns.
 ;Moved from bank 06
@@ -4090,7 +4102,7 @@ Bank01_LB134:  .byte $FF           ;
     .byte >Bank01_Struct_40, 	>Bank01_Struct_41, >Bank01_Struct_42, >Bank01_Struct_43, >Bank01_Struct_44, >Bank01_Struct_45, >Bank01_Struct_46, >Bank01_Struct_47 
     .byte >Bank01_Struct_48, 	>Bank01_Struct_49, >Bank01_Struct_4A, >Bank01_Struct_4B, >Bank01_Struct_4C, >Bank01_Struct_4D, >Bank01_Struct_4E, >Bank01_Struct_4F 
 	.byte >Bank01_Struct_50,	>Bank01_Struct_51, >Bank01_Struct_52, >Bank01_Struct_53, >Bank01_Struct_54, >Bank01_Struct_55, >Bank01_Struct_56, >Bank01_Struct_57
-	.byte >Bank01_Struct_58,	>Bank01_Struct_59
+	.byte >Bank01_Struct_58,	>Bank01_Struct_59, >Bank01_Struct_5A, >Bank01_Struct_5B
 
 .advance StructPointerTable_Lo
 
@@ -4105,7 +4117,7 @@ Bank01_LB134:  .byte $FF           ;
     .byte <Bank01_Struct_40, 	<Bank01_Struct_41, <Bank01_Struct_42, <Bank01_Struct_43, <Bank01_Struct_44, <Bank01_Struct_45, <Bank01_Struct_46, <Bank01_Struct_47 
     .byte <Bank01_Struct_48, 	<Bank01_Struct_49, <Bank01_Struct_4A, <Bank01_Struct_4B, <Bank01_Struct_4C, <Bank01_Struct_4D, <Bank01_Struct_4E, <Bank01_Struct_4F 
 	.byte <Bank01_Struct_50,	<Bank01_Struct_51, <Bank01_Struct_52, <Bank01_Struct_53, <Bank01_Struct_54, <Bank01_Struct_55, <Bank01_Struct_56, <Bank01_Struct_57
-	.byte <Bank01_Struct_58,	<Bank01_Struct_59
+	.byte <Bank01_Struct_58,	<Bank01_Struct_59, <Bank01_Struct_5A, <Bank01_Struct_5B
 
 ;----------------------------------------------------------------------------------------------------
 

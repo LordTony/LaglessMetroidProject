@@ -128,6 +128,9 @@ SBX #$F0
 * BenchmarkNMI.lua shows how long it takes to reach NMI, min and max, over a second. This can be used to find painful spots
 
 ## Definite Bugs
+* Samus standing on an elevator is a few pixels too low
+* When running while facing right and bumping into a door, wall, or other object that should stop movement, samus keep doing the run animation
+  * This doesn't happen when samus is moving left.
 * Bank 02 Pipe Enemies don't clear names tables properly
 * Bank 02 Ball Enemies don't bounce properly
 * Mini bosses don't seem to spawn properly
@@ -142,5 +145,5 @@ SBX #$F0
 * Killing a Metroid without a Missle Tank will crash or lock the game
 * Shooting a door open while falling vertically past it will move the closing door into a wall
 * Loading a room while too many sprites are being rendered (bullets + enemies + room transition) will hit the PPU cap
-  and some room elements will have the wrong palette.
-* Can't pickup items while blinking (from lava)
+  and some background elements will have the wrong palette because it won't even try to load the palette data for them.
+* Can't pickup items while blinking from taking damage, either from lava or from an being hit
