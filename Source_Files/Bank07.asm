@@ -2039,6 +2039,7 @@ LCCC2:
 *   jsr LCF88
     jsr LD09C
     jsr SetSamusHorzAccl
+;SetSamusDataTo2:
     lda #$02
     bne SetSamusData       ; branch always
 
@@ -2552,6 +2553,7 @@ LD055:
     JSR SetSamusPntUp
     BNE ++
 *   JSR StopHorzMovement
+SetSamusDataTo3:
 *   LDA #$03
     JMP SetSamusData        ;($CD6D)Set Samus control data and animation.
     ;safe
@@ -2615,41 +2617,39 @@ SamusRoll:
 *   lda Joy1Status
     anc #$04            ; DOWN pressed?
     bne +               ; branch if yes
-;break out of "ball mode"
-    lda SamusObjRadY
-    ;clc
-    adc #$08
-    sta SamusObjRadY
 
-;CheckMoveUp:
-    ;lda SamusObjRadY
-    clc
-    adc #$08
-    jsr CheckMoveUpDownSharedPart       ; JUMANJI BUG.
-    bcc +     ; branch if not possible to stand up
+        ;break out of "ball mode"
+        lda #$10
+        sta SamusObjRadY
 
-    lda ObjectHi
-    sta $0B
+    ;CheckMoveUp:
+        adc #$08
+        jsr CheckMoveUpDownSharedPart 
+        bcc +     ; branch if not possible to stand up
 
-    lda ObjectY
-    sta $08
+            lda ObjectHi
+            sta $0B
 
-    lda ObjectX
-    sta $09
+            lda ObjectY
+            sta $08
 
-    ldx #$00
-    stx $05
+            lda ObjectX
+            sta $09
 
-    lda #$F5
-    sta $04
+            ldx #$00
+            stx $05
 
-    jsr UpdateObjectLocation
-    jsr LD638
-    jsr StopHorzMovement
-    dec AnimIndex
-    jsr StopVertMovement        ;($D147)
-    lda #$04
-    jmp SetSamusData
+            lda #$F5
+            sta $04
+
+            jsr UpdateObjectLocation
+            jsr LD638
+            jsr StopHorzMovement
+            dec AnimIndex
+            jsr StopVertMovement        ;($D147)
+        SetSamusDataTo4:
+            lda #$04
+            jmp SetSamusData
 
 *   lda Joy1Change
     jsr BitScan         ;($E1E1)
@@ -2707,11 +2707,11 @@ CheckBombLaunch:
                 adc #$04    ; 4 pixels further down than Samus' center
                 sta ObjectY,x
 
-                lda #wa_LayBomb
+                lda #wa_LayBomb     ; #$08 == wa_LayBomb
                 sta ObjAction,x
 
             SFXBombLaunch:
-                lda #SFX_BMB_SET
+                lda #SFX_BMB_SET        ; #$01 == SFX_BMB_SET
                 ora TriangleSFXFlag
                 sta TriangleSFXFlag
 
@@ -2719,11 +2719,12 @@ BombExit:
 
     lda Joy1Status
     and #$03
-    bne +     
+    bne SetSamusDataTo2     
         sta SamusHorzSpeed  
         sta HorzCntrLinear 
         sta SamusHorzAccel
-*   lda #$02
+SetSamusDataTo2:
+    lda #$02
 LD144:  
     jmp SetSamusData        ;($CD6D)Set Samus control data and animation.
 
@@ -4919,7 +4920,16 @@ LDE51:  beq ClearObjectCntrl_2  ;Branch if no.
 
 ; HCSS - just pulled random crap out that might be important
 
-LDE74:*  lda FramePtrTable_Lo,y     ;  y == AnimFrame,x here
+LDE60:* lda ObjectY,x 
+LDE63:  sta $0A        
+
+LDE65:  lda ObjectX,x       ;Copy object y and x room position and name table
+LDE68:  sta $0B             ;data into $0A, $0B and $06 respectively.   
+
+LDE6A:  lda ObjectHi,x 
+LDE6D:  sta $06        
+
+LDE74:  lda FramePtrTable_Lo,y     ;  y == AnimFrame,x here
 LDE77:  sta $00             ;
 
 LDE79:  lda FramePtrTable_Hi,y       ;Entry from FramePtrTable is stored in $0000.
@@ -5043,16 +5053,7 @@ DrawFramePPUPart:
         jmp GetNextFrameByte        ; I don't think SpritePagePos can ever be zero for samus 
         ; safe
 
-DrawEnemyFramePPUPart:      
-
-    lda ObjectY,x 
-    sta $0A        
-
-    lda ObjectX,x               ;Copy object y and x room position and name table
-    sta $0B                     ;data into $0A, $0B and $06 respectively.   
-
-    lda ObjectHi,x 
-    sta $06 
+DrawEnemyFramePPUPart:
 
     sta ObjRadY,x               ;Get verticle radius in pixles of object.
     sec
@@ -5982,15 +5983,15 @@ MoveSamusRight:
     anc #$07
     bne +          ; only call crash detection every 8th pixel
 ;CheckMoveRight:
-    sbc #$03    ; Samus is always X radius 4
-    jsr CheckMoveRightLeftSharedPart
-    bcc ResetDoorData       ; branch if yes! (CF = 0)
+        sbc #$03    ; Samus is always X radius 4
+        jsr CheckMoveRightLeftSharedPart
+        bcc ResetDoorData       ; branch if yes! (CF = 0)
 
 *   jsr SamusOnElevatorOrEnemy
     lda SamusHit
     and #$41
     cmp #$40
-    ;clc
+    clc
     beq ResetDoorData
 
     lda SamusScrX
@@ -6023,7 +6024,7 @@ LE364:  rts             ;Exit for routines above and below.
 ResetDoorData:
     lda #$00
     sta SamusDoorData
-    rts
+    bne LE355       ; branch always
 
 CheckStopHorzMvmt:
 LE365:  bcs Exit10          ;Samus moved successfully. Branch to exit.
@@ -10410,47 +10411,45 @@ DoOneSpinnerDestruction:
     sta $0B
 
     jsr UpdateObjectLocation
-    bcc ++
-
-    lda #$40
-    sta PageIndex
-
-    lda $08
-    sta SpinnerYPos,x
-    sta $034D
-
-    lda $09
-    sta SpinnerXPos,x
-    sta $034E
-
-    lda $0B
-    and #$01
-    sta SpinnerNameTbl,x
-    sta $034C
-
-    lda #$5A
-    sta PowerUpAnimFrame        ;Save index to find object animation.
-
-    txa
-    jsr DrawFrame
-    lda SamusBlink
-    bne +
-    ldx #$40
-    jsr IsSamusTouchingObjectX      ;($DC7F)
-    bcs +
-    jsr IsScrewAttackActive     ;($CD9C)Check if screw attack active.
-    ldy #$00
     bcc +
-        ;clc        ; because jsr LF311 messes up the clear carry anyway
-        jsr LF311
-        lda #$50
-        sta HealthLoChange
-        jsr SubtractHealth      ;($CE92)
-Exit34:
-*   rts
+
+        lda #$40
+        sta PageIndex
+
+        lda $08
+        sta SpinnerYPos,x
+        sta $034D
+
+        lda $09
+        sta SpinnerXPos,x
+        sta $034E
+
+        lda $0B
+        and #$01
+        sta SpinnerNameTbl,x
+        sta $034C
+
+        lda #$5A
+        sta PowerUpAnimFrame        ;Save index to find object animation.
+
+        jsr DrawFrame
+
+        lda SamusBlink
+        bne Exit34
+            ldx #$40
+            jsr IsSamusTouchingObjectX      ;($DC7F)
+            bcs Exit34
+                jsr IsScrewAttackActive     ;($CD9C)Check if screw attack active.
+                bcc Exit34
+                    ;clc        ; because jsr LF311 messes up the clear carry anyway
+                    jsr LF311
+                    lda #$50
+                    sta HealthLoChange
+                    jmp SubtractHealth      ;($CE92)
 
 *   lda #$00
     sta SpinnerStatus,x
+Exit34:
     rts
 
 MemuRoutine2:  
