@@ -157,6 +157,8 @@ Bank03_Struct_2D:
 	.byte $44, $0B
 	.byte $FF
 
+; Code Cave 7 x 16 bytes
+
 .advance PalPntrTbl_Hi
 
     .byte >_Palette00         ;($A718)
@@ -2234,8 +2236,7 @@ Bank03_LA8C5:
 
 Bank03_Room_02_Left:
 	.byte $00, $0C
-	.byte $62, $13
-	.byte $82, $0E
+	.byte $52, $13
 	.byte $85, $12
 	.byte $C4, $0F
 	.byte $D3, $10
@@ -2247,8 +2248,7 @@ Bank03_Room_02_Right:
 	.byte $08, $0C
 	.byte $0F, $2C
 	.byte $5F, $04
-	.byte $6A, $13
-	.byte $8A, $0E
+	.byte $5A, $13
 	.byte $8D, $12
 	.byte $8F, $2C
 	.byte $C8, $0F
@@ -2267,8 +2267,7 @@ Bank03_LA8FA:
 
 Bank03_Room_03_Left:
 	.byte $00, $0C
-	.byte $62, $13
-	.byte $82, $0E
+	.byte $52, $13
 	.byte $85, $12
 	.byte $C4, $0F
 	.byte $D0, $0D
@@ -2278,8 +2277,7 @@ Bank03_Room_03_Left:
 
 Bank03_Room_03_Right:
 	.byte $08, $0C
-	.byte $6A, $13
-	.byte $8A, $0E
+	.byte $5A, $13
 	.byte $8D, $12
 	.byte $C8, $0F
 	.byte $DB, $0A
@@ -2299,7 +2297,6 @@ Bank03_Room_04_Left:
 	.byte $01, $0A
 	.byte $03, $11
 	.byte $52, $07
-	.byte $53, $08
 	.byte $80, $09
 	.byte $91, $0B
 	.byte $E0, $0A
@@ -2308,8 +2305,7 @@ Bank03_Room_04_Left:
 Bank03_Room_04_Right:
 	.byte $08, $0C
 	.byte $0E, $1C
-	.byte $6A, $13
-	.byte $8A, $0E
+	.byte $5A, $13
 	.byte $8D, $12
 	.byte $CB, $1C
 	.byte $CC, $1C
@@ -2868,19 +2864,14 @@ Bank03_LAC7A:
 
 ;Structure #$07
 Bank03_LAC8B:  
-	.byte $05, $25, $1C, $1C, $1C, $31
-	.byte $05, $26, $1C, $1C, $1C, $32
-	.byte $05, $26, $1C, $1C, $1C, $32
-	.byte $05, $27, $1C, $1C, $1C, $33
+	.byte $05, $25, $28, $29, $2A, $31
+	.byte $05, $26, $2B, $2C, $2D, $32
+	.byte $05, $26, $2E, $2F, $30, $32
+	.byte $05, $27, $06, $12, $35, $33
 	.byte $FF
 
 ;Structure #$08
-Bank03_LACA4:  
-	.byte $03, $28, $29, $2A
-	.byte $03, $2B, $2C, $2D
-	.byte $03, $2E, $2F, $30
-	.byte $03, $06, $12, $35
-	.byte $FF
+; merged together with structure 07 to avoid overdraw
 
 ;Structure #$09
 Bank03_LACB5:
@@ -2909,6 +2900,10 @@ Bank03_LACD0:
 	.byte $07, $1F, $0D, $20, $10, $1F, $0D, $20
 	.byte $FF
 
+; TODO: JUMANJI
+; Only used in rooms 02, 03 and 04
+; 1C is a blank tile so this is doing some needless overdraw
+; Could break this up to be less wasteful.
 ;Structure #$0C
 Bank03_LACF9:  
 	.byte $08, $22, $22, $0D, $22, $22, $1E, $1C, $1D
@@ -2916,7 +2911,6 @@ Bank03_LACF9:
 	.byte $08, $1C, $1C, $0C, $1C, $1C, $1F, $0D, $20
 	.byte $07, $1C, $1C, $21, $1C, $1C, $1C, $14
 	.byte $04, $1C, $14, $0D, $14
-	.byte $03, $1C, $1C, $15
 	.byte $FF
 
 ;Structure #$0D
@@ -2926,15 +2920,7 @@ Bank03_LAD26:
 	.byte $FF
 
 ;Structure #$0E
-Bank03_LAD2D:
-	.byte $01, $16
-	.byte $01, $21
-	.byte $01, $21
-	.byte $01, $0C
-	.byte $01, $21
-	.byte $01, $0D
-	.byte $01, $21
-	.byte $FF
+; Moved to link up with structure 13 because they are only used together
 
 ;Structure #$0F
 Bank03_LAD3C:
@@ -2960,10 +2946,20 @@ Bank03_LAD61:
 	.byte $03, $19, $1B, $1A
 	.byte $FF
 
+; JUMANJI
+; Zebitite Column - only used in rooms 02, 03, and 04
 ;Structure #$13
 Bank03_LAD66:
+	.byte $01, $15
 	.byte $01, $34
 	.byte $01, $34
+	.byte $01, $16
+	.byte $01, $21
+	.byte $01, $21
+	.byte $01, $0C
+	.byte $01, $21
+	.byte $01, $0D
+	.byte $01, $21
 	.byte $FF
 
 ;Structure #$14
@@ -3099,9 +3095,9 @@ Bank03_Init:
         STA GameMode            ;
         JSR ScreenNmiOff        ;($C45D)Disable screen and Vblank.
         LDY #$0D                ;
-    *   LDA MetroidData,y       ;Load info from table below into ram
-        STA MetroidDataRam,y 
-        DEY                     ;
+    	*   LDA MetroidData,y       ;Load info from table below into ram
+    	    STA MetroidDataRam,y 
+    	    DEY                     ;
         BPL -                   ;
         lda #$09
 		sta InTourianBank 		; As long as it's not zero. we are in tourian
@@ -3931,7 +3927,7 @@ MetroidData:
 .advance StructPointerTable_Hi
 
     .byte >Common_Struct_00,    >Bank03_LAC29, 		>Bank03_LAC50, 		>Bank03_LAC69, 		>Bank03_LAC70, 		>Bank03_LAC77, 		>Bank03_LAC7A, 		>Bank03_LAC8B
-    .byte >Bank03_LACA4,        >Bank03_LACB5, 		>Bank03_LACC6, 		>Bank03_LACD0, 		>Bank03_LACF9, 		>Bank03_LAD26, 		>Bank03_LAD2D, 		>Bank03_LAD3C
+    .byte >$FF,        			>Bank03_LACB5, 		>Bank03_LACC6, 		>Bank03_LACD0, 		>Bank03_LACF9, 		>Bank03_LAD26, 		$FF, 		 		>Bank03_LAD3C
     .byte >Bank03_LAD3F,        >Bank03_LAD48, 		>Bank03_LAD61, 		>Bank03_LAD66, 		>Bank03_LAD6B, 		>Bank03_LAD99, 		>Bank03_LADAC, 		>Bank03_LADC8
     .byte >Bank03_LADDD,        >Bank03_LADFE, 		>Bank03_LAE0F, 		>Bank03_LAE1A, 		>Bank03_LAE1E, 		>Bank03_LAE21, 		>Bank03_LAE2C, 		>Bank03_LAE36
 	.byte >Bank03_Struct_20,	>Bank03_Struct_21,	>Bank03_Struct_22,	>Bank03_Struct_23,	>Bank03_Struct_24,	>Bank03_Struct_25,	>Bank03_Struct_26,	>Bank03_Struct_27
@@ -3940,13 +3936,15 @@ MetroidData:
 .advance StructPointerTable_Lo
 
     .byte <Common_Struct_00,	<Bank03_LAC29, 		<Bank03_LAC50, 		<Bank03_LAC69, 		<Bank03_LAC70, 		<Bank03_LAC77, 		<Bank03_LAC7A, 		<Bank03_LAC8B
-    .byte <Bank03_LACA4,    	<Bank03_LACB5, 		<Bank03_LACC6, 		<Bank03_LACD0, 		<Bank03_LACF9, 		<Bank03_LAD26, 		<Bank03_LAD2D, 		<Bank03_LAD3C
+    .byte <$FF,    				<Bank03_LACB5, 		<Bank03_LACC6, 		<Bank03_LACD0, 		<Bank03_LACF9, 		<Bank03_LAD26, 		$FF, 		  		<Bank03_LAD3C
     .byte <Bank03_LAD3F,    	<Bank03_LAD48, 		<Bank03_LAD61, 		<Bank03_LAD66, 		<Bank03_LAD6B, 		<Bank03_LAD99, 		<Bank03_LADAC, 		<Bank03_LADC8
     .byte <Bank03_LADDD,    	<Bank03_LADFE, 		<Bank03_LAE0F, 		<Bank03_LAE1A, 		<Bank03_LAE1E, 		<Bank03_LAE21, 		<Bank03_LAE2C, 		<Bank03_LAE36
 	.byte <Bank03_Struct_20,	<Bank03_Struct_21,	<Bank03_Struct_22,	<Bank03_Struct_23,	<Bank03_Struct_24,	<Bank03_Struct_25,	<Bank03_Struct_26,	<Bank03_Struct_27
 	.byte <Bank03_Struct_28,	<Bank03_Struct_29,	<Bank03_Struct_2A,	<Bank03_Struct_2B,	<Bank03_Struct_2C,	<Bank03_Struct_2D 
 
 ;------------------------------------------------------------------------------------------------------
+
+; Code Cave - 3 * 16 - As long as we don't end up with too many structs, we should have some room here.
 
 RESET_Bank03:
 Bank03_LBFB0:  SEI                     ;Disables interrupt.
