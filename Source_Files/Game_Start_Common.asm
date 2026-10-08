@@ -1501,12 +1501,14 @@ _L8B3B:  LDX #$04                ;Samus currently scrolling vertically.
 _L8B3D:  LDA ScrollY             ;Is room centered on screen?-->
 _L8B3F:  BEQ +++++               ;If so, branch.
 _L8B41:  LDA $FF                 ;
-_L8B43:  EOR ObjectHi            ;Get inverse of Samus' current nametable.
+_L8B43:  EOR SamusObjectHi            ;Get inverse of Samus' current nametable.
+         nop 
 _L8B46:  LSR                     ;
 _L8B47:  BCC +++                 ;If Samus is on nametable 3, branch.
 _L8B49:  BCS ++                  ;If Samus is on nametable 0, branch to decrement x.
 _L8B4B:* LDX #$02                ;Samus is currently scrolling horizontally.
-_L8B4D:  LDA ObjectX             ;Is Samus entering a left hand door?-->
+_L8B4D:  LDA SamusObjectX             ;Is Samus entering a left hand door?-->
+         nop 
 _L8B50:  BPL ++                  ;If so, branch.
 _L8B52:* DEX                     ;
 _SetDoorEntryInfo:
@@ -1633,7 +1635,7 @@ _L8BF1:  LDA #$50
 _L8BF3:  STA $030F,X
 
 _L8BF6:  LDA #$2C
-_L8BF8:  STA $0305,X
+_L8BF8:  STA AnimResetIndex,X
 
 _L8BFB:  SEC 
 _L8BFC:  SBC #$03
@@ -1644,12 +1646,14 @@ _DoorHandlerRoutine3:
 _L8C01:  LDA DoorStatus
 _L8C03:  BEQ _L8C1D
 
-_L8C05:  LDA ObjectHi 
+_L8C05:  LDA SamusObjectHi
+         nop 
 _L8C08:  EOR ObjectHi,x
 _L8C0B:  LSR 
 _L8C0C:  BCS _L8C1D
 
-_L8C0E:  LDA ObjectX 
+_L8C0E:  LDA SamusObjectX
+         nop 
 _L8C11:  EOR ObjectX, x
 _L8C14:  BMI _L8C1D
 
@@ -1657,8 +1661,8 @@ _L8C16:  LDA #$04
 _L8C18:  STA $0300,X
 _L8C1B:  BNE _L8BB1
 
-_L8C1D:  LDA $0306,X
-_L8C20:  CMP $0305,X
+_L8C1D:  LDA AnimIndex,X
+_L8C20:  CMP AnimResetIndex,X
 _L8C23:  BCC _L8BB1
 
 _L8C25:  LDA $030F,X
@@ -1711,7 +1715,7 @@ _L8C73:  JMP _L8BB1
         ; safe
 
 _L8C76:  LDA #$30
-_L8C78:  STA $0305,X
+_L8C78:  STA AnimResetIndex,X
 
 _L8C7B:  SEC 
 _L8C7C:  SBC #$02
@@ -1786,7 +1790,7 @@ _L8CD0:  LDA #$06
 _L8CD2:  STA $0300,X
 
 _L8CD5:  LDA #$2C
-_L8CD7:  STA $0305,X
+_L8CD7:  STA AnimResetIndex,X
 
 _L8CDA:  SEC 
 _L8CDB:  SBC #$03

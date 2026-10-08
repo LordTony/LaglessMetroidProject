@@ -2454,7 +2454,7 @@ L92DD:  LDY #$00                ;
 L92DF:  STY SpritePagePos       ;
 L92E1:  STY PageIndex           ;Clear object data.
 L92E3:  STY ObjectCntrl         ;
-L92E5:  STY ObjectHi            ;
+L92E5:  STY SamusObjectHi       ;
 L92E8:  JSR SilenceMusic_Bank00 ;($CB8E)Turn off music.
 L92EB:  LDA #$5A                ;
 L92ED:  STA AnimFrame           ;Set animframe index. changed by initializing routines. 

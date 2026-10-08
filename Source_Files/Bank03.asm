@@ -586,11 +586,11 @@ Bank03_L99D7:  RTS
 Bank03_L99D8:  .byte $00, $FC, $F9, $F7, $F6, $F6, $F5, $F5, $F5, $F6, $F6, $F8
  
 ; TODO: Called from one spot
-Bank03_L99E4:  LDA $030E
+Bank03_L99E4:  LDA SamusObjectX
 Bank03_L99E7:  STA $09
-Bank03_L99E9:  LDA $030D
+Bank03_L99E9:  LDA SamusObjectY
 Bank03_L99EC:  STA $08
-Bank03_L99EE:  LDA ObjectHi
+Bank03_L99EE:  LDA SamusObjectHi
 Bank03_L99F1:  STA $0B
 Bank03_L99F3:  RTS
 
@@ -602,6 +602,9 @@ Bank03_L99FE:  LDA $0B
 Bank03_L9A00:  AND #$01
 Bank03_L9A02:  STA $6AFB,X
 Bank03_L9A05:  RTS
+nop
+nop
+nop
 
 Bank03_L9A06:  LSR 
 Bank03_L9A07:  LDA $0408,X
@@ -634,7 +637,8 @@ Bank03_L9A38:  LDA #$00
 Bank03_L9A3A:  JSR Bank03_L99D1
 Bank03_L9A3D:  STA $6AFC,X
 Bank03_L9A40:  STA $6AFD,X
-Bank03_L9A43:  LDA $030E
+Bank03_L9A43:  LDA SamusObjectX
+			   nop 
 Bank03_L9A46:  SEC 
 Bank03_L9A47:  SBC $0401,X
 Bank03_L9A4A:  STA $01
@@ -646,7 +650,8 @@ Bank03_L9A52:  BCC Bank03_L9A5A
 Bank03_L9A54:  LDA #$00
 Bank03_L9A56:  SBC $01
 Bank03_L9A58:  STA $01
-Bank03_L9A5A:  LDA $030D
+Bank03_L9A5A:  LDA SamusObjectY
+			   nop 
 Bank03_L9A5D:  SEC 
 Bank03_L9A5E:  SBC $0400,X
 Bank03_L9A61:  STA $00
@@ -1105,15 +1110,15 @@ Bank03_L9DDB:
 
 Bank03_L9DF1:   RTS 
 
-Bank03_L9DF2:  LDA ObjectHi
+Bank03_L9DF2:  LDA SamusObjectHi
 Bank03_L9DF5:  EOR $9D
 Bank03_L9DF7:  BNE Bank03_L9DF1
-Bank03_L9DF9:  LDA $030E
+Bank03_L9DF9:  LDA SamusObjectX
 Bank03_L9DFC:  SEC 
 Bank03_L9DFD:  SBC #$48
 Bank03_L9DFF:  CMP #$2F
 Bank03_L9E01:  BCS Bank03_L9DF1
-Bank03_L9E03:  LDA $030D
+Bank03_L9E03:  LDA SamusObjectY
 Bank03_L9E06:  SEC 
 Bank03_L9E07:  SBC #$80
 Bank03_L9E09:  BPL Bank03_L9E0E
@@ -1127,6 +1132,9 @@ Bank03_L9E18:  STA HealthHiChange
 Bank03_L9E1A:  LDA #$38
 Bank03_L9E1C:  STA $030A
 Bank03_L9E1F:  JMP SubtractHealth
+			   nop 
+			   nop 
+			   nop 
 
 Bank03_L9E22:  JSR Bank03_L9DF2
 Bank03_L9E25:  JSR Bank03_L9FED
@@ -1319,16 +1327,16 @@ Bank03_L9F82:  STA $0300,X
 Bank03_L9F85:  LDA $9D
 Bank03_L9F87:  STA ObjectHi,X
 Bank03_L9F8A:  LDA #$10
-Bank03_L9F8C:  STA $030E,X
+Bank03_L9F8C:  STA ObjectX,X
 Bank03_L9F8F:  LDA #$68
-Bank03_L9F91:  STA $030D,X
+Bank03_L9F91:  STA ObjectY,X
 Bank03_L9F94:  LDA #$55
-Bank03_L9F96:  STA $0305,X
-Bank03_L9F99:  STA $0306,X
+Bank03_L9F96:  STA AnimResetIndex,X
+Bank03_L9F99:  STA AnimIndex,X
 Bank03_L9F9C:  LDA #$00
-Bank03_L9F9E:  STA $0304,X
+Bank03_L9F9E:  STA AnimDelay,X
 Bank03_L9FA1:  LDA #$F7
-Bank03_L9FA3:  STA $0303,X
+Bank03_L9FA3:  STA AnimFrame,X
 Bank03_L9FA6:  LDA #$10
 Bank03_L9FA8:  STA $0503
 Bank03_L9FAB:  LDA #$40

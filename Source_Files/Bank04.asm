@@ -514,7 +514,7 @@ Bank04_L9A3E:  PHA
 Bank04_L9A3F:  LDA Bank_Enemy_Dispatch_Tbl_Lo,Y
 Bank04_L9A42:  PHA 
 Bank04_L9A43:  RTS
-            nop
+               nop 
 
 Bank04_L9A44:  LDA $6AF4,X
 Bank04_L9A47:  CMP #$02
@@ -523,7 +523,8 @@ Bank04_L9A4B:  LDA $0403,X
 Bank04_L9A4E:  BNE $9A83
 Bank04_L9A50:  LDA $6AFE,X
 Bank04_L9A53:  BNE $9A67
-Bank04_L9A55:  LDA $030D
+Bank04_L9A55:  LDA SamusObjectY
+               nop 
 Bank04_L9A58:  SEC 
 Bank04_L9A59:  SBC $0400,X
 Bank04_L9A5C:  CMP #$40

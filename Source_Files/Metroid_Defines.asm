@@ -198,15 +198,18 @@
                                 ;#$80=Stop item room music once door scroll complete. 
                                 ;#$81=Item room music already playing. Don't restart.
 
-.alias OnFrozenEnemy    $7D     ;#$01=Samus standing on frozen enemy, #$00=she is not.
-
 ;--------------------------------------[ End routine specific ]--------------------------------------
 
 .alias EndMsgWrite      $7A     ;0=don't write end message, 1=write end message.
 .alias IsCredits        $7B     ;0=credits not rolling, 1=credits rolling.
 .alias SpriteByteCntr   $7C     ;Used to indicate when Samus sprite load complete.
-.alias SpritePtrIndex   $7D     ;Index to proper Samus sprite graphics at end game.
-.alias SpriteAttribByte $7E     ;#$00.  Attribute byte of some sprites.
+
+.alias SpritePtrIndex   $7D     ;Index to proper Samus sprite graphics at end game.         ; Bank 00 only
+.alias OnFrozenEnemy    $7D     ;#$01=Samus standing on frozen enemy, #$00=she is not.      ; All other banks
+
+.alias SpriteAttribByte $7E     ;#$00.  Attribute byte of some sprites.                     ; Bank 00 only
+.alias SamusOnElevator  $7E     ;0=Samus not on elevator, 1=Samus on elevator.              ; All other banks
+
 .alias ColorCntIndex    $7F     ;Index for finding count number for ClrChangeCounter.
 .alias CreditPageNumber $80     ;Stores current page of credits(#$00 thru #$06).
 .alias HideShowEndMsg   $81     ;0=show end message, 1=erase end message.
@@ -272,7 +275,7 @@
 ; These two hit by the sound engine about 5 to 8 times per frame.
 .alias ThisSoundChannel     $AB ; Prev $064B   ;Least sig. byte of current channel(00,04,08 or 0C)
 .alias MusicInitIndex       $AC ; Prev $065E   ;index for loading $62B thru $637(base=$BD31).
-; unused                    $AD
+.alias SamusAnimIndex       $AD
 ; unused                    $AE
 ; unused                    $AF
 
@@ -296,8 +299,16 @@
 ; Spinners - $B4, $BC, $C4, $CC
 .alias SpinnerStatus    $B4
 
+.alias SamusObjectHi    $B5
+.alias SamusObjectY     $B6
+.alias SamusObjectX     $B7
 
-.alias SpareMemB7       $B7     ;Written to in title routine and accessed by unsed routine.
+.alias SamusAnimFrame       $C5
+.alias SamusAnimDelay       $C6  
+.alias SamusAnimResetIndex  $C7
+
+.alias SpareMemB7       $B7     ;Written to in title routine and accessed by unsed routine.     
+
 .alias SpareMemB8       $B8     ;Written to in title routine and accessed by unsed routine.
 .alias SpareMemBB       $BB     ;Written to in title routine, but never accessed.
 
@@ -406,7 +417,7 @@
 ; TODO: good candidates for ZP
 ; ObjectY (32), ObjectX (23), SamusGravity (14), SamusHorzAccel (10), SamusHit (10), VertCntrLinear (9), HorzCntrLinear (6), SamusJmpDsplcmnt (6)
 
-; ObjAction 0300, ObjRadY 0301, ObjRadX 0302, ObjVertSpeed $0308, ObjHorzSpeed $0309
+; ObjAction 0300, ObjRadY 0301, ObjRadX 0302, ObjVertSpeed $0308, ObjHorzSpeed $0309, SamusOnElevator, ObjectHi, ObjectY, ObjectY
 
 .alias ObjAction        $0300   ;Status of object. 0=object slot not in use.
 .alias ObjRadY          $0301   ;Distance in pixels from object center to top or bottom.
@@ -415,7 +426,7 @@
 .alias AnimDelay        $0304   ;Number of frames to delay between animation frames.
 .alias AnimResetIndex   $0305   ;Restart index-1 when AnimIndex finished with last frame. 
 .alias AnimIndex        $0306   ;Current index into ObjectAnimIndexTbl.
-.alias SamusOnElevator  $0307   ;0=Samus not on elevator, 1=Samus on elevator.
+;.alias SamusOnElevator  $0307   ;0=Samus not on elevator, 1=Samus on elevator.
 .alias ObjVertSpeed     $0308   ;MSB set=moving up(#$FA max), MSB clear=moving down(#$05 max).
 .alias ObjHorzSpeed     $0309   ;MSB set=moving lft(#$FE max), MSB clear=moving rt(#$01 max).
 .alias SamusHit         $030A   ;Samus hit by enemy.

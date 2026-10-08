@@ -1046,7 +1046,8 @@ Bank01_L9B0C:  AND #$10
 Bank01_L9B0E:  BEQ $9B25
 Bank01_L9B10:  LDA EnYRoomPos,X
 Bank01_L9B13:  SEC 
-Bank01_L9B14:  SBC $030D
+Bank01_L9B14:  SBC SamusObjectY
+			   nop 
 Bank01_L9B17:  BPL $9B1C
 Bank01_L9B19:  JSR TwosCompliment
 Bank01_L9B1C:  CMP #$10
@@ -1067,7 +1068,8 @@ Bank01_L9B39:  LDA $0403,X
 Bank01_L9B3C:  BNE Bank01_L9B71
 Bank01_L9B3E:  LDA $6AFE,X
 Bank01_L9B41:  BNE Bank01_L9B55
-Bank01_L9B43:  LDA $030D
+Bank01_L9B43:  LDA SamusObjectY
+			   nop 
 Bank01_L9B46:  SEC 
 Bank01_L9B47:  SBC EnYRoomPos,X
 Bank01_L9B4A:  CMP #$40

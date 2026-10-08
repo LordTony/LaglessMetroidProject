@@ -367,7 +367,8 @@ Bank02_L9857:  LDA $0403,X
 Bank02_L985A:  BNE $988F
 Bank02_L985C:  LDA $6AFE,X
 Bank02_L985F:  BNE $9873
-Bank02_L9861:  LDA $030D
+Bank02_L9861:  LDA SamusObjectY
+			   nop
 Bank02_L9864:  SEC 
 Bank02_L9865:  SBC $0400,X
 Bank02_L9868:  CMP #$40
@@ -465,7 +466,8 @@ Bank02_L9930:  AND #$10
 Bank02_L9932:  BEQ $9949
 Bank02_L9934:  LDA $0400,X
 Bank02_L9937:  SEC 
-Bank02_L9938:  SBC $030D
+Bank02_L9938:  SBC SamusObjectY
+			   nop 
 Bank02_L993B:  BPL $9940
 Bank02_L993D:  JSR TwosCompliment
 Bank02_L9940:  CMP #$10

@@ -315,7 +315,8 @@ Bank05_L986E:  LDA $0403,X
 Bank05_L9871:  BNE $98A6
 Bank05_L9873:  LDA $6AFE,X
 Bank05_L9876:  BNE $988A
-Bank05_L9878:  LDA $030D
+Bank05_L9878:  LDA SamusObjectY
+               nop 
 Bank05_L987B:  SEC 
 Bank05_L987C:  SBC $0400,X
 Bank05_L987F:  CMP #$40
@@ -405,7 +406,8 @@ Bank05_L9934:  AND #$10
 Bank05_L9936:  BEQ $994D
 Bank05_L9938:  LDA $0400,X
 Bank05_L993B:  SEC 
-Bank05_L993C:  SBC $030D
+Bank05_L993C:  SBC SamusObjectY
+               nop 
 Bank05_L993F:  BPL $9944
 Bank05_L9941:  JSR TwosCompliment
 Bank05_L9944:  CMP #$10
@@ -546,7 +548,8 @@ Bank05_L9A63:  LSR
 Bank05_L9A64:  BCS $9A78
 Bank05_L9A66:  LDA $0401,X
 Bank05_L9A69:  SEC 
-Bank05_L9A6A:  SBC $030E
+Bank05_L9A6A:  SBC SamusObjectX
+               nop 
 Bank05_L9A6D:  BCC $9A78
 Bank05_L9A6F:  CMP #$20
 Bank05_L9A71:  BCC $9A78
