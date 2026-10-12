@@ -421,7 +421,7 @@ Bank05_L9955:  JMP Start_Special_Attrs
 Bank05_L9958:  STA EnDataIndex,X
 Bank05_L995B:  LDA $040B,X
 Bank05_L995E:  PHA 
-Bank05_L995F:  JSR Bank07_LEB6E
+Bank05_L995F:  JSR SetEnemyInitialHitpoints
 Bank05_L9962:  PLA 
 Bank05_L9963:  STA $040B,X
 Bank05_L9966:  RTS
@@ -608,7 +608,7 @@ Bank05_L9AD1:  STA EnDataIndex,X
 Bank05_L9AD4:  LDA #$01
 Bank05_L9AD6:  STA $6AF4,X
 Bank05_L9AD9:  JSR $9AF1
-Bank05_L9ADC:  JMP Bank07_LEB6E
+Bank05_L9ADC:  JMP SetEnemyInitialHitpoints
 Bank05_L9ADF:  PHP 
 Bank05_L9AE0:  SED 
 Bank05_L9AE1:  LDA $0400,X
@@ -631,7 +631,7 @@ Bank05_L9B02:  RTS
 Bank05_L9B03:  LDA $6AF4,X
 Bank05_L9B06:  CMP #$02
 Bank05_L9B08:  BNE $9B0D
-Bank05_L9B0A:  JSR Bank07_LFBCA
+Bank05_L9B0A:  JSR BankEnemyCommonHelper
 Bank05_L9B0D:  LDA #$02
 Bank05_L9B0F:  STA $00
 Bank05_L9B11:  STA $01
@@ -2222,7 +2222,7 @@ Bank05_Init:
     LDA #$00                ;GameMode = play.
     STA GameMode            ;
     JSR ScreenNmiOff        ;($C45D)Disable screen and Vblank.
-    lda #$06
+    lda #$04
     sta SpareMemB7
 RidleyGFX_Loop:
     ldx SpareMemB7
@@ -2230,6 +2230,7 @@ RidleyGFX_Loop:
     JSR LoadGFX
     dec SpareMemB7
     bpl RidleyGFX_Loop
+    jsr LoadEntry_19_and_16_GFX
     JMP NmiOn               ;($C487)Turn on VBlank interrupts.
 
 ; CODE CAVE (86 x 16 bytes) 1.3 KB

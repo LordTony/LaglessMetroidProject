@@ -415,7 +415,7 @@ Bank02_L98BF:  SED
 Bank02_L98C0:  LDA $6AF4,X
 Bank02_L98C3:  CMP #$03
 Bank02_L98C5:  BEQ $98CA
-Bank02_L98C7:  JSR Bank07_LFBCA
+Bank02_L98C7:  JSR BankEnemyCommonHelper
 Bank02_L98CA:  LDA #$03
 Bank02_L98CC:  STA $00
 Bank02_L98CE:  STA $01
@@ -481,7 +481,7 @@ Bank02_L9951:  JMP Start_Special_Attrs
 Bank02_L9954:  STA EnDataIndex,X
 Bank02_L9957:  LDA $040B,X
 Bank02_L995A:  PHA 
-Bank02_L995B:  JSR Bank07_LEB6E
+Bank02_L995B:  JSR SetEnemyInitialHitpoints
 Bank02_L995E:  PLA 
 Bank02_L995F:  STA $040B,X
 Bank02_L9962:  RTS
@@ -661,7 +661,7 @@ Bank02_L9AD4:  INC $FA,X
 Bank02_L9AD6:  LDA $6AF4,X
 Bank02_L9AD9:  CMP #$02
 Bank02_L9ADB:  BNE $9AE0
-Bank02_L9ADD:  JSR Bank07_LFBCA
+Bank02_L9ADD:  JSR BankEnemyCommonHelper
 Bank02_L9AE0:  LDA #$02
 Bank02_L9AE2:  STA $00
 Bank02_L9AE4:  STA $01
@@ -717,7 +717,7 @@ Bank02_L9B4C:  JMP $9B59
 Bank02_L9B4F:  LDA $6AF4,X
 Bank02_L9B52:  CMP #$03
 Bank02_L9B54:  BEQ $9B59
-Bank02_L9B56:  JSR Bank07_LFBCA
+Bank02_L9B56:  JSR BankEnemyCommonHelper
 Bank02_L9B59:  LDA #$01
 Bank02_L9B5B:  STA $00
 Bank02_L9B5D:  STA $01
@@ -3216,7 +3216,7 @@ Bank02_Struct_37:
 	.byte $02, $0B, $0F
 	.byte $02, $0C, $0B
 	.byte $02, $0F, $0C
-	.byte $02, $0B, $0B
+	.byte $42, $0B
 	.byte $FF 
 
 ;Structure #$38
@@ -3354,18 +3354,28 @@ Bank02_Struct_4E:
 	.byte $FF
 
 InitBank2:
-		LDA #$00                ;GameMode = play.
-		STA GameMode            ;
-		JSR ScreenNmiOff        ;($C45D)Disable screen and Vblank.
-        lda #$06
-        sta SpareMemB7
-NorfairGFX_Loop:
-        ldx SpareMemB7
-        ldy NorfairGFXTable, x
-        JSR LoadGFX
-        dec SpareMemB7
-        bpl NorfairGFX_Loop
-		JMP NmiOn               ;($C487)Turn on VBlank interrupts.
+		lda #$00                ;GameMode = play.
+		sta GameMode            ;
+		jsr ScreenNmiOff        ;($C45D)Disable screen and Vblank.
+
+    	ldy #[$04 * 7 + 6]
+		jsr LoadGFX
+
+		ldy #[$05 * 7 + 6]
+		jsr LoadGFX
+
+		ldy #[$07 * 7 + 6]
+		jsr LoadGFX
+
+		ldy #[$08 * 7 + 6]
+		jsr LoadGFX
+
+		ldy #[$09 * 7 + 6]
+		jsr LoadGFX
+
+		jsr LoadEntry_19_and_16_GFX
+
+		jmp NmiOn               ;($C487)Turn on VBlank interrupts.
 
 Norfair_Room_04_Attrs:
 	.byte $03, $88

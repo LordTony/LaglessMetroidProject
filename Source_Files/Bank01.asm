@@ -165,12 +165,12 @@ Bank01_LAD05:
 
 ;Structure #$0B
 Bank01_LAD0A:
-    .byte $02, $36, $36
+    .byte $42, $36
     .byte $02, $1C, $08
     .byte $02, $08, $34
 Bank01_Struct_54:
-    .byte $02, $34, $34
-    .byte $02, $08, $08
+    .byte $42, $34
+    .byte $42, $08
     .byte $FF
 
 ;Structure #$0C
@@ -453,10 +453,10 @@ Bank01_Struct_39:
 
 ; Shortened #$0B (5 rows down to 4)
 Bank01_Struct_3A:
-    .byte $02, $36, $36
+    .byte $42, $36
     .byte $02, $1C, $08
     .byte $02, $08, $34
-    .byte $02, $34, $34
+    .byte $42, $34
     .byte $FF
 
 Bank01_Struct_3B:
@@ -477,7 +477,7 @@ Bank01_Struct_3C:
 
 ; Shortened #$0B (5 rows down to 2)
 Bank01_Struct_3D:
-    .byte $02, $36, $36
+    .byte $42, $36
     .byte $02, $1C, $08
     .byte $FF
 
@@ -865,7 +865,7 @@ Bank01_HandleBankEnemies3:
 Bank01_L99D8:  LDA EnStatus,X
 Bank01_L99DB:  CMP #$03
 Bank01_L99DD:  BEQ Bank01_L99C8
-Bank01_L99DF:  JSR Bank07_LFBCA
+Bank01_L99DF:  JSR BankEnemyCommonHelper
 Bank01_L99E2:  JMP Bank01_L99C8
 
 Bank01_HandleBankEnemies2:
@@ -1201,7 +1201,7 @@ Bank01_L9C53:  BEQ Bank01_L9C60
 Bank01_L9C55:  LDA #$00
 Bank01_L9C57:  STA EnStatus,X
 Bank01_L9C5A:  STA EnSpecialAttribs,X
-Bank01_L9C5D:  JSR Bank07_LEB6E
+Bank01_L9C5D:  JSR SetEnemyInitialHitpoints
 
 Bank01_L9C60:  LDA $0405
 Bank01_L9C63:  STA $0405,X

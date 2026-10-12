@@ -1130,8 +1130,9 @@ Bank03_L9E14:  STA HealthLoChange
 Bank03_L9E16:  LDA #$02
 Bank03_L9E18:  STA HealthHiChange
 Bank03_L9E1A:  LDA #$38
-Bank03_L9E1C:  STA $030A
+Bank03_L9E1C:  STA SamusHit
 Bank03_L9E1F:  JMP SubtractHealth
+			   nop 
 			   nop 
 			   nop 
 			   nop 
@@ -1602,7 +1603,7 @@ Bank03_LA1A3:  STA EnDataIndex,X
 Bank03_LA1A6:  LDA #$00
 Bank03_LA1A8:  STA $040F,X
 Bank03_LA1AB:  STA EnHasBeenHit,X
-Bank03_LA1AE:  JSR Bank07_LEB6E
+Bank03_LA1AE:  JSR SetEnemyInitialHitpoints
 Bank03_LA1B1:  LDA #$F7
 Bank03_LA1B3:  STA $6AF7,X
 
@@ -2923,8 +2924,8 @@ Bank03_LACF9:
 
 ;Structure #$0D
 Bank03_LAD26:
-	.byte $02, $01, $01 
-	.byte $02, $00, $00
+	.byte $42, $01 
+	.byte $42, $00
 	.byte $FF
 
 ;Structure #$0E
@@ -3107,7 +3108,7 @@ Bank03_Init:
     	    STA MetroidDataRam,y 
     	    DEY                     ;
         BPL -                   ;
-        lda #$09
+        lda #$06
 		sta InTourianBank 		; As long as it's not zero. we are in tourian
         sta SpareMemB7
 TourianGFX_Loop:
@@ -3116,6 +3117,7 @@ TourianGFX_Loop:
         JSR LoadGFX
         dec SpareMemB7
         bpl TourianGFX_Loop
+		jsr LoadEntry_19_and_16_GFX
 LC5A5:  JMP NmiOn               ;($C487)Turn on VBlank interrupts.
 
 Tourian_Room_0B_Attrs:

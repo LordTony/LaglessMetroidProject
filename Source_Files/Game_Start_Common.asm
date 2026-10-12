@@ -44,6 +44,26 @@ _RadiusXSharedPart:
     jsr GetXEnemyRoomPosition_09_08_0B
     ldy EnRadY,x
     jmp Bank07_LE89B
+    ; safe
+
+.advance DoSomethingToFrameCount
+    txa
+    lsr
+    lsr
+    lsr
+    adc FrameCount
+    lsr
+DoSomethingToFrameCountExit:
+    rts
+
+; Move to Common?
+.advance BankEnemyCommonHelper
+    jsr Bank07_LF844
+    lda $965B,y
+    cmp EnResetAnimIndex,x
+    beq DoSomethingToFrameCountExit
+        jmp Bank07_LFBB9
+    ; safe
 
 .advance Bank_Enemy_Dispatch_Tbl_Hi
     .byte >[Bank_Enemy_Dispatch_0_And_5 - 1]      ; 000

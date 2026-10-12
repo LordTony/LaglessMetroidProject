@@ -396,7 +396,7 @@ Bank04_L9939:  JMP $991E
 Bank04_L993C:  LDA $6AF4,X
 Bank04_L993F:  CMP #$03
 Bank04_L9941:  BEQ $9946
-Bank04_L9943:  JSR Bank07_LFBCA
+Bank04_L9943:  JSR BankEnemyCommonHelper
 Bank04_L9946:  JMP $992C
 Bank04_L9949:  LDA $81
 Bank04_L994B:  CMP #$01
@@ -649,7 +649,7 @@ Bank04_L9B65:  BEQ $9B72
 Bank04_L9B67:  LDA #$00
 Bank04_L9B69:  STA $6AF4,X
 Bank04_L9B6C:  STA $040F,X
-Bank04_L9B6F:  JSR Bank07_LEB6E
+Bank04_L9B6F:  JSR SetEnemyInitialHitpoints
 Bank04_L9B72:  LDA $0405
 Bank04_L9B75:  STA $0405,X
 Bank04_L9B78:  LSR 
@@ -2418,7 +2418,7 @@ InitBank4:
     LDA #$00 
     STA GameMode 
     JSR ScreenNmiOff
-    lda #$07
+    lda #$05
     sta SpareMemB7
 KraidGFX_Loop:
         ldx SpareMemB7
@@ -2426,6 +2426,7 @@ KraidGFX_Loop:
         JSR LoadGFX
         dec SpareMemB7
         bpl KraidGFX_Loop
+        jsr LoadEntry_19_and_16_GFX
         JMP NmiOn
 
 ;-----------------------------------[ Enemy animation data tables ]----------------------------------

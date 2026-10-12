@@ -276,7 +276,7 @@
 .alias ThisSoundChannel     $AB ; Prev $064B   ;Least sig. byte of current channel(00,04,08 or 0C)
 .alias MusicInitIndex       $AC ; Prev $065E   ;index for loading $62B thru $637(base=$BD31).
 .alias SamusAnimIndex       $AD
-; unused                    $AE
+.alias SamusHit             $AE ; Prev $030A
 ; unused                    $AF
 
 ; 4 Memu slots in memory.
@@ -429,7 +429,7 @@
 ;.alias SamusOnElevator  $0307   ;0=Samus not on elevator, 1=Samus on elevator.
 .alias ObjVertSpeed     $0308   ;MSB set=moving up(#$FA max), MSB clear=moving down(#$05 max).
 .alias ObjHorzSpeed     $0309   ;MSB set=moving lft(#$FE max), MSB clear=moving rt(#$01 max).
-.alias SamusHit         $030A   ;Samus hit by enemy.
+;.alias SamusHit         $030A   ;Samus hit by enemy.
 .alias ObjectOnScreen   $030B   ;1=Object on screen, 0=Object beyond screen boundaries.
 .alias ObjectHi         $030C   ;0=Object on nametable 0, 1=Object on nametable 3.
 .alias ObjectY          $030D   ;Object y position in room(not actual screen position).
@@ -955,6 +955,9 @@
 .alias Common_LF74B             $8012
 .alias GrowRadiusX              $8019
 .alias ShrinkRadiusX            $8022
+.alias DoSomethingToFrameCount  $8030
+.alias BankEnemyCommonHelper    $8038
+
 .alias Bank_Enemy_Dispatch_Tbl_Hi       $8048
 .alias Bank_Enemy_Dispatch_Tbl_Lo       $8050
 .alias Common_Collision_Func    $8395
