@@ -1175,11 +1175,23 @@ LC8BB:
     lda #$00
 
     ; x == $20 down to $1
-    ; Memu Variables == $B0 -> $CF
     ; Spinner Variables == $0110 -> $012F
+    
     ldx #$20
-*   sta $AF, x
-    sta $010F, x
+*   sta $010F, x
+    dex
+    bne -
+
+    ; need to clear out:
+    ; MemuStatus        = $B0, $B8, $C0, $C8
+    ; PipeEnemyStatus   = $B2, $BA, $C2, $CA
+    ; SpinnerStatus     = $B4, $BC, $C4, $CC
+    ldx #$06
+*   sta $BE, x
+    sta $C6, x
+    sta $AE, x
+    sta $B6, x
+    dex
     dex
     bne -
 

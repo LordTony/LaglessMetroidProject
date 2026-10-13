@@ -285,30 +285,54 @@
 ; Memu 3        $C0 - $C1
 ; Memu 4        $C8 - $C9
 
-.alias MemuStatus       $B0 
-.alias MemuNameTbl      $B1
-
 ; Pipe Enemy 1  $B2 - $B3
 ; Pipe Enemy 2  $BA - $BB
 ; Pipe Enemy 3  $C2 - $C3
 ; Pipe Enemy 4  $CA - $CB
 
-.alias PipeEnemyStatus  $B2
-.alias PipeEnemyNameTbl $B3
-
 ; Spinners - $B4, $BC, $C4, $CC
-.alias SpinnerStatus    $B4
 
-.alias SamusObjectHi    $B5
-.alias SamusObjectY     $B6
-.alias SamusObjectX     $B7
+.alias MemuStatus           $B0 
+.alias MemuNameTbl          $B1
+.alias PipeEnemyStatus      $B2
+.alias PipeEnemyNameTbl     $B3
+.alias SpinnerStatus        $B4
+
+.alias SamusObjectHi        $B5
+.alias SamusObjectY         $B6
+.alias SamusObjectX         $B7
+
+.alias MemuStatus_2         $B8
+.alias MemuNameTbl_2        $B9
+.alias PipeEnemyStatus_2    $BA
+.alias PipeEnemyNameTbl_2   $BB
+.alias SpinnerStatus_2      $BC
+
+; unused                    $BD     title routine only
+; unused                    $BE     title routine only
+; unused                    $BF     title routine only
+
+.alias MemuStatus_3         $C0
+.alias MemuNameTbl_3        $C1
+.alias PipeEnemyStatus_3    $C2
+.alias PipeEnemyNameTbl_3   $C3
+.alias SpinnerStatus_3      $C4
 
 .alias SamusAnimFrame       $C5
 .alias SamusAnimDelay       $C6  
 .alias SamusAnimResetIndex  $C7
 
-.alias SpareMemB7       $B7     ;Written to in title routine and accessed by unsed routine.     
+.alias MemuStatus_4         $C8
+.alias MemuNameTbl_4        $C9
+.alias PipeEnemyStatus_4    $CA
+.alias PipeEnemyNameTbl_4   $CB
+.alias SpinnerStatus_4      $CC
 
+; unused                    $CD     title routine only
+; unused                    $CE     title routine only
+; unused                    $CF     title routine only
+
+.alias SpareMemB7       $B7     ;Written to in title routine and accessed by unsed routine.     
 .alias SpareMemB8       $B8     ;Written to in title routine and accessed by unsed routine.
 .alias SpareMemBB       $BB     ;Written to in title routine, but never accessed.
 
