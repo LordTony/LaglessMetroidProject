@@ -128,7 +128,8 @@ SBX #$F0
 * BenchmarkNMI.lua shows how long it takes to reach NMI, min and max, over a second. This can be used to find painful spots
 
 ## Definite Bugs
-* Wave beam stops when it hits a door.
+* Getting hit doesn't give damage anymore
+  * This should be an easy one. I think I know what happened.
 * Bank 02 Pipe Enemies don't clear names tables properly
 * Bank 02 Ball Enemies don't bounce properly
 * Mini bosses don't seem to spawn properly
@@ -139,6 +140,8 @@ SBX #$F0
 
 ## Maybe Bugs (Check Original Game Behavior)
 * Holding forward while walking into an enemy shows a frame or two of the screw attack.
+* Pushing up against a door while facing right and shooting with the wave beam doesn't open the door.
+  * probably a bug because facing left doesn't do it
 
 ## Pre Existing Bugs (or quirks; whatever. The original metroid sucks)
 * Killing a Metroid without a Missle Tank will crash or lock the game

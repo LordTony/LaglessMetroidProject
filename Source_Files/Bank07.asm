@@ -3452,10 +3452,10 @@ UpdateWaveBullet:
         sta ObjHorzSpeed,x
 *   jsr CheckBulletHitBackground
     bcs +
+        ldx PageIndex       ; CheckBulletHitBackground clobbers X when a bullet hits a door.
         jsr MoveBulletX
 *   jmp CheckBulletStat
 
-    
 LD5DA:
     lda $030A,x         ; Is bullet hit (not samus)
     beq Exit5
@@ -3578,11 +3578,11 @@ SFXBombExplode_Inline:
     ora NoiseSFXFlag
     sta NoiseSFXFlag
 
-*   jmp DrawBomb
+*   bne DrawBomb
 
 LayBomb3and6:
     inc $030F,x
-    jsr LD6A7
+    jsr ComplexBombLayingLogic
     ldx PageIndex
     lda AnimFrame,x
     sec
@@ -3592,7 +3592,7 @@ LayBomb3and6:
 *   beq DrawBomb
     ; safe
 
-LD6A7:
+ComplexBombLayingLogic:
     jsr GetObjCoords
 
     lda $04
@@ -3601,7 +3601,7 @@ LD6A7:
     lda $05
     sta $0B
     
-    ldx PageIndex
+    ;ldx PageIndex  
     ldy $030F,x
     dey
     beq ++
@@ -3611,21 +3611,23 @@ LD6A7:
     jsr LD78B
     txa
     bne +
-    lda $04
-    and #$20
-    beq Exit6
+        lda $04
+        and #$20
+        beq Exit6
+
 *   lda $05
     and #$03
     cmp #$03
     bne +
-    lda $04
-    cmp #$C0
-    bcc +
-    lda ScrollDir
-    and #$02
-    bne Exit6
-    lda #$80
-    jsr LD78B
+        lda $04
+        cmp #$C0
+        bcc +
+            lda ScrollDir
+            and #$02
+            bne Exit6
+
+            lda #$80
+            jsr LD78B
 *   jsr LD76A
 Exit6:  rts
 
@@ -3696,35 +3698,33 @@ Exit6:  rts
     lda $05
     eor #$04
     sta $05
-LD76A:
-    txa
-    pha
-
-    ldy #$00
-    lda ($04),y
 
 .scope
+LD76A:
+    ldy #$00
+    lda ($04),y
 
     ldy InArea
     cpy #$10
     beq _compare_hex_80
     cmp #$70
     bcs _end
+    
     _compare_hex_80:
         cmp #$80
+
     _end:
-
-.scend
-
     bcc +
-    cmp #$A0
-    bcs +
-    jsr LE9C2
-*   pla
-    tax
+        cmp #$A0
+        bcs +
+            jsr LE9C2   ; clobbers X
+*   ldx PageIndex
 Exit7:
     rts
 
+.scend
+
+; called with #$40, #$80, #$02, and #$1E
 LD77F:
     clc
     adc $0A
@@ -3735,6 +3735,7 @@ LD77F:
     jmp LD798
     ; safe
 
+; called with #$40, #$80, #$02, and #$1E
 LD78B:
     sta $00
 
@@ -3742,6 +3743,7 @@ LD78B:
     sec
     sbc $00
     sta $04
+
     lda $0B
     sbc #$00
 LD798:
