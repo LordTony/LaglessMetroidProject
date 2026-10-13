@@ -628,15 +628,14 @@ Bank01_Struct_58:
 
 Bank01_L9598:  .word _SpecItmsTbl       ;($A3D6)Beginning of special items table.
 
-.advance $95C0
-
-Bank01_L95C0:
+.advance TourianBulletCheckSub
 	rts 
 
-.advance $95CC
-
+; I think this is unsused but was previous $95CC
+.advance AreaBossRoomNumber
 Bank01_L95CC:  .byte $FF
-                
+
+.advance AreaMusicFlag
 Bank01_L95CD:  .byte $01           ;Brinstar music init flag.
 
 .advance AreaEnemyDmg_LowByte
@@ -644,27 +643,27 @@ Bank01_L95CE:  .byte $80           ;Base damage caused by area enemies to lower 
 .advance AreaEnemyDmg_HiByte
 Bank01_L95CF:  .byte $00           ;Base damage caused by area enemies to upper health byte.
 
-.advance $95D0
+.advance MusicTriggerRoomTbl
 ;Special room numbers(used to start item room music).
-Bank01_L95D0:  .byte $2B, $2C, $28, $0B, $1C, $0A, $1A
+Bank01_L:  .byte $2B, $2C, $28, $0B, $1C, $0A, $1A
 
-.advance StartingXPosition
-Bank01_L95D7:  .byte $03           ;Samus start x coord on world map.
-.advance StartingYPosition
-Bank01_L95D8:  .byte $0E           ;Samus start y coord on world map.
-Bank01_L95D9:  .byte $B0           ;Samus start verticle screen position.
+.advance StartingMapX
+Bank01_L95D7:  .byte $03           	;Samus start x coord on world map.
+.advance StartingMapY
+Bank01_L95D8:  .byte $0E           	;Samus start y coord on world map.
+.advance StartingVertPosition
+Bank01_L95D9:  .byte $B0           	;Samus start verticle screen position.
 
 .advance StartingPalette
+Bank01_L95DA:  .byte $01
+Bank01_L95DB:  .byte $00, $03		; unused ?
 
-Bank01_L95DA:  .byte $01, $00
-Bank01_L95DC:  .byte $03		; unused
-Bank01_L95DD:  .byte $43, $00, $00
+.advance $95DD
+Bank01_L95DD:  .byte $43
+Bank01_L95DE:  .byte $00, $00		; unused ? 
 
-.advance $95E0      ; called once in Bank07
-Bank01_L95E0:  .byte $00, $00
-
-.advance $95E2      ; called once in Bank07
-Bank01_L95E2:  .byte $00, $00 
+.advance $95E0      				; used in Bank07
+Bank01_L95E0: .byte $00, $00, $00, $00 
 
 .advance MemuByte
     .byte $69

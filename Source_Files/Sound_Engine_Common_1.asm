@@ -407,6 +407,7 @@ _ClearSFXFlags:
 
 * JSR _InitSoundAddresses  ;($B404)Prepare to start playing music.     
   BEQ --                  ;Branch always.
+  ; safe
 
 _CheckRepeatMusic:
   LDA MusicRepeat         ;

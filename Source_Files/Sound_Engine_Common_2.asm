@@ -329,9 +329,7 @@ _InitializeMusic_Bank00:
   JSR _CheckMusicFlags     ;($B3FC)Check to see if restarting current music.
 
   LDA CurrentSFXFlags     ;Load current SFX flags and store CurrentMusic address.
-  nop                     ;TODO - Get rid of this
   STA CurrentMusic        ;
-  nop
   LDA MusicInitIndex      ;Get the index for the music data to start.
   TAY                     ;
   LDA _InitMusicIndexTbl,Y ;($BBFA)Find index for music in InitMusicInitIndexTbl.

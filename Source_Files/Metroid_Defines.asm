@@ -716,6 +716,7 @@
 .alias SamusStat00      $6876   ;Unused memory address for storing Samus info.
 .alias KraidStatueStat  $687B   ;bit 0 set, the statues blink, 
 .alias RidlyStatueStat  $687C   ;bit 7 set, statues are up.
+
 .alias SamusAgeLo       $687D   ;Low byte of Samus' age.
 .alias SamusAgeMid      $687E   ;Mid byte of Samus' age.
 .alias SamusAgeHi       $687F   ;High byte of Samus' age.
@@ -787,7 +788,7 @@
 .alias PasswordChar16   $69B0   ;
 .alias PasswordChar17   $69B1   ;
 
-.alias ItemHistory      $69B4   ;Thru $6A73. Unique item history saved game data (not used).
+;.alias ItemHistory      $69B4   ;Thru $6A73. Unique item history saved game data (not used).
 
 ;---------------------------------------[ More enemy RAM ]-------------------------------------------
 
@@ -973,61 +974,64 @@
 .alias BulletSlot3Cache     $6FF0
 
 ;---------------------------------- [ Constant Locations in Swap Banks ] -----------------------------
-.alias Common_Struct_00         $8000
-.alias TwosCompliment           $8005
-.alias Common_UpdateEnAttr_05   $800B
-.alias Common_LF74B             $8012
-.alias GrowRadiusX              $8019
-.alias ShrinkRadiusX            $8022
-.alias DoSomethingToFrameCount  $8030
-.alias BankEnemyCommonHelper    $8038
+.alias Common_Struct_00             $8000
+.alias TwosCompliment               $8005
+.alias Common_UpdateEnAttr_05       $800B
+.alias Common_LF74B                 $8012
+.alias GrowRadiusX                  $8019
+.alias ShrinkRadiusX                $8022
+.alias DoSomethingToFrameCount      $8030
+.alias BankEnemyCommonHelper        $8038
 
-.alias Bank_Enemy_Dispatch_Tbl_Hi       $8048
-.alias Bank_Enemy_Dispatch_Tbl_Lo       $8050
-.alias Common_Collision_Func    $8395
-.alias ObjectAnimIdxTbl         $8572
-.alias FramePtrTable_Hi         $860B
-.alias FramePtrTable_Lo         $8675
-.alias PlacePtrTable_Hi         $86DF
-.alias PlacePtrTable_Lo         $86EE
-.alias SamusEnterDoor           $8B13
-.alias DoorHandler              $8B70
-.alias PalPntrTbl_Hi            $9560
-.alias PalPntrTbl_Lo            $957C
-.alias SpecItmsTblPtr           $9598
-.alias StartingXPosition        $95D7
-.alias StartingYPosition        $95D8
-.alias StartingPalette          $95DA
-.alias HandleBankEnemies        $95E5
-.alias AreaRoutine              $95C3       ; TODO: Delete
-.alias AreaEnemyDmg_LowByte     $95CE
-.alias AreaEnemyDmg_HiByte      $95CF
-.alias MemuByte                 $95E4
-.alias EnemyHitPointTbl         $962B
-.alias EnemyInitDelayTbl        $96BB
+.alias Bank_Enemy_Dispatch_Tbl_Hi   $8048
+.alias Bank_Enemy_Dispatch_Tbl_Lo   $8050
+.alias Common_Collision_Func        $8395
+.alias ObjectAnimIdxTbl             $8572
+.alias FramePtrTable_Hi             $860B
+.alias FramePtrTable_Lo             $8675
+.alias PlacePtrTable_Hi             $86DF
+.alias PlacePtrTable_Lo             $86EE
+.alias SamusEnterDoor               $8B13
+.alias DoorHandler                  $8B70
 
-
-.alias TileFramePtrTbl_Hi       $97AF
-.alias TileFramePtrTbl_Lo       $97C0
-.alias RoomAttrTbl_Hi           $ACB0
-.alias RoomAttrTbl_Lo           $ACE0
-.alias EnemyAnimIndexTbl        $AD14
-.alias EnemyFramePtrTbl_Hi      $AD9E
-.alias EnemyFramePtrTbl_Lo      $AE35
-.alias EnemyPlacePtrTbl_Hi      $AECC
-.alias EnemyPlacePtrTbl_Lo      $AEDC
-.alias RoomPointerTable_Hi      $AEEC
-.alias RoomPointerTable_Lo      $AF1C
-.alias MacroUpperRight          $AF4C
-.alias MacroUpperLeft           $AF91
-.alias MacroLowerRight          $AFD6
-.alias MacroLowerLeft           $B01B
-.alias SoundEngineOrg           $B200
-.alias SXFInitTables            $B29D
-.alias SoundEngineEntryPoint    $B3CC
-.alias StructPointerTable_Hi    $BF0F
-.alias StructPointerTable_Lo    $BF6B
-.alias InterruptVectors         $BFFA
+.alias PalPntrTbl_Hi                $954C
+.alias PalPntrTbl_Lo                $9568
+.alias SpecItmsTblPtr               $9584
+.alias TourianBulletCheckSub        $9586
+.alias AreaBossRoomNumber           $9589
+.alias AreaMusicFlag                $958A
+.alias AreaEnemyDmg_LowByte         $958B
+.alias AreaEnemyDmg_HiByte          $958C
+.alias MusicTriggerRoomTbl          $958D
+.alias StartingMapX                 $9594
+.alias StartingMapY                 $9595
+.alias StartingVertPosition         $9596
+.alias StartingPalette              $9597
+.alias MemuByte                     $95E4
+.alias HandleBankEnemies            $95E5
+.alias EnemyHitPointTbl             $962B
+.alias EnemyInitDelayTbl            $96BB
+.alias TileFramePtrTbl_Hi           $97AF
+.alias TileFramePtrTbl_Lo           $97C0
+.alias RoomAttrTbl_Hi               $ACB0
+.alias RoomAttrTbl_Lo               $ACE0
+.alias EnemyAnimIndexTbl            $AD14
+.alias EnemyFramePtrTbl_Hi          $AD9E
+.alias EnemyFramePtrTbl_Lo          $AE35
+.alias EnemyPlacePtrTbl_Hi          $AECC
+.alias EnemyPlacePtrTbl_Lo          $AEDC
+.alias RoomPointerTable_Hi          $AEEC
+.alias RoomPointerTable_Lo          $AF1C
+.alias MacroUpperRight              $AF4C
+.alias MacroUpperLeft               $AF91
+.alias MacroLowerRight              $AFD6
+.alias MacroLowerLeft               $B01B
+.alias SoundEngineOrg               $B200
+.alias SXFInitTables                $B29D
+.alias SoundEngineEntryPoint        $B3CC
+.alias StructPointerTable_Hi        $BF0F
+.alias StructPointerTable_Lo        $BF6B
+.alias InterruptVectors             $BFFA
 
 ;----------------------------------------------------------------------------------------------------
 

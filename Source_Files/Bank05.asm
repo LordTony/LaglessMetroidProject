@@ -149,14 +149,13 @@ GFXGameOverJapaneseFont:
 
 Bank05_L9598:  .word _SpecItmsTbl       ;($A20D)Beginning of special items table.
 
-.advance $95C0
-
-Bank05_L95C0:
+.advance TourianBulletCheckSub
     rts 
 
-.advance $95CC
+.advance AreaBossRoomNumber			; I think this is unsused but was previous $95CC
 Bank05_L95CC:  .byte $12           ;Ridley's room.
 
+.advance AreaMusicFlag
 Bank05_L95CD:  .byte $80           ;Ridley hideout music init flag.
 
 .advance AreaEnemyDmg_LowByte
@@ -164,20 +163,27 @@ Bank05_L95CE:  .byte $40           ;Base damage caused by area enemies to lower 
 .advance AreaEnemyDmg_HiByte
 Bank05_L95CF:  .byte $02           ;Base damage caused by area enemies to upper health byte.
 
-.advance $95D0
+.advance MusicTriggerRoomTbl
 ;Special room numbers(used to start item room music).
 Bank05_L95D0:  .byte $FF, $FF, $FF, $FF, $FF, $FF, $FF
 
-.advance StartingXPosition
-Bank05_L95D7:  .byte $19           ;Samus start x coord on world map.
-.advance StartingYPosition
-Bank05_L95D8:  .byte $18           ;Samus start y coord on world map.
-Bank05_L95D9:  .byte $6E           ;Samus start verticle screen position.
+.advance StartingMapX
+Bank05_L95D7:  .byte $19            ;Samus start x coord on world map.
+.advance StartingMapY
+Bank05_L95D8:  .byte $18            ;Samus start y coord on world map.
+.advance StartingVertPosition
+Bank05_L95D9:  .byte $6E            ;Samus start verticle screen position.
 
 .advance StartingPalette
-Bank05_L95DA:  .byte $06, $00
-Bank05_L95DC:  .byte $03    ; unused
-Bank01_L95DD:  .byte $58, $44, $4A, $48, $4A, $4A, $36 
+Bank05_L95DA:  .byte $06
+Bank05_L95DB:  .byte $00, $03       ; unused ?
+
+.advance $95DD
+Bank01_L95DD:  .byte $58
+Bank01_L95DE:  .byte $44, $4A       ; unused ?
+
+.advance $95E0                      ; used in Bank07
+Bank01_L95E0:  .byte $48, $4A, $4A, $36 
 
 .advance MemuByte
     .byte $25

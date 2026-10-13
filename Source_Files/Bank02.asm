@@ -211,15 +211,14 @@ Bank02_L9510:  .byte $10, $52, $24, $03, $C0, $24, $4A, $08, $34, $5E, $E5, $43,
 
 Bank02_L9598:  .word _SpecItmsTbl       ;($A2D9)Beginning of special items table.
 
-.advance $95C0
-
-Bank02_L95C0:
+.advance TourianBulletCheckSub
     rts 
 
-.advance $95CC
+.advance AreaBossRoomNumber			; I think this is unsused but was previous $95CC
 
 Bank02_L95CC:  .byte $FF		   ;Boss Music Byte. Only used in bank 04 and 05
 
+.advance AreaMusicFlag
 Bank02_L95CD:  .byte $08           ;Norfair music init flag.
 
 .advance AreaEnemyDmg_LowByte
@@ -227,44 +226,51 @@ Bank02_L95CE:  .byte $00           ;Base damage caused by area enemies to lower 
 .advance AreaEnemyDmg_HiByte
 Bank02_L95CF:  .byte $01           ;Base damage caused by area enemies to upper health byte.
 
-.advance $95D0
+.advance MusicTriggerRoomTbl
 ;Special room numbers(used to start item room music).
 Bank02_L95D0:  .byte $10, $05, $27, $04, $0F, $FF, $FF
 
-.advance StartingXPosition
-Bank02_L95D7:  .byte $16           ;Samus start x coord on world map.
-.advance StartingYPosition
-Bank02_L95D8:  .byte $0D           ;Samus start y coord on world map.
-Bank02_L95D9:  .byte $6E           ;Samus start verticle screen position.
+.advance StartingMapX
+Bank02_L95D7:  .byte $16           	;Samus start x coord on world map.
+.advance StartingMapY
+Bank02_L95D8:  .byte $0D           	;Samus start y coord on world map.
+.advance StartingVertPosition
+Bank02_L95D9:  .byte $6E           	;Samus start verticle screen position.
 
 .advance StartingPalette
-Bank02_L95DA:  .byte $01, $00
-Bank02_L95DC:  .byte $03	; unused
-Bank02_L95DD:  .byte $77, $53, $57, $55, $59, $5B, $4F
+Bank02_L95DA:  .byte $01
+Bank02_L95DB:  .byte $00, $03		; unused ?
+
+.advance $95DD
+Bank02_L95DD:  .byte $77
+Bank02_L95DE:  .byte $53, $57		; unused ?
+
+.advance $95E0						; used in Bank07
+Bank02_L95E0:  .byte $55, $59, $5B, $4F
 
 .advance MemuByte
     .byte $32
 
 .advance HandleBankEnemies
-Bank02_L95E5:  LDA EnDataIndex,X
-Bank02_L95E8:  JSR ChooseRoutine
+	LDA EnDataIndex,X
+	JSR ChooseRoutine	
 
-Bank02_L95EB:  .word Bank02_L98D3
-Bank02_L95ED:  .word Bank02_L9908
-Bank02_L95EF:  .word Bank02_L98C0
-Bank02_L95F1:  .word Bank02_L9833
-Bank02_L95F3:  .word Bank02_L9833
-Bank02_L95F5:  .word Bank02_L9833
-Bank02_L95F7:  .word Bank02_L9996
-Bank02_L95F9:  .word Bank02_L9850
-Bank02_L95FB:  .word Bank02_L9833
-Bank02_L95FD:  .word Bank02_L9833
-Bank02_L95FF:  .word Bank02_L9833
-Bank02_L9601:  .word Bank02_L9A64
-Bank02_L9603:  .word Bank02_L9AD6
-Bank02_L9605:  .word Bank02_L9AE9
-Bank02_L9607:  .word Bank02_L9B64		; Norfair Fire Pit ball things
-Bank02_L9609:  .word Bank02_L9833
+	.word Bank02_EnemyHandler_0 		; 0000
+	.word Bank02_EnemyHandler_1 		; 0001
+	.word Bank02_EnemyHandler_2 		; 0010
+	.word KillObject 					;		0011
+	.word KillObject 					;		0100
+	.word KillObject 					;		0101
+	.word Bank02_EnemyHandler_6 		; 0110
+	.word Bank02_EnemyHandler_7 		; 0111
+	.word KillObject 					; 		1000
+	.word KillObject 					; 		1001
+	.word KillObject 					; 		1010
+	.word Bank02_EnemyHandler_0B 		; 1011
+	.word Bank02_EnemyHandler_0C 		; 1100
+	.word Bank02_EnemyHandler_0D 		; 1101	
+	.word Bank02_EnemyHandler_0E 		; 1110			Norfair Fire Pit ball things
+	.word KillObject 
 
 .advance $960B
 Bank02_L960B:  .byte $28, $28, $28, $28, $30, $30, $00, $00, $00, $00, $00, $00, $75, $75, $84, $82
@@ -345,21 +351,31 @@ Bank02_L9815:  .byte $07, $C2, $06, $A2, $05, $92, $05, $12, $06, $22, $07, $42,
 
 Bank02_L9824:  .byte $05, $C2, $04, $A2, $03, $92, $03, $12, $04, $22, $05, $42, $50, $72, $FF
 
-Bank02_L9833:  LDA #$00
-Bank02_L9835:  STA $6AF4,X
-Bank02_L9838:  RTS
+;Bank02_L9833:  LDA #$00
+;Bank02_L9835:  STA EnStatus,X
+;Bank02_L9838:  RTS
 
+nop
+nop
+nop
+nop
+nop
+nop
+
+.advance $9839
 Bank02_L9839:  LDA $81
 Bank02_L983B:  CMP #$01
-Bank02_L983D:  BEQ $9848
+Bank02_L983D:  BEQ Bank02_L9848
 Bank02_L983F:  CMP #$03
-Bank02_L9841:  BEQ $984D
+Bank02_L9841:  BEQ Bank02_L984D
 Bank02_L9843:  LDA $00
 Bank02_L9845:  JMP StartUpdateEnemyAnimation
+
 Bank02_L9848:  LDA $01
 Bank02_L984A:  JSR UpdateEnemyAnim
 Bank02_L984D:  JMP Start_Special_Attrs
 
+Bank02_EnemyHandler_7:
 Bank02_L9850:  LDA $6AF4,X
 Bank02_L9853:  CMP #$02
 Bank02_L9855:  BNE $988F
@@ -412,6 +428,7 @@ Bank02_L98BD:  RTS
 Bank02_L98BE:  PHP 
 Bank02_L98BF:  SED 
 
+Bank02_EnemyHandler_2:
 Bank02_L98C0:  LDA $6AF4,X
 Bank02_L98C3:  CMP #$03
 Bank02_L98C5:  BEQ $98CA
@@ -421,6 +438,7 @@ Bank02_L98CC:  STA $00
 Bank02_L98CE:  STA $01
 Bank02_L98D0:  JMP $9839
 
+Bank02_EnemyHandler_0:
 Bank02_L98D3:  LDA #$03
 Bank02_L98D5:  STA $00
 Bank02_L98D7:  LDA #$08
@@ -445,6 +463,7 @@ Bank02_L9902:  LDA #$22
 Bank02_L9904:  STA $6AF9,X
 Bank02_L9907:  RTS
 
+Bank02_EnemyHandler_1:
 Bank02_L9908:  LDA $81
 Bank02_L990A:  CMP #$01
 Bank02_L990C:  BEQ $991E
@@ -508,6 +527,7 @@ Bank02_L998E:  BNE $9993
 Bank02_L9990:  JMP $984D
 Bank02_L9993:  JMP $9839
 
+Bank02_EnemyHandler_6:
 Bank02_L9996:  JSR DoSomethingToFrameCount
 Bank02_L9999:  AND #$03
 Bank02_L999B:  BEQ $99D1
@@ -608,6 +628,7 @@ Bank02_L9A5E:  LDA $09
 Bank02_L9A60:  STA $0401,X
 Bank02_L9A63:  RTS
 
+Bank02_EnemyHandler_0B:
 Bank02_L9A64:  LDA $81
 Bank02_L9A66:  CMP #$01
 Bank02_L9A68:  BNE $9A88
@@ -658,6 +679,7 @@ Bank02_L9ACF:  JMP Start_Special_Attrs
 Bank02_L9AD2:  INC $F8,X
 Bank02_L9AD4:  INC $FA,X
 
+Bank02_EnemyHandler_0C:
 Bank02_L9AD6:  LDA $6AF4,X
 Bank02_L9AD9:  CMP #$02
 Bank02_L9ADB:  BNE $9AE0
@@ -667,6 +689,7 @@ Bank02_L9AE2:  STA $00
 Bank02_L9AE4:  STA $01
 Bank02_L9AE6:  JMP $9839
 
+Bank02_EnemyHandler_0D:
 Bank02_L9AE9:  LDA $6AF4,X
 Bank02_L9AEC:  CMP #$01
 Bank02_L9AEE:  BNE $9AF5
@@ -724,6 +747,7 @@ Bank02_L9B5D:  STA $01
 Bank02_L9B5F:  JMP $9839
 Bank02_L9B62:  EOR $49
 
+Bank02_EnemyHandler_0E:
 Bank02_L9B64:  LDA #$00
 Bank02_L9B66:  STA $6AF5,X
 Bank02_L9B69:  STA $6AF6,X
@@ -1323,10 +1347,12 @@ Bank02_LA3BE:
 
 Bank02_Room_01_Top:
 	.byte $07, $02
+	.byte $47, $02
 	.byte $FF
 
 Bank02_Room_01_Bottom:
 	.byte $87, $02
+	.byte $B7, $02
 	.byte $FF
 
 ;Room #$02
@@ -2868,9 +2894,9 @@ Bank02_LACE5:
 	.byte $02, $04, $05
 	.byte $02, $04, $05
 	.byte $02, $04, $05
-	.byte $02, $04, $05
-	.byte $02, $04, $05
-	.byte $02, $04, $05
+	;.byte $02, $04, $05
+	;.byte $02, $04, $05
+	;.byte $02, $04, $05
 	;.byte $02, $04, $05		; TODO: Check all the elevators on Bank 02 to make sure this is ok
 	.byte $FF
 

@@ -896,42 +896,56 @@ LC54F:  JMP NmiOn               ;($C487)Turn on VBlank interrupts.
 ;Brinstar memory page.
 
 InitBank1:
-LC552:  LXA #$00                ; X == A == 0
-LC554:  STA GameMode            ;GameMode = play.
-LC556:  JSR ScreenNmiOff        ;($C45D)Disable screen and Vblank.
-LC559:  LDA MainRoutine         ;
-LC55B:  CMP #$03                ;Is game engine running? if so, branch.
-LC55D:  BEQ InitBank1_RomSwitch ;Else do some housekeeping first.
-LC55F:  TXA                     ; X == A == 0
-LC561:  STA MainRoutine         ;Run InitArea routine next.
-LC563:  STA InArea              ;Start in Brinstar.
-LC565:  STA GamePaused          ;Make sure game is not paused.
+    lda #$00                ; X == A == 0
+    sta GameMode            ;GameMode = play.
+    jsr ScreenNmiOff        ;($C45D)Disable screen and Vblank.
 
-ClearRAM_33_DF:
-*   STA $33,x               ;Clear RAM addresses $33 through $DF.
-    INX                     ;
-    CPX #$A0                ;
-    BCC -                   ;Loop until all desired addresses are cleared.
+    lda MainRoutine         ;
+    cmp #$03                ;Is game engine running? if so, branch.
+    beq InitBank1_RomSwitch ;Else do some housekeeping first.
+        lda #$00 
+        sta MainRoutine         ;Run InitArea routine next.
+        sta InArea              ;Start in Brinstar.
+        sta GamePaused          ;Make sure game is not paused.
 
-    LDY #$0F                ;Clears Samus stats(Health, full tanks, game timer, etc.).
-*   STA $0100,y             ;A = 0 here. Load $100 thru $10F with #$00.
-    DEY                     ;
-    BPL -                   ;Loop 16 times.
+        ldx #$A1
+        ClearRAM_33_DF:
+        *   sta $32,x               ;Clear RAM addresses $33 through $DF.
+            dex 
+            bne -                   ;Loop until all desired addresses are cleared.
+
+            ; Still clear $0108 - $010F ()
+            ; but $0100 - $0107 (most of them at least) have moved
+            ldy #$07                ;Clears Samus stats(Health, full tanks, game timer, etc.).
+        *   sta $0108,y             ;A = 0 here. Load $100 thru $10F with #$00.
+            dey                     ;
+            bpl -                   ;Loop 16 times.
 
 InitBank1_RomSwitch:
-;LC56D:  tay                     ; A == 0
-LC56F:  JSR MMCWriteReg3         ;($C4EF)Load Brinstar memory page into lower 16Kb memory.
-        lda #$05
-        sta SpareMemB7
-BrinstarGFX_Loop:
-        ldx SpareMemB7
-        ldy BrinstarGFXTable, x
-        JSR LoadGFX
-        dec SpareMemB7
-        bpl BrinstarGFX_Loop
-        jsr LoadEntry_19_and_16_GFX
-LC575:  JMP NmiOn               ;($C487)Turn on VBlank interrupts.
-        ; SAFE
+    lda #$01
+    jsr MMCWriteReg3 
+
+    ldy #[$06 * 7 + 6]
+    jsr LoadGFX
+
+    ldy #[$05 * 7 + 6]
+    jsr LoadGFX
+
+    ldy #[$04 * 7 + 6]
+    jsr LoadGFX
+
+    ldy #[$03 * 7 + 6] 
+    jsr LoadGFX
+
+    ldy #[$1D * 7 + 6]
+    jsr LoadGFX
+
+    ldy #[$1E * 7 + 6]
+    jsr LoadGFX
+
+    jsr LoadEntry_19_and_16_GFX
+    jmp NmiOn                           ;($C487)Turn on VBlank interrupts.
+    ; safe
 
 ; entry 19 and 16 are common in LoadSamusGFX
 LoadEntry_19_and_16_GFX:
@@ -1113,16 +1127,13 @@ LC849:  jsr DestroyEnemies      ;($C8BB)
     jsr CacheMissileGraphics 
 
     stx DoorOnNameTable3        ;Clear data about doors on the name tables.
-    stx DoorOnNameTable0        ;
+    stx DoorOnNameTable0 
 
-    ldx #$02  
-    stx ScrollDir               ;Set initial scroll direction as left.
+    lda StartingMapX            ;Get Samus start x pos on map.
+    sta MapPosX 
 
-    lda StartingXPosition                   ;Get Samus start x pos on map.
-    sta MapPosX                 ;
-
-    lda StartingYPosition                   ;Get Samus start y pos on map.
-    sta MapPosY                 ;
+    lda StartingMapY            ;Get Samus start y pos on map.
+    sta MapPosY 
 
     lda StartingPalette         ;Get ??? Something to do with palette switch
     sta PalToggle 
@@ -1133,15 +1144,12 @@ LC849:  jsr DestroyEnemies      ;($C8BB)
     iny
     bne -
 
-    ldy CartRAMPtrUB
-    sty $01
-    ldy CartRAMPtrLB
-    sty $00
     lda PPUCNT0ZP
-    and #$FB    ; PPU increment = 1
+    and #$FB                ; PPU increment = 1
     sta PPUCNT0ZP
     sta PPUControl0
-    ldy PPUStatus   ; reset PPU addr flip/flop
+
+    ldy PPUStatus           ; reset PPU addr flip/flop
 
 ; Copy room RAM #0 ($6000) to PPU Name Table #0 ($2000)
 
@@ -1151,20 +1159,21 @@ LC849:  jsr DestroyEnemies      ;($C8BB)
     sty PPUAddress
 
     ldx #$04    ; prepare to write 4 pages
-*   lda ($00),y
+*   lda (CartRAMPtr),y
     sta PPUIOReg
     iny
 
     bne -
-    inc $01
+    inc CartRAMPtrUB
     dex
     bne -
 
-    ldx #$00
-    stx $91
-    inx      ; X = 1
+    stx $91                 ; X == 0
+    inx                     ; X == 1
     stx PalDataPending
-    inc MainRoutine         ;SamusInit is next routine to run.
+    inx                     ; X == 2
+    stx ScrollDir           ; Set initial scroll direction as left.
+    stx MainRoutine         ; SamusInit is next routine to run.
     jmp ScreenOn
 
 ; DestroyEnemies
@@ -1177,19 +1186,8 @@ LC8BB:
     ; x == $20 down to $1
     ; Spinner Variables == $0110 -> $012F
     ldx #$20
-*   sta $010F, x
+*   sta [$0110 - $01], x
     dex
-    bne -
-
-    ; cleans out 256 bytes of enemy data.
-*   sta EnStatus,x
-    sta EnStatus+1,x
-    sta EnStatus+2,x
-    sta EnStatus+3,x
-    inx
-    inx
-    inx
-    inx
     bne -
 
     ; x == $00 to $FF
@@ -1214,48 +1212,57 @@ LC8BB:
 ; Code that sets up Samus, when the game is first started.
 
 SamusInit:
-LC8D1:  LDA #$08                ;
-LC8D3:  STA MainRoutine         ;SamusIntro will be executed next frame.
-LC8D5:  LDA #$2C                ;440 frames to fade in Samus(7.3 seconds).
-LC8D7:  STA Timer2              ;
+    lda #$08                ;
+    sta MainRoutine         ;SamusIntro will be executed next frame.
+    lda #$2C                ;440 frames to fade in Samus(7.3 seconds).
+    sta Timer2              ;
+
 IntroMusic_Inline:
-        LDA #MUS_FADE_IN 
-        ORA MultiSFXFlag
-        STA MultiSFXFlag
-LC8DC:  LDY #sa_FadeIn0         ;
-        STY SamusObjAction      ;Set Samus status as fading onto screen.
-        LDX #$00       ;
-        STX HealthLo            ;Starting health is 30 (This is just the low bit)
-        STX SamusBlink
-        DEX                     ;X = $FF
-        STX PipeEnemyStatus
-        STX PipeEnemyStatus + $08
-        STX $0732                   ; Is this a bug?
-        STX PipeEnemyStatus + $10
-        STX EndTimerLo          ;Set end timer bytes to #$FF as
-        STX EndTimerHi          ;escape timer not currently active.
-        STX $8B
-        STX $8E
-        LDY #$27
-        LDA InArea
-        AND #$0F
-        BEQ +                   ;Branch if Samus starting in Brinstar.
-        LSR ScrollDir           ;If not in Brinstar, change scroll direction from left
-        LDY #$2F                ;to down. and set PPU for horizontal mirroring.
-      * STY MirrorCntrl         ;
-        STY MaxMissilePickup
-        STY MaxEnergyPickup
-        LDA $95D9               ;Samus' initial vertical position
-        STA SamusObjectY        ;
-        LDA #$80                ;Samus' initial horizontal position
-        STA SamusObjectX             ;
-        LDA PPUCNT0ZP           ;
-        AND #$01                ;Set Samus' name table position to current name table
-        STA SamusObjectHi       ;active in PPU.
-        LDA #$03                ;set to 30 units.
-        STA HealthHi            ;
+    lda #MUS_FADE_IN        ; #MUS_FADE_IN == #$80
+    ora MultiSFXFlag
+    sta MultiSFXFlag
+
+    ; HCSS - Abuse happy coincidences
+    sta SamusObjectX        ;Samus' initial horizontal position == #$80
+
+    ldy #sa_FadeIn0         ; #sa_FadeIn0 == #$20
+    sty SamusObjAction      ;Set Samus status as fading onto screen.
+
+    ldx #$00 
+    stx HealthLo            ;Starting health is 30 (This is just the low bit)
+    stx SamusBlink
+
+    dex                     ;X = $FF
+    stx PipeEnemyStatus
+    stx PipeEnemyStatus + $08
+    stx $0732                   ; Is this a bug?
+    stx PipeEnemyStatus + $10
+    stx EndTimerLo          ;Set end timer bytes to #$FF as
+    stx EndTimerHi          ;escape timer not currently active.
+    stx $8B
+    stx $8E
+
+    ldy #$27
+    lda InArea
+    and #$0F
+    beq +                       ;Branch if Samus starting in Brinstar.
+        lsr ScrollDir           ;If not in Brinstar, change scroll direction from left
+        ldy #$2F                ;to down. and set PPU for horizontal mirroring.
+*   sty MirrorCntrl 
+    sty MaxMissilePickup
+    sty MaxEnergyPickup
+
+    lda StartingVertPosition              ;Samus' initial vertical position
+    sta SamusObjectY
+
+    lda PPUCNT0ZP           ;
+    and #$01                ;Set Samus' name table position to current name table
+    sta SamusObjectHi       ;active in PPU.
+
+    lda #$03                ;set to 30 units.
+    sta HealthHi 
 Exit25:
-      * RTS                     ;
+    rts 
 
 ;------------------------------------[ Main game engine ]--------------------------------------------
 
@@ -3480,7 +3487,7 @@ CheckBulletHitBackground:
     lda ($04),y     ; get tile # that bullet touches
     cmp #$A0
     bcs MoveBulletX
-        jsr $95C0       ; Tourian Only
+        jsr TourianBulletCheckSub   ; Tourian Only
         cmp #$4E
         beq -
     
@@ -3901,6 +3908,7 @@ LD8A3:
     jmp AnimDrawObject
     ; safe
 
+; Some kind of elevator logic 
 LD8BF:
     ldy $030F + $20
     cpy #$8F    ; Leads-To-Ending elevator?
@@ -3971,7 +3979,7 @@ StartMusic:
     bne +
     lda $032F
     bmi ++
-*   lda $95CD           ;Load proper bit flag for area music.
+*   lda AreaMusicFlag           ;Load proper bit flag for area music.
     ldy ItemRmMusicSts
     bmi ++
     beq ++
@@ -6716,10 +6724,10 @@ CalculateRoomNumber:
 
             ldy #$07
             ItemRoomLoop:
-                cmp $95D0 - $01, y          ;Is it a special room?
-                beq StartItemRoomMusic      ;If so, branch to set flag to play item room music.
+                cmp MusicTriggerRoomTbl - $01, y        ;Is it a music trigger room?
+                beq StartItemRoomMusic                  ;If so, branch to set flag to play item room music.
                     dey 
-                    bne ItemRoomLoop        ;Loop until all special room numbers are checked. 
+                    bne ItemRoomLoop                    ;Loop until all music trigger rooms numbers are checked. 
 
         AfterItemRoomLoop:    
             lda ItemRmMusicSts     ;Load item room music status.
@@ -6850,7 +6858,7 @@ ObjectBackgrounCollisionCheck:
     lda ($04),y     ; get tile value
     cmp #$4E
     beq LE81E
-        jsr $95C0       ; Tourian Only
+        jsr TourianBulletCheckSub      ; Tourian Only
 
     ldy InArea
     cpy #$10
@@ -10472,7 +10480,7 @@ EnvEnemyUpdateRoutine_2:
     BEQ +
     BMI +
     LDY $040A,x
-    LDA $95E0,y
+    LDA $95E0,y              ; T == 0, 1, 2, or 3 here
     STA EnResetAnimIndex,x
 *   JSR Bank07_LFA1E
     LDX PageIndex
@@ -10483,8 +10491,8 @@ EnvEnemyUpdateRoutine_2:
     LDA $040A,x
     LSR
     BEQ +
-    INY
-*   LDA $95E2,y
+        INY
+*   LDA [$95E0 + $02],y     ; Y == 0 or 1 here
     JSR SetAnimationIndex
     lda #$04
     sta EnStatus,x
@@ -11203,14 +11211,6 @@ ChooseRoutine:
     JMP (CodePtr)
 
 ;-----------------------------------------------[ TABLES ]--------------------------------------------
-
-BrinstarGFXTable:
-    .byte [$06 * 7 + 6] 
-    .byte [$05 * 7 + 6] 
-    .byte [$04 * 7 + 6]
-    .byte [$03 * 7 + 6] 
-    .byte [$1D * 7 + 6]
-    .byte [$1E * 7 + 6]
 
 TourianGFXTable:
     .byte [$1C * 7 + 6] 

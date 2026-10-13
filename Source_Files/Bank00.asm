@@ -2684,6 +2684,7 @@ Bank00ChooseRoutine:
     LDY TempY
     JMP (CodePtr)
 
+; TODO: This is now a bit broken
 ClearSamusStats:
     LDY #$0F                ;
     LDA #$00                ;Clears Samus stats(Health, full tanks, game timer, etc.).

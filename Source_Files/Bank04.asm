@@ -196,15 +196,13 @@ Bank04_L94D0:  .byte $FC, $C6, $C6, $CE, $F8, $DC, $CE, $00, $00, $00, $00, $00,
 
 Bank04_L9598:  .word _SpecItmsTbl       ;($A26D)Beginning of special items table.
 
-.advance $95C0
-
-Bank04_L95C0:
+.advance TourianBulletCheckSub
     rts
 
-.advance $95CC
-
+.advance AreaBossRoomNumber			; I think this is unsused but was previous $95CC
 Bank04_L95CC:  .byte $1D           ;Kraid's room.
 
+.advance AreaMusicFlag
 Bank04_L95CD:  .byte $10           ;Kraid's hideout music init flag.
 
 .advance AreaEnemyDmg_LowByte
@@ -213,20 +211,27 @@ Bank04_L95CE:  .byte $00           ;Base damage caused by area enemies to lower 
 .advance AreaEnemyDmg_HiByte
 Bank04_L95CF:  .byte $02           ;Base damage caused by area enemies to upper health byte.
 
-.advance $95D0
+.advance MusicTriggerRoomTbl
 ;Special room numbers(used to start item room music).
 Bank04_L95D0:  .byte $FF, $FF, $FF, $FF, $FF, $FF, $FF
 
-.advance StartingXPosition
-Bank04_L95D7:  .byte $07           ;Samus start x coord on world map.
-.advance StartingYPosition
-Bank04_L95D8:  .byte $14           ;Samus start y coord on world map.
-Bank04_L95D9:  .byte $6E           ;Samus start verticle screen position.
+.advance StartingMapX
+Bank04_L95D7:  .byte $07            ;Samus start x coord on world map.
+.advance StartingMapY
+Bank04_L95D8:  .byte $14            ;Samus start y coord on world map.
+.advance StartingVertPosition
+Bank04_L95D9:  .byte $6E            ;Samus start verticle screen position.
 
 .advance StartingPalette
-Bank04_L95DA:  .byte $06, $00
-Bank04_L95DC:  .byte $03    ; unused
-Bank04_L95DD:  .byte $43, $00, $00, $00, $00, $00, $00
+Bank04_L95DA:  .byte $06
+Bank04_L95DB:  .byte $00, $03       ; unused ?
+
+.advance $95DD
+Bank04_L95DD:  .byte $43
+Bank04_L95DE:  .byte $00, $00       ; unused ?
+
+.advance $95E0                      ; used in Bank07
+ Bank04_L95E0: .byte $00, $00, $00, $00
 
 .advance MemuByte
     .byte $64
@@ -237,20 +242,20 @@ Bank04_L95E8:  JSR ChooseRoutine
 
 Bank04_L95EB:  .word $991C
 Bank04_L95ED:  .word $9937
-Bank04_L95EF:  .word $95CB
+Bank04_L95EF:  .word ExitSub
 Bank04_L95F1:  .word $993C
 Bank04_L95F3:  .word $9949
 Bank04_L95F5:  .word $999B
-Bank04_L95F7:  .word $95CB
+Bank04_L95F7:  .word ExitSub
 Bank04_L95F9:  .word $9A44
 Bank04_L95FB:  .word $9AB4
 Bank04_L95FD:  .word $9AE4
 Bank04_L95FF:  .word $9B2C
-Bank04_L9601:  .word $95CB
-Bank04_L9603:  .word $95CB
-Bank04_L9605:  .word $95CB
-Bank04_L9607:  .word $95CB
-Bank04_L9609:  .word $95CB
+Bank04_L9601:  .word ExitSub
+Bank04_L9603:  .word ExitSub
+Bank04_L9605:  .word ExitSub
+Bank04_L9607:  .word ExitSub
+Bank04_L9609:  .word ExitSub
 
 .advance $960B
 Bank04_L960B:  .byte $27, $27, $29, $29, $2D, $2B, $31, $2F, $33, $33, $41, $41, $48, $48, $50, $4E

@@ -128,7 +128,7 @@ SBX #$F0
 * BenchmarkNMI.lua shows how long it takes to reach NMI, min and max, over a second. This can be used to find painful spots
 
 ## Definite Bugs
-* Elevators seem to lock up the game now
+* Wave beam stops when it hits a door.
 * Bank 02 Pipe Enemies don't clear names tables properly
 * Bank 02 Ball Enemies don't bounce properly
 * Mini bosses don't seem to spawn properly
