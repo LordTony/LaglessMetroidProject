@@ -2058,17 +2058,27 @@ LCCC2:
 AfterHandleGravity:
 *   lda SamusOnElevator
     bne +
-    jsr SetRunAcceleration
-*   jsr LCDBF
-    dec WalkSoundDelay  ; time to play walk sound?
-    bne +               ; branch if not
-    lda #$09
-    sta WalkSoundDelay  ; # of frames till next walk sound trigger
+        jsr SetRunAcceleration
+    ;jsr LCDBF
+*   lda Joy1Status
+    and #$08                        ; Is the up button pressed on the controller
+    beq +
+        lda #an_SamusRunPntUp       ; an_SamusRunPntUp == $37
+*   cmp SamusAnimResetIndex
+    beq +
+        jsr SetSamusAnim
+        jmp SetSamusDataTo3
+        ; safe
 
-SFXSamusWalk_Inline1:
-    lda #$08
-    ora NoiseSFXFlag
-    sta NoiseSFXFlag
+*   dec WalkSoundDelay  ; time to play walk sound?
+    bne +               ; branch if not
+        lda #$09
+        sta WalkSoundDelay  ; # of frames till next walk sound trigger
+
+    SFXSamusWalk_Inline1:
+        lda #$08
+        ora NoiseSFXFlag
+        sta NoiseSFXFlag
 
 *   jsr SetSamusHorzAccl
     lda Joy1Change
@@ -2124,32 +2134,31 @@ SetSamusDataTo3:
 ;The following function sets various animation and control data bytes for Samus.
 
 SetSamusData:
-LCD6D:  JSR UpdateObjAnim       ;($DC8F)Update animation if needed.
+LCD6D:  JSR UpdateObjAnim           ;($DC8F)Update animation if needed.
 LCD70:  JSR IsScrewAttackActive     ;($CD9C)Check if screw attack active to change palette.
-LCD73:  BCS +               ;If screw attack not active, branch to skip palette change.
-LCD75:  LDA FrameCount      ;
-LCD77:  asr #$07            ; Every other frame, change Samus palette while screw
-LCD7A:  ORA #$A0            ;Attack is active.
-LCD7C:  STA ObjectCntrl         ;
+LCD73:  BCS +                       ;If screw attack not active, branch to skip palette change.
+            lda FrameCount 
+            asr #$07                ;Every other frame, change Samus palette while screw
+            ora #$A0                ;Attack is active.
+            sta ObjectCntrl 
 LCD7E:* JSR CheckHealthStatus       ;($CDFA)Check if Samus hit, blinking or Health low.
 LCD81:  JSR LavaAndMoveCheck        ;($E269)Check if Samus is in lava or moving.
-LCD84:  LDA MetroidOnSamus      ;Is a Metroid stuck to Samus?
-LCD86:  BEQ LCD8C               ;If not, branch.
+LCD84:  LDA MetroidOnSamus          ;Is a Metroid stuck to Samus?
+LCD86:  BEQ LCD8C                   ;If not, branch.
 
-            ; HCSS - Get rid of this in real time
-            LDA #$A1                ;Metroid on Samus. Turn Samus blue.
-            STA ObjectCntrl         ;
+        ; HCSS - Get rid of this in real time
+        LDA #$A1                ;Metroid on Samus. Turn Samus blue.
+        STA ObjectCntrl 
 
 SetSamusMirrorCntrlBitAndThenDrawFrame:
 LCD8C:
         LDA SamusDir                ;Facing left=#$01, facing right=#$00.
         BEQ SetSamusDrawFrameCall
-            LDA #$10                ;
-            ORA ObjectCntrl         ;
-            STA ObjectCntrl
+            LDA #$10 
+            ORA ObjectCntrl 
+            STA ObjectCntrl 
 SetSamusDrawFrameCall:
-LCD8F:  JMP DrawFrame           ;($DE4A)Display Samus.
-
+LCD8F:  jmp DrawSamusFrame          ;($DE4A)Display Samus.
 
 ;------------------------------[ Check if screw attack is active ]-----------------------------------
 
@@ -2191,6 +2200,7 @@ LCDBF:
         pla
         pla
         jmp SetSamusDataTo3
+        ; safe
 
 CheckHealthStatus:
     lda SamusHit            ;
@@ -4985,7 +4995,6 @@ MoveEnemies:
     BEQ SetObjectCntrlToA_2
         JMP DoDrawSpriteObject
         ; safe
-
 
 DrawSamusFrame:
     ldy SamusAnimFrame
@@ -9151,16 +9160,22 @@ BombKnockbackLoop:
         cmp #$0A
         bne ++
 
-*   jsr GetObjectXCoordData
-    bcs +
-        ; skip JSR is carry is set
-        jsr LF311           ; Has a side effect of setting A to zero
-        sta HealthLoChange
+        *   jsr GetObjectXCoordData
+            bcs +
+                ; skip JSR is carry is set
+                jsr LF311           ; Has a side effect of setting A to zero
+                sta HealthLoChange
 *   txa
     sbx #$10
     cpx #$C0
     bne BombKnockbackLoop
-    rts
+
+SubtractHealth_Trampoline:
+    lda HealthLoChange
+    ora HealthHiChange
+    beq Exit21         
+    *   jmp SubtractHealth      ;($CE92)
+    ; safe
 
 GetSamusCoordData_06_08_0A:
     lda SamusObjectY
@@ -9175,14 +9190,6 @@ GetSamusCoordData_06_08_0A:
     sta $0A
 
     rts
-
-; TODO - find a better place for this
-SubtractHealth_Trampoline:
-    lda HealthLoChange
-    ora HealthHiChange
-    beq Exit21         
-    *   jmp SubtractHealth      ;($CE92)
-    ; safe
 
 ; TODO: Maybe inline
 DistFromXEnemyToSamus:
