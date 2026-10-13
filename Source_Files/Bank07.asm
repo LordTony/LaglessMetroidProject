@@ -1176,23 +1176,20 @@ LC8BB:
 
     ; x == $20 down to $1
     ; Spinner Variables == $0110 -> $012F
-    
     ldx #$20
 *   sta $010F, x
     dex
     bne -
 
-    ; need to clear out:
-    ; MemuStatus        = $B0, $B8, $C0, $C8
-    ; PipeEnemyStatus   = $B2, $BA, $C2, $CA
-    ; SpinnerStatus     = $B4, $BC, $C4, $CC
-    ldx #$06
-*   sta $BE, x
-    sta $C6, x
-    sta $AE, x
-    sta $B6, x
-    dex
-    dex
+    ; cleans out 256 bytes of enemy data.
+*   sta EnStatus,x
+    sta EnStatus+1,x
+    sta EnStatus+2,x
+    sta EnStatus+3,x
+    inx
+    inx
+    inx
+    inx
     bne -
 
     ; x == $00 to $FF
