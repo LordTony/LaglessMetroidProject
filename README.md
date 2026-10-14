@@ -128,9 +128,6 @@ SBX #$F0
 * BenchmarkNMI.lua shows how long it takes to reach NMI, min and max, over a second. This can be used to find painful spots
 
 ## Definite Bugs
-* Justin Bailey Password doesn't load in some of the tiles in the room below the elevator
-  * If you go up and down the elevator it seems to make them spawn again.
-  * Probably some issue with loading a password vs entering a room via movement
 * Bank 02 Pipe Enemies don't clear names tables properly
 * Bank 02 Ball Enemies don't bounce properly
 * Mini bosses don't seem to spawn properly
@@ -138,6 +135,8 @@ SBX #$F0
   * This this has to do with "MaxMissiles" being moved into zero page a long time ago.
   * It looks like the ridley and kraid dead bytes were based on the offset to MaxMissiles.
 * End credits have their graphics corrupted
+* Pillar thingies on Mother brain's room get overwritten when the second half of the room loads
+  
 
 ## Maybe Bugs (Check Original Game Behavior)
 * Holding forward while walking into an enemy shows a frame or two of the screw attack.
@@ -145,7 +144,6 @@ SBX #$F0
 ## Pre Existing Bugs (or quirks; whatever. The original metroid sucks)
 * Killing a Metroid without a Missle Tank will crash or lock the game
 * Shooting a door open while falling vertically past it will move the closing door into a wall
-* Loading a room while too many sprites are being rendered (bullets + enemies + room transition) will hit the PPU cap
-  and some background elements will have the wrong palette because it won't even try to load the palette data for them.
+* Loading a room while too many sprites are being rendered (bullets + enemies + room transition) will hit the PPU cap and some background elements will have the wrong palette because it won't even try to load the palette data for them.
 * Can't pickup items while blinking from taking damage, either from lava or from an being hit
-* Pushing up against a door while facing right and shooting with the wave beam doesn't open the door. Facing left doors has no problem.
+* Pushing up against a door while facing right and shooting with the wave beam doesn't open the door. Facing left doors open without issue.

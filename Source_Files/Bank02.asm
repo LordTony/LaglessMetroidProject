@@ -1396,6 +1396,7 @@ Bank02_LA3F8:
 	.word Bank02_Room_03_Top_Right
 	.word Bank02_Room_03_Bottom_Left
 
+; JUMANJI
 Bank02_Room_03_Bottom_Right:
 	.byte $88, $0B
 	.byte $8C, $0B
@@ -3313,6 +3314,7 @@ Bank02_Struct_43:
 	.byte $42, $2B
 	.byte $FF
 
+; JUMANJI
 ;Structure #$44
 Bank02_Struct_44:
 	.byte $01, $2D
@@ -3321,7 +3323,7 @@ Bank02_Struct_44:
 	.byte $01, $3D
     .byte $01, $2D
     .byte $01, $3D
-	.byte $01, $2D
+	;.byte $01, $2D
 	.byte $FF
 
 ;Structure #$45		(3x4)
@@ -3379,29 +3381,35 @@ Bank02_Struct_4E:
 	.byte $01, $31
 	.byte $FF
 
+; Goes through in reverse order
+Bank2GFX:
+	.byte [$1E * 7 + 6]
+	.byte [$1D * 7 + 6]
+	.byte [$09 * 7 + 6]
+	.byte [$08 * 7 + 6]
+	.byte [$07 * 7 + 6]
+	.byte [$05 * 7 + 6]
+	.byte [$04 * 7 + 6]
+
 InitBank2:
-		lda #$00                ;GameMode = play.
-		sta GameMode            ;
-		jsr ScreenNmiOff        ;($C45D)Disable screen and Vblank.
+	lda #$00                ;GameMode = play.
+	sta GameMode            ;
+	jsr ScreenNmiOff        ;($C45D)Disable screen and Vblank.
 
-    	ldy #[$04 * 7 + 6]
+	lda #$06
+InitBank2_Loop:
+	pha
+		tax
+		ldy Bank2GFX, x
 		jsr LoadGFX
+	pla
+	sec
+	sbc #$01
+	bpl InitBank2_Loop
 
-		ldy #[$05 * 7 + 6]
-		jsr LoadGFX
+	jsr LoadEntry_19_and_16_GFX
 
-		ldy #[$07 * 7 + 6]
-		jsr LoadGFX
-
-		ldy #[$08 * 7 + 6]
-		jsr LoadGFX
-
-		ldy #[$09 * 7 + 6]
-		jsr LoadGFX
-
-		jsr LoadEntry_19_and_16_GFX
-
-		jmp NmiOn               ;($C487)Turn on VBlank interrupts.
+	jmp NmiOn               ;($C487)Turn on VBlank interrupts.
 
 Norfair_Room_04_Attrs:
 	.byte $03, $88

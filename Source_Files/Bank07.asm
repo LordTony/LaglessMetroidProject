@@ -925,16 +925,16 @@ InitBank1_RomSwitch:
     lda #$01
     jsr MMCWriteReg3 
 
-    ldy #[$06 * 7 + 6]
-    jsr LoadGFX
-
-    ldy #[$05 * 7 + 6]
+    ldy #[$03 * 7 + 6] 
     jsr LoadGFX
 
     ldy #[$04 * 7 + 6]
     jsr LoadGFX
 
-    ldy #[$03 * 7 + 6] 
+    ldy #[$05 * 7 + 6]
+    jsr LoadGFX
+    
+    ldy #[$06 * 7 + 6]
     jsr LoadGFX
 
     ldy #[$1D * 7 + 6]
@@ -982,10 +982,10 @@ AfterLoadingJustinBaileyGraphics:
     ldy #[$14 * 7 + 6] 
     jsr LoadGFX  
 
-    ldy #[$18 * 7 + 6] 
+    ldy #[$17 * 7 + 6] ;Entry 23 in GFXInfo table.
     jsr LoadGFX  
 
-    ldy #[$17 * 7 + 6] ;Entry 23 in GFXInfo table.
+    ldy #[$18 * 7 + 6] 
     jsr LoadGFX  
 
     jmp LoadEntry_19_and_16_GFX
@@ -2066,7 +2066,7 @@ AfterHandleGravity:
         lda #an_SamusRunPntUp       ; an_SamusRunPntUp == $37
 *   cmp SamusAnimResetIndex
     beq +
-        jsr SetSamusAnim
+        jsr SetSamusAnim 
         jmp SetSamusDataTo3
         ; safe
 
@@ -2349,23 +2349,24 @@ ClearPendingDamage:
     rts
 
 SamusWasKilled:
-LCEE6:  lda #$00                ;Samus is dead.
-LCEE8:* sta HealthLo 
-LCEEB:  sta HealthHi            ;Set health to #$00.
-LCEEE:  lda #sa_Dead            ; #sa_Dead == 7
-LCEF0:  sta SamusObjAction      ;Death handler.
+    lda #sa_Dead            ; #sa_Dead == 7
+    sta SamusObjAction      ;Death handler.
 
-SFX_SamusDie_Inline:
+;SFX_SamusDie_Inline:
     lda #SFX_SMS_DIE        ; #SFX_SMS_DIE == #$80
     ora TriangleSFXFlag
     sta TriangleSFXFlag
 
-SetSamusExplode:
+;SetSamusExplode:
     lda #$50
-    sta SamusJmpDsplcmnt
+    sta SamusJmpDsplcmnt 
+
     lda #an_Explode             ; #an_Explode == #$32
-    jsr SetSamusAnim
-    sta ObjectCounter
+    jsr SetSamusAnim            
+
+    sta ObjectCounter           ; A == 0 here
+    sta HealthLo 
+    sta HealthHi                ; Set health to #$00.
     rts
 
 ;----------------------------------------------------------------------------------------------------
@@ -2409,6 +2410,7 @@ LCF5D:  JSR NoHorzMoveNoDelay   ;($CF81)Clear horizontal movement and animation 
         BNE SetSamusPntUp       ;If so, branch.
         LDA #an_SamusStand      ;Set Samus animation for standing.
 
+; Will set A to 0 as a side effect
 SetSamusAnim:
 LCF6B:  STA SamusAnimResetIndex ;Set new animation reset index.
 
@@ -2421,6 +2423,7 @@ SetSamusNextAnim:
 SetSamusPntUp:
 LCF77:* LDA #sa_PntUp           ;
         STA SamusObjAction      ;Samus is pointing up.
+
         LDA #an_SamusPntUp      ;
         JSR SetSamusAnim        ;($CF6B)Set new animation values.
 
@@ -2437,12 +2440,12 @@ LCF88:  LDA Joy1Status
         JSR SetRunAcceleration
         LDA SamusGravity
         BMI ClearHorzDataExit
-        LDA SamusAnimResetIndex
-        CMP #an_SamusSalto
-        BEQ ClearHorzDataExit
-        STX SamusDir
-        LDA #$0C
-        JMP SetSamusAnim
+            LDA SamusAnimResetIndex
+            CMP #an_SamusSalto
+            BEQ ClearHorzDataExit
+                STX SamusDir
+                LDA #$0C
+                JMP SetSamusAnim
 
 ApplyGravity:
         LDA SamusGravity
@@ -2612,7 +2615,7 @@ LD0B5:
 
             ldx SamusDir
             lda RunAccelerationTbl,x
-            sta SamusHorzAccel          ; Either #$30 or #$D0
+            sta SamusHorzAccel          ; Either #$30 or #$D0       ; 0011 0000 or 1101 0000
 
             ;lda #$01                   ; HCSS - don't really know
             ;sta $0686                  ; Never read anywhere so I'm removing it
