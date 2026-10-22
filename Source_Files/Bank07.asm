@@ -6391,7 +6391,6 @@ CheckForRoomUpdate:
 CheckRoomUpdate_HorizontalScroll:
     lda ScrollX
     and #$07                ; keep lower 3 bits
-                            ; JUMANJI: THIS HACK IS PROBABLY BROKEN
     cmp TileBlastAnim-1,y   ; compare value = 0 if ScrollDir = right, else 7
                             ; Using TileBlastAnim because it has [$07, $00] in there
                             ; It's a bit a hack.
@@ -6829,7 +6828,7 @@ SEC_RTS:
     sbc $03
     anc #$07
     beq +
-    inx
+        inx
 *   jsr LE8CE
 
     ldx #$00
@@ -6912,21 +6911,21 @@ IsWalkableTile:
     sta $02
     cmp #$F0
     bcc +
-    adc #$0F
-    sta $02
-    lda ScrollDir
-    anc #$02
-    bne +
-    inc $0B
+        adc #$0F
+        sta $02
+        lda ScrollDir
+        anc #$02
+        bne +
+            inc $0B
 *   lda $03
     ;clc
     adc $07
     sta $03
     bcc +
-    lda ScrollDir
-    and #$02
-    beq +
-    inc $0B
+        lda ScrollDir
+        and #$02
+        beq +
+            inc $0B
 *   jmp ObjectBackgrounCollisionCheck
     ; safe
 
@@ -7030,7 +7029,7 @@ Bank07_LE89B:
     sbc $02
     anc #$07
     beq +
-    inx
+        inx
 *   jsr LE8CE
 
     ldx #$08
@@ -7052,16 +7051,17 @@ LE8CE:
     sbc $04
 
     bcs +
-    adc #$08
+        adc #$08
 *   tay
     lsr
     lsr
     lsr
     sta $04
+
     tya
     anc #$07
     beq +
-    inx
+        inx
 *   txa
     ; HCSS show how ANC works
     ;clc
@@ -7073,6 +7073,7 @@ LE90F:
     lda $02
     bpl ++
 
+;LE95F
     lda $08
     sec
     sbc $02
@@ -7081,12 +7082,15 @@ LE90F:
     sta $00
 
     bcs +
-    cpx #$F0
-    bcc +++
+        cpx #$F0
+        bcc +++
+
 *   txa 
     adc #$0F
     jmp LE934
 
+; HCSS - compare this to old code. Strange double work
+; jsr LE95F
 *   lda $08
     sec
     sbc $02
@@ -7103,12 +7107,12 @@ LE934:
     lda ScrollDir
     and #$02
     bne +
-    inc $0B
+        inc $0B
 *   stx $02
     ldx #$00
     lda $03
     bmi +
-    dex
+        dex
 *   lda $09
     sec
     sbc $03
@@ -7118,10 +7122,10 @@ LE934:
     txa
     adc #$00
     beq +
-    lda ScrollDir
-    and #$02
-    beq +
-    inc $0B
+        lda ScrollDir
+        and #$02
+        beq +
+            inc $0B
 *   rts
 
 ;-------------------------------------[ Get object coordinates ]------------------------------------
@@ -7622,9 +7626,6 @@ LoadDoor_Trampoline:
 LoadZebHole_Trampoline:
     jmp LoadZebHole
 
-LoadStatues_Trampoline:
-    jmp LoadStatues
-
 ; HCSS - Being stupid to save 1 cycle
 SetupNextRoomFeature_Hi_Byte_Inc:
     inc $01
@@ -7649,16 +7650,16 @@ LoadRoomFeatureRoutine:
     cmp #$FF
     beq EndOfRoomLoad           ; A == 255
 
-    and #$0F
+        and #$0F
 
-    cmp #$02
-    bcc LoadEnemy                ; A <= 1 (0 should be impossible, but will likely cause a nasty bug if it happens)
-    beq LoadDoor_Trampoline      ; A == 2
+        cmp #$02
+        bcc LoadEnemy                ; A <= 1 (0 should be impossible, but will likely cause a nasty bug if it happens)
+        beq LoadDoor_Trampoline      ; A == 2
 
-    cmp #$06
-    beq LoadStatues_Trampoline   ; A == 6
-    bcs LoadZebHole_Trampoline   ; A >= 7 (Anything higher than 7 should be impossible)
-    rts                          ; (3, 4, and 5 shouldn't exist either. Could probably remove this, but it's just 1 byte)
+        lsr                          ; 3, 4, 5 and 8+ doesn't exist so just checking the low bit at this point is enough to 
+        bcs LoadZebHole_Trampoline ; A >= 7
+        jmp LoadStatues             ; A == 6
+
 ;---------------------------------------------------------------------------------------------------
 
 EndOfRoomLoad:
@@ -7702,6 +7703,7 @@ EnemySlotIsNotTaken:
     lda ($00),y         ;Get enemy type.
     ; TODO: inlining GetEnemyType should be possible
     jsr GetEnemyType    ;($EB28)Load data about enemy.
+
     ldy #$02            ;
     lda ($00),y         ;Get enemy initial position(%yyyyxxxx).
 
@@ -9397,9 +9399,9 @@ _HorzCrossNameTable:
     sbc ScrollX
     bcs EXIT22
 
-    adc EnRadX,x
-    bcc ChooseEnemySubroutine
-    rts
+        adc EnRadX,x
+        bcc ChooseEnemySubroutine
+            rts
 
 _HorzScrollCheck:
     lda EnNameTable,x
@@ -9407,12 +9409,12 @@ _HorzScrollCheck:
     lsr
     bcs _HorzCrossNameTable
 
-    lda ScrollX
-    adc EnRadX,x
-    bcs EXIT22 
+        lda ScrollX
+        adc EnRadX,x
+        bcs EXIT22 
 
-    cmp EnXRoomPos,x
-    bcs EXIT22 
+            cmp EnXRoomPos,x
+            bcs EXIT22 
 
     ; fall through
 ChooseEnemySubroutine:
@@ -10198,7 +10200,7 @@ LF7BA:
 .scope
 LF699:
     jsr Bank07_LF844
-    lda $965B,y
+    lda $965B,y                 ; some kind of bank table
     cmp EnResetAnimIndex,x
     beq _done
         jsr SetAnimationIndex
@@ -10274,8 +10276,8 @@ LF699:
 Bank07_LF844:
     lda $0405,x
     bpl +
-    lsr
-    lsr
+        lsr
+        lsr
 *   lsr
     lda EnDataIndex,x
     rol
@@ -10624,31 +10626,29 @@ Bank07_LFB88:
     inc $6B03,x
     dec $6B03,x
     bne +
-    pha
-    pla
+        pha
+        pla
 *   bpl +
-
-    EOR #$FF
-    CLC 
-    ADC #$01
-
+        eor #$FF
+        clc 
+        adc #$01
 *   cmp #$08
     bcc +
-    cmp #$10
-    bcs Exit20
-    tya
-    and #$01
-    tay
-    lda $85,y
-    cmp EnResetAnimIndex,x
-    beq Exit20
-    sta EnAnimIndex,x
-    dec EnAnimIndex,x
-Bank07_LFBB9:
-    sta EnResetAnimIndex,x
-    lda #$00
-    sta EnAnimDelay,x
-    rts
+        cmp #$10
+        bcs Exit20
+            tya
+            and #$01
+            tay
+            lda $85,y
+            cmp EnResetAnimIndex,x
+            beq Exit20
+                sta EnAnimIndex,x
+                dec EnAnimIndex,x
+            Bank07_LFBB9:
+                sta EnResetAnimIndex,x
+                lda #$00
+                sta EnAnimDelay,x
+                rts
 
 *   lda $963B,y
     cmp EnResetAnimIndex,x
@@ -10973,8 +10973,8 @@ SetupTileAnimationAndDelay:
     ;LDX PageIndex
     ldy TileAnimDelay,x
     beq +
-    dec TileAnimDelay,x
-    bne ++
+        dec TileAnimDelay,x
+        bne ++
     * sta TileAnimDelay,x
 
     ldy TileAnimIndex,x
@@ -10987,8 +10987,8 @@ SetupTileAnimationAndDelay:
     sta TileAnimIndex,x
     jsr DrawTileBlast
     bcc +
-    ;ldx PageIndex
-    dec TileAnimIndex,x
+        ;ldx PageIndex
+        dec TileAnimIndex,x
     * rts
 
     * inc TileRoutine,x
@@ -11000,16 +11000,16 @@ TileSubroutine3:
     ; A == 3 here
     and FrameCount 
     bne +       ; only update tile timer every 4th frame
-    dec TileDelay,x
-    bne +       ; exit if timer not reached zero
-    inc TileRoutine,x
-    ldy TileType,x
-    lda Table19,y
-SetTileAnim:
-    sta TileAnimIndex,x
-    sta $0505,x
-    lda #$00
-    sta TileAnimDelay,x
+        dec TileDelay,x
+        bne +       ; exit if timer not reached zero
+            inc TileRoutine,x
+            ldy TileType,x
+            lda Table19,y
+        SetTileAnim:
+            sta TileAnimIndex,x
+            sta $0505,x
+            lda #$00
+            sta TileAnimDelay,x
 Exit28:
 *   rts
 

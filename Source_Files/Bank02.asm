@@ -255,21 +255,21 @@ Bank02_L95E0:  .byte $55, $59, $5B, $4F
 	LDA EnDataIndex,X
 	JSR ChooseRoutine	
 
-	.word Bank02_EnemyHandler_0 		; 0000
-	.word Bank02_EnemyHandler_1 		; 0001
-	.word Bank02_EnemyHandler_2 		; 0010
-	.word KillObject 					;		0011
-	.word KillObject 					;		0100
-	.word KillObject 					;		0101
-	.word Bank02_EnemyHandler_6 		; 0110
-	.word Bank02_EnemyHandler_7 		; 0111
-	.word KillObject 					; 		1000
-	.word KillObject 					; 		1001
-	.word KillObject 					; 		1010
-	.word Bank02_EnemyHandler_0B 		; 1011
-	.word Bank02_EnemyHandler_0C 		; 1100
-	.word Bank02_EnemyHandler_0D 		; 1101	
-	.word Bank02_EnemyHandler_0E 		; 1110			Norfair Fire Pit ball things
+	.word Bank02_EnemyHandler_0 				; 0000
+	.word Bank02_EnemyHandler_1 				; 0001
+	.word Bank02_EnemyHandler_2 				; 0010
+	.word KillObject 							;		0011
+	.word KillObject 							;		0100
+	.word KillObject 							;		0101
+	.word Bank02_EnemyHandler_6 				; 0110
+	.word Bank02_EnemyHandler_7 				; 0111
+	.word KillObject 							; 		1000
+	.word KillObject 							; 		1001
+	.word KillObject 							; 		1010
+	.word Bank02_EnemyHandler_0B 				; 1011
+	.word Bank02_Bouncy_Ball_Enemy_Handler 		; 1100			Bouncy Ball?
+	.word Bank02_EnemyHandler_0D 				; 1101	
+	.word Bank02_EnemyHandler_0E 				; 1110			Norfair Fire Pit ball things
 	.word KillObject 
 
 .advance $960B
@@ -284,10 +284,12 @@ Bank02_L963B:  .byte $22, $22, $22, $22, $2A, $2D, $00, $00, $00, $00, $00, $00,
 
 Bank02_L964B:  .byte $00, $00, $05, $08, $13, $18, $20, $20, $3C, $37, $43, $47, $00, $00, $00, $00
 
+.advance $965B
 Bank02_L965B:  .byte $25, $25, $25, $25, $2A, $2D, $00, $00, $00, $00, $00, $00, $69, $69, $7F, $7C
 
 Bank02_L966B:  .byte $00, $00, $05, $08, $13, $18, $1D, $1D, $3C, $37, $43, $47, $00, $00, $00, $00
 
+.advance $967B
 Bank02_L967B:  .byte $00, $00, $80, $82, $00, $00, $00, $00, $80, $00, $00, $00, $82, $00, $00, $00
 
 .advance $968B
@@ -679,15 +681,16 @@ Bank02_L9ACF:  JMP Start_Special_Attrs
 Bank02_L9AD2:  INC $F8,X
 Bank02_L9AD4:  INC $FA,X
 
-Bank02_EnemyHandler_0C:
+Bank02_Bouncy_Ball_Enemy_Handler:
 Bank02_L9AD6:  LDA $6AF4,X
 Bank02_L9AD9:  CMP #$02
-Bank02_L9ADB:  BNE $9AE0
+Bank02_L9ADB:  BNE Bank02_L9AE0
 Bank02_L9ADD:  JSR BankEnemyCommonHelper
 Bank02_L9AE0:  LDA #$02
 Bank02_L9AE2:  STA $00
 Bank02_L9AE4:  STA $01
-Bank02_L9AE6:  JMP $9839
+Bank02_L9AE6:  JMP Bank02_L9839
+				; safe
 
 Bank02_EnemyHandler_0D:
 Bank02_L9AE9:  LDA $6AF4,X
@@ -1251,6 +1254,7 @@ Bank02_LA347:  .byte $16, $04, $0A, $00
 Bank02_LA34B:  .byte $18, $09, $31, $0B, $E9, $41, $02, $9A, $00
 
 ;Squeept.
+; JUMANJI - BUG - WARNING - GLITCH
 Bank02_LA354:  .byte $19, $09, $21, $8B, $E9, $51, $02, $9A, $00
 
 ;High jump.
@@ -2808,6 +2812,7 @@ Bank02_Room_2B_Right:
 	.byte $11, $86, $9E			; Enemy
 	.byte $FF
 
+; JUMANJI
 ;Room #$2C
 Bank02_LAC72:
 	.byte $56
