@@ -2754,6 +2754,7 @@ Bank02_LAC0D:
 	.word FFLabel
 	.byte $FF
 
+; JUMANJI - BUG
 Bank02_Room_2A_Left:
 	.byte $00, $30
 	.byte $15, $15

@@ -10266,7 +10266,7 @@ LF699:
 
     *   and #$04
         beq +
-        jsr $8209       ; Something in common
+            jsr NegateEnemyYAcceleration       ; Something in common
 
 *   lda #$DF
     and $0405,x

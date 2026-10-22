@@ -32,10 +32,6 @@
 .alias CodePtrLB        $0C     ;Pointer to an indirect function call, lower byte.
 .alias CodePtrUB        $0D     ;Pointer to an indirect function call, upper byte.
 
-.alias TempPtr          $CB
-.alias TempPtrLB        $CB     
-.alias TempPtrUB        $CC 
-
 .alias ScreenYPos       $10
 .alias ScreenXPos       $0E
 .alias RoomYPos         $0A
@@ -295,7 +291,7 @@
 .alias MemuStatus           $B0 
 .alias MemuNameTbl          $B1
 .alias PipeEnemyStatus      $B2
-.alias PipeEnemyNameTbl     $B3
+.alias PipeEnemyNameTbl     $B3     ;  also $BB, $C3, $CB
 .alias SpinnerStatus        $B4
 
 .alias SamusObjectHi        $B5
@@ -360,8 +356,14 @@
 
 ;.alias SamusHorzAccel   $D2   ;Value used in calculating horizontal acceleration on Samus.
 ;.alias SamusHorzSpdMax  $D3   ;Used to calc maximum horizontal speed Samus can reach.
+
 ; used, but isolated    $D4     ; D4, D5, and D6 are set, used, and then are completely free afterwards
-; used, but isolated    $D5
+; used, but isolated    $D5     ; Scratch Variables
+
+.alias TempPtr          $DA
+.alias TempPtrLB        $DA     
+.alias TempPtrUB        $DB 
+
 ; used, but isolated    $D6
 .alias SpareMemD7       $D7     ;Written to in title routine, but never accessed.
 .alias IntroMusRstrt    $D8     ;After all title routines run twice, restarts intro music.
@@ -985,6 +987,7 @@
 
 .alias Bank_Enemy_Dispatch_Tbl_Hi   $8048
 .alias Bank_Enemy_Dispatch_Tbl_Lo   $8050
+.alias NegateEnemyYAcceleration     $8206
 .alias Common_Collision_Func        $8395
 .alias ObjectAnimIdxTbl             $8572
 .alias FramePtrTable_Hi             $860B

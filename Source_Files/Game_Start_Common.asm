@@ -297,11 +297,10 @@ _L81FB:  RTS
 _L81FC:  JSR _L81F6
 _L81FF:  BNE _L81F5
 _L8201:  LDA #$04
-_L8203:  
-    EOR $0405,X
-    STA $0405,X
+_L8203:  JSR _L856B
 
-.advance $8209                  ; Called in Bank 07 only
+.advance NegateEnemyYAcceleration
+_L8206:  LDA $6AFE,X
 _L8209:  JSR TwosCompliment
 _L820C:  STA $6AFE,X
 
@@ -757,9 +756,9 @@ _L8566:  EOR PPUCNT0ZP
 _L8568:  AND #$01
 _L856A:  RTS
 
-;_L856B:  EOR $0405,X
-;_L856E:  STA $0405,X
-;_L8571:  RTS
+_L856B:  EOR $0405,X
+_L856E:  STA $0405,X
+_L8571:  RTS
 ;---------------------------------[ Object animation data tables ]----------------------------------
 
 ;The following tables are indices into the FramePtrTable that correspond to various animations. The

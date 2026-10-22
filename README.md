@@ -128,8 +128,7 @@ SBX #$F0
 * BenchmarkNMI.lua shows how long it takes to reach NMI, min and max, over a second. This can be used to find painful spots
 
 ## Definite Bugs
-* Bank 02 Pipe Enemies don't clear names tables properly
-* Bank 02 Ball Enemies don't bounce properly
+* Bank 02 Room #$2A Double Squeept bug doesn't seem to want to load them properly. 
 * Mini bosses don't seem to spawn properly
   * I havent checked this out in maybe 8 months. Will need to clean up their levels first
   * This this has to do with "MaxMissiles" being moved into zero page a long time ago.
