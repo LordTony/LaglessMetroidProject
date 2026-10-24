@@ -1254,7 +1254,6 @@ Bank02_LA347:  .byte $16, $04, $0A, $00
 Bank02_LA34B:  .byte $18, $09, $31, $0B, $E9, $41, $02, $9A, $00
 
 ;Squeept.
-; JUMANJI - BUG - WARNING - GLITCH
 Bank02_LA354:  .byte $19, $09, $21, $8B, $E9, $51, $02, $9A, $00
 
 ;High jump.

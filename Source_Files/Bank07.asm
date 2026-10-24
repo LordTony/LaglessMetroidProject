@@ -3188,8 +3188,24 @@ CheckDoorDelay:
         _done:
     .scend
 
-    jsr ClearOffScreenDoors
+;ClearOffScreenDoors:  
+    lda ObjectOnScreen + $B0
+    bne +
+        sta ObjAction + $B0     ; set to zero
 
+*   lda ObjectOnScreen + $A0
+    bne +
+        sta ObjAction + $A0     ; set to zero
+
+*   lda ObjectOnScreen + $90
+    bne +
+        sta ObjAction + $90     ; set to zero
+
+*   lda ObjectOnScreen + $80
+    bne ClearDoorTorianStuff
+        sta ObjAction + $80     ; set to zero
+
+ClearDoorTorianStuff:
     lda InTourianBank
     beq CheckDoorAfterTourian
         jsr Bank03_LA315            ; Tourian Only
@@ -4479,7 +4495,7 @@ LDC48:  STA $07             ;item x position before writing to unique item histo
 LDC4A:  JMP AddItemToHistory        ;($DC51)Add unique item to unique item history.
 
 LDC4D:* ADC $06             ;Scrolling up/down. Make any necessary adjustments to
-LDC4F:  STA $06             ;item y position before writing to unique item history.
+;LDC4F:  STA $06             ;item y position before writing to unique item history.
 
 AddItemToHistory:
 LDC51:  JSR CreateItemID        ;($DC67)Create an item ID to put into unique item history.
@@ -4833,10 +4849,10 @@ LDD5B:
     cmp #$13
     beq KeepTrackOfHowManyRoomPickupsHaveDropped
 
-KillObject2:
-*   lda #$00
-    sta EnStatus,x
-    rts
+    KillObject2:
+    *   lda #$00
+        sta EnStatus,x
+        rts
 
 KeepTrackOfHowManyRoomPickupsHaveDropped:
 *   lda RandomNumber1
@@ -7579,6 +7595,12 @@ LEA9B:  sta StructPtrLB                 ;
 LEA9E:  lda StructPointerTable_Hi, x    ; High byte of 16-bit structure ptr.
 LEAA0:  sta StructPtrUB                 ;
         dey                             ;Y = 0 at this point
+
+        ; All 8 DrawMacro calls need to stay on the same page
+        ; If the rooms just randomly stop loading properly, this is probably to blame
+        lda #>DrawMacro8 
+        sta CodePtrUB
+
         jmp DrawStruct          ;($EF8C)Draw one structure.     ; count_struct_addr in BuildRoomAnalyzer.lua
         ; safe
 
@@ -7645,19 +7667,19 @@ AfterSetupNextRoomFeature_Hi_Byte_Inc:
     ldy #$00
 
 LoadRoomFeatureRoutine:
-    lda ($00),y                 ; Y == 0 here
+    lda ($00),y                     ; Y == 0 here
 
     cmp #$FF
-    beq EndOfRoomLoad           ; A == 255
+    beq EndOfRoomLoad               ; A == 255
 
         and #$0F
 
         cmp #$02
-        bcc LoadEnemy                ; A <= 1 (0 should be impossible, but will likely cause a nasty bug if it happens)
-        beq LoadDoor_Trampoline      ; A == 2
+        bcc LoadEnemy               ; A <= 1 (0 should be impossible, but will likely cause a nasty bug if it happens)
+        beq LoadDoor_Trampoline     ; A == 2
 
-        lsr                          ; 3, 4, 5 and 8+ doesn't exist so just checking the low bit at this point is enough to 
-        bcs LoadZebHole_Trampoline ; A >= 7
+        lsr                         ; 3, 4, 5 and 8+ doesn't exist so just checking the low bit at this point is enough to 
+        bcs LoadZebHole_Trampoline  ; A >= 7
         jmp LoadStatues             ; A == 6
 
 ;---------------------------------------------------------------------------------------------------
@@ -7912,14 +7934,15 @@ LoadStatues:
     lda #$40
     ldx RidlyStatueStat
     bpl +      ; branch if Ridley statue not hit
-    lda #$30
+        lda #$30
 *   sta $0370
     lda #$60
     ldx KraidStatueStat
     bpl +      ; branch if Kraid statue not hit
-    lda #$50
+        lda #$50
 *   sta $036F
     sty $54
+
     lda #$01
     sta $0360
 SetupNextRoomFeature_Trampoline:
@@ -7937,32 +7960,31 @@ ZebHoleLoop:
         iny
         bne ZebHoleLoop
 
-    ; y == 0 here
-    lda ($00),y
-    and #$F0
-    sta $0729,x
+            lda ($00),y     ; y == 0 here
+            and #$F0
+            sta $0729,x
 
-    iny             ; y == 1 here
-    lda ($00),y
-    sta PipeEnemyStatus,x
+            iny             ; y == 1 here
+            lda ($00),y
+            sta PipeEnemyStatus,x
 
-    iny             ; y == 2 here
-    lda ($00),y
-    tay
-    and #$F0
-    ora #$08
-    sta PipeEnemyYPos,x
+            iny             ; y == 2 here
+            lda ($00),y
+            tay
+            and #$F0
+            ora #$08
+            sta PipeEnemyYPos,x
 
-    ;lda Mul16Table, y  Mul16
-    tya
-    asl
-    asl
-    asl
-    asl
-    sta PipeEnemyXPos,x
+            ;lda Mul16Table, y  Mul16
+            tya
+            asl
+            asl
+            asl
+            asl
+            sta PipeEnemyXPos,x
 
-    jsr GetNameTable 
-    sta PipeEnemyNameTbl,x
+            jsr GetNameTable 
+            sta PipeEnemyNameTbl,x
 *   lda #$03
 ; HCSS - Trampolines
     bne SetupNextRoomFeature_Trampoline         ; branch always
@@ -7973,8 +7995,8 @@ LEC9B:
     ldx ScrollDir
     dex
 UpdateDoorData:
-    txa               ;
-    eor #$03          ;
+    txa 
+    eor #$03 
     tax
 
     and DoorOnNameTable3         ;Moves door info from one name table to the next
@@ -7990,57 +8012,26 @@ SetupUpdateDoorDataLoop:
     lda PPUCNT0ZP
     eor ScrollDir
     and #$01
-
-    tay         ; Holds the target nametable
-    lda #$02    ; Used for the enemy "bit" tests
-    ldx #$00    ; Set to zero for storing
-
+    tay         ; Cache target nametable in Y
 
     ; Enemy slots: $50, $40, $30, $20, $10, $00.
-    ; Clear when nametable matches and attribute bit 1 is clear.
+    ldx #$60
+    _ClearEnemyLoop:
+        tya
+        eor EnNameTable - $10,x
+        lsr
+        bcs _ClearNextEnemy
+            lda EnAttr_05 - $10,x
+            and #$02
+            bne _ClearNextEnemy
+                sta EnStatus - $10,x
 
-    _Enemy50:
-        cpy EnNameTable + $50
-        bne _Enemy40
-            bit EnAttr_05 + $50
-            bne _Enemy40
-                stx EnStatus + $50
+    _ClearNextEnemy:
+        txa
+        sbx #$10
+        bne _ClearEnemyLoop
 
-    _Enemy40:
-        cpy EnNameTable + $40
-        bne _Enemy30
-            bit EnAttr_05 + $40
-            bne _Enemy30
-                stx EnStatus + $40
-
-    _Enemy30:
-        cpy EnNameTable + $30
-        bne _Enemy20
-            bit EnAttr_05 + $30
-            bne _Enemy20
-                stx EnStatus + $30
-
-    _Enemy20:
-        cpy EnNameTable + $20
-        bne _Enemy10
-            bit EnAttr_05 + $20
-            bne _Enemy10
-                stx EnStatus + $20
-
-    _Enemy10:
-        cpy EnNameTable + $10
-        bne _Enemy00
-            bit EnAttr_05 + $10
-            bne _Enemy00
-                stx EnStatus + $10
-
-    _Enemy00:
-        cpy EnNameTable + $00
-        bne _Memu18
-            bit EnAttr_05 + $00
-            bne _Memu18
-                stx EnStatus
-
+    ; X == 0 here
     ; Memu slots: $18, $10, $08, $00.
     ; Clear when nametable matches.
 
@@ -8063,46 +8054,70 @@ SetupUpdateDoorDataLoop:
         cpy MemuNameTbl
         bne _done
             stx MemuStatus
-
     _done:
 
 .scend
 
-    jsr ClearOffScreenDoors
+;ClearOffScreenDoors:
+ClearDoorB0:
+    lda ObjectOnScreen + $B0
+    bne ClearDoorA0
+        sta ObjAction + $B0     ; set to zero
 
-LED5B:  
+ClearDoorA0:
+    lda ObjectOnScreen + $A0
+    bne ClearDoor90
+        sta ObjAction + $A0     ; set to zero
 
-    tya             ; Y contains the current name table at this point
-    pha
-    eor #$01
-    tay
-    lda #$00
-    sta $6C,y
+ClearDoor90:
+    lda ObjectOnScreen + $90
+    bne ClearDoor80
+        sta ObjAction + $90     ; set to zero
 
-Setup_LED5B_Loop:
-    pla
-    asl
-    asl
-    tay
+ClearDoor80:
+    lda ObjectOnScreen + $80
+    bne LED5B
+        sta ObjAction + $80     ; set to zero
 
-; Goes from #$C0, #$B0, #$A0, #$90, #$80, #$70, #$60, #$50, #$40, #$30, #$20, #$10, #$00
-; HCSS - jumping through hoops to get rid of "cpx #$F0"
-ldx #$D0
-LED5B_Loop:
-*   tya
-    eor TileWRAMHi - $10,x
-    and #$04
-    bne +
-        sta TileRoutine - $10,x
-*   txa
-    sbx #$10
-    bne LED5B_Loop
+LED5B:
+    ; Goes from #$C0, #$B0, #$A0, #$90, #$80, #$70, #$60, #$50, #$40, #$30, #$20, #$10, #$00
+    ldx #$D0
+    tya
+    beq _ClearTilesOnNameTable0
+        lda #$00                        ; Y == 1 here
+        sta DoorOnNameTable3
+
+    _ClearTilesOnNameTable3Loop:
+        lda TileWRAMHi - $10,x
+        and #$04
+        beq _NextNameTable3Tile         ; Skip entries whose bit 2 is clear.
+            lda #$00
+            sta TileRoutine - $10,x
+
+    _NextNameTable3Tile:
+        txa
+        sbx #$10
+        bne _ClearTilesOnNameTable3Loop
+        beq _TilesDone
+        ; safe
+
+_ClearTilesOnNameTable0:
+    sta DoorOnNameTable0             ; Y = A = 0.
+
+    _ClearTilesOnNameTable0Loop:
+        lda TileWRAMHi - $10,x
+        and #$04
+        bne _NextNameTable0Tile      ; Skip entries whose bit 2 is set.
+            sta TileRoutine - $10,x  ; A is already zero.
+
+    _NextNameTable0Tile:
+        txa
+        sbx #$10
+        bne _ClearTilesOnNameTable0Loop
+
+_TilesDone:
 
 .scope
-    tya
-    lsr
-    lsr
-    tay
 
 PostRoomSetupStuff4:
     ldx #$D0
@@ -8125,51 +8140,49 @@ PostRoomSetupStuff4:
 
 .scend
 
-    tya
-    sec
-    sbc $032C
+    ldx #$00
+    cpy $032C
     bne +
-        sta ElevatorStatus
+        stx ElevatorStatus
 
 *   lda #$FF        ; This stays the A value for a while
 .scope
 
-PostRoomSetupStuff5:    
+; HCSS - Unrolled this and then found out months later that
+;        It isn't used anywhere and can just be removed.
+;PostRoomSetupStuff5:    
+;
+;        ldx $0704 + $1E
+;        bne +
+;            sta $0700 + $1E
+;
+;    *   ldx $0704 + $18
+;        bne +
+;            sta $0700 + $18
+;
+;    *   ldx $0704 + $12
+;        bne +
+;            sta $0700 + $12
+;
+;    *   ldx $0704 + $0C
+;        bne +
+;            sta $0700 + $0C
+;
+;    *   ldx $0704 + $06
+;        bne +
+;            sta $0700 + $06
+;
+;    *   ldx $0704 + $00
+;        bne _done
+;            sta $0700 + $00   
+;    _done:
 
-        ldx $0704 + $1E
-        bne +
-            sta $0700 + $1E
-
-    *   ldx $0704 + $18
-        bne +
-            sta $0700 + $18
-
-    *   ldx $0704 + $12
-        bne +
-            sta $0700 + $12
-
-    *   ldx $0704 + $0C
-        bne +
-            sta $0700 + $0C
-
-    *   ldx $0704 + $06
-        bne +
-            sta $0700 + $06
-
-    *   ldx $0704 + $00
-        bne _done
-            sta $0700 + $00   
-    _done:
-
-.scend 
-
+    ; X == 0 here (as long as the $0704 and $0700 code above has been commented out)
     cpy $036C
     bne CleanUpPipeEnemies
-        ldx #$00
         stx $0360
 
 CleanUpPipeEnemies:
-    
     cpy PipeEnemyNameTbl + $18
     bne +
         sta PipeEnemyStatus + $18
@@ -8186,39 +8199,23 @@ CleanUpPipeEnemies:
     bne +
         sta PipeEnemyStatus + $00
 
-.scope
-    ; A == #$FF here
-*   cpy PowerUpNameTable 
-    bne _skip1
-        sta PowerUpType 
-    _skip1:
+CleanUpPowerUps:
+*   cpy PowerUpNameTable + $00
+    bne +
+        sta PowerUpType + $00
 
-    cpy PowerUpNameTable + $08
-    bne _skip2
+*   cpy PowerUpNameTable + $08
+    bne +
         sta PowerUpType + $08
-    _skip2:
 
-    lda InTourianBank
+*   lda InTourianBank
     beq Exit11
         jmp Bank03_L9C6F    ; Tourian Only
-.scend
-
-    ; Doors
-    ; #$B0, #$A0, #$90, #$80
-ClearOffScreenDoors:  
-    ldx #$B0
-*   lda ObjAction,x
-    beq +
-        lda ObjectOnScreen,x
-        bne +
-            ; set  ObjAction,x to 0
-            sta ObjAction,x
-*   txa
-    sbx #$10
-    bmi --
 
 Exit11: 
     rts
+
+.scend
 
 ;---------------------------------------[ Setup special items ]--------------------------------------
 
@@ -8271,57 +8268,55 @@ LEDC9:  beq LEDD4           ;If so, then load object.
 LEDCB:  bcs Exit11          ;Exit if item pos X > Samus Pos X.
 
 LEDCD:  iny                 ;
-LEDCE:  jsr LEF00           ;($EF00)Check for another item on same Y pos.
+LEDCE:  jsr AnotherItem     ;($EF00)Check for another item on same Y pos.
 LEDD1:  jmp ScanItemX       ;Try next X coord.
 
 LEDD4:* lda #$02            ;Move ahead two bytes to find item data.
 
 ChooseHandlerRoutine:
-        clc                
-        adc $00            
-        sta $00            
-        bcc LEDD9
+    clc                
+    adc $00            
+    sta $00            
+    bcc LEDD9
         inc $01                    
-LEDD9:  ldy #$00                ;
-LEDDB:  lda ($00),y             ;Object type
-LEDDD:  
+LEDD9:  
+    ldy #$00 
+    lda ($00),y             ;Object type
     and #$0F                ;Object handling routine index stored in 4 LSBs.
-    beq Exit_40
-    tax
-    lda ChooseHandlerRoutineTable_LoBytes - 1, x
-    sta CodePtr
-    lda ChooseHandlerRoutineTable_HiBytes - 1, x
-    sta CodePtr + 1
-    jmp (CodePtr)
-    
-    Exit_40:
-    rts
+    beq Exit11
+
+        tax
+        lda ChooseHandlerRoutineTable_LoBytes - 1, x
+        sta CodePtr
+        lda ChooseHandlerRoutineTable_HiBytes - 1, x
+        sta CodePtr + 1
+        jmp (CodePtr)
 
 ;Handler routines jumped to by above code.
 
 ChooseHandlerRoutineTable_HiBytes:
-    .byte >SqueeptHandler        ;($EDF8)Some squeepts.
-    .byte >PowerUpHandler        ;($EDFE)power-ups.
-    .byte >SpecEnemyHandler      ;($EE63)Special enemies(Mellows, Melias and Memus).
-    .byte >ElevatorHandler       ;($EEA1)Elevators.
-    .byte >CannonHandler     ;($EEA6)Mother brain room cannons.
-    .byte >MotherBrainHandler    ;($EEAE)Mother brain.
-    .byte >ZeebetiteHandler      ;($EECA)Zeebetites.
-    .byte >RinkaHandler      ;($EEEE)Rinkas.
+    .byte >SqueeptHandler           ;($EDF8)Some squeepts.
+    .byte >PowerUpHandler           ;($EDFE)power-ups.
+    .byte >SpecEnemyHandler         ;($EE63)Special enemies(Mellows, Melias and Memus).
+    .byte >ElevatorHandler          ;($EEA1)Elevators.
+    .byte >CannonHandler            ;($EEA6)Mother brain room cannons.
+    .byte >MotherBrainHandler       ;($EEAE)Mother brain.
+    .byte >ZeebetiteHandler         ;($EECA)Zeebetites.
+    .byte >RinkaHandler             ;($EEEE)Rinkas.
     .byte >SpecialDoorHandler       ;($EEF4)Some doors.
-    .byte >PaletteHandler        ;($EEFA)Background palette change.
+    .byte >PaletteHandler           ;($EEFA)Background palette change.
 
 ChooseHandlerRoutineTable_LoBytes:
-    .byte <SqueeptHandler        ;($EDF8)Some squeepts.
-    .byte <PowerUpHandler        ;($EDFE)power-ups.
-    .byte <SpecEnemyHandler      ;($EE63)Special enemies(Mellows, Melias and Memus).
-    .byte <ElevatorHandler       ;($EEA1)Elevators.
-    .byte <CannonHandler     ;($EEA6)Mother brain room cannons.
-    .byte <MotherBrainHandler    ;($EEAE)Mother brain.
-    .byte <ZeebetiteHandler      ;($EECA)Zeebetites.
-    .byte <RinkaHandler      ;($EEEE)Rinkas.
-    .byte <SpecialDoorHandler       ;($EEF4)Some doors.
-    .byte <PaletteHandler        ;($EEFA)Background palette change.
+    .byte <SqueeptHandler 
+    .byte <PowerUpHandler 
+    .byte <SpecEnemyHandler 
+    .byte <ElevatorHandler 
+    .byte <CannonHandler 
+    .byte <MotherBrainHandler 
+    .byte <ZeebetiteHandler 
+    .byte <RinkaHandler 
+    .byte <SpecialDoorHandler 
+    .byte <PaletteHandler 
 
 ;---------------------------------------[ Squeept handler ]------------------------------------------
 
@@ -8371,7 +8366,7 @@ LEE36:  sta PowerUpNameTable,x      ;Store name table Item is located on.
 
 PowerUpHandlerEnd:
 LEE39:  lda #$03            ;Get next data byte(Always #$00).
-LEE3B:  bne GoChooseHandlerRoutine  ;Branch always to exit handler routines.
+LEE3B:  bne ChooseHandlerRoutine  ;Branch always to exit handler routines.
         ; safe
 .scope
     CheckForItem:
@@ -8430,9 +8425,9 @@ PrepareItemID:
 LEE41:  
     sta $07                     ;Store item X coordinate.
     lda MapPosY                 ;
-    sta $06                     ;Store item Y coordinate.
 
 CreateItemID:
+        sta $06             ;item y position before writing to unique item history.
 LDC67:  LDA $07             ;Load x map position of item.
 LDC69:  asl                 
         asl 
@@ -8510,6 +8505,8 @@ ElevatorHandler:
         lda ($00),y
         sta $032F
 
+        sty ElevatorStatus      ; Y == 1 here
+
         ldy #$83
         sty $032D           ; elevator Y coord
 
@@ -8522,7 +8519,6 @@ ElevatorHandler:
         lda #$23
         sta $0323           ; elevator frame
 
-        inc ElevatorStatus      ;1
 SetATo2AndJumpToHandlerRoutine:
     lda #$02
     bne ChooseHandlerRoutine_Trampoline              ;Branch always.
@@ -8599,23 +8595,23 @@ LEEFA:
     sta $91
     bne SetATo1AndJumpToHandlerRoutine
 
-; Probably don't need these, but I don't really know 
-LEF00:
-    lda ($00),y 
-    cmp #$FF    
-    bne LEF09   
-    pla         
-    pla         
-    rts         
-
-LEF09:
-    ;clc                
-    adc $00            
-    sta $00            
-    bcc Exit102       
-    inc $01            
-Exit102:
-    rts
+    ; Probably don't need these, but I don't really know 
+    AnotherItem:
+        lda ($00),y 
+        cmp #$FF    
+        bne LEF09   
+            pla         
+            pla         
+            rts         
+    
+    LEF09:
+        ;clc                
+        adc $00            
+        sta $00            
+        bcc Exit102       
+        inc $01            
+    Exit102:
+        rts
 
 ;----------------------------------[ Draw structure routines ]----------------------------------------
 .scope
@@ -8630,17 +8626,18 @@ Exit102:
 
 DrawMacroEntryLo:
     .byte <DrawMacro1, <DrawMacro2, <DrawMacro3, <DrawMacro4, <DrawMacro5, <DrawMacro6, <DrawMacro7, <DrawMacro8 
-DrawMacroEntryHi:
-    .byte >DrawMacro1, >DrawMacro2, >DrawMacro3, >DrawMacro4, >DrawMacro5, >DrawMacro6, >DrawMacro7, >DrawMacro8 
 
+; IMPORTANT - It is vitally important that all DrawMacro calls are on the same memory page
 DrawMacro8:
     ldy #$08
     lax (StructPtr),y
+
     ldy #$0F
     lda MacroLowerLeft,x
     sta (_RoomDataWritePtr_Plus20),y
     lda MacroUpperLeft,x
     sta (_RoomDataWritePtr),y
+
     dey
     lda MacroLowerRight,x
     sta (_RoomDataWritePtr_Plus20),y
@@ -8650,11 +8647,13 @@ DrawMacro8:
 DrawMacro7:
     ldy #$07
     lax (StructPtr),y
+
     ldy #$0D
     lda MacroLowerLeft,x
     sta (_RoomDataWritePtr_Plus20),y
     lda MacroUpperLeft,x
     sta (_RoomDataWritePtr),y
+
     dey
     lda MacroLowerRight,x
     sta (_RoomDataWritePtr_Plus20),y
@@ -8664,11 +8663,13 @@ DrawMacro7:
 DrawMacro6:
     ldy #$06
     lax (StructPtr),y
+
     ldy #$0B
     lda MacroLowerLeft,x
     sta (_RoomDataWritePtr_Plus20),y
     lda MacroUpperLeft,x
     sta (_RoomDataWritePtr),y
+
     dey
     lda MacroLowerRight,x
     sta (_RoomDataWritePtr_Plus20),y
@@ -8678,11 +8679,13 @@ DrawMacro6:
 DrawMacro5:
     ldy #$05
     lax (StructPtr),y
+
     ldy #$09
     lda MacroLowerLeft,x
     sta (_RoomDataWritePtr_Plus20),y
     lda MacroUpperLeft,x
     sta (_RoomDataWritePtr),y
+
     dey
     lda MacroLowerRight,x
     sta (_RoomDataWritePtr_Plus20),y
@@ -8692,54 +8695,66 @@ DrawMacro5:
 DrawMacro4:
     ldy #$04
     lax (StructPtr),y
+
     ldy #$07
     lda MacroLowerLeft,x
     sta (_RoomDataWritePtr_Plus20),y
     lda MacroUpperLeft,x
     sta (_RoomDataWritePtr),y
+
     dey
     lda MacroLowerRight,x
     sta (_RoomDataWritePtr_Plus20),y
     lda MacroUpperRight,x
     sta (_RoomDataWritePtr),y
 
+; This one was moved around a bit to save 1 byte
 DrawMacro3:
     ldy #$03
     lax (StructPtr),y
-    ldy #$05
-    lda MacroLowerLeft,x
-    sta (_RoomDataWritePtr_Plus20),y
-    lda MacroUpperLeft,x
-    sta (_RoomDataWritePtr),y
-    dey
+
+    iny 
     lda MacroLowerRight,x
     sta (_RoomDataWritePtr_Plus20),y
     lda MacroUpperRight,x
     sta (_RoomDataWritePtr),y
 
+    iny 
+    lda MacroLowerLeft,x
+    sta (_RoomDataWritePtr_Plus20),y
+    lda MacroUpperLeft,x
+    sta (_RoomDataWritePtr),y
+
+; This one was moved around a bit to avoid
+; ldy #$03 followed by a dey 
 DrawMacro2:
     ldy #$02
     lax (StructPtr),y
-    ldy #$03
-    lda MacroLowerLeft,x
-    sta (_RoomDataWritePtr_Plus20),y
-    lda MacroUpperLeft,x
-    sta (_RoomDataWritePtr),y
-    dey
+
+    ; Y == 2 here
     lda MacroLowerRight,x
     sta (_RoomDataWritePtr_Plus20),y
     lda MacroUpperRight,x
     sta (_RoomDataWritePtr),y
 
-DrawMacro1:
-    ldy #$01
-    lax (StructPtr),y
-    ; Y is already 1: source index equals destination offset.
+    iny ; Y == 3 here
     lda MacroLowerLeft,x
     sta (_RoomDataWritePtr_Plus20),y
     lda MacroUpperLeft,x
     sta (_RoomDataWritePtr),y
-    dey
+
+; Y is already 1: source index equals destination offset.
+DrawMacro1:
+    ldy #$01
+    lax (StructPtr),y
+
+    ; Y == 1 here
+    lda MacroLowerLeft,x
+    sta (_RoomDataWritePtr_Plus20),y
+    lda MacroUpperLeft,x
+    sta (_RoomDataWritePtr),y
+
+    dey ; Y == 0 here
     lda MacroLowerRight,x
     sta (_RoomDataWritePtr_Plus20),y
     lda MacroUpperRight,x
@@ -8766,30 +8781,33 @@ IncCartRAMWorkPtrUB:
     clc
     ; Carry is clear and Y is zero; fall through into DrawStruct.
 
+; Entry Point
 DrawStruct:
 DrawStructRow:
     lax (StructPtr),y
     bmi DrawStructExit
 
-    stx _PositionInStruct
+        stx _PositionInStruct
 
-    lda _RoomDataWritePtr_Lo
-    adc #$20                  ; C is clear on entry, not from an ASL.
-    sta _RoomDataWritePtr_Plus20_Lo
+        lda _RoomDataWritePtr_Lo
+        adc #$20                  ; C is clear on entry, not from an ASL.
+        sta _RoomDataWritePtr_Plus20_Lo
 
-    lda _RoomDataWritePtr_Hi
-    sta _RoomDataWritePtr_Plus20_Hi
+        lda _RoomDataWritePtr_Hi
+        sta _RoomDataWritePtr_Plus20_Hi
 
-    bit _PositionInStruct
-    bvs DrawRepeatingMacro
+        bit _PositionInStruct
+        bvs DrawRepeatingMacro
 
-DrawMacro:
-    ; X still contains the normal row width (1..8).
-    lda DrawMacroEntryLo-1,x
-    sta CodePtrLB
-    lda DrawMacroEntryHi-1,x
-    sta CodePtrUB
-    jmp (CodePtr)
+    DrawMacro:
+        ; X still contains the normal row width (1..8).
+
+        ; CodePtrUB is constant so it's set before the first DrawStruct call
+        ; in SetupStructPtr and is not reset between macro draws
+        lda DrawMacroEntryLo-1,x
+        sta CodePtrLB
+
+        jmp (CodePtr)
 
 DrawStructExit:
     jmp CheckForNextStruct
@@ -9175,6 +9193,7 @@ BombKnockbackLoop:
     cpx #$C0
     bne BombKnockbackLoop
 
+; 14 scanlines
 SubtractHealth_Trampoline:
     lda HealthLoChange
     ora HealthHiChange
@@ -9916,29 +9935,29 @@ SFX_BigEnemyHit_Inline:
     ; asl20            
     and #$10
     beq +
-    lda $040E,x
-    cmp #$0B
-    bne ----
+        lda $040E,x
+        cmp #$0B
+        bne ----
 *   lda EnStatus,x
     cmp #$04
     bne +
-    lda $040C,x
+        lda $040C,x
 *   ora $0A
     sta $040C,x
     asl
     bmi +
+        ;inlined $80B0
+        LDY EnDataIndex,X
+        LDA $977B,Y
+        ; asl20            
+        and #$10
+        bne +
+            ldy $040E,x
+            cpy #$0B
+            beq +++++
+                cpy #$81
+                beq +++++
 
-;inlined $80B0
-*   LDY EnDataIndex,X
-    LDA $977B,Y
-    ; asl20            
-    and #$10
-    bne +
-    ldy $040E,x
-    cpy #$0B
-    beq +++++
-    cpy #$81
-    beq +++++
 *   lda #$06
     sta EnStatus,x
     lda #$0A
@@ -9991,6 +10010,7 @@ SFX_BigEnemyHit_Inline:
 
 *   lda $95DD
     jsr SetAnimationIndex
+
     lda #$0A
     sta EnCounter,x
 
@@ -9999,7 +10019,7 @@ SFX_BigEnemyHit_Inline:
     lda #$00
     bit $0A
     bvc +
-    lda #$03
+        lda #$03
 *   sta $0407,x
 
     ldy PageIndex
@@ -10110,11 +10130,9 @@ LF6B9:
     lsr
     ror
     eor $0402,x
-    bpl EXIT_44
+    bpl Exit_47
         jmp $820F
-
-EXIT_44:
-    rts
+    ; safe
 
 LF75B:
     lda #$E7
@@ -10178,11 +10196,11 @@ Exit_47:
 LF7BA:
     dec EnDelay,x
     bne +
-    lda $0405,x
-    and #$08
-    bne ++
-    inc EnDelay,x
-*   rts
+        lda $0405,x
+        and #$08
+        bne ++
+            inc EnDelay,x
+*           rts
 
 *   lda EnDataIndex,x
     cmp #$07
@@ -10193,7 +10211,7 @@ LF7BA:
         ora SQ1SFXFlag
         sta SQ1SFXFlag
 
-        ldx PageIndex
+        ; ldx PageIndex
 
 *   inc EnStatus,x
 
@@ -10366,21 +10384,26 @@ AfterLavaJumpLoop:
         rol
         and #$07
         sta $040A,y
+
         lda #$02
         sta EnStatus,y
+
         lda #$00
         sta EnDelay,y
         sta EnAnimDelay,y
         sta $0408,y
+
 *   lda $0405,x
     lsr
     pla
     tax
     lda $97A3,x
     sta $04
+
     txa
     rol
     tax
+
     lda $979B,x
     sta $05
 
@@ -10395,11 +10418,11 @@ AfterLavaJumpLoop:
     ldx PageIndex
     bit $87
     bvc Exit19
-    lda $0405,x
-    and #$01
-    tay
-    lda $0083,y
-    jmp Bank07_LFBB9
+        lda $0405,x
+        and #$01
+        tay
+        lda $0083,y
+        jmp Bank07_LFBB9
 
 ; X is always the enemy index here
 DoOneEnvironmentalEnemyUpdate:
@@ -10421,8 +10444,10 @@ EnvEnemyUpdateRoutine_5_Trampoline:
 
 EnvEnemyUpdateRoutine_1:
 LF96A:
-    jsr LFA5B
-    jsr Bank07_LFA1E
+    lda EnHasBeenHit,x
+    beq +
+        jsr LFA60
+*   jsr Bank07_LFA1E
     ldx PageIndex
     bcs LF97C
         lda EnStatus,x
@@ -10442,12 +10467,14 @@ LF987:
     inc $0408,x
     lda #$00
     sta EnDelay,x
-    beq +           ; branch always
+    beq ++           ; branch always
     ; safe
 
 EnvEnemyUpdateRoutine_2:
-    jsr LFA5B
-    LDA $040A,x
+    lda EnHasBeenHit,x
+    beq +
+        jsr LFA60
+*   LDA $040A,x
     AND #$FE
     TAY
     LDA $97A7,y
@@ -10605,18 +10632,14 @@ EnvEnemyUpdateRoutine_5:
     jmp LF97C
     ; safe
 
-LFA5B:
-    lda EnHasBeenHit,x
-    beq Exit20
+LFA60:  
+    lda #$00
+    sta EnHasBeenHit,x
 
-    LFA60:  
-        lda #$00
-        sta EnHasBeenHit,x
-
-        lda #$05
-        sta EnStatus,x
-        
-Exit20: rts
+    lda #$05
+    sta EnStatus,x   
+Exit20: 
+    rts
 
 ; Only called in bank 01, 02, 04, 05. Not called in 07 or 03
 Bank07_LFB88:
@@ -10656,8 +10679,10 @@ Bank07_LFB88:
 
 SetAnimationIndex:
     sta EnAnimIndex,x
-    jmp Bank07_LFBB9
-    ; safe
+    sta EnResetAnimIndex,x
+    lda #$00
+    sta EnAnimDelay,x
+    rts
 
 DoOneSpinnerDestruction:
     dec SpinnerStatus,x

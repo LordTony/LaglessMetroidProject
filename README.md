@@ -21,10 +21,12 @@ The idea here is to attempt to take the Metroid lag as low as possible without a
 The baseline benchmark is Samus standing still in the opening room with 2 of the spikey bois both alive and crawing on the walls.
 
   * Metroid finishes all work for the benchmark frames in **137 to 149** scanlines
-  * Lagless Metroid finishes work in **52 to 67** scanlines
-  * Lagless Metroid finishes work in **38% to 45%** of the scanlines standard NES Metroid takes
-  * The limit might be something like **50** scanlines, so keep pushing
-    * Lag is only possible in very specific situations.
+  * Lagless Metroid finishes work in **50 to 68** scanlines
+  * Lagless Metroid finishes work in **36% to 46%** of the scanlines standard NES Metroid takes
+  * The limit might be something like **50** scanlines
+    * This goal has been reached. I'm not sure there is much more to shave off
+    * Lag is only possible when absolutely forced by fishing for a lag frame in Bank 01 - Rooms #$24 when transitioning between rooms while spamming bombs
+      * This was only tested with 1 missile upgrade and 1 tank upgrade, So it might still cause problems
 
 ### Code Progress
 * ChooseRoutine has been removed from bank07 and is now only called from outside
@@ -47,14 +49,6 @@ The baseline benchmark is Samus standing still in the opening room with 2 of the
 * Getting rid of pointer math wherever I can by putting table entries at the same spots in Bank01-Bank05
   * Breaking up macro tables into hard locations is a good example of this kind of thing
   * Now I don't need a table that points to another table, but it costs precious wasted bytes
-
-### TODOs
-* Get rid of the rest of ChooseRoutine. Move it into Bank01-Bank05
-* Get rid of the Mul and Div routines
-  * Consider placing Mul and Div tables in unused spots in Bank01-Bank05
-* Refactor the common code in Bank01-Bank05
-* Re-align the $0400 enemy memory so it's grouped by property rather than enemy
-  * x = x+1 (inx) is much cheaper than x = x+16
 
 ## Folder Structure
 
@@ -100,6 +94,7 @@ There are a good number of code caves in bank Bank01 - Bank05. The thought its t
 Using these sites a lot:
 * http://www.6502.org/users/obelisk/6502/instructions.html
 * https://www.nesdev.org/wiki/6502_assembly_optimisations
+* https://hitmen.c02.at/files/docs/c64/NoMoreSecrets-NMOS6510UnintendedOpcodes-20162412.pdf
 
 I want to create some tables for the common multiplication operations that happen. Like a mul / div table for 16, and 32 (8 is just 2 shifts and a table lookup would be slower). If I could find the bytes for it, I would also like to try adding an identity table for the XMinus16 and YPlus16 calls so that way I could add numbers with code that looks like this:
 
@@ -116,33 +111,51 @@ In order for it to work properly, A needs to have all of the bits set that X has
 ```
 ; Subtract 16 from X
 txa
-SBX #$16
+sbx #$10
 
 ; Add 16 to X
 txa
-SBX #$F0
+sbx #$F0
 ```
 
 ### Benchmarking
 * The "Visualize Hotspots" lua script can be run and tweaked to find places in the code that are hit more often. It helped me get some big wins.
 * BenchmarkNMI.lua shows how long it takes to reach NMI, min and max, over a second. This can be used to find painful spots
 
+### TODOs (Non Bugs)
+* Bank 03
+  * Need to somehow make room for the attribute colors for the last couple of rooms
+* Bank 04
+  * Apply the room changes so bank 04 loads with the new protocol
+  * Apply the attribute color changes so bank 04 is colored correctly with the new protocol
+* Bank 05
+  * Apply the room changes so bank 05 loads with the new protocol
+  * Apply the attribute color changes so bank 05 is colored correctly with the new protocol
+
 ## Definite Bugs
-* Bank 02 Room #$2A Double Squeept bug doesn't seem to want to load them properly. 
+* Bank 04 and 05 currently won't load because they haven't been updated to fit the new level load protocol
+* End credits have their graphics corrupted
+* Escape sequence timer graphic is mildly corrupted
+* Pillar thingies (Zeebitites?) in Mother brain's rooms get overwritten when the second half of the room loads
+* Tourian missle doors need to destroyed from both sides.
+  * You open them with 5 (or 10) missiles and then walk through, the other side of the door is still red (or yellow)
+* Changed the functionality of the sprite display logic.
+  * This could cause issues or make different sprites becomes invisible when there are more than 64 trying to be rendered
+  * I don't know if I should even bother fixing this.
+  * I could probably make the game run faster by changing it even more.
+
+## Maybe Bugs (Check Original Game Behavior)
+* Holding forward while walking into an enemy shows a frame or two of the screw attack.
 * Mini bosses don't seem to spawn properly
   * I havent checked this out in maybe 8 months. Will need to clean up their levels first
   * This this has to do with "MaxMissiles" being moved into zero page a long time ago.
   * It looks like the ridley and kraid dead bytes were based on the offset to MaxMissiles.
-* End credits have their graphics corrupted
-* Pillar thingies on Mother brain's room get overwritten when the second half of the room loads
-  
-
-## Maybe Bugs (Check Original Game Behavior)
-* Holding forward while walking into an enemy shows a frame or two of the screw attack.
 
 ## Pre Existing Bugs (or quirks; whatever. The original metroid sucks)
-* Killing a Metroid without a Missle Tank will crash or lock the game
-* Shooting a door open while falling vertically past it will move the closing door into a wall
+* Killing a metroid without a Missle Tank will crash or lock the game
+  * This is only possible with NARPASS or hacks since you need missles to kill metroids
+* Shooting a door open while falling vertically past it and into another name table will move the closing door into a wall on the other name table
 * Loading a room while too many sprites are being rendered (bullets + enemies + room transition) will hit the PPU cap and some background elements will have the wrong palette because it won't even try to load the palette data for them.
-* Can't pickup items while blinking from taking damage, either from lava or from an being hit
-* Pushing up against a door while facing right and shooting with the wave beam doesn't open the door. Facing left doors open without issue.
+* Can't pick up items while blinking from taking damage, either from lava or from an being hit
+* Pushing up against a door while facing right and shooting with the wave beam doesn't open the door.
+  * If samus faces left and does the same thing to a door, the door will open without issue.
