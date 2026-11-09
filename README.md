@@ -133,6 +133,8 @@ sbx #$F0
   * Apply the attribute color changes so bank 05 is colored correctly with the new protocol
 
 ## Definite Bugs
+* Switching to bank 06 and hitting NMI while in there breaks everything.
+  * This only happens when loading a password or starting a game.
 * Bank 04 and 05 currently won't load because they haven't been updated to fit the new level load protocol
 * End credits have their graphics corrupted
 * Escape sequence timer graphic is mildly corrupted
