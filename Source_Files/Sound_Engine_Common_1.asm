@@ -1225,15 +1225,15 @@ _DivideTriePeriods:
   LDX #$10                ;
   ROL TriPeriodLow        ;
   ROL TriPeriodHigh       ;
-* ROL DivideData          ;The following routine takes the triangle period
-  LDA DivideData          ;high and triangle period low values and reduces
-  CMP PercentDiff         ;them by a certain percent.  The percent is
-  BCC +                   ;determined by the value stored in
-  SBC PercentDiff         ;PercentDiff.  If PercentDiff=#$05,
-  STA DivideData          ;then the values will be reduced by 20%(1/5).
-* ROL TriPeriodLow        ;If PercentDiff=#$0A,Then the value will
-  ROL TriPeriodHigh       ;be reduced by 10%(1/10), etc. This function is
-  DEX                     ;basically a software emulation of a sweep function.
+*   LDA #$FF              ;The following routine takes the triangle period
+    RLA DivideData        ;high and triangle period low values and reduces
+    CMP PercentDiff       ;them by a certain percent.  The percent is
+    BCC +                 ;determined by the value stored in
+      SBC PercentDiff     ;PercentDiff.  If PercentDiff=#$05,
+      STA DivideData      ;then the values will be reduced by 20%(1/5).
+*   ROL TriPeriodLow      ;If PercentDiff=#$0A,Then the value will
+    ROL TriPeriodHigh     ;be reduced by 10%(1/10), etc. This function is
+    DEX                   ;basically a software emulation of a sweep function.
   BNE --                  ;
   LDA TriPeriodLow        ;
   STA TriLoPercentage     ;

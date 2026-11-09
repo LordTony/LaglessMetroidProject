@@ -40,13 +40,13 @@
 .alias MacroTileIndex   $11
 
 .alias Joy1Change       $12     ;Button changes since last frame, pad 1.
-.alias Joy2Change       $13     ;Button changes since last frame, pad 2.
+;.alias Joy2Change      $13     ;Button changes since last frame, pad 2.
 .alias Joy1Status       $14     ;Buttons currently being pressed, pad 1.
 .alias Joy2Status       $15     ;Buttons currently being pressed, pad 2.
 .alias Joy1Retrig       $16     ;Buttons that need to retrigger, pad 1.
-.alias Joy2Retrig       $17     ;Buttons that need to retrigger, pad 2.
+;.alias Joy2Retrig      $17     ;Buttons that need to retrigger, pad 2.
 .alias RetrigDelay1     $18     ;Counter that control retriggering, pad 1.
-.alias RetrigDelay2     $19     ;Counter that control retriggering, pad 2.
+;.alias RetrigDelay2    $19     ;Counter that control retriggering, pad 2.
 .alias NMIStatus        $1A     ;0=NMI in progress. anything else, NMI not in progress.
 .alias PPUDataPending   $1B     ;1=No PPU data pending, 1=data pending.
 .alias PalDataPending   $1C     ;Pending palette data. Palette #=PalDataPending-1.
@@ -108,7 +108,7 @@
 
 .alias CurrentMusic         $41     ;Stores the flag of the current music being played
 .alias PalToggle            $43
-.alias ShouldUpdateAttrs    $44
+;unused                     $44     ;previously "ShouldUpdateAttrs"
 
 .alias SamusVertSpeed       $45     ;moved from $0308
 .alias SamusHorzSpeed       $46     ;moved from $0309
@@ -177,7 +177,7 @@
 .alias HealthLoChange   $6E     ;Amount to add/subtract from HealthLo.
 .alias HealthHiChange   $6F     ;Amount to add/subtract from HealthHi.
 
-.alias SamusBlink       $70
+.alias SamusBlinkFrames $70
 .alias UpdtngPrjctl     $71     ;#$01=Projectile update in process. #$00=not in process.
 .alias DmgPushDir       $72     ;#$00=Push Samus left when hit, #$01=Push right, #$FF=No push. 
 ; used in damage push   $73
@@ -706,6 +706,7 @@
 .alias SPRDMAReg        $4014   ;Sprite RAM DMA register.
 .alias APUCommonCntrl0  $4015   ;APU common control 1 register.
 .alias CPUJoyPad1       $4016   ;Joypad1 register.
+.alias CPUJoyPad2       $4017   ;Joypad2 register.
 .alias APUCommonCntrl1  $4017   ;Joypad2/APU common control 2 register.
 
 ;----------------------------------------------------------------------------------------------------
@@ -726,7 +727,7 @@
 .alias SamusStat02      $6881   ;SamusStat02 and 03 keep track of how many times Samus has
 .alias SamusStat03      $6882   ;died, but this info is never accessed anywhere in the game.
 
-.alias AtEnding         $6883   ;1=End scenes playing, 0=Not at ending.
+;.alias AtEnding         $6883   ;1=End scenes playing, 0=Not at ending.
 
 .alias EraseGame        $6884   ;MSB set=erase selected saved game(not used in password carts).
 

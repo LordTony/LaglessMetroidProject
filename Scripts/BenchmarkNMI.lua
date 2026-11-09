@@ -2,7 +2,7 @@
 --Press F5 or click the Run button to execute it
 --Type "emu." to show a list of all available API function
 
-nmi_addr = 0xC0D0
+nmi_addr = 0xC0CB
 return_from_nmi_addr = 0xC20C
 framesToResetOn = 60
 timer = 0

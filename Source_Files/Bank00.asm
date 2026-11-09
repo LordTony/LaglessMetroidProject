@@ -2511,11 +2511,14 @@ L9342:  STA SamusAgeLo              ;
 L9345:  STA SamusAgeMid             ;
 L9348:  STA SamusAgeHi              ;
 L934B:  STA SamusStat01             ;
-L934E:  STA AtEnding                ;
 L9351:  STA JustInBailey            ;
 L9354:  LDA #$02                    ;
 L9356:  STA SwitchPending           ;Prepare to switch to Brinstar memory page.
 L9358:  RTS                         ;
+
+nop
+nop
+nop
 
 DisplayPassword:
 L9359:  LDA Timer2              ;Wait for "GAME OVER" to be displayed
@@ -3137,7 +3140,7 @@ L9A38:  RTS                     ;Exit from above and below routines.
  
 Restart:
 L9A39:  LDA Joy1Status          ;
-L9A3B:  AND #$10                ;If start has not been pressed, branch to exit.
+L9A3B:  AND #BTN_START          ;If start has not been pressed, branch to exit. BTN_START == $10
 L9A3D:  BEQ Exit100             ;
 L9A3F:  LDY #$11                ;
 L9A41:  LDA #$00                ;

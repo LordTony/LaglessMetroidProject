@@ -1016,23 +1016,32 @@ Bank03_L9D1D:  STA $6BF7,X
 Bank03_L9D20:  RTS
 
 Bank03_Mother_Brain_Handler:
-Bank03_L9D21:  LDA #$01
-Bank03_L9D23:  STA MthrBrainStatus
+
 Bank03_L9D25:  JSR Bank03_L9D88
 Bank03_L9D28:  STA $9D
 Bank03_L9D2A:  EOR #$01
 Bank03_L9D2C:  TAX 
-Bank03_L9D2D:  LDA Bank03_L9D3C
+
+LDA #$01
+STA MthrBrainStatus
+
 Bank03_L9D30:  ORA $6C,X
 Bank03_L9D32:  STA $6C,X
+
 Bank03_L9D34:  LDA #$20
 Bank03_L9D36:  STA $9A
 Bank03_L9D38:  STA $9B
 Bank03_L9D3A:  RTS 
 
+nop
+nop
+nop
+nop
+nop
+
 ; TODO: SUS data
-Bank03_L9D3B:  .byte $02
-Bank03_L9D3C:  .byte $01 
+;Bank03_L9D3B:  .byte $02
+;Bank03_L9D3C:  .byte $01 
 
 Bank03_ZeebititeHandler:
 Bank03_L9D3D:  LDA ($00),Y
@@ -1079,6 +1088,7 @@ Bank03_L9D83:  STA $8C,X
 Bank03_L9D85:  LDA #$FF
 Bank03_L9D87:  RTS
 
+; TODO: This is just "GetNameTable" from bank 07
 Bank03_L9D88:  LDA PPUCNT0ZP
 Bank03_L9D8A:  EOR ScrollDir
 Bank03_L9D8C:  AND #$01

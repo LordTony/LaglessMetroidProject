@@ -137,12 +137,13 @@ sbx #$F0
 * End credits have their graphics corrupted
 * Escape sequence timer graphic is mildly corrupted
 * Pillar thingies (Zeebitites?) in Mother brain's rooms get overwritten when the second half of the room loads
-* Tourian missle doors need to destroyed from both sides.
+* Tourian missile doors need to destroyed from both sides.
   * You open them with 5 (or 10) missiles and then walk through, the other side of the door is still red (or yellow)
 * Changed the functionality of the sprite display logic.
   * This could cause issues or make different sprites becomes invisible when there are more than 64 trying to be rendered
   * I don't know if I should even bother fixing this.
   * I could probably make the game run faster by changing it even more.
+* Start game logic breaks if the NMI timing is wrong
 
 ## Maybe Bugs (Check Original Game Behavior)
 * Holding forward while walking into an enemy shows a frame or two of the screw attack.
