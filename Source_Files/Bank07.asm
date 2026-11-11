@@ -10,7 +10,7 @@
 RandomNumbers:
     lda RandomNumber2
     clc
-    adc #$5F                   ; first four additions of $13
+    adc #$5F 
     sta RandomNumber2
 
     lda RandomNumber1
@@ -1116,10 +1116,10 @@ LC7F7:  bne GFXCopyByte
             ; safe
 
 GFXCopyLoopEnd:
-LC7D0:  ldy CurrentBank         ;
+LC7D0:  ldy CurrentBank 
 
 ROMSwitch:
-    TYA                     ;
+    TYA  
 MMCWriteReg3:
     STA MMC1Reg3            ;Write bit 0 of ROM bank #.
     LSR                     ;
@@ -1131,7 +1131,7 @@ MMCWriteReg3:
     LSR                     ;
     STA MMC1Reg3            ;Write bit 4 of ROM bank #.
 MMCWriteRegExit:
-    RTS                   ;
+    RTS 
 
 ;-------------------------------------------[ AreaInit ]---------------------------------------------
 
@@ -1336,7 +1336,7 @@ GameEngine:
 ; ===== HANDLE the debug NARPASSWORD =====
 
     HandleNarPassword:
-        lda NARPASSWORD 
+        ldx NARPASSWORD 
         beq UpdateWorld 
             lda #$03                    ;The following code is only accessed if 
             sta HealthHi                ;NARPASSWORD has been entered at the 
@@ -1345,38 +1345,67 @@ GameEngine:
             sta SamusGear               ;missiles and every power-up every frame.
 
             lda #$05 
-            sta MissileCount  
-            ora #$A0
-            sta MissileCountOnes
+            jsr UpdateMissileCount 
 
-            lda #$A0
-            sta MissileCountHundreds
-            sta MissileCountTens
 ; ===== THE REAL GUTS OF THE GAME ENGINE! =====
 
 UpdateWorld:
         ldx #$00
+UpdateWorldWithXSetToZero:
 LCB2B:  stx SpritePagePos
+
+; Swap this back in if we need
+; to get some wiggle room for bytes
+;
+;.scope
+;    UpdateEnemies:
+;
+;        ldx #$50
+;        _loop:
+;            stx PageIndex 
+;            ldy EnStatus, x
+;            beq _next   
+;                jsr DoOneEnemy
+;        _next:
+;            lax PageIndex
+;            sbx #$10
+;            bpl _loop
+;.scend 
 
 .scope
     UpdateEnemies:
+        ldy EnStatus + $50
+        beq +
+            ldx #$50
+            jsr DoOneEnemy 
 
-        ldx #$50
-        _loop:
-            stx PageIndex 
-            ldy EnStatus, x
-            beq _next   
-                jsr DoOneEnemy
-        _next:
-            lax PageIndex
-            sbx #$10
-            bpl _loop
+    *   ldy EnStatus + $40
+        beq +
+            ldx #$40
+            jsr DoOneEnemy 
+
+    *   ldy EnStatus + $30
+        beq +
+            ldx #$30
+            jsr DoOneEnemy 
+
+    *   ldy EnStatus + $20
+        beq +
+            ldx #$20
+            jsr DoOneEnemy 
+
+    *   ldy EnStatus + $10
+        beq +
+            ldx #$10
+            jsr DoOneEnemy 
+
+    *   ldy EnStatus + $00
+        beq _end
+            ldx #$00
+            jsr DoOneEnemy 
+    _end:
+
 .scend 
-
-LCB30:
-
-; UpdateProjectiles
-; =================
 
 UpdateProjectiles:
 
@@ -1404,12 +1433,12 @@ UpdateProjectiles:
 ;--------------------------------------[ Update Samus ]----------------------------------------------
 
     UpdateSamus:
-        LDX #$00                ;Samus data is located at index #$00.
-        STX PageIndex           ;
-        INX                     ;x=1.
-        STX IsSamus             ;Indicate Samus is the object being updated.
-        JSR GoSamusHandler      ;($CC1A)Find proper Samus handler routine.
-        DEC IsSamus             ;Update of Samus complete.
+        ldx #$00                ;Samus data is located at index #$00.
+        stx PageIndex 
+        inx                     ;x=1.
+        stx IsSamus             ;Indicate Samus is the object being updated.
+        jsr GoSamusHandler      ;($CC1A)Find proper Samus handler routine.
+        dec IsSamus             ;Update of Samus complete.
 
 ;-------------------------------------- [ Area Routine ] ----------------------------------------------
 
@@ -2133,12 +2162,12 @@ LCCC2:
     ldy SamusJmpDsplcmnt
     bit SamusVertSpeed
     bmi +
-    cpy #$18
-    bcs ++++
-    lda #an_SamusJump
-    sta SamusAnimResetIndex
-    bcc ++++      ; branch always
-    ; safe 
+        cpy #$18
+        bcs ++++
+            lda #an_SamusJump           ; an_SamusJump == $0C
+            sta SamusAnimResetIndex
+            bcc ++++      ; branch always
+            ; safe 
 
 *   cpy #$18
     bcc +++
@@ -2158,10 +2187,13 @@ LCCC2:
             bmi +
                 jsr StopVertMovement        ;($D147)
 
-*   lda #an_SamusRun
-    cmp SamusAnimResetIndex
+    ; the following line was originally
+    ; lda SamusAnimResetIndex
+    ; cmp #an_SamusRun
+    ; but #an_SamusRun == $00 so the cmp was pointless
+*   lda SamusAnimResetIndex 
     bne +
-        lda #an_SamusJump
+        lda #an_SamusJump       ; an_SamusJump == $0C
         sta SamusAnimResetIndex
 *   lda SamusInLava
     beq +
@@ -2281,48 +2313,52 @@ SetSamusDrawFrameCall:
 
 ; Does not clobber X
 IsScrewAttackActive:
-    sec                     ;Assume screw attack is not active.
-    ldy SamusObjAction      ;
-    dey                     ;Is Samus running?
-    bne ScrewAttackExit     ;If not, branch to exit. Screw attack is not active
+    sec                             ;Assume screw attack is not active.
+    ldy SamusObjAction 
+    dey                             ;Is Samus running?
+    bne ScrewAttackExit             ;If not, branch to exit. Screw attack is not active
 
-    lda SamusGear           ;
-    and #gr_SCREWATTACK     ;Does Samus have screw attack?
-    beq ScrewAttackExit     ;If not, branch to exit. Screw attack is not active
+    lda SamusGear 
+    and #gr_SCREWATTACK             ;Does Samus have screw attack?
+    beq ScrewAttackExit             ;If not, branch to exit. Screw attack is not active
 
-    lda SamusAnimResetIndex 
-    cmp #an_SamusSalto      ;Is Samus summersaulting?
-    beq +                   ;If so, branch to clear carry(screw attack active).
-        cmp #an_SamusJump   ;
-        sec                 ;Is Samus jumping?
-        bne ScrewAttackExit ;If not, branch to exit.
+        lda SamusAnimResetIndex     
+        cmp #an_SamusSalto          ;Is Samus summersaulting?   an_SamusSalto == $0E
+        beq +                       ;If so, branch to clear carry(screw attack active).
+            cmp #an_SamusJump       ;
+            sec                     ;Is Samus jumping?
+            bne ScrewAttackExit     ;If not, branch to exit.
 
-        bit SamusVertSpeed  ;If Samus is jumping and still moving upwards, screw 
-        bpl ScrewAttackExit ;attack is active.
+            bit SamusVertSpeed      ;If Samus is jumping and still moving upwards, screw 
+            bpl ScrewAttackExit     ;attack is active.
     
-*   cmp SamusAnimIndex           ;Screw attack will still be active if not spinning, but
+*   cmp SamusAnimIndex              ;Screw attack will still be active if not spinning, but
 ScrewAttackExit:
-    rts                     ;jumping while running and still moving upwards.
+    rts                             ;jumping while running and still moving upwards.
 
 ;----------------------------------------------------------------------------------------------------
 
 CheckHealthStatus:
-    lda SamusHit            ;
-    and #$20            ;Has Samus been hit?
-    beq +++             ;If not, branch to check if still blinking from recent hit.
+    lda SamusHit
+    and #$20                ;Has Samus been hit?
+    beq +++                 ;If not, branch to check if still blinking from recent hit.
+
     lda #$32 
     sta SamusBlinkFrames    ;Samus has been hit. Set blink for $32 (50) frames.
+
     lda #$FF
     sta DmgPushDir
+
     lda $73
     sta $77
+
     beq ++
     bpl +
 
-    SFX_SamusHit_Inline:
-        lda #SFX_SMS_HIT    ; SFX_SMS_HIT == $04
-        ora MultiSFXFlag
-        sta MultiSFXFlag
+        SFX_SamusHit_Inline:
+            lda #SFX_SMS_HIT    ; SFX_SMS_HIT == $04
+            ora MultiSFXFlag
+            sta MultiSFXFlag
 
 *   lda SamusHit
     asr #$08
@@ -2333,15 +2369,13 @@ CheckHealthStatus:
 *   lda #$FD
     sta SamusVertSpeed
 
-    lda #$38                ;Samus is hit. Store Samus hit gravity.
-    sta SamusGravity        ;
+    lda #$38                ; Samus is hit. Store Samus hit gravity.
+    sta SamusGravity 
     
-; jsr IsSamusDead
     lda SamusObjAction
     and #$08
-
     beq +
-    bne CheckHealthBeep ; branch always
+        bne CheckHealthBeep ; branch always
     ; safe
 
 *   lda SamusBlinkFrames
@@ -2359,7 +2393,7 @@ CheckHealthStatus:
             bcs +
                 ldy SamusHorzAccel
                 bne +++
-                jsr LCF4E
+                    jsr LCF4E
         *   dex
             bne +
                 eor #$FF
@@ -2974,26 +3008,26 @@ FireWeapon:
 SpawnBulletHorizontal:
     lda MetroidOnSamus
     bne +
-    jsr CheckIfBulletCanBeFired
-    bne +
-    jsr DoNormalBulletStuff     ; sets A to zero
+        jsr CheckIfBulletCanBeFired
+        bne +
+            jsr DoNormalBulletStuff     ; sets A to zero
 
-    sta ObjVertSpeed,y
+            sta ObjVertSpeed,y
 
-    ldx SamusDir 
-    lda BulletSpeedTable,x      ; get bullet speed
-    sta ObjHorzSpeed,y          ; -4 (#$FC) or 4 (#$04), depending on Samus' direction
+            ldx SamusDir 
+            lda BulletSpeedTable,x      ; get bullet speed
+            sta ObjHorzSpeed,y          ; -4 (#$FC) or 4 (#$04), depending on Samus' direction
 
-    lda MissileToggle
-    bne AfterHorizontalSpecialBeamChecks
-        TXA     ; X is SamusDir here
-        jsr DoWaveBeamAndIceBeamStuff
-        jmp AfterHorizontalMissleLaunch 
-        ; safe 
+            lda MissileToggle
+            bne AfterHorizontalSpecialBeamChecks
+                TXA     ; X is SamusDir here
+                jsr DoWaveBeamAndIceBeamStuff
+                jmp AfterHorizontalMissleLaunch 
+                ; safe 
 
 AfterHorizontalSpecialBeamChecks:
     lda MissileAnims,x          ; X is SamusDir here
-    jsr GoSetBulletAnim 
+    jsr GoSetMissileAnim 
 
 AfterHorizontalMissleLaunch:
 
@@ -3057,7 +3091,7 @@ SpawnBulletVertical:
 
         AfterVerticalSpecialBeamChecks:
             lda #$8F
-            jsr GoSetBulletAnim
+            jsr GoSetMissileAnim
 
 AfterVerticalMissleToggleCheck:
 
@@ -3144,31 +3178,31 @@ LD306:
     txa
     tay
     jmp LD638
+    ; safe
 
-GoSetBulletAnim:
-*   sta AnimIndex,y
-    sta AnimResetIndex,y
+; The missile offset will always be $D0
+GoSetMissileAnim:
+*   sta AnimIndex + $D0
+    sta AnimResetIndex + $D0
     lda #$00
-    sta AnimDelay,y
+    sta AnimDelay + $D0
 
 SFXMissileLaunch_Inline:
-    lda #SFX_MSL_LNCH   ; #SFX_MSL_LNCH == $#20 
+    lda #SFX_MSL_LNCH       ; #SFX_MSL_LNCH == $#20 
     ora NoiseSFXFlag
     sta NoiseSFXFlag
 
-    lda #wa_Missile ; #wa_Missile == #$0B
-    sta ObjAction,y
+    lda #wa_Missile         ; #wa_Missile == #$0B
+    sta ObjAction + $D0
 
     lda #$FF
-    sta $030F,y     ; # of frames projectile should last
+    sta $030F + $D0         ; # of frames projectile should last
 
     dec MissileCount
     jsr CacheMissileGraphics
     lda MissileCount
-    bne Exit4       ; exit if not the last missile
-
-    ; Samus has no more missiles left
-        dec MissileToggle       ; put Samus in "regular fire" mode
+    bne Exit4               ; exit if not the last missile. Swap Palettes if it was.
+        sta MissileToggle   ; put Samus in "regular fire" mode AKA MissileToggle == $00
 
 ;------------------------------------[ Select Samus palette ]----------------------------------------
 
@@ -3370,7 +3404,7 @@ MoveOutDoor:
 
 *   inc SamusObjectX
     bne CheckHealthStatusAndSetCntrlBit
-    jsr ToggleSamusHi       ; toggle 9th bit of Samus' X coord
+        jsr ToggleSamusHi       ; toggle 9th bit of Samus' X coord
 
 CheckHealthStatusAndSetCntrlBit:
     jsr CheckHealthStatus       ;($CDFA)Check if Samus hit, blinking or Health low.
@@ -3526,10 +3560,10 @@ CheckBulletStat:
     bcc +
         lda SamusGear
         and #gr_LONGBEAM
-            bne DrawBullet  ; branch if Samus has Long Beam
-            dec $030F,x     ; decrement bullet timer
+        bne DrawBullet          ; branch if Samus has Long Beam
+            dec $030F,x         ; decrement bullet timer
             bne DrawBullet
-                lda #$00    ; timer hit 0, kill bullet
+                lda #$00        ; timer hit 0, kill bullet
                 sta ObjAction,x
                 beq DrawBullet  ; branch always
                 ;safe
@@ -4088,9 +4122,11 @@ LD8BF:
 *   tya
 *   ora #$10
     jsr IsEngineRunning
+
     lda PalToggle
     eor #$07
     sta PalToggle
+
     ldy InArea
     cpy #$12
     bcc +
@@ -4246,6 +4282,7 @@ Exit8:
 UpdateStatues:
     lda #$60
     sta PageIndex
+
     dey
     bne +
         jsr LDAB0
@@ -4260,82 +4297,81 @@ UpdateStatues:
     bpl +
     ldy #$02
     jsr LDAB0
-*   lda $687C
+*   lda RidleyStatueStat
     bpl +
     ldy #$03
     jsr LDAB0
 *   bcs +
-    inc $0360
+        inc $0360
+
 *   ldx #$60
     jsr LDA1A
+
     ldx #$61
     jsr LDA1A
 
-    LDA $54
-    BMI Exit0
-    LDA DoorStatus
-    BNE Exit0
-    LDA KraidStatueStat
-    AND $687C
-    BPL Exit0
-    STA $54
-    LDX #$70
-    LDY #$08
-.scope
-    _loop:
-        lda #$03
-        sta $0500,x
+    lda $54
+    bmi Exit0
+        lda DoorStatus
+        bne Exit0
+            lda KraidStatueStat
+            and RidleyStatueStat
+            bpl Exit0
+            .scope
+                sta $54
+                ldx #$70
+                ldy #$08
+                _loop:
 
-        tya 
-        asl 
-        sta $0507,x
+                    tya 
+                    asl 
+                    sta $0507,x
 
-        lda #$04
-        sta TileType,x
+                    lda #$03
+                    sta $0500,x
 
-        lda $036C
-        asl 
-        asl 
-        ora #$62
-        sta TileWRAMHi,x
+                    adc #$08
+                    sta TileWRAMLo,x
 
-        tya
-        asl
-        adc #$08
-        sta TileWRAMLo,x
+                    lda #$04
+                    sta TileType,x
 
-        txa
-        sbx #$10
-        dey
-        bne _loop
-    Exit0:
-        RTS
-.scend
+                    lda #$66            ; Since the statue nametable is always #$01, this can be hard coded
+                    sta TileWRAMHi,x
+
+                    txa
+                    sbx #$10
+                    dey
+
+                    bne _loop
+            .scend
+Exit0:
+    rts
 
 
 ; X can be 60 or 61 here
 ; So these variables offset by X are probably wrong?
 LDA1A:
-    lda $0304,x
+    lda AnimDelay,x
     bmi LDA3D_END
 
         lda #$01
-        sta $0304,x
+        sta AnimDelay,x
         lda $030F,x
         and #$0F
         beq LDA3D_END
 
-            inc $0304,x
+            inc AnimDelay,x
             dec $030F,x
             lda $030F,x
             and #$0F
             bne LDA3D_END
 
-                lda $0304,x
+                lda AnimDelay,x
                 ora #$80
-                sta $0304,x
+                sta AnimDelay,x
                 sta $681B,x
-                inc $0304,x
+                inc AnimDelay,x
                 txa
                 pha
                     and #$01
@@ -4351,37 +4387,39 @@ LDA1A:
                 tax
 LDA3D_END:
 
-LDA7C:
+    ; set the statue Y coord
     lda $030F,x
-    sta $036D
+    sta ObjectY + $60
 
+    ; set the statue X coord
     txa
-    and #$01
-    tay
-    lda LDA39,y
-    sta $036E
+    lsr 
+    lda #$88
+    bcc + 
+        lda #$68  
+*   sta ObjectX + $60 
 
     lda $681B,x
-    beq +
+    beq ++
     bmi +
-        lda $0304,x
+        lda AnimDelay,x
         cmp #$01
         bne +
-            lda $0306,x
-            beq +
+            lda AnimIndex,x
+            beq +++
                 dec $030F,x
                 lda TriangleSFXFlag
                 ora #$10
                 sta TriangleSFXFlag
 
 *   lda #$00
-    sta $0306,x
+*   sta AnimIndex,x
 
     ; HCSS - clever math and illegal op to replace a table lookup
-    txa
+*   txa
     anc #$01
     adc #$65
-    sta $0363
+    sta AnimFrame + $60
 
     lda $681B,x
     beq +
@@ -4395,16 +4433,16 @@ LDA7C:
 
 LDAB0:
     lda Table0E,y
-    sta $05C8
+    sta TileWRAMLo + $C0
 
-    lda $036C
-    asl
-    asl
-    ora Table1B,y
-    sta $05C9
+    lda #$64
+    cpy #$01
+    bcs +
+        lda #$65
+    * sta TileWRAMHi + $C0 
 
     lda #$09
-    sta $05C3
+    sta TileAnimFrame + $C0
 
     lda #$C0
     sta PageIndex
@@ -4557,7 +4595,7 @@ LDBFE:  BNE LDBE3             ;Branch always.
 ; HCSS - There are more than 6 energy tanks in the game, but you can only hold 6
 EnergyTankPickup:
 LDC00:* LDA TankCount           ;
-LDC03:  CMP #$06            ;Has Samus got 6 energy tanks?
+LDC03:  CMP #$06                ;Has Samus got 6 energy tanks?
 LDC05:  BEQ LDC0A               ;If so, she can't have any more.
 LDC07:  INC TankCount           ;Otherwise give her a new tank.
 LDC0A:* LDA TankCount           ;
@@ -4993,7 +5031,7 @@ KeepTrackOfHowManyRoomPickupsHaveDropped:
 
 OnBossKilled:
 ;PowerUpMusic:
-    LDA #MUS_PWR_UP
+    LDA #MUS_PWR_UP         ; MUS_PWR_UP == $40
     ORA MultiSFXFlag
     STA MultiSFXFlag
 
@@ -5027,29 +5065,27 @@ SomethingAboutMovement:
     ldy EnAnimFrame,x
     cpy #$F7
     bne MoveEnemies
-        lda #$00
-        sta ObjectCntrl
-        rts
+        jmp ClearObjectCntrl_2
 
 MoveEnemies:
 
-    LDA EnemyFramePtrTbl_Lo,y       ; Y == EnAnimFrame,x (where X == PageIndex) here
-    STA $00
+    lda EnemyFramePtrTbl_Lo,y       ; Y == EnAnimFrame,x (where X == PageIndex) here
+    sta $00
     
-    LDA EnemyFramePtrTbl_Hi,y
-    STA $01
+    lda EnemyFramePtrTbl_Hi,y
+    sta $01
     
-    LDY #$00            
-    STY $0F
+    ldy #$00            
+    sty $0F
 
-    LAX ($00),y         
-    STA $04             
+    lax ($00),y         
+    sta $04             
 
-    AND #$C0         
-    ORA #$20         
-    ORA Div16Table, x
-    AND #$E3         
-    STA $05
+    and #$C0         
+    ora #$20         
+    ora Div16Table, x
+    and #$E3         
+    sta $05
 
     lda ObjectCntrl
     bpl +
@@ -5128,7 +5164,8 @@ MoveEnemies:
             sbc ScrollX
             sta $0E
             jmp _EnemyVisible
-
+            ; safe
+            
 _EnemyHorzVisibility:
     lda EnXRoomPos,x
     sec
@@ -5163,10 +5200,10 @@ DrawSamusFrame:
     cpy #$F7
     bne DrawFrameSharedPart
 
-ClearObjectCntrl_2:
-    lda #$00              ; A == 0 here
-    sta ObjectCntrl       ;Clear object control byte.
-    rts                   ;
+    ClearObjectCntrl_2:
+        lda #$00              ; A == 0 here
+        sta ObjectCntrl       ;Clear object control byte.
+        rts                   ;
 
 AnimDrawObject:
 LDE47:  jsr UpdateObjAnim       ;($DC8F)Update animation if needed.
@@ -5318,9 +5355,11 @@ DrawFramePPUPart:
 
 DrawEnemyFramePPUPart:
     sta ObjRadY,x
+
     iny
     lda ($00),y
     sta ObjRadX,x
+
     iny
     sty $11
     tay                         ; Y = horizontal radius.
@@ -5334,16 +5373,17 @@ DrawEnemyFramePPUPart:
         sec
         sbc ScrollY
         sta $10
+
         lda ObjectHi,x
         jsr IsObjectVisible_VertCore
         beq _ObjectInvisible
 
-        lda ObjectX,x
-        sec
-        sbc ScrollX
-        sta $0E
-        jmp _ObjectVisible
-        ; safe
+            lda ObjectX,x
+            sec
+            sbc ScrollX
+            sta $0E
+            jmp _ObjectVisible
+            ; safe
 
     _ObjectHorzVisibility:
         lda ObjectX,x
@@ -5370,7 +5410,6 @@ DrawEnemyFramePPUPart:
         ; safe
 
     _ObjectInvisible:
-        lda #$00
         sta ObjectOnScreen,x
         sta ObjectCntrl         ;Clear object control byte.
         rts 
@@ -5529,7 +5568,7 @@ LDF21:  beq OffsetObjectPosition    ;if == $FC changes object's x and y position
                                     ;if == $FF - fall through
 LDF2B:  stx SpritePagePos           ;Keep track of current position in sprite RAM.
 
-ClearObjectCntrl:
+;ClearObjectCntrl:
 LDF2D:  lda #$00                    ;
 LDF2F:  sta ObjectCntrl             ;Clear object control byte.
 LDF31:  rts                         ;
@@ -5639,6 +5678,7 @@ IsObjectVisible_HorzCore:
     adc $0E                   ; C=0 from position subtraction.
     bcc _VisVisible
     bcs _VisInvisible
+    ; safe
 
 _VisHorzSame:
     bcc _VisInvisible
@@ -5837,23 +5877,23 @@ LE0F1:  beq MissileAndTimerDisplayEnd       ;Don't show missile count if Samus h
 ; I believe we are safe here
 DisplayEscapeSequenceTimer:
 ;Display 3-digit end sequence timer.
-LE11C:* ldy EndTimerHi          ;
+LE11C:* ldy EndTimerHi 
         lda Div16Table, y
-        ora #$A0            ;#$A0 is index into pattern table for numbers.
-        sta SpriteRAM+9,x     ;Store proper nametable pattern in sprite RAM.
+        ora #$A0                ;#$A0 is index into pattern table for numbers.
+        sta SpriteRAM+9,x       ;Store proper nametable pattern in sprite RAM.
 
-LE125:  lda EndTimerHi          ;
+LE125:  lda EndTimerHi 
 LE128:  and #$0F                ;Middle timer digit.
-        ora #$A0               ;#$A0 is index into pattern table for numbers.
-        sta SpriteRAM+13,x     ;Store proper nametable pattern in sprite RAM.
+        ora #$A0                ;#$A0 is index into pattern table for numbers.
+        sta SpriteRAM+13,x      ;Store proper nametable pattern in sprite RAM.
 
-LE12D:  ldy EndTimerLo          ;
+LE12D:  ldy EndTimerLo 
         lda Div16Table, y       
-        ora #$A0               ;#$A0 is index into pattern table for numbers.
-        sta SpriteRAM+17,x     ;Store proper nametable pattern in sprite RAM.
+        ora #$A0                ;#$A0 is index into pattern table for numbers.
+        sta SpriteRAM+17,x      ;Store proper nametable pattern in sprite RAM.
 
 LE136:  lda #$58                ;"TI" sprite(left half of "TIME").
-LE138:  sta SpriteRAM+21,x      ;
+LE138:  sta SpriteRAM+21,x 
         lda #$01
 LE13B:  sta SpriteRAM+22,x      ;Change color of sprite to pal 1
 
@@ -5861,10 +5901,10 @@ LE13E:  cpx #$DC                ;If at last sprite, branch to skip.
 LE140:  bcs MissileAndTimerDisplayEnd
         sta SpriteRAM+26,x      ;Change color of sprite to pal 1               ;
 LE142:  lda #$59                ;"ME" sprite(right half of "TIME").
-LE144:  sta SpriteRAM+27,x      ;
+LE144:  sta SpriteRAM+27,x 
 
 MissileAndTimerDisplayEnd:
-    *   lda TankCount           ;
+    *   lda TankCount 
 LE14F:  beq AddTankExit         ;Branch to exit if Samus has no energy tanks.
 
 ;----------------------------------[ Add energy tanks to display ]------------------------------------
@@ -5883,29 +5923,32 @@ AfterAddTankSetup:
     ldx SpritePagePos               ;Restore initial sprite page pos.
 
 AddOneTank:
-    LE17B:  lda #$17                ;Y coord-1.
-    LE17D:  sta SpriteRAM,x         ;
-    LE180:  lda $00                 ;Tile value.
-    LE181:  sta SpriteRAM+1,x       ;
-    LE184:  lda #$01                ;Palette #.
-    LE186:  sta SpriteRAM+2,x       ;
-            iny
-    LE189:  lda TankXTable-1,y      ;X coord.
-    LE18B:  sta SpriteRAM+3,x       ;
-            txa
-            sbx #$FC                ;add 4 to x
-    LE167:  dec $01                 ;Any more full energy tanks left?
-    LE169:  bne +                   ;If so, then branch.
-    LE16B:  dec $00                 ;Otherwise, switch to "empty energy tank" tile.
-    LE16C:* cpy TankCount           ;done all tanks?
-    LE16E:  bne AddOneTank          ;if not, loop to do another.
+    lda #$17                ;Y coord-1.
+    sta SpriteRAM, x 
 
-    LE170:  stx SpritePagePos       ;Store new sprite page position.
+    lda $00                 ;Tile value.
+    sta SpriteRAM+1, x 
+
+    lda #$01                ;Palette #.
+    sta SpriteRAM+2, x 
+
+    iny
+    lda TankXTable-1, y     ;X coord.
+    sta SpriteRAM+3, x 
+    txa
+    sbx #$FC                ;add 4 to x
+    dec $01                 ;Any more full energy tanks left?
+    bne +                   ;If so, then branch.
+        dec $00             ;Otherwise, switch to "empty energy tank" tile.
+*   cpy TankCount           ;done all tanks?
+    bne AddOneTank          ;if not, loop to do another.
+
+    stx SpritePagePos       ;Store new sprite page position.
 AddTankExit:
-    LE172:* rts                     ;
+*   rts 
 
 TankXTable:
-    .byte 64, 54, 44, 34, 24, 14
+    .byte $40, $36, $2C, $22, $18, $0E
 
 ;------------------------------------------[ Scroll door ]-------------------------------------------
 
@@ -7033,15 +7076,15 @@ ObjectBackgrounCollisionCheck:
 IsWalkableTile:
     ldy IsSamus
     beq ++
-    ; special case for Samus
-    dey      ; = 0
-    sty SamusDoorData    ; y == 0
-    cmp #$A0    ; crash with tile #$A0? (scroll toggling door)
-    beq +
-    cmp #$A1    ; crash with tile #$A1? (horizontal scrolling door)
-    bne ++
-    inc SamusDoorData
-*   inc SamusDoorData
+        ; special case for Samus
+        dey      ; = 0
+        sty SamusDoorData    ; y == 0
+        cmp #$A0    ; crash with tile #$A0? (scroll toggling door)
+        beq +
+        cmp #$A1    ; crash with tile #$A1? (horizontal scrolling door)
+        bne ++
+        inc SamusDoorData
+*       inc SamusDoorData
 *   dex
     beq SetCarryAndExit3
 
@@ -7623,10 +7666,14 @@ and #$01
 bne End_Attr_Loop
 
 InitTables:
-    lda #GFXBank                ; Switch to Bank06
-    jsr MMCWriteReg3 
-    jsr DoRoomRamClear          ; Call this routine which exists only in Bank06
-    lda CurrentBank           
+    lda CurrentBank
+    pha
+        lda #GFXBank                ; Switch to Bank06
+        sta CurrentBank
+        jsr MMCWriteReg3 
+        jsr DoRoomRamClear          ; Call this routine which exists only in Bank06
+    pla
+    sta CurrentBank           
     jsr MMCWriteReg3            ; Switch back to whatever bank we were on
 
 .scope
@@ -7722,20 +7769,20 @@ DrawObject:
     ora CartRAMPtrUB
     sta CartRAMWorkPtrUB
 
-    lda CartRamMulOffsetLoTable,x
-    sta CartRAMWorkPtrLB
     lda $0E
     and #$0F
     asl
-    ora CartRAMWorkPtrLB
+    ora CartRamMulOffsetLoTable,x
     sta CartRAMWorkPtrLB
 
 SetupStructPtr:
 LEA8D:  iny                             ; Move to the next byte of room data which is
 LEA8E:  lax (RoomPtr),y                 ; the index into the structure pointer table.
 LEA99:  lda StructPointerTable_Lo ,x    ; Low byte of 16-bit structure ptr.
+
 LEA9B:  sta StructPtrLB                 ;
 LEA9E:  lda StructPointerTable_Hi, x    ; High byte of 16-bit structure ptr.
+
 LEAA0:  sta StructPtrUB                 ;
         dey                             ;Y = 0 at this point
         jmp DrawStruct          ;($EF8C)Draw one structure.     ; count_struct_addr in BuildRoomAnalyzer.lua
@@ -7743,7 +7790,6 @@ LEAA0:  sta StructPtrUB                 ;
 
 ;-------------------------------------------[ Draw room ]--------------------------------------------
 
-; HCSS - saving 1 cycle
 IncRoomPtrHiByte:
     inc RoomPtr+1
     bne DrawRoom    ; branch always
@@ -7776,8 +7822,29 @@ LEAD0:  sta $01             ;
             inc $01
 ; End of Draw Room
         bne LoadRoomFeatureRoutine   ; branch always
-
+        ; safe
 ;----------------------------------------------------------------------------------------------------
+
+EndOfRoomLoad:
+    inc Quarter
+    lda Quarter
+    and #$01
+    beq Quarter2And4RoomEnd
+
+EndOfRoomExit:
+    rts
+
+Quarter2And4RoomEnd:
+    ldx #$F0                ;Prepare for PPU attribute table write.
+    stx RoomNumber 
+    lax ScrollDir 
+    tay
+    sta TempScrollDir       ;Make temp copy of ScrollDir.
+    and #$02                ;Check if scrolling left or right.
+    bne + 
+        jmp LE57C
+*   jmp LE70C
+    ; safe
 
 LoadDoor_Trampoline:
     jmp LoadDoor
@@ -7817,31 +7884,33 @@ LoadRoomFeatureRoutine:
 
         lsr                         ; 3, 4, 5 and 8+ doesn't exist so just checking the low bit at this point is enough to 
         bcs LoadZebHole_Trampoline  ; A >= 7
-        jmp LoadStatues             ; A == 6
-        ; safe
+                                    ; A == 6 fall through to LoadStatues
+
+LoadStatues:
+    lda #$40
+    ldx RidleyStatueStat
+    bpl +      ; branch if Ridley statue not hit
+        lda #$30
+*   sta $0370           ; set to #$40 or #$30
+
+    lda #$60
+    ldx KraidStatueStat
+    bpl +      ; branch if Kraid statue not hit
+        lda #$50
+*   sta $036F           ; set to #$60 or #$50
+
+    ; TODO: What numbers are being saved here?
+    ;       When is Y being set?
+    ; Looking back at original metroid, it looks like it should just be set to 0
+    ; Will need to step through it to be sure.
+    sty $54 
+
+    lda #$01
+    sta $0360
+*   bne SetupNextRoomFeature   ; branch always
+    ; safe 
 
 ;---------------------------------------------------------------------------------------------------
-
-EndOfRoomLoad:
-    inc Quarter
-    lda Quarter
-    and #$01
-    beq Quarter2And4RoomEnd
-
-EndOfRoomExit:
-    rts
-
-Quarter2And4RoomEnd:
-    ldx #$F0                ;Prepare for PPU attribute table write.
-    stx RoomNumber 
-    lax ScrollDir 
-    tay
-    sta TempScrollDir       ;Make temp copy of ScrollDir.
-    and #$02                ;Check if scrolling left or right.
-    bne + 
-        jmp LE57C
-*   jmp LE70C
-    ; safe
 
 GetEnemyData:
     lda ($00),y         ;Get 1st byte again. Y == 0 here
@@ -7852,43 +7921,43 @@ GetEnemyData:
     beq EnemySlotIsNotTaken
         lda EnAttr_05,x
         and #$02
-    *   bne Set_A_To_3_and_RTS  ;Exit if object slot taken.
+        bne Set_A_To_3_and_RTS  ;Exit if object slot taken.
 
-EnemySlotIsNotTaken:
-    sta EnHasBeenHit,x  ; Set enemy hit == 0
+        EnemySlotIsNotTaken:
+            sta EnHasBeenHit,x  ; Set enemy hit == 0
 
-    iny                 ; y == 1 here
-    tya                 
-    sta EnStatus,x      ;Indicate object slot is taken.
+            iny                 ; y == 1 here
+            tya                 
+            sta EnStatus,x      ;Indicate object slot is taken.
 
-    lda ($00),y         ;Get enemy type.
-    ; TODO: inlining GetEnemyType should be possible
-    jsr GetEnemyType    ;($EB28)Load data about enemy.
+            lda ($00),y         ;Get enemy type.
+            ; TODO: inlining GetEnemyType should be possible
+            jsr GetEnemyType    ;($EB28)Load data about enemy.
 
-    ldy #$02            ;
-    lda ($00),y         ;Get enemy initial position(%yyyyxxxx).
+            ldy #$02            ;
+            lda ($00),y         ;Get enemy initial position(%yyyyxxxx).
 
-    tay                 ;Save enemy position data in Y.
-    and #$F0            ;Extract Enemy y position.
-    ora #$08            ;Add 8 pixels to y position so enemy is always on screen. 
-    sta EnYRoomPos,x    ;Store enemy y position.
-    
-    ;lda Mul16Table,y    ;*16 to extract enemy x position.
-    tya
-    asl
-    asl
-    asl
-    asl                 ;*16 to extract enemy x position.
-    ora #$0C            ;Add 12 pixels to x position so enemy is always on screen.
-    sta EnXRoomPos,x        ;Store enemy x position.
+            tay                 ;Save enemy position data in Y.
+            and #$F0            ;Extract Enemy y position.
+            ora #$08            ;Add 8 pixels to y position so enemy is always on screen. 
+            sta EnYRoomPos,x    ;Store enemy y position.
 
-    ;jsr GetNameTable        ;($EB85)Get name table to place enemy on.
-    lda PPUCNT0ZP
-    eor ScrollDir
-    and #$01
-    sta EnNameTable,x       ;Store name table.
+            ;lda Mul16Table,y    ;*16 to extract enemy x position.
+            tya
+            asl
+            asl
+            asl
+            asl                 ;*16 to extract enemy x position.
+            ora #$0C            ;Add 12 pixels to x position so enemy is always on screen.
+            sta EnXRoomPos,x        ;Store enemy x position.
 
-    jsr SetEnemyInitialHitpoints
+            ;jsr GetNameTable        ;($EB85)Get name table to place enemy on.
+            lda PPUCNT0ZP
+            eor ScrollDir
+            and #$01
+            sta EnNameTable,x       ;Store name table.
+
+            jsr SetEnemyInitialHitpoints
 
 Set_A_To_3_and_RTS:
     lda #$03            ;Number of bytes to add to ptr to find next room item.
@@ -8074,29 +8143,6 @@ SetDoorObjectAction:
     ;lda #$02       ; Moving the load #$02 to the outside 
     rts
 
-; LoadStatues
-; ===========
-
-LoadStatues:
-    jsr GetNameTable        ;($EB85)
-    sta $036C
-    lda #$40
-    ldx RidlyStatueStat
-    bpl +      ; branch if Ridley statue not hit
-        lda #$30
-*   sta $0370
-    lda #$60
-    ldx KraidStatueStat
-    bpl +      ; branch if Kraid statue not hit
-        lda #$50
-*   sta $036F
-    sty $54
-
-    lda #$01
-    sta $0360
-SetupNextRoomFeature_Trampoline:
-*   jmp SetupNextRoomFeature   ; do next room object
-
 LoadZebHole:
 ; loop over (#$18, #$10, #$08, #$00)
 LEC57:
@@ -8135,8 +8181,7 @@ ZebHoleLoop:
             jsr GetNameTable 
             sta PipeEnemyNameTbl,x
 *   lda #$03
-; HCSS - Trampolines
-    bne SetupNextRoomFeature_Trampoline         ; branch always
+    jmp SetupNextRoomFeature  
     ; safe
 
 UpdateRoomSpriteInfo:
@@ -8303,50 +8348,28 @@ _next:
 
 .scend
 
-ClearElevators:
-    ;ldx #$00   ; X == 0 here
-    cpy $032C
-    bne +
-        stx ElevatorStatus      ; Set ElevatorStatus == 0
+.scope
+    ClearElevators:
+        ;ldx #$00   ; X == 0 here
+        cpy $032C
+        bne +
+            stx ElevatorStatus      ; Set ElevatorStatus == 0
 
-*   lda #$FF        ; This stays the A value for a while
+    *   lda #$FF        ; This stays the A value for a while
+
+.scend
+
 .scope
 
-; HCSS - Unrolled this and then found out months later that
-;        It isn't used anywhere and can just be removed.
-;PostRoomSetupStuff5:    
-;
-;        ldx $0704 + $1E
-;        bne +
-;            sta $0700 + $1E
-;
-;    *   ldx $0704 + $18
-;        bne +
-;            sta $0700 + $18
-;
-;    *   ldx $0704 + $12
-;        bne +
-;            sta $0700 + $12
-;
-;    *   ldx $0704 + $0C
-;        bne +
-;            sta $0700 + $0C
-;
-;    *   ldx $0704 + $06
-;        bne +
-;            sta $0700 + $06
-;
-;    *   ldx $0704 + $00
-;        bne _done
-;            sta $0700 + $00   
-;    _done:
+    ClearStatues:
+        cpy #$01        ; The statue nametable is always 1
+        bne _done
+            stx $0360   ; X == 0 here (as long as the $0704 and $0700 code above has been commented out)
+        _done:
 
-ClearStatues:
-    ; X == 0 here (as long as the $0704 and $0700 code above has been commented out)
-    cpy $036C
-    bne ClearPipeEnemies
-        stx $0360
+.scend 
 
+.scope
 ClearPipeEnemies:
     cpy PipeEnemyNameTbl + $18
     bne +
@@ -9419,13 +9442,9 @@ LF282:
         and #$10
         bne Exit21
 *   lda $10
-    asl
-    asl
-    asl
-    ora SamusHit
-    sta SamusHit
-    jmp LF306
-
+    jmp ApplyAreaDamage
+    ; safe
+    
 *   lda #$81
     sta $040E,x
     bne ++
@@ -9485,18 +9504,19 @@ LF2ED:
 
         lda $10
         eor #$03
-        asl
-        asl
-        asl
-        ora SamusHit
-        sta SamusHit
 
         ; WARNING TODO BUG
         ; I think replacing these with SamusHit is fine
         ; but I seriously can't make this part of the code trigger at all
         ;ora $030A,x
         ;sta $030A,x
-    LF306:  
+    ApplyAreaDamage:
+        asl
+        asl
+        asl
+        ora SamusHit
+        sta SamusHit
+
         lda AreaEnemyDmg_LowByte
         sta HealthLoChange
 
@@ -9539,6 +9559,9 @@ LF329:
 
 ; HUGBEES #1 - %11 of average frame time is spent here
 DoOneEnemy:
+
+    stx PageIndex
+
     cpy #$03
     bcs ChooseEnemySubroutine
 
@@ -9815,21 +9838,23 @@ CollectEnemyPickup:
     cpy #$80
     beq PickupMissile
 
-PickupHealth:
-    lda #$03
-    sta $00                ;Add 30 Health
-    lda EnDataIndex,x
-    bne AddToHealthHi
+    PickupHealth:
+        lda #$03
+        sta $00                ;Add 30 Health
 
-    dec $00                ;Add 20 Health
-    cpy #$81
-    bne AddToHealthHi
+        lda EnDataIndex,x
+        bne AddToHealthHi
+
+            dec $00                ;Add 20 Health
+            cpy #$81
+                bne AddToHealthHi
 
 .scope
 
     Add5Health:
         lda #$00
         sta $00
+
         lda HealthLo
         adc #$50
         cmp #$A0
@@ -9873,7 +9898,7 @@ _addAndStoreHi:
 
 ;($CEF9)Add health to Samus.
 SFX_EnergyPickup:
-    lda #SFX_ENGY_PKUP
+    lda #SFX_ENGY_PKUP      ; SFX_ENGY_PKUP == $40
     ora SQ1SFXFlag
     sta SQ1SFXFlag
     rts             
@@ -9895,6 +9920,13 @@ DecrementEnemyPickupTimer:
 
 .scope
 PickupMissile:
+
+    SFX_MissilePickup:
+        ;lda #SFX_MSL_PKUP      ; SFX_MSL_PKUP == $80
+        tya                     ; Happy Coincidence: Y == $80 here
+        ora SQ1SFXFlag
+        sta SQ1SFXFlag
+
     lda #$01                    ; Carry flag is set here so this is actually adding #$02 (2 missiles)
     ldy EnDataIndex,x
     beq _skip30MissileAdd
@@ -9903,38 +9935,34 @@ PickupMissile:
     _skip30MissileAdd:
         adc MissileCount
         bcs _capMissiles 
-        cmp MaxMissiles             ; can Samus hold this many missiles?
-        bcc _skipCappingMissles     ; branch if yes
-    _capMissiles:
-            lda MaxMissiles         ; set to max. # of missiles allowed
+            cmp MaxMissiles             ; can Samus hold this many missiles?
+            bcc _skipCappingMissles     ; branch if yes
 
+            _capMissiles:
+                lda MaxMissiles         ; set to max. # of missiles allowed
+
+    UpdateMissileCount:
     _skipCappingMissles:
         sta MissileCount
 
-    SFX_MissilePickup:
-        lda #SFX_MSL_PKUP
-        ora SQ1SFXFlag
-        sta SQ1SFXFlag
-
     CacheMissileGraphics:
-        lda #$00
+        ; Will end with either $A0, $A1, or $A2
+        lda #$A0
         sta MissileCountHundreds
+
+        lda #$0A
         sta MissileCountTens
 
         lda MissileCount
-
-        cmp #200
-        bcc _Hundreds1
-            sbc #200
-
-    _Hundreds1:    
-        rol MissileCountHundreds
+    
+    _hundredsLoop:
         cmp #100
-        bcc _Hundreds2
+        bcc _Tens
             sbc #100
+            inc MissileCountHundreds   
+            bne _hundredsLoop
 
-    _Hundreds2:     
-        rol MissileCountHundreds
+    _Tens:     
         cmp #80
         bcc _Tens1
             sbc #80
@@ -9963,15 +9991,6 @@ PickupMissile:
         ; What is left in A is the 1's place
         ora #$A0
         sta MissileCountOnes
-
-        lda MissileCountHundreds
-        ora #$A0
-        sta MissileCountHundreds
-
-        lda MissileCountTens
-        ora #$A0
-        sta MissileCountTens
-
         rts
 .scend
 
@@ -10863,36 +10882,39 @@ MemuRoutine2:
     lda MemuProp4,x
     cmp #$02
     bcs +
-    ldy $08
-    cpy SamusObjectY
-    bcc +
-    ora #$02
-    sta MemuProp4,x
+        ldy $08
+        cpy SamusObjectY
+        bcc +
+            ora #$02
+            sta MemuProp4,x
+
 *   ldy #$01
     lda MemuProp4,x
     lsr
     bcc +
-    ldy #$FF
+        ldy #$FF
 *   sty $05
+
     ldy #$04
     lsr
     lda MemuProp5,x
     bcc +
-    ldy #$FD
+        ldy #$FD
 *   sty $04
+
     inc MemuProp5,x
     jsr UpdateObjectLocation
     bcs +
-    lda MemuProp4,x
-    ora #$02
-    sta MemuProp4,x
+        lda MemuProp4,x
+        ora #$02
+        sta MemuProp4,x
 *   bcc +
-    jsr LFD6C
+        jsr LFD6C
 *   lda MemuProp5,x
     cmp #$50
     bcc AfterLFCC1
-    lda #$01
-    sta MemuStatus,x
+        lda #$01
+        sta MemuStatus,x
 AfterLFCC1:
     jmp SomethingAboutMovement
 
@@ -10928,6 +10950,7 @@ MemuRoutine1:
     bcs AfterLFD08
         tya
         sta MemuProp4,x
+
         lda #$02
         sta MemuStatus,x
 AfterLFD08:
@@ -10940,10 +10963,11 @@ MemuRoutine3:
     lda #$00
     sta MemuStatus,x
 SFX_EnemyHit:
-    lda #SFX_EN_HIT
+    lda #SFX_EN_HIT     ; SFX_EN_HIT == $04
     ora SQ1SFXFlag
     sta SQ1SFXFlag
     rts
+    
 
 PlaceMellowMemuRandomly:
     txa         ; X == Memu Offset here $00, $08, $10, or $18
@@ -11549,6 +11573,7 @@ Table05:
 Table09_A:
     .byte $01
     .byte $FF
+
 Table09_B:
     .byte $EC
     .byte $F0
@@ -11592,11 +11617,6 @@ Table0E:
     .byte $AC
     .byte $F0
     .byte $6C
-Table1B:
-    .byte $61
-    .byte $60
-    .byte $60
-    .byte $60
 
 ; Table16 - Uninvestigated
 Table16:
@@ -11631,11 +11651,6 @@ Table18:
 ; Table used for indexing the animations in TileBlastAnim
 Table19:
     .byte $18, $1C, $20, $00, $04, $08, $0C, $10, $24, $14
-
-; Unknown
-LDA39:  
-    .byte $88
-    .byte $68
 
 ExplodeRotationTbl:
     .byte $00           ;No sprite flipping.

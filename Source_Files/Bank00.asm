@@ -1670,13 +1670,13 @@ L8CCE:  BEQ +                   ;Branch if Kraid not yet defeated.
 L8CD0:  LDA $00                 ;
 L8CD2:  ORA #$40                ;Set bit 6 of $00
 L8CD4:  STA $00                 ;If Kraid defeated.
-L8CD6:* LDA RidlyStatueStat     ;
+L8CD6:* LDA RidleyStatueStat    ;
 L8CD9:  AND #$80                ;
 L8CDB:  BEQ +                   ;Branch if Ridley statue not up.
 L8CDD:  LDA $00                 ;
 L8CDF:  ORA #$20                ;Set bit 5 of $00
 L8CE1:  STA $00                 ;if Ridley statue up.
-L8CE3:* LDA RidlyStatueStat     ;
+L8CE3:* LDA RidleyStatueStat    ;
 L8CE6:  AND #$02                ;
 L8CE8:  BEQ +                   ;Branch if Ridley not yet defeated.
 L8CEA:  LDA $00                 ;
@@ -1690,7 +1690,7 @@ L8CFA:  STA PasswordByte0B,Y    ;SamusAgeMid in $6994 and
 L8CFD:  DEY                     ;SamusAe+2 in $6995.
 L8CFE:  BPL -                   ;
 L8D00:* JSR RandomNumbers       ;
-L8D03:  LDA RandomNumber1       ;
+;L8D03:  LDA RandomNumber1       ;
 L8D05:  AND #$0F                ;Store the value of $2E at $6998
 L8D07:  BEQ -                   ;When any of the 4 LSB are set. (Does not
 L8D09:  STA PasswordByte10      ;allow RandomNumber1 to be a multiple of 16).
@@ -1753,7 +1753,7 @@ L8D82:  LDA $02                 ;
 L8D84:  ORA #$02                ;If Ridley is defeated, set bit 1 of $02.
 L8D86:  STA $02                 ;
 L8D88:* LDA $02                 ;
-L8D8A:  STA RidlyStatueStat     ;Store Ridley status.
+L8D8A:  STA RidleyStatueStat    ;Store Ridley status.
 L8D8D:  LDA #$00                ;
 L8D8F:  STA $00                 ;
 L8D91:  STA $02                 ;
@@ -1789,7 +1789,7 @@ L8DC6:* LDY KraidStatueStat     ;
 L8DC9:  BEQ +                   ;
 L8DCB:  ADC #$4B                ;75 missiles are added to MaxMissiles
 L8DCD:  BCS ++                  ;if Kraid has been defeated and another
-L8DCF:* LDY RidlyStatueStat     ;75 missiles are added if the ridley 
+L8DCF:* LDY RidleyStatueStat    ;75 missiles are added if the ridley 
 L8DD2:  BEQ ++                  ;has been defeated.
 L8DD4:  ADC #$4B                ;
 L8DD6:  BCC ++                  ;
@@ -2506,7 +2506,7 @@ L9336:  STA MissileCount            ;
         STA MissileCountOnes        ;
 L9339:  STA MaxMissiles             ;
 L933C:  STA KraidStatueStat         ;Set all of Samus' stats to 0 when starting new game.
-L933F:  STA RidlyStatueStat         ;
+L933F:  STA RidleyStatueStat        ;
 L9342:  STA SamusAgeLo              ;
 L9345:  STA SamusAgeMid             ;
 L9348:  STA SamusAgeHi              ;

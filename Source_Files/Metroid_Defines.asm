@@ -718,7 +718,7 @@
 
 .alias SamusStat00      $6876   ;Unused memory address for storing Samus info.
 .alias KraidStatueStat  $687B   ;bit 0 set, the statues blink, 
-.alias RidlyStatueStat  $687C   ;bit 7 set, statues are up.
+.alias RidleyStatueStat $687C   ;bit 7 set, statues are up.
 
 .alias SamusAgeLo       $687D   ;Low byte of Samus' age.
 .alias SamusAgeMid      $687E   ;Mid byte of Samus' age.
