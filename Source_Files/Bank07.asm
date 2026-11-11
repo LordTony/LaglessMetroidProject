@@ -10696,7 +10696,7 @@ AfterLavaJumpLoop:
     lsr
     pla
     tax
-    
+
     lda $97A3,x
     sta $04
 
@@ -10802,14 +10802,15 @@ EnvEnemyUpdateRoutine_2:
 
     STA $0403,x
     TAY
+    
     LDA $040A,x
     LSR
     PHP
     BCC +
-    TYA
+        TYA
 
-    EOR #$FF
-    ADC #$00    ;Carry always set here
+        EOR #$FF
+        ADC #$00    ;Carry always set here
 
     STA $0403,x
 *   PLP

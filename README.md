@@ -133,8 +133,7 @@ sbx #$F0
   * Apply the attribute color changes so bank 05 is colored correctly with the new protocol
 
 ## Definite Bugs
-* Switching to bank 06 and hitting NMI while in there breaks everything.
-  * This only happens when loading a password or starting a game.
+* Bank 02 dragons are only spitting fire to the left
 * Bank 04 and 05 currently won't load because they haven't been updated to fit the new level load protocol
 * End credits have their graphics corrupted
 * Escape sequence timer graphic is mildly corrupted
@@ -145,7 +144,6 @@ sbx #$F0
   * This could cause issues or make different sprites becomes invisible when there are more than 64 trying to be rendered
   * I don't know if I should even bother fixing this.
   * I could probably make the game run faster by changing it even more.
-* Start game logic breaks if the NMI timing is wrong
 
 ## Maybe Bugs (Check Original Game Behavior)
 * Holding forward while walking into an enemy shows a frame or two of the screw attack.

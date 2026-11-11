@@ -418,9 +418,9 @@
 .alias PPUCNT1ZP        $FE     ;Data byte to be loaded into PPU control register 1.
 .alias PPUCNT0ZP        $FF     ;Data byte to be loaded into PPU control register 0.
 
+; TODO: Moves these over to ZP
 .alias EscapeTimerNameTable  $010C
 .alias EscapeTimerVisible    $010D
-
 
 .alias SpinnerYPos      $0111
 .alias SpinnerXPos      $0112
