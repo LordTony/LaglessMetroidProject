@@ -381,20 +381,22 @@ _EndGamePaused:
 ;SQ1=0, SQ2=1, Triangle=2, Noise=3
 
 .advance SoundEngineEntryPoint
-    LDA #$C0                ;Set APU to 5 frame cycle, disable frame interrupt.
-    STA APUCommonCntrl1     ;
-    LDA NoiseSFXFlag        ;is bit zero is set in NoiseSFXFlag(Silence
-    LSR                     ;music)?  If yes, branch.
-    BCS ++                  ;
-    LDA MainRoutine         ;
-    CMP #$05                ;Is game paused?  If yes, branch.
-    BEQ _ChkPausedSFX        ;
-    LDA #$00                ;Clear SFXPaused when game is running.
-    STA SFXPaused           ;
-    JSR _NseSFXInitFlags     ;($B31B)Check noise SFX flags.
-    JSR _LdMultiSFXInitFlags ;($B34B)Check multichannel SFX flags.
-    JSR _STriSFXInitFlags    ;($B33D)Check triangle SFX flags.
-    JSR _LoadMusicTempFlags  ;($BC36)Check music flags.
+    LDA #$C0                 ;Set APU to 5 frame cycle, disable frame interrupt.
+    STA APUCommonCntrl1
+
+    LDA NoiseSFXFlag         ;is bit zero is set in NoiseSFXFlag(Silence music)?  If yes, branch.
+    LSR 
+    BCS ++ 
+      LDA MainRoutine 
+      CMP #mrtn_PauseMode      ;Is game paused?  If yes, branch. ; mrtn_PauseMode == $05
+      BEQ _ChkPausedSFX 
+        LDA #$00                 ;Clear SFXPaused when game is running.
+        STA SFXPaused 
+
+        JSR _NseSFXInitFlags     ;($B31B)Check noise SFX flags.
+        JSR _LdMultiSFXInitFlags ;($B34B)Check multichannel SFX flags.
+        JSR _STriSFXInitFlags    ;($B33D)Check triangle SFX flags.
+        JSR _LoadMusicTempFlags  ;($BC36)Check music flags.
 
 _ClearSFXFlags:
 * LDA #$00                ;

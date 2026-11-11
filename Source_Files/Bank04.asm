@@ -429,7 +429,7 @@ Bank04_L9976:  LDA $0400,X
 Bank04_L9979:  STA SpinnerYPos,Y
 Bank04_L997C:  LDA $0401,X
 Bank04_L997F:  STA SpinnerXPos,Y
-Bank04_L9982:  LDA $6AFB,X
+Bank04_L9982:  LDA EnNameTable,X
 Bank04_L9985:  STA SpinnerNameTbl,Y
                lda IdentityTable, y
                tay 
@@ -694,14 +694,14 @@ Bank04_L9BAF:  LDA $09
 Bank04_L9BB1:  STA $0401,X
 Bank04_L9BB4:  LDA $0B
 Bank04_L9BB6:  AND #$01
-Bank04_L9BB8:  STA $6AFB,X
+Bank04_L9BB8:  STA EnNameTable,X
 Bank04_L9BBB:  RTS
 
 Bank04_L9BBC:  LDA $0400,X
 Bank04_L9BBF:  STA $08
 Bank04_L9BC1:  LDA $0401,X
 Bank04_L9BC4:  STA $09
-Bank04_L9BC6:  LDA $6AFB,X
+Bank04_L9BC6:  LDA EnNameTable,X
 Bank04_L9BC9:  STA $0B
 Bank04_L9BCB:  RTS
 

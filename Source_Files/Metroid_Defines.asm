@@ -180,14 +180,14 @@
 .alias SamusBlinkFrames $70
 .alias UpdtngPrjctl     $71     ;#$01=Projectile update in process. #$00=not in process.
 .alias DmgPushDir       $72     ;#$00=Push Samus left when hit, #$01=Push right, #$FF=No push. 
-; used in damage push   $73
+.alias SamusHitReaction $73
 .alias InArea           $74     ;#$10(or #$00)=Brinstar, #$11=Norfair, #$12=Kraid hideout,
                                 ;#$13=Tourian, #$14=Ridley hideout.
 
-.alias ChannelType      $75     ;Stores channel type being processed(0,1,2,3 or 4)
+.alias EndTimerLo       $75     ;Lower byte of end game escape timer.
+.alias EndTimerHi       $76     ;Upper byte of end game escape timer.    ; Use 9 times in bank 7
 
-; unused                $76
-; used in damage push   $77
+.alias LatchedSamusHitReaction  $77
 
 .alias ItemRmMusicSts   $79     ;#$00=Item room music not playing. 
                                 ;#$01=Play item room music.
@@ -217,6 +217,10 @@
 ; used                  $87
 ; used                  $88
 ; unused                $89
+
+; used                  $8B
+; used                  $8C
+
 ; used in tourinan door $90
 ; used in door routine  $91
 
@@ -273,7 +277,7 @@
 .alias MusicInitIndex       $AC ; Prev $065E   ;index for loading $62B thru $637(base=$BD31).
 .alias SamusAnimIndex       $AD
 .alias SamusHit             $AE ; Prev $030A
-; unused                    $AF
+.alias ChannelType          $AF ; Stores channel type being processed(0,1,2,3 or 4)
 
 ; 4 Memu slots in memory.
 ; Memu 1        $B0 - $B1
@@ -354,8 +358,8 @@
 .alias SpareMemD1       $D1     ;Written to in title routine, but never accessed.
 .alias CurrentSFXFlags  $D1     ;Stores flags of SFX currently being processed.
 
-;.alias SamusHorzAccel   $D2   ;Value used in calculating horizontal acceleration on Samus.
-;.alias SamusHorzSpdMax  $D3   ;Used to calc maximum horizontal speed Samus can reach.
+.alias MiniBossKillDly  $D2     ;Initiate power up music and delay after Kraid/Ridley killed.
+.alias PowerUpDelay     $D3     ;Initiate power up music and delay after item pickup.
 
 ; used, but isolated    $D4     ; D4, D5, and D6 are set, used, and then are completely free afterwards
 ; used, but isolated    $D5     ; Scratch Variables
@@ -414,17 +418,9 @@
 .alias PPUCNT1ZP        $FE     ;Data byte to be loaded into PPU control register 1.
 .alias PPUCNT0ZP        $FF     ;Data byte to be loaded into PPU control register 0.
 
-                                ;# of full tanks in upper 4 bits.
-.alias MiniBossKillDly  $0108   ;Initiate power up music and delay after Kraid/Ridley killed.
-.alias PowerUpDelay     $0109   ;Initiate power up music and delay after item pickup.
+.alias EscapeTimerNameTable  $010C
+.alias EscapeTimerVisible    $010D
 
-.alias EndTimerLo       $010A   ;Lower byte of end game escape timer.
-.alias EndTimerHi       $010B   ;Upper byte of end game escape timer.    ; Use 9 times in bank 7
-
-; used in bank 03       $010C
-; used in bank 03       $010D
-
-; used in bank 07       $010F
 
 .alias SpinnerYPos      $0111
 .alias SpinnerXPos      $0112
@@ -1141,6 +1137,18 @@
 .alias wa_BombCount     9
 .alias wa_BombExplode   10
 .alias wa_Missile       11
+
+;MainRoutines
+.alias mrtn_AreaInit            $00
+.alias mrtn_MoreInit            $01
+.alias mrtn_SamusInit           $02
+.alias mrtn_GameEngine          $03
+.alias mrtn_GameOver            $04
+.alias mrtn_PauseMode           $05
+.alias mrtn_GoPassword          $06
+.alias mrtn_IncrementRoutine    $07
+.alias mrtn_SamusIntro          $08
+.alias mrtn_WaitTimer           $09
 
 ;Hardware registers.
 .alias PPU_PT0_UB       $00     ;Base address of pattern table 0, upper byte.

@@ -1661,6 +1661,8 @@ _L8BFC:  SBC #$03
 _L8BFE:  JMP _L8C7E
 ; Safe
 
+         nop 
+         
 _DoorHandlerRoutine3:
 _L8C01:  LDA DoorStatus
 _L8C03:  BEQ _L8C1D

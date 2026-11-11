@@ -437,7 +437,7 @@ UpdateAge:
     ldy GameMode 
     bne NMIEnd_WithYSetTo1                      ;Exit if at title/password screen.
         lda MainRoutine 
-        cmp #$03                                ;Is game engine running?
+        cmp #mrtn_GameEngine                    ;Is game engine running?    mrtn_GameEngine == $03
         bne NMIEnd                              ;If not, don't update age.
             ldx FrameCount                      ;Only update age when FrameCount is zero
             bne NMIEnd                          ;(which is approx. every 4.266666666667 seconds).
@@ -482,16 +482,17 @@ LC11D:  AND #BTN_START          ;Has START been pressed? BTN_START == $10
 LC11F:  BEQ AfterPauseToggle    ;if not, execute current routine as normal.
 
 PauseButtonPressed:
-LC121:  LDX MainRoutine         ;
-LC123:  CPX #$03                ;Is game engine running?
+LC121:  LDX MainRoutine 
+LC123:  CPX #mrtn_GameEngine    ;Is game engine running?
 LC125:  BEQ SetPauseState       ;If yes, check for routine #5 (pause game).
-LC127:  CPX #$05                ;Is game paused?
+LC127:  CPX #mrtn_PauseMode     ;Is game paused?
 LC129:  BNE AfterPauseToggle    ;If not routine #5 either, don't care about START being pressed.
-LC12B:  LDX #$03                ;Otherwise, switch to routine #3 (game engine).
+LC12B:  LDX #mrtn_GameEngine    ;Otherwise, switch to routine #3 (game engine).
 LC12D:  BNE TogglePauseState    ;Branch always.
+        ; safe
 
 SetPauseState:
-LC12F:* LDX #$05                ;Switch to pause routine.
+LC12F:* LDX #mrtn_PauseMode     ;Switch to pause routine.
 
 TogglePauseState:
 LC131:* STX MainRoutine         ;(MainRoutine = 5 if game paused, 3 if game engine running).
@@ -500,9 +501,9 @@ LC135:  EOR #$01                ;Toggle game paused.
 LC137:  STA GamePaused          ;
 
 ;Set PauseMusic SFX flag
-    LDA #MUS_PAUSE
-    ORA NoiseSFXFlag
-    STA NoiseSFXFlag
+    LDA #MUS_PAUSE              ; MUS_PAUSE == $02
+    ORA NoiseSFXFlag 
+    STA NoiseSFXFlag 
 
 AfterPauseToggle:
 * LDX MainRoutine 
@@ -751,6 +752,70 @@ LC3CD:  AND #$3F                ;
 LC3CF:  STA $05                 ;Extract counter bits and save them for use above.
 LC3D1:  JMP NextPPUByte         ;($C36E)
 
+EraseTile2x2Fast:
+    lda #$01
+    sta PPUDataPending
+
+    ldx PPUStrIndex
+    ldy #$01
+
+    ; First row
+    lda $01
+    sta PPUDataString,x
+
+    lda $00
+    sta PPUDataString+1,x
+
+    lda #$02
+    sta PPUDataString+2,x
+
+    lda ($02),y
+    sta PPUDataString+3,x
+
+    iny
+    lda ($02),y
+    sta PPUDataString+4,x
+
+    ; X += 5
+    txa
+    sbx #$FB
+
+    ; Advance PPU address one row
+    lda $00
+    clc
+    adc #$20
+    sta $00
+    bcc +
+        inc $01
+
+    ; Second row
+*   lda $01
+    sta PPUDataString,x
+
+    lda $00
+    sta PPUDataString+1,x
+
+    lda #$02
+    sta PPUDataString+2,x
+
+    iny
+    lda ($02),y
+    sta PPUDataString+3,x
+
+    iny
+    lda ($02),y
+    sta PPUDataString+4,x
+
+    ; X += 5
+    txa
+    sbx #$FB
+
+    stx PPUStrIndex
+
+    lda #$00
+    sta PPUDataString,x
+    rts
+
 ;----------------------------------------[ Math routines ]-------------------------------------------
 
 ; Thanks Chat GPT
@@ -839,6 +904,7 @@ LC48C:  BNE -                   ;
 LC48E:  LDA PPUCNT0ZP           ;
 LC490:  ORA #$80                ;Enable VBlank interrupts.
 LC492:  BNE --                  ;Branch always.
+        ; Safe
 
 ;--------------------------------------[ Timer routines ]--------------------------------------------
 
@@ -847,19 +913,19 @@ LC492:  BNE --                  ;Branch always.
 ;is playing.
 
 WaitTimer:
-LC494:  LDA Timer2              ;Exit if timer hasn't hit zero yet
-LC496:  BNE +                   ;
-LC498:  LDA NextRoutine         ;Set GameOver as next routine.
-LC49A:  CMP #$04                ;
-LC49C:  BEQ SetMainRoutine      ;Set GoPassword as main routine.
-LC49E:  CMP #$06                ;
-LC4A0:  BEQ SetMainRoutine      ;
-LC4A2:  JSR StartMusic          ;($D92C)Assume power up was picked up and GameEngine
-LC4A5:  LDA NextRoutine         ;is next routine. Start area music before exiting.
+    lda Timer2                      ;Exit if timer hasn't hit zero yet
+    bne ExitSub 
+        lda NextRoutine             ;Set GameOver as next routine.
+        cmp #mrtn_GameOver          ; mrtn_GameOver = $04
+        beq SetMainRoutine          ;Set GoPassword as main routine.
+            cmp #mrtn_GoPassword    ; mrtn_GoPassword = $06
+            beq SetMainRoutine 
+                jsr StartMusic      ;($D92C)Assume power up was picked up and GameEngine
+                lda NextRoutine     ;is next routine. Start area music before exiting.
 
 SetMainRoutine:
-LC4A7:  STA MainRoutine         ;Set next routine to run.
-LC4A9:* RTS                     ;
+    sta MainRoutine         ;Set next routine to run.
+*   rts 
 
 ;-----------------------------------[ PPU mirroring routines ]---------------------------------------
 
@@ -960,18 +1026,20 @@ InitBank1:
         sta InArea              ;Start in Brinstar.
         sta GamePaused          ;Make sure game is not paused.
 
+        sta MiniBossKillDly 
+        sta PowerUpDelay 
+
+        sta EndTimerLo 
+        sta EndTimerHi 
+
+        sta EscapeTimerNameTable 
+        sta EscapeTimerVisible 
+
         ldx #$A1
         ClearRAM_33_DF:
         *   sta $32,x               ;Clear RAM addresses $33 through $DF.
             dex 
             bne -                   ;Loop until all desired addresses are cleared.
-
-            ; Still clear $0108 - $010F ()
-            ; but $0100 - $0107 (most of them at least) have moved
-            ldy #$07                ;Clears Samus stats(Health, full tanks, game timer, etc.).
-        *   sta $0108,y             ;A = 0 here. Load $100 thru $10F with #$00.
-            dey                     ;
-            bpl -                   ;Loop 16 times.
 
 InitBank1_RomSwitch:
     lda #$01
@@ -1141,7 +1209,7 @@ LC805:  stx ScrollY             ;Clear ScrollY.
 LC807:  lda PPUCNT0ZP           ;   
 LC809:  and #$FC                ;Sets nametable address = $2000.
 LC80B:  sta PPUCNT0ZP           ;
-LC80D:  inc MainRoutine         ;Increment MainRoutine to MoreInit.
+LC80D:  inc MainRoutine         ;Increment MainRoutine to MoreInit. Set MainRoutine = $01
 ;LC80F:  lda Joy1Status          ;
 ;LC811:  and #$C0                ;Stores status of both the A and B buttons.
 ;LC813:  sta ABStatus            ;Appears to never be accessed.
@@ -1263,11 +1331,11 @@ LC8BB:
 ; Code that sets up Samus, when the game is first started.
 
 SamusInit:
-    lda #$08                ;
+    lda #mrtn_SamusIntro    ; mrtn_SamusIntro == $08
     sta MainRoutine         ;SamusIntro will be executed next frame.
 
     lda #$2C                ;440 frames to fade in Samus(7.3 seconds).
-    sta Timer2              ;
+    sta Timer2 
 
 IntroMusic_Inline:
     lda #MUS_FADE_IN        ; #MUS_FADE_IN == #$80
@@ -1905,13 +1973,13 @@ ClearSpriteRamLoop:
 
 AfterClearSpriteRamLoop:
 
-LC948:  lda MiniBossKillDly     ;
+LC948:  lda MiniBossKillDly 
 LC94B:  ora PowerUpDelay        ;Check if mini boss was just killed or powerup aquired.
 LC94E:  beq StartDeathCheck     ;If not, branch.
 
-LC950:      lda #$00                ;
+LC950:      lda #$00 
 LC952:      sta MiniBossKillDly     ;Reset delay indicators.
-LC955:      sta PowerUpDelay        ;
+LC955:      sta PowerUpDelay 
 LC958:      lda #$18                ;Set timer for 240 frames(4 seconds).
 LC95A:      ldx #$03                ;GameEngine routine to run after delay expires
 LC95C:      jsr SetTimer            ;($C4AA)Set delay timer and game engine routine.
@@ -1949,80 +2017,91 @@ LC97D:  rts                     ;
 ;-------------------------------------------[ Game over ]--------------------------------------------
 
 GameOver:
-LC9A6:  lda #$1C                ;GameOver is the next routine to run.
-LC9A8:  sta TitleRoutine        ;
-LC9AA:  lda #$01                ;
-LC9AC:  sta SwitchPending       ;Prepare to switch to title memory page.
-LC9AE:  jmp ScreenOff           ;($C439)Turn screen off.
+    lda #$1C                ;GameOver is the next routine to run.
+    sta TitleRoutine 
+
+    bne SetSwitchPendingAndScreenOff    ; branch always
+    ; safe
 
 ;------------------------------------------[ Pause mode ]--------------------------------------------
 
 PauseMode:
-LC9B1:  lda Joy2Status          ;Load buttons currently being pressed on joypad 2.
-LC9B7:  beq Exit14              ;Exit if not.
-LC9B9:  ldy EndTimerHi          ;
-LC9BC:  iny                     ;Is escape timer active?
-LC9BD:  bne Exit14              ;Sorry, can't quit if this is during escape scence.
-LC9BF:  sty GamePaused          ;Clear pause game indicator.
-LC9C1:  inc MainRoutine         ;Display password is the next routine to run.
+    lda Joy2Status          ;Load buttons currently being pressed on joypad 2.
+    beq Exit14              ;Exit if not.
+        ldy EndTimerHi 
+        iny                 ;Is escape timer active?
+        bne Exit14          ;Sorry, can't quit if this is during escape scence.
+            sty GamePaused  ;Clear pause game indicator.
+            inc MainRoutine ;Display password is the next routine to run.
 
 Exit14:
-LC9C3:  rts                     ;Exit for routines above and below.
+    rts                     ;Exit for routines above and below.
 
 ;------------------------------------------[ GoPassword ]--------------------------------------------
 
 GoPassword:
-LC9C4:  lda #$19                ;DisplayPassword is next routine to run.
-LC9C6:  sta TitleRoutine        ;
-LC9C8:  lda #$01                ;
-LC9CA:  sta SwitchPending       ;Prepare to switch to intro memory page.
-LC9CC:  lda NoiseSFXFlag        ;
-LC9CF:  ora #$01                ;Silence music.
-LC9D1:  sta NoiseSFXFlag        ;
-LC9D4:  jmp ScreenOff           ;($C439)Turn off screen.
+    lda #$19                ;DisplayPassword is next routine to run.
+    sta TitleRoutine 
+
+    lda NoiseSFXFlag        ;Silence music.
+    ora #$01 
+    sta NoiseSFXFlag 
+
+SetSwitchPendingAndScreenOff:
+    lda #$01 
+    sta SwitchPending       ;Prepare to switch to intro memory page.  
+
+    jmp ScreenOff           ;($C439)Turn off screen.
+    ; safe
 
 ;-----------------------------------------[ Samus intro ]--------------------------------------------
 
 SamusIntro:
-LC9D7:  jsr EraseAllSprites     ;($C1A3)Clear all sprites off screen.
-LC9DA:  ldy SamusObjAction      ;Load Samus' fade in status.
-LC9DD:  lda Timer2              ;
-LC9E0:  bne +                   ;Branch if Intro still playing.
+    jsr EraseAllSprites             ;($C1A3)Clear all sprites off screen.
+    ldy SamusObjAction              ;Load Samus' fade in status.
+
+    lda Timer2 
+    bne +                           ;Branch if Intro still playing.
     
-;Fade in complete.
-LC9E2:  sta ItemRmMusicSts      ;Make sure item room music is not playing.
-LC9E4:  lda #sa_Begin           ;Samus facing forward and can't be hurt.
-LC9E6:  sta SamusObjAction      ;
-LC9E8:  jsr StartMusic          ;($D92C)Start main music.
-LC9EB:  jsr SelectSamusPal      ;($CB73)Select proper Samus palette.
-LC9EE:  lda #$03                ;
-LC9F0:  sta MainRoutine         ;Game engine will be called next frame.
+        ;Fade in complete.
+        sta ItemRmMusicSts          ;Make sure item room music is not playing.
+
+        lda #sa_Begin               ;Samus facing forward and can't be hurt. ; sa_Begin == $FF
+        sta SamusObjAction 
+
+        jsr StartMusic              ;($D92C)Start main music.
+        jsr SelectSamusPal          ;($CB73)Select proper Samus palette.
+
+        lda #mrtn_GameEngine        ; mrtn_GameEngine == $03
+        sta MainRoutine             ;Game engine will be called next frame.
 
 ;Still fading in.
-LC9F2:* cmp #$1F                ;When 310 frames left of intro, display Samus.
-LC9F4:  bcs Exit14              ;Branch if not time to start drawing Samus.
-LC9F6:  cmp SamusFadeTmTbl-20,y ;sa_FadeIn0 is beginning of table.
-LC9F9:  bne +                   ;Every time Timer2 equals one of the entries in the table
-LC9FB:  inc SamusObjAction      ;below, change the palette used to color Samus.
-LC9FE:  sty PalDataPending      ;
-LCA00:* lda FrameCount          ;Is game currently on an odd frame?
-LCA02:  lsr                     ;If not, branch to exit.
-LCA03:  bcc Exit14              ;Only display Samus on odd frames [the blink effect].
-LCA05:  lda #an_SamusFront      ;Samus front animation is animation to display.
-LCA07:  jsr SetSamusAnim        ;($CF6B)while fading in.
-;LCA0A:  lda #$00                ;  SetSamusAnim sets A register to 0 already
-LCA0C:  sta SpritePagePos       ;Samus sprites start at Sprite 0.
-LCA0E:  sta PageIndex           ;Samus RAM is first set of RAM.
-LCA10:  jmp AnimDrawObject      ;($DE47)Draw Samus on screen.
+*   cmp #$1F                        ;When 310 frames left of intro, display Samus.
+    bcs Exit14                      ;Branch if not time to start drawing Samus.
+        cmp SamusFadeTmTbl-20,y     ;sa_FadeIn0 is beginning of table.
+        bne +                       ;Every time Timer2 equals one of the entries in the table
+            inc SamusObjAction      ;below, change the palette used to color Samus.
+            sty PalDataPending 
+    *   lda FrameCount              ;Is game currently on an odd frame?
+        lsr                         ;If not, branch to exit.
+        bcc Exit14                  ;Only display Samus on odd frames [the blink effect].
+
+            lda #an_SamusFront      ;Samus front animation is animation to display. ; an_SamusFront == $04
+            jsr SetSamusAnim        ;($CF6B)while fading in. ; SetSamusAnim sets A = $00
+
+            sta SpritePagePos       ;Samus sprites start at Sprite 0.
+            sta PageIndex           ;Samus RAM is first set of RAM.
+            jmp AnimDrawObject      ;($DE47)Draw Samus on screen.
+            ; safe
 
 ;---------------------------------[ Check if game engine running ]-----------------------------------
 
 IsEngineRunning:
-LCA18:  ldy MainRoutine         ;If Samus is fading in or the wait timer is
-LCA1A:  cpy #$07                ;active, return from routine.
-LCA1C:  beq Exit14              ;
-LCA1E:  cpy #$03                ;Is game engine running?
-LCA20:  bne Exit14              ;If yes, continue to SwitchBank.
+    ldy MainRoutine                 ;If Samus is fading in or the wait timer is
+    cpy #mrtn_IncrementRoutine      ;active, return from routine. mrtn_IncrementRoutine == $07
+    beq Exit14 
+        cpy #mrtn_GameEngine        ;Is game engine running? mrtn_GameEngine == $03
+        bne Exit14                  ;If yes, continue to SwitchBank.
 
 ;-----------------------------------------[ Switch bank ]--------------------------------------------
 
@@ -2339,7 +2418,7 @@ ScrewAttackExit:
 ;----------------------------------------------------------------------------------------------------
 
 CheckHealthStatus:
-    lda SamusHit
+    lda SamusHit 
     and #$20                ;Has Samus been hit?
     beq +++                 ;If not, branch to check if still blinking from recent hit.
 
@@ -2347,10 +2426,10 @@ CheckHealthStatus:
     sta SamusBlinkFrames    ;Samus has been hit. Set blink for $32 (50) frames.
 
     lda #$FF
-    sta DmgPushDir
+    sta DmgPushDir 
 
-    lda $73
-    sta $77
+    lda SamusHitReaction 
+    sta LatchedSamusHitReaction 
 
     beq ++
     bpl +
@@ -2360,19 +2439,19 @@ CheckHealthStatus:
             ora MultiSFXFlag
             sta MultiSFXFlag
 
-*   lda SamusHit
+*   lda SamusHit 
     asr #$08
     lsr
     lsr
-    sta DmgPushDir
+    sta DmgPushDir 
 
 *   lda #$FD
-    sta SamusVertSpeed
+    sta SamusVertSpeed 
 
     lda #$38                ; Samus is hit. Store Samus hit gravity.
     sta SamusGravity 
     
-    lda SamusObjAction
+    lda SamusObjAction 
     and #$08
     beq +
         bne CheckHealthBeep ; branch always
@@ -2401,7 +2480,7 @@ CheckHealthStatus:
                 adc #$01
         *   sta SamusHorzSpeed
 
-    *   lda $77
+    *   lda LatchedSamusHitReaction
         bpl CheckHealthBeep
             lda FrameCount
             and #$01
@@ -2455,7 +2534,7 @@ LCEB1:  beq DoHealthSubtration                   ;
 LCEB3:  lsr HealthLoChange      ;If Samus has Varia, divide damage by 2.
 LCEB5:  lsr HealthHiChange      ;
 LCEB7:  bcc DoHealthSubtration               ;If HealthHi moved a bit into the carry flag while
-LCEB9:  lda #$4F            ;dividing, add #$4F to HealthLo for proper
+LCEB9:  lda #$4F                ;dividing, add #$4F to HealthLo for proper
 LCEBB:  adc HealthLoChange      ;division results.
 LCEBD:  sta HealthLoChange      ;
 
@@ -3045,13 +3124,13 @@ AfterHorizontalMissleLaunch:
     jsr LD306
 
     lda SamusGear
-    asr #gr_LONGBEAM
-    lsr
-    lsr
-    ror
-    ora HasBeamSFX
-    sta HasBeamSFX
+    and #gr_LONGBEAM    ; gr_LONGBEAM == $04
+    beq SetBulletFireCheck_2
+        lda #$80
+        ora HasBeamSFX
+        sta HasBeamSFX
 
+SetBulletFireCheck_2:
     ldx ObjAction,y
     dex
     bne +
@@ -3099,27 +3178,30 @@ AfterVerticalMissleToggleCheck:
     lda Table09_A,x
     sta $05
 
+    ; previously used a table
+    ; .byte $EC, $F0
     lda ObjAction,y
     and #$01
-    tax
-    lda Table09_B,x
-    sta $04
+    asl 
+    asl 
+    adc #$EC
+    sta $04 
 
     jsr LD306
 
     lda SamusGear
-    asr #gr_LONGBEAM
-    lsr
-    lsr
-    ror
-    ora HasBeamSFX
-    sta HasBeamSFX
+    and #gr_LONGBEAM    ; gr_LONGBEAM == $04
+    beq SetBulletFireCheck
+        lda #$80
+        ora HasBeamSFX
+        sta HasBeamSFX
 
+SetBulletFireCheck:
     ldx ObjAction,y
     dex
     bne +
     
-        lda #SFX_BLT_FIRE
+        lda #SFX_BLT_FIRE   ; SFX_BLT_FIRE == $10
         ora SQ1SFXFlag
         sta SQ1SFXFlag
 
@@ -3239,11 +3321,21 @@ DoWaveBeamAndIceBeamStuff:
 
     lda #$00
     sta AnimDelay,y
-    sta $0501,y
 
-    bcs +
-        lda #$0C
-*   STA $0500,y
+    ; $0502,Y is:
+    ;   0 = horizontal right
+    ;   1 = horizontal left
+    ;   2 = vertical up
+
+    lda Div16Table,y
+    asl
+    eor $0502,y
+    and #$02
+    sec
+    sbc #$02
+    and #$06
+    sta $0500,y
+
     lda #wa_WaveBeam        ; #wa_WaveBeam == #$02
     sta ObjAction,y
 Set_WaveFireAnim:
@@ -3563,9 +3655,9 @@ CheckBulletStat:
         bne DrawBullet          ; branch if Samus has Long Beam
             dec $030F,x         ; decrement bullet timer
             bne DrawBullet
-                lda #$00        ; timer hit 0, kill bullet
-                sta ObjAction,x
-                beq DrawBullet  ; branch always
+                ;lda #$00        
+                sta ObjAction,x     ; timer hit 0, kill bullet; A == $00 here     
+                jmp DrawBullet      ; branch always
                 ;safe
 
 *   lda ObjAction,x
@@ -3574,8 +3666,6 @@ CheckBulletStat:
 
     DrawBullet:
         lda #$01
-
-    DrawBulletWith1AlreadyLoaded:
         jsr AnimDrawObject
 
 *   dec UpdtngPrjctl
@@ -3596,49 +3686,57 @@ UpdateWaveBullet:
     bne + 
         sta ObjAction,x
 *   jsr LD5DA
-    lda $0502,x
-    and #$FE
-    tay
 
-    lda Table0A,y
-    sta $0A
+    ldy $0500,x
 
-    lda Table0A+1,y
-    sta $0B
-
-*   ldy $0500,x
-    lda ($0A),y
-    cmp #$FF
-    bne +
-        sta $0500,x
-        jmp LD522
-        ; safe
-
-*   cmp $0501,x
-    beq ----
-    inc $0501,x
-    iny
-    lda ($0A),y
-    pha
-        jsr $8296           ; doesn't clobber X
-        sta ObjVertSpeed,x
-    pla
-    jsr $832F               ; doesn't clobber X
-
-    sta ObjHorzSpeed,x
-    tay
-    lda $0502,x
+    lda $0502,x     ; $0502,X: 0=right, 1=left, 2=up
     lsr
-    bcc +
-        tya
-        eor #$FF
-        adc #$00            ;Carry always set here
-        sta ObjHorzSpeed,x
-*   jsr CheckBulletHitBackground
+    bne VerticalWave
+
+    ; Horizontal shot:
+    ; X speed = +/- 3
+    ; Y speed = waveform
+    lda #$03
+    bcc StoreHorizontalWaveSpeed
+        lda #$FD
+
+StoreHorizontalWaveSpeed:
+    sta ObjHorzSpeed,x
+
+    lda WaveSpeedTable,y
+    sta ObjVertSpeed,x
+
+    ; WaveSpeedTable never contains zero.
+    bne AdvanceWave
+
+VerticalWave:
+    ; Vertical shot:
+    ; Y speed = -3
+    ; X speed = waveform
+    lda #$FD
+    sta ObjVertSpeed,x
+
+    lda WaveSpeedTable,y
+    sta ObjHorzSpeed,x
+
+AdvanceWave:
+    iny
+    cpy #$0C
+    bne StoreWavePhase
+        ldy #$00
+
+StoreWavePhase:
+    tya
+    sta $0500,x
+
+    ; Original collision/movement code
+    jsr CheckBulletHitBackground
     bcs +
-        ldx PageIndex       ; CheckBulletHitBackground clobbers X when a bullet hits a door.
+        ldx PageIndex
         jsr MoveBulletX
+
 *   jmp CheckBulletStat
+    ; safe
 
 LD5DA:
     lda $030A,x         ; Is bullet hit (not samus)
@@ -3647,14 +3745,14 @@ LD5DA:
         sta $030A,x
 LD5E4:  
     ldy ObjAction,x
-    cpy #wa_BulletExplode
+    cpy #wa_BulletExplode   ; wa_BulletExplode == $04
     beq Exit5
         lda #$1D
-        cpy #wa_Missile
+        cpy #wa_Missile     ; wa_Missile == $0B
         bne +
-            lda #an_MissileExpld
+            lda #an_MissileExpld    ; an_MissileExpld == $91
     *   jsr SetProjectileAnim
-        lda #wa_BulletExplode
+        lda #wa_BulletExplode   ; wa_BulletExplode == $04
     *   sta ObjAction,x
 Exit5:
     rts
@@ -3766,7 +3864,12 @@ SFXBombExplode_Inline:
 
 LayBomb3and6:
     inc $030F,x
-    jsr ComplexBombLayingLogic
+
+    lda $030F,x
+    cmp #$06
+    bcs AfterBombLogic
+        jsr ComplexBombLayingLogic
+AfterBombLogic:
     ldx PageIndex
     lda AnimFrame,x
     sec
@@ -3777,111 +3880,134 @@ LayBomb3and6:
     ; safe
 
 ComplexBombLayingLogic:
-    jsr GetObjCoords
+    ;GetObjCoords:
 
-    lda $04
-    sta $0A
+    ; X == PageIndex here
+    lda ObjectHi,x  
+    ;and #$01           ; ObjectHi,x is always 0 or 1 so no AND needed
+    ora #$18 
+    sta $05 
+
+    lda ObjectY,x 
+    and #$F8
+    asl 
+    rol $05 
+    asl 
+    rol $05 
+    sta $04 
 
     lda $05
     sta $0B
-    
+
+    lda ObjectX,x
+    lsr 
+    lsr 
+    lsr 
+    ora $04
+    sta $04 
+    sta $0A
+
     ;ldx PageIndex  
     ldy $030F,x
     dey
-    beq ++
-    dey
-    bne +++
-    lda #$40
-    jsr LD78B
-    txa
-    bne +
-        lda $04
-        and #$20
-        beq Exit6
+    beq +
+        dey
+        bne ++
+            lda #[$40 ^ $FF]
+            jsr LD78B   ; Ends with $05 loaded into A
+            and #$03
+            cmp #$03
+            bne +
+                lda $04
+                cmp #$C0
+                bcc +
+                    lda ScrollDir
+                    and #$02
+                    bne Exit6
 
-*   lda $05
-    and #$03
-    cmp #$03
-    bne +
-        lda $04
-        cmp #$C0
-        bcc +
-            lda ScrollDir
-            and #$02
-            bne Exit6
+                        lda #[$80 ^ $FF]    ; #$80 ^ #$FF == #$7F
+                        jsr LD78B
+*   jmp LD76A
 
-            lda #$80
-            jsr LD78B
-*   jsr LD76A
 Exit6:  rts
 
 *   dey
-    bne +++
-    lda #$40
-    jsr LD77F
-    txa
     bne +
-    lda $04
-    and #$20
-    bne Exit6
-*   lda $05
-    and #$03
-    cmp #$03
-    bne +
-    lda $04
-    cmp #$C0
-    bcc +
-    lda ScrollDir
-    and #$02
-    bne Exit6
-    lda #$80
-    jsr LD77F
-*   jmp LD76A
+        lda #$40
+        clc
+        adc $0A
+        sta $04
 
-*   dey
-    bne +++
-    lda #$02
-    jsr LD78B
-    txa
-    bne +
-    lda $04
-    lsr
-    bcc Exit7
-*   lda $04
-    and #$1F
-    cmp #$1E
-    bcc +
-    lda ScrollDir
-    and #$02
-    beq Exit7
-    lda #$1E
-    jsr LD77F
-    lda $05
-    eor #$04
-    sta $05
-*   jmp LD76A
+        lda $0B
+        adc #$00
+        and #$67
+        sta $05
+        and #$03
+        cmp #$03
+        bne LD76A
+            lda $04
+            cmp #$C0
+            bcc LD76A
+                lda ScrollDir
+                anc #$02
+                bne Exit6
+                    lda #$80
+                    adc $0A
+                    sta $04
 
+                    lda $0B
+                    adc #$00
+                    and #$67
+                    sta $05
+                    jmp LD76A
+                    ; safe
 *   dey
+    bne +
+        lda #[$02 ^ $FF] 
+        jsr LD78B
+        lda $04
+        and #$1F
+        cmp #$1E
+        bcc LD76A
+            lda ScrollDir
+            anc #$02
+            beq Exit7
+                lda #$1E
+                adc $0A
+                sta $04
+
+                lda $0B
+                adc #$00
+                and #$67
+                eor #$04
+                sta $05
+
+                jmp LD76A
+                ; safe
+
+*   dey 
     bne Exit7
-    lda #$02
-    jsr LD77F
-    txa
-    bne +
-    lda $04
-    lsr
-    bcs Exit7
-*   lda $04
-    and #$1F
-    cmp #$02
-    bcs LD76A
-    lda ScrollDir
-    and #$02
-    beq Exit7
-    lda #$1E
-    jsr LD78B
-    lda $05
-    eor #$04
-    sta $05
+        lda #$02
+        clc
+        adc $0A
+        sta $04
+
+        lda $0B
+        adc #$00
+        and #$67
+        sta $05
+
+        lda $04
+        and #$1F
+        cmp #$02
+        bcs LD76A
+            lda ScrollDir
+            and #$02
+            beq Exit7
+                lda #[$1E ^ $FF]    ; #$1E ^ #$FF == #$E1
+                jsr LD78B           ; Ends with A == $05
+                eor #$04
+                sta $05
 
 .scope
 LD76A:
@@ -3908,29 +4034,17 @@ Exit7:
 
 .scend
 
-; called with #$40, #$80, #$02, and #$1E
-LD77F:
-    clc
+; called with A == #$40, #$80, #$02, and #$1E
+;  but in order to remove a call to "eor #$FF"
+;  the assembler does that operation ahead of time
+; Ends with A == $05
+LD78B:
+    sec
     adc $0A
     sta $04
 
     lda $0B
-    adc #$00
-    jmp LD798
-    ; safe
-
-; called with #$40, #$80, #$02, and #$1E
-LD78B:
-    sta $00
-
-    lda $0A
-    sec
-    sbc $00
-    sta $04
-
-    lda $0B
-    sbc #$00
-LD798:
+    adc #$FF
     and #$07
     ora #$60
     sta $05
@@ -3957,33 +4071,39 @@ UpdateElevatorTable_LoByte:
 ElevatorIdle:
     lda SamusOnElevator
     beq ShowElevator
-    lda #$04
-    bit $032F       ; elevator direction in bit 7 (1 = up)
-    bpl +
-        asl     ; btn_UP
-*   and Joy1Status
-    beq ShowElevator
-    ; start elevator!
-    jsr StopVertMovement        ;($D147)
-    sty SamusAnimDelay
-    sty SamusGravity
-    ;tya
-    sty ObjVertSpeed + $20
-    inc ObjAction + $20
-    lda #sa_Elevator
-    sta SamusObjAction
-    lda #an_SamusFront
-    jsr SetSamusAnim
-    lda #128
-    sta SamusObjectX     ; center
-    lda #112
-    sta SamusObjectY     ; center
+        lda #$04
+        bit $030F + $20       ; elevator direction in bit 7 (1 = up)
+        bpl +
+            asl     ; btn_UP
+    *   and Joy1Status
+        beq ShowElevator
+            ; start elevator!
+            jsr StopVertMovement    ; Sets Y == 0
+            sty SamusAnimDelay
+            sty SamusGravity
+            ;tya
+            sty ObjVertSpeed + $20
+
+            inc ObjAction + $20     ; sets ObjAction + $20 to $02
+
+            lda #sa_Elevator        ; sa_Elevator == $07
+            sta SamusObjAction
+
+            lda #an_SamusFront      ; an_SamusFront == $04
+            jsr SetSamusAnim
+
+            lda #128
+            sta SamusObjectX        ; center
+
+            lda #112
+            sta SamusObjectY        ; center
 
 ShowElevator:
     lda FrameCount
     lsr
-    bcc Exit99          ; only display elevator at odd frames
-    jmp DrawFrame       ; display elevator
+    bcc Exit99              ; only display elevator at odd frames
+        jmp DrawFrame       ; display elevator
+    ; safe
 
 LD80E:
     lda ScrollX
@@ -3997,7 +4117,8 @@ LD80E:
         sta ScrollDir
 
         inc ObjAction + $20
-        jmp ShowElevator
+        bne ShowElevator       ; branch always
+        ; safe
 
 *   lda #$80
     sta SamusObjectX
@@ -4010,6 +4131,7 @@ LD80E:
         jmp ShowElevator
 
 *   jsr ScrollRight
+ShowElevator_Trampoline:
     jmp ShowElevator
     ;safe
 
@@ -4017,15 +4139,15 @@ ElevatorMove:
     lda $030F + $20
     bpl ++    ; branch if elevator going down
 
-    ; move elevator up one pixel
-    ldy ObjectY + $20
-    bne +
-        jsr ToggleObjectHi
-        ldy #240
-*   dey
-    tya
-    sta ObjectY + $20
-    jmp ++
+        ; move elevator up one pixel
+        ldy ObjectY + $20
+        bne +
+            jsr ToggleObjectHi
+            ldy #240
+    *   dey
+        tya
+        sta ObjectY + $20
+        jmp ++
 
     ; move elevator down one pixel
     ; TOOD: Replace with ISC
@@ -4046,11 +4168,16 @@ ElevatorScroll:
     lda ScrollY
     bne ElevScrollRoom  ; scroll until ScrollY = 0
 
+        inc ObjAction + $20     ; Set to #$05
+
         lda #$4E
         sta SamusAnimResetIndex
 
-        lda #$41
-        sta SamusAnimIndex
+        ldy #$41
+        sty SamusAnimIndex
+
+        dey         ; Y = #$40
+        sty Timer1
 
         lda #$5D
         sta AnimResetIndex + $20
@@ -4058,11 +4185,7 @@ ElevatorScroll:
         lda #$50
         sta AnimIndex + $20
 
-        inc ObjAction + $20
-        lda #$40
-        sta Timer1
-
-        jmp ShowElevator    ; branch always
+        bne ShowElevator_Trampoline    ; branch always
         ; safe
 
 ElevScrollRoom:
@@ -4100,7 +4223,8 @@ LD8BF:
     cpy #$8F    ; Leads-To-Ending elevator?
     bne +
         ; Samus made it! YAY!
-        lda #$07
+
+        lda #mrtn_IncrementRoutine  ; mrtn_IncrementRoutine == $07
         sta MainRoutine
 
         ldy #$00
@@ -4178,7 +4302,7 @@ StartMusic:
 
 *   ora MusicInitFlag       ;
     sta MusicInitFlag       ;Store music flag info.
-    rts             ;
+    rts 
 
 ElevatorStop:
     lda ScrollY
@@ -4566,7 +4690,7 @@ LDB34:  BPL MakeBitMaskLoop
 LDBDD:  ORA SamusGear           ;
 LDBE0:  STA SamusGear           ;Update Samus gear with new beam weapon.
 
-LDBE3:* LDA #$FF            ;
+LDBE3:* LDA #$FF 
 LDBE5:  STA PowerUpDelay        ;Initiate delay while power up music plays.
 LDBE8:  STA PowerUpType,x       ;Clear out item data from RAM.
 LDBEB:  LDY ItemRmMusicSts      ;Is Samus not in an item room?
@@ -4938,68 +5062,68 @@ UpdateSamusObjAnim:
 MoveEnemies_Continued:
     lda #$00
     sta ObjectCntrl         ;Clear object control byte.
-    PLA
-    PLA
+    pla 
+    pla 
     ;LDX PageIndex
 LDCFC:  
     ldy EnDataIndex,x
-    LDA InArea
-    CMP #$13
-    BNE +
+    lda InArea 
+    cmp #$13
+    bne +
         cpy #$04
-        BEQ KillObject2
-        cpy #$02
-        BEQ KillObject2
+        beq KillObject2 
+            cpy #$02
+            beq KillObject2 
 
 *   lda $040C,x
     asl 
-    bmi OnBossKilled
+    bmi OnBossKilled 
 
-    lda $968B,y
-    sta $00
+        lda $968B,y
+        sta $00
 
-    lda $977B,y
-    asl              
-    and #$20
-    sta EnDataIndex,x
+        lda $977B,y
+        asl              
+        and #$20
+        sta EnDataIndex,x
 
-    lda #$05
-    sta EnStatus,x
+        lda #$05
+        sta EnStatus,x
 
-    lda #$60
-    sta $040D,x
+        lda #$60
+        sta $040D,x
 
-    LDA RandomNumber1
-    CMP #$10
-    BCC LDD5B
+        lda RandomNumber1 
+        cmp #$10
+        bcc LDD5B 
 
-    MoveEnemies_Continued_Loop:
-    *   AND #$07
-        TAY
-        LDA ItemDropTbl,y
-        STA EnAnimFrame,x
-        CMP #$80
-        BNE TurnEnemyIntoItemDrop
+            MoveEnemies_Continued_Loop:
+            *   and #$07
+                tay 
+                lda ItemDropTbl,y
+                sta EnAnimFrame,x
+                cmp #$80
+                bne TurnEnemyIntoItemDrop 
 
-        TurnEnemyIntoMissleDrop:
-            LDY MaxMissilePickup
-            CPY CrntMslePickups
-            BEQ LDD5B
-                LDA MaxMissiles
-                BEQ LDD5B
-                    INC CrntMslePickups
+                TurnEnemyIntoMissleDrop:
+                    ldy MaxMissilePickup 
+                    cpy CrntMslePickups 
+                    beq LDD5B 
+                        lda MaxMissiles 
+                        beq LDD5B 
+                            inc CrntMslePickups 
 EXIT_67:
-*   RTS
+*   rts 
 
 TurnEnemyIntoItemDrop:
-*   LDY MaxEnergyPickup
-    CPY CrntEnrgyPickups
-    BEQ LDD5B
-        INC CrntEnrgyPickups
-        CMP #$89
-        BNE EXIT_67
-            LSR $00
-            BCS EXIT_67
+*   ldy MaxEnergyPickup 
+    cpy CrntEnrgyPickups 
+    beq LDD5B 
+        inc CrntEnrgyPickups 
+        cmp #$89
+        bne EXIT_67 
+            lsr $00
+            bcs EXIT_67 
 
 ; When in tourian it looks like
 ; KeepTrackOfHowManyRoomPickupsHaveDropped goes into an infinite loop
@@ -5007,9 +5131,9 @@ TurnEnemyIntoItemDrop:
 ; Tested with NARPASSWORD.
 LDD5B:
     ;ldx PageIndex
-    lda InArea
+    lda InArea 
     cmp #$13
-    beq KeepTrackOfHowManyRoomPickupsHaveDropped
+    beq KeepTrackOfHowManyRoomPickupsHaveDropped 
 
     KillObject2:
     *   lda #$00
@@ -5017,15 +5141,15 @@ LDD5B:
         rts
 
 KeepTrackOfHowManyRoomPickupsHaveDropped:
-*   lda RandomNumber1
+*   lda RandomNumber1 
 
     ldy #$00
-    sty CrntEnrgyPickups
-    sty CrntMslePickups
+    sty CrntEnrgyPickups 
+    sty CrntMslePickups 
 
-    iny
-    sty MaxEnergyPickup
-    sty MaxMissilePickup
+    iny 
+    sty MaxEnergyPickup 
+    sty MaxMissilePickup 
     bne MoveEnemies_Continued_Loop  ; branch always
     ; safe
 
@@ -5038,20 +5162,20 @@ OnBossKilled:
     lda InArea
     and #$0F
     sta MiniBossKillDly
-    lsr
-    tay
+    lsr 
+    tay 
     sta KraidStatueStat - 1,y       ; TODO : I think this is bugged beacuse I moved "MaxMissiles"
 
     clc                 ; because of the lsr above, we need this
     lda #75
-    adc MissileCount
-    sta MissileCount
+    adc MissileCount 
+    sta MissileCount 
 
     lda #75
-    adc MaxMissiles
-    sta MaxMissiles
+    adc MaxMissiles 
+    sta MaxMissiles 
 
-    jsr CacheMissileGraphics
+    jsr CacheMissileGraphics 
     bne LDD5B               ; Branch always
     ; safe
     
@@ -5418,51 +5542,51 @@ DrawEnemyFramePPUPart:
 
 ;Special case for Samus exploding.
 SamusExplodeDisplacement:
-    adc ObjectCounter       ;Increments every frame Samus is exploding. Initial=#$01.
+    adc ObjectCounter           ;Increments every frame Samus is exploding. Initial=#$01.
 SamusExplodeDisplacement_2:
-    tay             ;
+    tay 
     lda ExplodeIndexTbl+2,y     ;Get data from ExplodePlacementTbl.
-    pha             ;Save data on stack.
-    lda $0F             ;Load placement data index.
-        clc             ;
-        adc #$0C            ;Move index forward by 12 bytes. to find y
-        tay             ;placement data.
-    pla             ;Restore A with ExplodePlacementTbl data.
-    clc             ;
-    adc ($02),y         ;Add table displacements with sprite placement data.
-    bit $04             ;
-    bmi NegativeDisplacementY    ;Branch if MSB in $04 is set(Flips object).
-    clc
-    bpl AfterYDisplacement      ; branch always
-    ; safe
+    pha                         ;Save data on stack.
+        lda $0F                 ;Load placement data index.
+        clc 
+        adc #$0C                ;Move index forward by 12 bytes. to find y
+        tay                     ;placement data.
+    pla                         ;Restore A with ExplodePlacementTbl data.
+    clc 
+    adc ($02),y                 ;Add table displacements with sprite placement data.
+    bit $04 
+    bmi NegativeDisplacementY   ;Branch if MSB in $04 is set(Flips object).
+        clc
+        bpl AfterYDisplacement  ;branch always
+        ; safe
 
 .scope
 ExplodeXDisplace:
     ldy PageIndex           ;Load index to proper enemy slot.
     lda EnCounter,y         ;Load counter value.
-    ldy IsSamus         ;Is Samus the one exploding?
-    beq _Skip1          ;If not, branch.
-    lda ObjectCounter       ;Load object counter if it is Samus who is exploding.
+    ldy IsSamus             ;Is Samus the one exploding?
+    beq _Skip1              ;If not, branch.
+        lda ObjectCounter   ;Load object counter if it is Samus who is exploding.
 _Skip1:
-    asl             ;*2. Move sprite in x direction 2 pixels every frame.
-    pha             ;Store value on stack.
-    ldy $0F             ;
-    lda ($02),y         ;Load placement data byte.
-    lsr             ;
-    bcs _Skip2       ;Check if LSB is set. If not, the byte stored on stack
-    pla             ;Will be twos complimented and used to move sprite in
-    eor #$FF            ;the negative x direction.
-    adc #$01            ;
-    pha
-_Skip2:         ;
-    lda $0F             ;Load placement data index.
-    clc             ;
-    adc #$0C            ;Move index forward by 12 bytes. to find x
-    tay             ;placement data.
-    pla             ;Restore A with x displacement data.
-    clc             ;
-    adc ($02),y         ;Add x displacement with sprite placement data.
-    jmp XDisplacementBitCheck ;Branch to add x placement values to sprite coords.
+    asl                     ;*2. Move sprite in x direction 2 pixels every frame.
+    pha                     ;Store value on stack.
+    ldy $0F 
+    lda ($02),y             ;Load placement data byte.
+    lsr 
+    bcs _Skip2              ;Check if LSB is set. If not, the byte stored on stack
+        pla                 ;Will be twos complimented and used to move sprite in
+        eor #$FF            ;the negative x direction.
+        adc #$01
+        pha
+_Skip2: 
+    tya                     ;Load placement data index.
+    clc 
+    adc #$0C                ;Move index forward by 12 bytes. to find x
+    tay                     ;placement data.
+    pla                     ;Restore A with x displacement data.
+    clc 
+    adc ($02),y             ;Add x displacement with sprite placement data.
+    jmp XDisplacementBitCheck   ;Branch to add x placement values to sprite coords.
     ; safe
 .scend
 
@@ -5472,21 +5596,21 @@ LDEE6: ldy $0F             ;Load index for placement data.
 .scope
 YDisplacement:
     lda ($02),y         ;Load placement data byte.
-    tay             ;
+    tay 
     and #$F0            ;Check to see if this is placement data for the object
     cmp #$80            ;exploding.  If so, branch.
-    beq ExplodeYDisplace              ;
+    beq ExplodeYDisplace 
         tya             ;Restore placement data byte to A.
-        bit $04             ;
+        bit $04 
         bmi NegativeDisplacementY    ;Branch if MSB in $04 is set(Flips object).
         bpl _ClearAndExit
 
 ExplodeYDisplace:
     tya             ;Transfer placement byte back into A.
     asr #$0E            ;Discard bits 7,6,5,4 and 0.
-    tay             ;
+    tay 
     lda ExplodeIndexTbl,y       ;Index into ExplodePlacementTbl.
-    ldy IsSamus         ;
+    ldy IsSamus 
     bne SamusExplodeDisplacement  ;Is Samus the object exploding? if so, branch.
         ldy PageIndex           ;Load index to proper enemy data.
         adc EnCounter,y         ;Increment every frame enemy is exploding. Initial=#$01.
@@ -5494,8 +5618,8 @@ ExplodeYDisplace:
         ; safe
 
 NegativeDisplacementY:
-    eor #$FF            ;
-    sec             ;NOTE:Setting carry makes solution 1 higher than expected.
+    eor #$FF 
+    sec                 ;NOTE:Setting carry makes solution 1 higher than expected.
     adc #$F8            ;If flip bit is set in $04, this function flips the
 _ClearAndExit:
     sec
@@ -5526,10 +5650,10 @@ LDF09:  ldy $0F             ;Load index for placement data.
 .scope
 XDisplacement:
     lda ($02),y         ;Load placement data byte.
-    tay             ;
+    tay 
     and #$F0            ;Check to see if this is placement data for the object
     cmp #$80            ;exploding.  If so, branch.
-    beq ExplodeXDisplace ;
+    beq ExplodeXDisplace 
     tya             ;Restore placement data byte to A.
 
 XDisplacementBitCheck:
@@ -5549,7 +5673,7 @@ _ClearAndExit:
 ;AfterXDisplacement:
 
 LDF0E:  adc $0E             ;Add initial X pos
-LDF10:  sta SpriteRAM+3,x     ;Store sprite X coord
+LDF10:  sta SpriteRAM+3,x   ;Store sprite X coord
 LDF13:  inc $0F             ;Increment to next placement data byte.
         txa
         sbx #$FC            ; Add 4 to X
@@ -5569,13 +5693,13 @@ LDF21:  beq OffsetObjectPosition    ;if == $FC changes object's x and y position
 LDF2B:  stx SpritePagePos           ;Keep track of current position in sprite RAM.
 
 ;ClearObjectCntrl:
-LDF2D:  lda #$00                    ;
+LDF2D:  lda #$00 
 LDF2F:  sta ObjectCntrl             ;Clear object control byte.
-LDF31:  rts                         ;
+LDF31:  rts 
 
 SkipPlacementData:
-    lda $0F                     ;Skip next y and x placement data bytes.
-    adc #$01
+    lda $0F                         ;Skip next y and x placement data bytes.
+    adc #$01                        ;Carry == 1 here so this is actually A + 2
     sta $0F
 LDF36:  inc $11                     ;Increment to next data item in frame data.
 LDF38:  bne DrawSpriteObject        ;Branch Always - ($DF19)Draw next sprite.
@@ -5603,8 +5727,8 @@ GetNewControlByte:
         and #$C0                    ;Extract the two sprite flip bytes from theoriginal
         ora ObjectCntrl             ;control byte and set any additional bits from ObjectCntrl.
         sta $05                     ;Store modified byte to load in sprite control byte later.
-        lda ObjectCntrl             ;
-        ora #$80                    ;
+        lda ObjectCntrl 
+        ora #$80 
         sta ObjectCntrl             ;Ensure MSB of object control byte remains set.
         bne GetNextFrameByte        ;Branch Always - ($DF1B)Load next frame data byte.
         ;safe
@@ -5634,13 +5758,14 @@ OffsetObjectPosition:
 ;current screen.  The function needs to know what nametable is currently in the PPU, what nametable
 ;the object is on and what the scroll offsets are. 
 
+
+; Visibility core contract:
+; A = object's nametable bit, Y = horizontal radius, X preserved.
+; $10 already holds Y-scroll delta for vertical callers.
+; $0E already holds X-scroll delta for horizontal callers.
+; Carry on entry is from that coordinate subtraction.
 ; Clobbers Y
 ; Does not clobber X
- ; Visibility core contract:
- ; A = object's nametable bit, Y = horizontal radius, X preserved.
- ; $10 already holds Y-scroll delta for vertical callers.
- ; $0E already holds X-scroll delta for horizontal callers.
- ; Carry on entry is from that coordinate subtraction.
 
  .scope
 IsObjectVisible_VertCore:
@@ -5663,10 +5788,10 @@ _VisVisible:
 
 _VisVertSame:
     bcc _VisInvisible
-    tya
-    cmp $10
-    bcs _VisInvisible
-    bcc _VisVisible
+        tya
+        cmp $10
+        bcs _VisInvisible
+        bcc _VisVisible
 
 IsObjectVisible_HorzCore:
     eor PPUCNT0ZP
@@ -5674,17 +5799,17 @@ IsObjectVisible_HorzCore:
     beq _VisHorzSame
     bcs _VisInvisible
 
-    tya
-    adc $0E                   ; C=0 from position subtraction.
-    bcc _VisVisible
-    bcs _VisInvisible
-    ; safe
+        tya
+        adc $0E                   ; C=0 from position subtraction.
+        bcc _VisVisible
+        bcs _VisInvisible
+        ; safe
 
 _VisHorzSame:
     bcc _VisInvisible
-    tya
-    cmp $0E
-    bcc _VisVisible
+        tya
+        cmp $0E
+        bcc _VisVisible
 
 _VisInvisible:
     lda #$00
@@ -6489,29 +6614,29 @@ Exit104:
 ScrollUp:
     lda ScrollDir
     beq +
-    cmp #$01
-    bne ++++
-    dec ScrollDir
-    lda ScrollY
-    beq +
-    dec MapPosY
+        cmp #$01
+        bne ++++
+            dec ScrollDir
+            lda ScrollY
+            beq +
+                dec MapPosY
 *   ldx ScrollY
     bne +
-    dec MapPosY                     ; decrement MapY
-    lda #$00
-    sta Quarter
-    jsr GetRoomNum                  ; put room # at current map pos in $5A
-    bcs ++                          ; if function returns CF = 1, moving up is not possible
-    jsr SwitchToOppositeNameTable
-    ldx #240    ; new Y coord
+        dec MapPosY                             ; decrement MapY
+        lda #$00
+        sta Quarter
+        jsr GetRoomNum                          ; put room # at current map pos in $5A
+        bcs ++                                  ; if function returns CF = 1, moving up is not possible
+            jsr SwitchToOppositeNameTable
+            ldx #240                          ; new Y coord
 *   dex
-    cpx #MidScreenVertical + 4          ; Load just a bit before you reach the half way point vertically
-    bne SkipScrollUpMidwayMap
+    cpx #MidScreenVertical + 4                  ; Load just a bit before you reach the half way point vertically
+    bne LE53F
         lda #$02
         sta Quarter
         jsr GetRoomNum
-    SkipScrollUpMidwayMap:
-    jmp LE53F
+        jmp LE53F
+    ; safe
 
 *   inc MapPosY
 *   sec
@@ -6524,17 +6649,17 @@ ScrollDown:
     dex
     beq +
     bpl +++++
-    inc ScrollDir
-    lda ScrollY
-    beq +
-    inc MapPosY
+        inc ScrollDir
+        lda ScrollY
+        beq +
+            inc MapPosY
 *   lda ScrollY
     bne +
-    inc MapPosY     ; increment MapY
-    ;lda #$00       ; A == 0 here
+    inc MapPosY             ; increment MapY
+    ;lda #$00               ; A == 0 here
     sta Quarter
-    jsr GetRoomNum  ; put room # at current map pos in $5A
-    bcs +++   ; if function returns CF = 1, moving down is not possible
+    jsr GetRoomNum          ; put room # at current map pos in $5A
+    bcs +++                 ; if function returns CF = 1, moving down is not possible
 *   ldx ScrollY
     cpx #MidScreenVertical - 1
     bne SkipScrollDownMidwayMap
@@ -6544,8 +6669,8 @@ ScrollDown:
     SkipScrollDownMidwayMap:
     cpx #239
     bne +
-    jsr SwitchToOppositeNameTable
-    ldx #$FF
+        jsr SwitchToOppositeNameTable
+        ldx #$FF
 *   inx
 LE53F:
     stx ScrollY
@@ -6584,14 +6709,14 @@ LE70C:
     cpy TempScrollDir
     bne Exit_35
 
-    lda ScrollX
-    lsr         ; keep upper five bits
-    lsr 
-    lsr         ; / 8 (make 'em lower five)
-    sta $00
+        lda ScrollX
+        lsr         ; keep upper five bits
+        lsr 
+        lsr         ; / 8 (make 'em lower five)
+        sta $00
 
-    lda #$00
-    beq LE590   ; branch always
+        lda #$00
+        beq LE590   ; branch always
     ; safe
 
 ; check if it's time to update nametable (when scrolling is VERTICAL)
@@ -6607,15 +6732,15 @@ LE57C:
     cpy TempScrollDir       ;Still scrolling same direction when room was loaded?
     bne Exit_35              ;If not, branch to exit.
 
-    lda ScrollY
-    and #$F8                ; keep upper 5 bits
-    sta $00
-    
-    lda #$00
-    asl $00
-    rol
-    asl $00
-    rol
+        lda ScrollY
+        and #$F8                ; keep upper 5 bits
+        sta $00
+
+        lda #$00
+        asl $00
+        rol
+        asl $00
+        rol
 
 LE590:
     sta $01                 ; $0001 = (ScrollY & 0xF8) << 2 = row offset
@@ -7029,7 +7154,7 @@ LE7DE:
 ObjectBackgrounCollisionCheck:
 ;    jsr MakeCartRAMPtr      ;($E96A)Find object position in room RAM.
     lda $0B   
-    and #$01  
+    and #$01                 ; This one can't be removed
     ora #$18  
     sta $05
 
@@ -7314,6 +7439,8 @@ LE934:
 
 ;-------------------------------------[ Get object coordinates ]------------------------------------
 
+; ends with $04 loaded into A
+
 GetObjCoords:
 LD79F:  ldy PageIndex           ;Load index into object RAM to find proper object.
 ;LD7A1:  lda ObjectY,y           ;
@@ -7326,7 +7453,7 @@ LD79F:  ldy PageIndex           ;Load index into object RAM to find proper objec
 ; HCSS
 ;MakeCartRAMPtr:
     lda ObjectHi,y  ; ObjectHi
-    and #$01        ; isolate the one bit we need
+    ;and #$01       ; Removing this line because ObjectHi should always be 0 or 1 here
     ora #$18        ; fold in the base constant (no overlap w/ bit 0)
     sta $05         ; preset hi-byte accumulator = $18 | H
 
@@ -7813,14 +7940,15 @@ LEAB0:  bcc DrawObject      ;If so, branch to exit.
 LEAB6:  bne EndOfRoomLoad   ;is A=#$FD(end-of-objects)?
 
 LoadRoomFeatures:
-LEACA:  lda RoomPtr         ;
-LEACC:  sta $00             ;Store room pointer in $0000.
-LEACE:  lda RoomPtr+1       ;
-LEAD0:  sta $01             ;
-        inc $00
-        bne LoadRoomFeatureRoutine
-            inc $01
-; End of Draw Room
+    lda RoomPtr+1 
+    sta $01 
+
+    ldx RoomPtr 
+    inx 
+    stx $00             ;Store room pointer in $0000.
+
+    bne LoadRoomFeatureRoutine
+        inc $01
         bne LoadRoomFeatureRoutine   ; branch always
         ; safe
 ;----------------------------------------------------------------------------------------------------
@@ -7828,15 +7956,14 @@ LEAD0:  sta $01             ;
 EndOfRoomLoad:
     inc Quarter
     lda Quarter
-    and #$01
-    beq Quarter2And4RoomEnd
-
-EndOfRoomExit:
-    rts
+    lsr
+    bcc Quarter2And4RoomEnd     ; branch if Quarter == 2 or 4
+        rts
 
 Quarter2And4RoomEnd:
     ldx #$F0                ;Prepare for PPU attribute table write.
-    stx RoomNumber 
+    stx RoomNumber
+
     lax ScrollDir 
     tay
     sta TempScrollDir       ;Make temp copy of ScrollDir.
@@ -8693,21 +8820,21 @@ ElevatorHandler:
     bne SetATo2AndJumpToHandlerRoutine      ; exit if elevator already present
         iny                     ; Set Y == 1
         lda ($00),y
-        sta $032F
+        sta $030F + $20
 
         sty ElevatorStatus      ; Y == 1 here
 
         ldy #$83
-        sty $032D               ; elevator Y coord
+        sty $030D + $20         ; elevator Y coord
 
         lda #$80
-        sta $032E               ; elevator X coord
+        sta $030E + $20         ; elevator X coord
 
         jsr GetNameTable        ;($EB85)
-        sta $032C               ; high Y coord
+        sta $030C + $20         ; high Y coord
 
         lda #$23
-        sta $0323               ; elevator frame
+        sta $0303 + $20         ; elevator frame
 
 SetATo2AndJumpToHandlerRoutine:
     lda #$02
@@ -8820,7 +8947,6 @@ DrawMacroEntryHi:
 DrawMacroEntryLo:
     .byte <DrawMacro1, <DrawMacro2, <DrawMacro3, <DrawMacro4, <DrawMacro5, <DrawMacro6, <DrawMacro7, <DrawMacro8 
 
-; IMPORTANT - It is vitally important that all DrawMacro calls are on the same memory page
 DrawMacro8:
     ldy #$08
     lax (StructPtr),y
@@ -9075,8 +9201,7 @@ CollisionDetection:
     sta BulletSlotCache + $F0
 
     lda #$FF
-    sta $73
-    sta $010F
+    sta SamusHitReaction
 
     lda MemuStatus + $18
     ora MemuStatus + $10
@@ -9435,8 +9560,7 @@ LF282:
     bcs Exit21
     lda EnDataIndex,x
 
-*   sta $010F
-    tay
+*   tay
     bmi +
         lda $968B,y
         and #$10
@@ -9499,8 +9623,6 @@ LF2ED:
     pla
     tay
     bcc +
-        lda #$80
-        sta $010F
 
         lda $10
         eor #$03
@@ -9526,9 +9648,6 @@ LF2ED:
 
 ; Conventient side effect of setting A to 0
 LF311:  
-    lda #$E0
-    sta $010F
-
     lda $10
     asl
     asl
@@ -9539,7 +9658,7 @@ LF311:
     lda $0F
     beq +
         lda #$01
-*   sta $73
+*   sta SamusHitReaction
 
 ; ClearHealthChange:
     ; This code is fired when:
@@ -9550,6 +9669,7 @@ LF311:
     ; So to save bytes we will have that be the default
     lda #$50
     sta HealthLoChange
+
     lda #$00
     sta HealthHiChange
 
@@ -10197,7 +10317,7 @@ SFX_BigEnemyHit_Inline:
     ; safe
 
 *   lda $95DD
-    jsr SetAnimationIndex
+    jsr SetAnimationIndex 
 
     lda #$0A
     sta EnCounter,x
@@ -10498,15 +10618,9 @@ Bank07_LF870:
     and #$10
     beq Exit33
 
-    lda $87
-    and EnStatus,x
-    beq Exit33
-
-    lda $87
-    bpl LF8E8
-    
-        ldy $6B01,x
-        bne Exit33
+        lda $87
+        and EnStatus,x
+        beq Exit33
 
 ; Monsters That spit lava
 LF8E8:                  ; inlined
@@ -10546,19 +10660,18 @@ AfterLavaJumpLoop:
     ;tax
     ;pla
 
-    jsr SetAnimationIndex
+    jsr SetAnimationIndex   ; Sets A == $00
+    sta $0402,y
 
     ldx PageIndex
 
     lda #$01
     sta EnStatus,y
+
     and EnAttr_05,x
     tax
     lda Table15,x
     sta $0403,y
-
-    lda #$00
-    sta $0402,y
 
     ldx PageIndex
 
@@ -10583,6 +10696,7 @@ AfterLavaJumpLoop:
     lsr
     pla
     tax
+    
     lda $97A3,x
     sta $04
 
@@ -10602,13 +10716,7 @@ AfterLavaJumpLoop:
     jsr StoreUpdatedObjectLocation
 
     ldx PageIndex
-    bit $87
-    bvc Exit19
-        lda $0405,x
-        and #$01
-        tay
-        lda $0083,y
-        jmp Bank07_LFBB9
+    rts 
 
 ; X is always the enemy index here
 DoOneEnvironmentalEnemyUpdate:
@@ -10634,11 +10742,13 @@ LF96A:
     beq +
         jsr LFA60
 *   jsr Bank07_LFA1E
+
     ldx PageIndex
     bcs LF97C
         lda EnStatus,x
         beq Exit19
             jsr LFA60       ; Maybe inline?
+
 LF97C:
     lda #$01
 LF97E:
@@ -10665,6 +10775,7 @@ EnvEnemyUpdateRoutine_2:
     TAY
     LDA $97A7,y
     STA $0A
+
     LDA $97A8,y
     STA $0B
 
@@ -10739,19 +10850,19 @@ Bank07_LFA1E:
     lda InArea
     cmp #$11
     bne +
-    lda EnStatus,x
-    lsr
-    bcc ++
+        lda EnStatus,x
+        lsr
+        bcc ++
 ;LFA7D:
 *   ldx PageIndex
 
-    lda EnNameTable,x
-    and #$01
-    ora #$18
+    lda EnNameTable,x 
+    ;and #$01               ; EnNameTable,x will always be 0 or 1 so this line can be removed
+    ora #$18 
     sta $05 
 
-    lda EnYRoomPos,x
-    and #$F8
+    lda EnYRoomPos,x 
+    and #$F8 
     asl 
     rol $05 
     asl 
@@ -10779,9 +10890,10 @@ Bank07_LFA1E:
 
     cmp #$A0
     bcc StoreUpdatedObjectLocationExit
-    ;ldx PageIndex
+    ; X == PageIndex here
 *   lda $0403,x
     sta $05
+
     lda $0402,x
     sta $04
 LFA41:
@@ -11175,7 +11287,7 @@ TileSubroutine5:
     sta TileRoutine,x       ; tile = respawned
 
     lda TileWRAMLo,x
-    adc #$20        ; Carry is always set here so add #$20 instead of #$21 
+    adc #$20                ; Carry is always set here so add #$20 instead of #$21 
     sta $00
 
     and #$E0
@@ -11222,7 +11334,7 @@ TileSubroutine5:
 DrawTileBlast:
     lda PPUStrIndex
     cmp #$1F
-    bcs Exit23
+    bcs Exit28
 
     ; Setup and save $00 ptr on the stack
     ldx PageIndex
@@ -11312,6 +11424,16 @@ _RowLoop:
     and #$2F
     sta $01
 
+    ldy #$00
+    lda ($02),y
+    cmp #$22
+    bne DoGenericErase
+
+        jsr EraseTile2x2Fast
+        clc
+        rts
+
+DoGenericErase:
     jsr EraseTile
     clc
 
@@ -11526,7 +11648,9 @@ LC7A5:  .word GFXExPoint, $1F40, $0010
 ;the Samus fade-in sequence. This creates the fade-in effect.
 
 SamusFadeTmTbl:
-    .byte $1E, $14, $0B, $04, $FF
+    .byte $1E, $14, $0B, $04;, $FF
+FFLabel:        ; Interleaved with SamusFadeTmTbl
+    .byte $FF
 
 ;Table used by above subroutine.
 ;Each value is the area bank number plus one.
@@ -11574,10 +11698,6 @@ Table09_A:
     .byte $01
     .byte $FF
 
-Table09_B:
-    .byte $EC
-    .byte $F0
-
 Table08:
     .byte $0C
     .byte $F4
@@ -11592,25 +11712,10 @@ MissileAnims:
     .byte an_MissileRight
     .byte an_MissileLeft
 
-; Some kinda wave math
-Table0A:
-    .word Table0C     ; pointer to table #1 below
-    .word Table0D     ; pointer to table #2 below
+WaveSpeedTable:
+    .byte $F9, $FB, $FF, $01, $05, $07
+    .byte $07, $05, $01, $FF, $FB, $F9
 
-; Table #1 (size: 25 bytes)
-
-Table0C:
-    .byte $01, $F3, $01, $D3, $01, $93, $01, $13, $01, $53, $01, $73, $01, $73, $01, $53
-    .byte $01, $13, $01, $93, $01, $D3, $01, $F3
-FFLabel:                    ; Interleaved with Table0C
-    .byte $FF
-
-; Table #2 (size: 25 bytes)
-
-Table0D:
-    .byte $01, $B7, $01, $B5, $01, $B1, $01, $B9, $01, $BD, $01, $BF, $01, $BF, $01, $BD
-    .byte $01, $B9, $01, $B1, $01, $B5, $01, $B7
-    .byte $FF
 
 Table0E:
     .byte $30

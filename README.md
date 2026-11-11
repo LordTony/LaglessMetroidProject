@@ -21,9 +21,9 @@ The idea here is to attempt to take the Metroid lag as low as possible without a
 The baseline benchmark is Samus standing still in the opening room with 2 of the spikey bois both alive and crawing on the walls.
 
   * Metroid finishes all work for the benchmark frames in **137 to 149** scanlines
-  * Lagless Metroid finishes work in **50 to 68** scanlines
-  * Lagless Metroid finishes work in **36% to 46%** of the scanlines standard NES Metroid takes
-  * The limit might be something like **50** scanlines
+  * Lagless Metroid finishes work in **48 to 68** scanlines
+  * Lagless Metroid finishes work in **35% to 46%** of the scanlines standard NES Metroid takes
+  * The limit might be something like **45** scanlines
     * This goal has been reached. I'm not sure there is much more to shave off
     * Lag is only possible when absolutely forced by fishing for a lag frame in Bank 01 - Rooms #$24 when transitioning between rooms while spamming bombs
       * This was only tested with 1 missile upgrade and 1 tank upgrade, So it might still cause problems

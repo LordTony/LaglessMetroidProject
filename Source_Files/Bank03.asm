@@ -376,6 +376,7 @@ Bank03_L97F3:  JSR UpdateEnemyAnim
 Bank03_L97F6:  JMP Start_Special_Attrs
 
 Bank03_L97F9:  LDY EndTimerHi
+			   nop 
 Bank03_L97FC:  INY 
 Bank03_L97FD:  BEQ Bank03_L9804
 Bank03_L97FF:  LDA #$00
@@ -604,7 +605,7 @@ Bank03_L99F9:  LDA $08
 Bank03_L99FB:  STA $0400,X
 Bank03_L99FE:  LDA $0B
 Bank03_L9A00:  AND #$01
-Bank03_L9A02:  STA $6AFB,X
+Bank03_L9A02:  STA EnNameTable,X
 Bank03_L9A05:  RTS
 nop
 nop
@@ -720,7 +721,7 @@ Bank03_L9AD8:  LDA $0400,X
 Bank03_L9ADB:  STA $08
 Bank03_L9ADD:  LDA $0401,X
 Bank03_L9AE0:  STA $09
-Bank03_L9AE2:  LDA $6AFB,X
+Bank03_L9AE2:  LDA EnNameTable,X
 Bank03_L9AE5:  STA $0B
 Bank03_L9AE7:  JSR UpdateObjectLocation
 Bank03_L9AEA:  BCS Bank03_L9AF1
@@ -784,6 +785,7 @@ Bank03_L9B4C:  JSR Bank03_L9C4D
 Bank03_L9B4F:  TYA 
 Bank03_L9B50:  BNE Bank03_L9B4B
 Bank03_L9B52:  LDY EndTimerHi
+			   nop 
 Bank03_L9B55:  INY 
 Bank03_L9B56:  BNE Bank03_L9B65
 Bank03_L9B58:  LDA $6BF8,X
@@ -846,7 +848,7 @@ Bank03_L9BCD:  STA $0400,Y
 Bank03_L9BD0:  LDA $6BF6,X
 Bank03_L9BD3:  STA $0401,Y
 Bank03_L9BD6:  LDA $6BF7,X
-Bank03_L9BD9:  STA $6AFB,Y
+Bank03_L9BD9:  STA EnNameTable,Y
 Bank03_L9BDC:  LDA #$02
 Bank03_L9BDE:  STA $6AF4,Y
 Bank03_L9BE1:  LDA #$00
@@ -957,14 +959,14 @@ Bank03_L9CBD:  BCS Bank03_L9CC3
 Bank03_L9CBF:  LDA #$00
 Bank03_L9CC1:  STA MthrBrainStatus
 
-Bank03_L9CC3:  LDA $010D
+Bank03_L9CC3:  LDA EscapeTimerVisible
 Bank03_L9CC6:  BEQ Bank03_L9CD5
-Bank03_L9CC8:  LDA $010C
+Bank03_L9CC8:  LDA EscapeTimerNameTable
 Bank03_L9CCB:  EOR $02
 Bank03_L9CCD:  LSR 
 Bank03_L9CCE:  BCS Bank03_L9CD5
 Bank03_L9CD0:  LDA #$00
-Bank03_L9CD2:  STA $010D
+Bank03_L9CD2:  STA EscapeTimerVisible
 Bank03_L9CD5:  RTS
 
 Bank03_L9CD6:  LDA $8B,X
@@ -1316,10 +1318,12 @@ Bank03_L9F50:  STA MthrBrainStatus
 Bank03_L9F52:  LDA #$99
 Bank03_L9F54:  STA EndTimerLo
 Bank03_L9F57:  STA EndTimerHi
+			   nop 
+			   nop 
 Bank03_L9F5A:  LDA #$01
-Bank03_L9F5C:  STA $010D
+Bank03_L9F5C:  STA EscapeTimerVisible
 Bank03_L9F5F:  LDA $9D
-Bank03_L9F61:  STA $010C
+Bank03_L9F61:  STA EscapeTimerNameTable
 Bank03_L9F64:  RTS 
 
 ; TODO: I think this table is duplicated in bank 07
@@ -1381,9 +1385,9 @@ Bank03_L9FD9:  RTS
 Bank03_L9FDA:  JSR Bank03_L9F69
 Bank03_L9FDD:  BCS Bank03_L9FEC
 Bank03_L9FDF:  LDA $9D
-Bank03_L9FE1:  STA $010C
+Bank03_L9FE1:  STA EscapeTimerNameTable
 Bank03_L9FE4:  LDY #$01
-Bank03_L9FE6:  STY $010D
+Bank03_L9FE6:  STY EscapeTimerVisible
 Bank03_L9FE9:  DEY 
 Bank03_L9FEA:  STY MthrBrainStatus
 Bank03_L9FEC:  RTS
@@ -1578,6 +1582,7 @@ Bank03_LA15C:  TYA
 Bank03_LA15D:  RTS
 
 Bank03_LA15E:  LDY EndTimerHi
+			   nop 
 Bank03_LA161:  INY 
 Bank03_LA162:  BNE Bank03_LA1DA
 Bank03_LA164:  LDY #$03
@@ -1623,7 +1628,7 @@ Bank03_LA1B3:  STA $6AF7,X
 
 Bank03_LA1B6:  LDY PageIndex
 Bank03_LA1B8:  LDA $8C,Y			; Problems?
-Bank03_LA1BB:  STA $6AFB,X
+Bank03_LA1BB:  STA EnNameTable,X
 Bank03_LA1BE:  LDA $8D,Y
 Bank03_LA1C1:  ASL 
 Bank03_LA1C2:  ORA $8B,Y
@@ -1643,19 +1648,24 @@ Bank03_LA1DA:  RTS
 Bank03_LA1DB:  .byte $22, $2A, $2A, $BA, $B2, $2A, $C4, $2A, $C8, $BA, $BA, $BA
 
 Bank03_LA1E7:  LDY EndTimerHi
+			   nop 
 Bank03_LA1EA:  INY 
 Bank03_LA1EB:  BEQ Bank03_LA237
 Bank03_LA1ED:  LDA EndTimerLo
+			   nop 
 Bank03_LA1F0:  STA $03
 Bank03_LA1F2:  LDA #$01
 Bank03_LA1F4:  SEC 
 Bank03_LA1F5:  JSR Base10Subtract
 Bank03_LA1F8:  STA EndTimerLo
 Bank03_LA1FB:  LDA EndTimerHi
+			   nop 
+			   nop 
 Bank03_LA1FE:  STA $03
 Bank03_LA200:  LDA #$00
 Bank03_LA202:  JSR Base10Subtract
 Bank03_LA205:  STA EndTimerHi
+			   nop 
 Bank03_LA208:  LDA FrameCount
 Bank03_LA20A:  AND #$1F
 Bank03_LA20C:  BNE Bank03_LA216
@@ -1665,8 +1675,11 @@ Bank03_LA213:  STA SQ1SFXFlag
 
 Bank03_LA216:  LDA EndTimerLo
 Bank03_LA219:  ORA EndTimerHi
+			   nop 
+			   nop  
 Bank03_LA21C:  BNE Bank03_LA237
 Bank03_LA21E:  DEC EndTimerHi
+			   nop 
 Bank03_LA221:  STA MotherBrainHits
 Bank03_LA223:  LDA #$07
 Bank03_LA225:  STA MthrBrainStatus
@@ -1680,9 +1693,9 @@ Bank03_LA235:  STA PalDataPending
 
 Bank03_LA237:  RTS
 
-Bank03_LA238:  LDA $010D
+Bank03_LA238:  LDA EscapeTimerVisible
 Bank03_LA23B:  BEQ Bank03_LA28A
-Bank03_LA23D:  LDA $010C
+Bank03_LA23D:  LDA EscapeTimerNameTable
 Bank03_LA240:  STA $6BDB
 Bank03_LA243:  LDA #$84
 Bank03_LA245:  STA $04E0
@@ -1700,6 +1713,7 @@ Bank03_LA25D:  CMP SpritePagePos
 Bank03_LA25F:  BEQ Bank03_LA28A
 Bank03_LA261:  TAX 
 Bank03_LA262:  LDA EndTimerHi
+			   nop 
 Bank03_LA265:  LSR 
 Bank03_LA266:  LSR 
 Bank03_LA267:  LSR 
@@ -1709,10 +1723,12 @@ Bank03_LA26A:  AND #$0F
 Bank03_LA26C:  ORA #$A0
 Bank03_LA26E:  STA $0201,X
 Bank03_LA271:  LDA EndTimerHi
+			   nop 
 Bank03_LA274:  AND #$0F
 Bank03_LA276:  ORA #$A0
 Bank03_LA278:  STA $0205,X
 Bank03_LA27B:  LDA EndTimerLo
+			   nop 
 Bank03_LA27E:  LSR 
 Bank03_LA27F:  LSR 
 Bank03_LA280:  LSR 
