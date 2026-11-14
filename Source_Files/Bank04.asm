@@ -378,64 +378,84 @@ Bank04_L98F6:  .byte $05, $C2, $04, $A2, $03, $92, $03, $12, $04, $22, $05, $42,
 
 Bank04_L9905:  LDA $81
 Bank04_L9907:  CMP #$01
-Bank04_L9909:  BEQ $9914
+Bank04_L9909:  BEQ Bank04_L9914
 Bank04_L990B:  CMP #$03
-Bank04_L990D:  BEQ $9919
+Bank04_L990D:  BEQ Bank04_L9919
 Bank04_L990F:  LDA $00
 Bank04_L9911:  JMP StartUpdateEnemyAnimation
+                ;safe
+
 Bank04_L9914:  LDA $01
 Bank04_L9916:  JSR UpdateEnemyAnim
 Bank04_L9919:  JMP Start_Special_Attrs
+                ;safe
+
 Bank04_L991C:  LDA #$09
-Bank04_L991E:  STA $85
+
+Bank04_L991E:  STA $85          ; 2 entry points    A == #$0F or #$09
 Bank04_L9920:  STA $86
-Bank04_L9922:  LDA $6AF4,X
+Bank04_L9922:  LDA Enstatus,X
 Bank04_L9925:  CMP #$03
-Bank04_L9927:  BEQ $992C
-Bank04_L9929:  JSR Bank07_LFB88
+Bank04_L9927:  BEQ Bank04_L992C
+                    JSR Bank07_LFB88
+
 Bank04_L992C:  LDA #$06
 Bank04_L992E:  STA $00
 Bank04_L9930:  LDA #$08
 Bank04_L9932:  STA $01
-Bank04_L9934:  JMP $9905
+Bank04_L9934:  BNE Bank04_L9905     ; branch always
+               nop 
+                ; safe
+
 Bank04_L9937:  LDA #$0F
-Bank04_L9939:  JMP $991E
-Bank04_L993C:  LDA $6AF4,X
+Bank04_L9939:  JMP Bank04_L991E
+
+Bank04_L993C:  LDA Enstatus,X
 Bank04_L993F:  CMP #$03
-Bank04_L9941:  BEQ $9946
+Bank04_L9941:  BEQ Bank04_L992C
 Bank04_L9943:  JSR BankEnemyCommonHelper
-Bank04_L9946:  JMP $992C
+Bank04_L9946:  JMP Bank04_L992C
+
 Bank04_L9949:  LDA $81
 Bank04_L994B:  CMP #$01
-Bank04_L994D:  BEQ $9993
+Bank04_L994D:  BEQ Bank04_L9993
 Bank04_L994F:  CMP #$03
-Bank04_L9951:  BEQ $9998
+Bank04_L9951:  BEQ Bank04_L9998
 Bank04_L9953:  LDA $0406,X
 Bank04_L9956:  CMP #$0F
-Bank04_L9958:  BCC $998E
+Bank04_L9958:  BCC Bank04_L998E
 Bank04_L995A:  CMP #$11
-Bank04_L995C:  BCS $9965
+Bank04_L995C:  BCS Bank04_L9965
 Bank04_L995E:  LDA #$3A
 Bank04_L9960:  STA $6B01,X
-Bank04_L9963:  BNE $998E
+Bank04_L9963:  BNE Bank04_L998E
+
 Bank04_L9965:  DEC $6B01,X
-Bank04_L9968:  BNE $998E
+Bank04_L9968:  BNE Bank04_L998E
 Bank04_L996A:  LDA #$00
-Bank04_L996C:  STA $6AF4,X
+Bank04_L996C:  STA Enstatus,X
+
 Bank04_L996F:  LDY #$18
-Bank04_L9971:  LDA #$0A
-Bank04_L9973:  STA SpinnerStatus,Y          ; TODO: Might be screwed up now
-Bank04_L9976:  LDA $0400,X
-Bank04_L9979:  STA SpinnerYPos,Y
-Bank04_L997C:  LDA $0401,X
-Bank04_L997F:  STA SpinnerXPos,Y
-Bank04_L9982:  LDA EnNameTable,X
-Bank04_L9985:  STA SpinnerNameTbl,Y
-               lda IdentityTable, y
-               tay 
-Bank04_L998C:  BPL Bank04_L9971
+Bank04_L9971:  
+    lda #$0A
+    sta SpinnerStatus,y 
+
+    lda EnYRoomPos,x  
+    sta SpinnerYPos,y 
+
+    lda EnXRoomPos,x
+    sta SpinnerXPos,y
+
+    lda EnNameTable,x
+    sta SpinnerNameTbl,y
+
+    lda IdentityTable - $08, y
+    tay 
+    bpl Bank04_L9971
+
 Bank04_L998E:  LDA #$02
 Bank04_L9990:  JMP StartUpdateEnemyAnimation
+
 Bank04_L9993:  LDA #$08
 Bank04_L9995:  JSR UpdateEnemyAnim
 Bank04_L9998:  JMP Start_Special_Attrs
@@ -1180,980 +1200,1314 @@ Bank04_LA2B1:  .byte $08, $FF, $02, $08, $BE, $00
 ;with #$FE. The next portion of the room definition describes the enemies and doors in the room. The
 ;number of data bytes and their functions vary depending on what type of item is being loaded.
 
-;Room #$00 (not used)
-Bank04_LA2B7:  
-;.byte $08           ;Attribute table data.
-;;Room object data:
-;Bank04_LA2B8:  
-;.byte $40, $01;, $0C
-;.byte $48, $01;, $0C
-;.byte $50, $04;, $08
-;.byte $5F, $04;, $08
-;.byte $FF
-
-;Room #$01
+; Room $00 (unused in original source)
+Bank04_LA2B7:
+; Room $01
 Bank04_LA2C5:
-    .byte $08           ;Attribute table data.
-;Room object data:
-Bank04_LA2C6:  
-    .byte $07, $02;, $08
-    .byte $87, $02;, $08
+    .byte $AA    ; original base $08 -> palette 2
+    .word Bank04_Room_01_Top_Left
+    .word Bank04_Room_01_Top_Right
+    .word Bank04_Room_01_Bottom_Left
+Bank04_Room_01_Bottom_Right:
+    .byte $88, $5A
+    .byte $B8, $5A
+    .byte $E8, $4D
+    .byte $FF
+Bank04_Room_01_Top_Left:
+    .byte $07, $5B
+    .byte $27, $59
+    .byte $57, $59
+    .byte $FF
+Bank04_Room_01_Top_Right:
+    .byte $08, $5A
+    .byte $38, $4D
+    .byte $48, $5A
+    .byte $78, $4D
+    .byte $FF
+Bank04_Room_01_Bottom_Left:
+    .byte $87, $59
+    .byte $B7, $5B
+    .byte $D7, $5B
     .byte $FF
 
-;Room #$02
-Bank04_LA2CD: 
-    .byte $00           ;Attribute table data.
-;Room object data:
-Bank04_LA2CE:  
-    .byte $00, $10;, $00
-    .byte $04, $10;, $00
-    .byte $08, $10;, $00
-    .byte $0C, $10;, $00
-    .byte $40, $06;, $00
-    .byte $42, $08;, $04
-    .byte $4E, $06;, $00
-    .byte $6D, $09;, $04
-    .byte $75, $0C;, $00
-    .byte $7A, $0C;, $00
-    .byte $90, $06;, $00
-    .byte $92, $0C;, $00
-    .byte $96, $0D;, $00
-    .byte $9D, $0C;, $00
-    .byte $9E, $06;, $00
-    .byte $E0, $06;, $00
-    .byte $E1, $0D;, $00
-    .byte $EB, $0D;, $00
-    .byte $EE, $06;, $00
+; Room $02
+Bank04_LA2CD:
+    .byte $00    ; original base $00 -> palette 0
+    .word Bank04_Room_02_Top_Left
+    .word Bank04_Room_02_Top_Right
+    .word Bank04_Room_02_Bottom_Left
+Bank04_Room_02_Bottom_Right:
+    .byte $8E, $27
+    .byte $8A, $29
+    .byte $98, $27
+    .byte $9D, $0C
+    .byte $9E, $06
+    .byte $EB, $0D
+    .byte $EE, $27
+    .byte $FF
+Bank04_Room_02_Top_Left:
+    .byte $00, $10
+    .byte $04, $10
+    .byte $40, $2F
+    .byte $60, $54
+    .byte $42, $08
+    .byte $75, $28
+    .byte $FF
+Bank04_Room_02_Top_Right:
+    .byte $08, $10
+    .byte $0C, $10
+    .byte $4E, $2F
+    .byte $6E, $54
+    .byte $6D, $09
+    .byte $7A, $28
+    .byte $FF
+Bank04_Room_02_Bottom_Left:
+    .byte $80, $27
+    .byte $85, $29
+    .byte $90, $06
+    .byte $92, $0C
+    .byte $96, $27
+    .byte $E0, $27
+    .byte $E1, $0D
     .byte $FF
 
-;Room #$03
+; Room $03
 Bank04_LA308:
-    .byte $00           ;Attribute table data.
-;Room object data:
-Bank04_LA309:  
-    .byte $00, $06;, $00
-    .byte $0A, $0D;, $00
-    .byte $0E, $06;, $00
-    .byte $22, $08;, $04
-    .byte $2D, $09;, $04
-    .byte $45, $0D;, $00
-    .byte $50, $03;, $08
-    .byte $5F, $03;, $08
-    .byte $80, $10;, $00
-    .byte $8A, $06;, $00
-    .byte $8C, $10;, $00
-    .byte $A4, $08;, $04
-    .byte $C0, $10;, $00
-    .byte $C9, $0D;, $00
-    .byte $CC, $10;, $00
-    .byte $DB, $09;, $04
-    .byte $E1, $10;, $00
+    .byte $00    ; original base $00 -> palette 0
+    .word Bank04_Room_03_Top_Left
+    .word Bank04_Room_03_Top_Right
+    .word Bank04_Room_03_Bottom_Left
+Bank04_Room_03_Bottom_Right:
+    .byte $8A, $06
+    .byte $8C, $10
+    .byte $C9, $0D
+    .byte $CC, $2A
+    .byte $DB, $09
+    .byte $FF
+Bank04_Room_03_Top_Left:
+    .byte $00, $06
+    .byte $22, $08
+    .byte $45, $27
+    .byte $47, $11
+    .byte $50, $03
     .byte $FD
-;Room enemy/door data:
-Bank04_LA33D: 
-    .byte $02, $A0
-    .byte $02, $B1
-    .byte $31, $85, $37
+    .byte $02, $B1    ; Door
+    .byte $31, $85, $37    ; Enemy
+    .byte $FF
+Bank04_Room_03_Top_Right:
+    .byte $0A, $0D
+    .byte $0E, $06
+    .byte $2D, $09
+    .byte $48, $11
+    .byte $5F, $03
+    .byte $FD
+    .byte $02, $A0    ; Door
+    .byte $FF
+Bank04_Room_03_Bottom_Left:
+    .byte $80, $10
+    .byte $A4, $08
+    .byte $C0, $2A
+    .byte $E1, $2B
     .byte $FF
 
-;Room #$04
-Bank04_LA345: 
-    .byte $00           ;Attribute table data.
-;Room object data:
-    .byte $00, $06;, $00 
-    .byte $07, $06;, $00
-    .byte $0B, $10;, $00
-    .byte $0E, $06;, $00
-    .byte $22, $08;, $04
-    .byte $2A, $09;, $04
-    .byte $35, $0D;, $00
-    .byte $50, $03;, $08
-    .byte $57, $06;, $00
-    .byte $5F, $03;, $08
-    .byte $80, $0D;, $00
-    .byte $8C, $0D;, $00
-    .byte $8E, $06;, $00
-    .byte $90, $06;, $00
-    .byte $92, $08;, $04
-    .byte $BE, $06;, $00
-    .byte $CD, $09;, $04
-    .byte $D0, $06;, $00
+; Room $04
+Bank04_LA345:
+    .byte $00    ; original base $00 -> palette 0
+    .word Bank04_Room_04_Top_Left
+    .word Bank04_Room_04_Top_Right
+    .word Bank04_Room_04_Bottom_Left
+Bank04_Room_04_Bottom_Right:
+    .byte $88, $2E
+    .byte $8C, $0D
+    .byte $8E, $06
+    .byte $BE, $2F
+    .byte $DE, $54
+    .byte $CD, $09
     .byte $FD
-;Room enemy/door data:
-Bank04_LA37D:
-    .byte $02, $A0
-    .byte $02, $B1
-    .byte $41, $85, $25
-    .byte $21, $83, $C8
+    .byte $21, $83, $C8    ; Enemy
+    .byte $FF
+Bank04_Room_04_Top_Left:
+    .byte $00, $06
+    .byte $07, $2E
+    .byte $27, $11
+    .byte $37, $2D
+    .byte $22, $08
+    .byte $35, $27
+    .byte $37, $11
+    .byte $50, $03
+    .byte $57, $11
+    .byte $67, $2E
+    .byte $FD
+    .byte $02, $B1    ; Door
+    .byte $41, $85, $25    ; Enemy
+    .byte $FF
+Bank04_Room_04_Top_Right:
+    .byte $08, $2C
+    .byte $38, $2E
+    .byte $0B, $10
+    .byte $0E, $06
+    .byte $2A, $09
+    .byte $38, $11
+    .byte $58, $2C
+    .byte $5F, $03
+    .byte $FD
+    .byte $02, $A0    ; Door
+    .byte $FF
+Bank04_Room_04_Bottom_Left:
+    .byte $87, $2D
+    .byte $80, $0D
+    .byte $90, $06
+    .byte $92, $08
+    .byte $D0, $2F
     .byte $FF
 
-;Room #$05
+; Room $05
 Bank04_LA388:
-    .byte $00           ;Attribute table data.
-;Room object data:
-    .byte $00, $10;, $00
-    .byte $0C, $10;, $00
-    .byte $14, $08;, $04
-    .byte $40, $10;, $00
-    .byte $4C, $10;, $00
-    .byte $6B, $09;, $04
-    .byte $7C, $10;, $00
-    .byte $80, $10;, $00
-    .byte $94, $08;, $04
-    .byte $BC, $10;, $00
-    .byte $C0, $10;, $00
-    .byte $DB, $09;, $04
+    .byte $00    ; original base $00 -> palette 0
+    .word Bank04_Room_05_Top_Left
+    .word Bank04_Room_05_Top_Right
+    .word Bank04_Room_05_Bottom_Left
+Bank04_Room_05_Bottom_Right:
+    .byte $8C, $55
+    .byte $9C, $2D
+    .byte $9D, $54
+    .byte $9F, $2D
+    .byte $BC, $10
+    .byte $DB, $09
     .byte $FD
-;Room enemy/door data:
-Bank04_LA3AE:
-    .byte $51, $83, $57
-    .byte $01, $03, $95
-    .byte $11, $03, $CA
+    .byte $11, $03, $CA    ; Enemy
+    .byte $FF
+Bank04_Room_05_Top_Left:
+    .byte $00, $10
+    .byte $14, $08
+    .byte $40, $10
+    .byte $FD
+    .byte $51, $83, $57    ; Enemy
+    .byte $FF
+Bank04_Room_05_Top_Right:
+    .byte $0C, $10
+    .byte $4C, $10
+    .byte $6B, $09
+    .byte $7C, $2B
+    .byte $FF
+Bank04_Room_05_Bottom_Left:
+    .byte $80, $10
+    .byte $94, $08
+    .byte $C0, $2A
+    .byte $FD
+    .byte $01, $03, $95    ; Enemy
     .byte $FF
 
-;Room #$06
+; Room $06
 Bank04_LA3B8:
-    .byte $00           ;Attribute table data.
-;Room object data:
-    .byte $00, $06;, $00
-    .byte $0E, $06;, $00
-    .byte $12, $08;, $04 
-    .byte $17, $0E;, $00 
-    .byte $1A, $0D;, $00 
-    .byte $27, $0C;, $00
-    .byte $31, $0E;, $00
-    .byte $36, $11;, $00
-    .byte $39, $07;, $00
-    .byte $50, $03;, $08
-    .byte $59, $0E;, $00
-    .byte $5F, $03;, $08
-    .byte $80, $10;, $00
-    .byte $84, $10;, $00
-    .byte $88, $10;, $00
-    .byte $8C, $10;, $00
-    .byte $C0, $10;, $00
-    .byte $C4, $10;, $00
-    .byte $C8, $10;, $00
-    .byte $CC, $10;, $00
+    .byte $00    ; original base $00 -> palette 0
+    .word Bank04_Room_06_Top_Left
+    .word Bank04_Room_06_Top_Right
+    .word Bank04_Room_06_Bottom_Left
+Bank04_Room_06_Bottom_Right:
+    .byte $88, $10
+    .byte $8C, $10
+    .byte $C8, $2A
+    .byte $CC, $2A
+    .byte $FF
+Bank04_Room_06_Top_Left:
+    .byte $00, $06
+    .byte $12, $08
+    .byte $17, $11
+    .byte $27, $0C
+    .byte $31, $0E
+    .byte $36, $11
+    .byte $50, $03
     .byte $FD
-;Room enemy/door data:
-Bank04_LA3F6: 
-    .byte $02, $A1
-    .byte $02, $B1
-    .byte $01, $85, $2A
-    .byte $51, $85, $26
+    .byte $02, $B1    ; Door
+    .byte $51, $85, $26    ; Enemy
+    .byte $FF
+Bank04_Room_06_Top_Right:
+    .byte $0E, $06
+    .byte $18, $30
+    .byte $1A, $0D
+    .byte $39, $07
+    .byte $59, $0E
+    .byte $5F, $03
+    .byte $FD
+    .byte $02, $A1    ; Door
+    .byte $01, $85, $2A    ; Enemy
+    .byte $FF
+Bank04_Room_06_Bottom_Left:
+    .byte $80, $10
+    .byte $84, $10
+    .byte $C0, $2A
+    .byte $C4, $2A
     .byte $FF
 
-;Room #$07
+; Room $07
 Bank04_LA401:
-    .byte $00           ;Attribute table data.
-;Room object data:
-Bank04_LA402:  
-    .byte $00, $10;, $00
-    .byte $0A, $10;, $00
-    .byte $0E, $07;, $00
-    .byte $24, $08;, $04
-    .byte $27, $0E;, $00
-    .byte $40, $07;, $00
-    .byte $5F, $03;, $08
-    .byte $62, $10;, $00
-    .byte $8B, $0E;, $00
-    .byte $8E, $07;, $00
-    .byte $90, $07;, $00
-    .byte $9D, $09;, $04
-    .byte $B0, $07;, $00
-    .byte $B2, $10;, $00
-    .byte $B6, $0D;, $00
-    .byte $CE, $07;, $00
-    .byte $D6, $08;, $04
+    .byte $00    ; original base $00 -> palette 0
+    .word Bank04_Room_07_Top_Left
+    .word Bank04_Room_07_Top_Right
+    .word Bank04_Room_07_Bottom_Left
+Bank04_Room_07_Bottom_Right:
+    .byte $8B, $0E
+    .byte $8E, $07
+    .byte $9D, $09
+    .byte $B8, $27
+    .byte $CE, $32
     .byte $FD
-;Room enemy/door data:
-Bank04_LA436: 
-    .byte $02, $A1
-    .byte $01, $85, $17
-    .byte $21, $85, $A8
-    .byte $31, $03, $87
+    .byte $21, $85, $A8    ; Enemy
+    .byte $FF
+Bank04_Room_07_Top_Left:
+    .byte $00, $10
+    .byte $24, $08
+    .byte $27, $11
+    .byte $40, $32
+    .byte $70, $27
+    .byte $62, $2B
+    .byte $72, $55
+    .byte $FD
+    .byte $01, $85, $17    ; Enemy
+    .byte $FF
+Bank04_Room_07_Top_Right:
+    .byte $0A, $10
+    .byte $0E, $07
+    .byte $28, $30
+    .byte $5F, $03
+    .byte $FD
+    .byte $02, $A1    ; Door
+    .byte $FF
+Bank04_Room_07_Bottom_Left:
+    .byte $80, $31
+    .byte $82, $2D
+    .byte $83, $54
+    .byte $85, $2D
+    .byte $90, $07
+    .byte $B0, $32
+    .byte $E0, $27
+    .byte $B2, $10
+    .byte $B6, $27
+    .byte $D6, $08
+    .byte $FD
+    .byte $31, $03, $87    ; Enemy
     .byte $FF
 
-;Room #$08
-Bank04_LA442: 
-    .byte $00           ;Attribute table data.
-;Room object data:
-Bank04_LA443:  
-    .byte $00, $10;, $00 
-    .byte $03, $10;, $00 
-    .byte $0A, $10;, $00 
-    .byte $0C, $10;, $00 
-    .byte $29, $09;, $04 
-    .byte $35, $0E;, $00 
-    .byte $40, $10;, $00 
-    .byte $44, $08;, $04 
-    .byte $4C, $10;, $00 
-    .byte $79, $0E;, $00 
-    .byte $80, $10;, $00 
-    .byte $8C, $10;, $00 
-    .byte $AB, $09;, $04 
-    .byte $B0, $10;, $00 
-    .byte $B4, $0D;, $00 
-    .byte $CC, $10;, $00
-    .byte $D4, $08;, $04
+; Room $08
+Bank04_LA442:
+    .byte $00    ; original base $00 -> palette 0
+    .word Bank04_Room_08_Top_Left
+    .word Bank04_Room_08_Top_Right
+    .word Bank04_Room_08_Bottom_Left
+Bank04_Room_08_Bottom_Right:
+    .byte $8C, $10
+    .byte $AB, $09
+    .byte $CC, $2A
+    .byte $FF
+Bank04_Room_08_Top_Left:
+    .byte $00, $10
+    .byte $03, $10
+    .byte $35, $0E
+    .byte $40, $10
+    .byte $44, $08
+    .byte $FF
+Bank04_Room_08_Top_Right:
+    .byte $0A, $10
+    .byte $0C, $10
+    .byte $29, $09
+    .byte $4C, $10
+    .byte $79, $0E
     .byte $FD
-;Room enemy/door data:
-Bank04_LA477: 
-    .byte $11, $85, $6A
-    .byte $41, $85, $A6
+    .byte $11, $85, $6A    ; Enemy
+    .byte $FF
+Bank04_Room_08_Bottom_Left:
+    .byte $80, $10
+    .byte $B0, $10
+    .byte $B4, $0D
+    .byte $D4, $08
+    .byte $FD
+    .byte $41, $85, $A6    ; Enemy
     .byte $FF
 
-;Room #$09
-Bank04_LA47E: 
-    .byte $00           ;Attribute table data.
-;Room object data:
-Bank04_LA47F:  
-    .byte $00, $07;, $00
-    .byte $0D, $09;, $04
-    .byte $0E, $07;, $00
-    .byte $42, $08;, $04
-    .byte $50, $07;, $00
-    .byte $5F, $03;, $08
-    .byte $8B, $0E;, $00
-    .byte $8E, $07;, $00
-    .byte $9D, $09;, $04
-    .byte $A0, $07;, $00
-    .byte $A6, $0E;, $00
-    .byte $DE, $07;, $00
+; Room $09
+Bank04_LA47E:
+    .byte $00    ; original base $00 -> palette 0
+    .word Bank04_Room_09_Top_Left
+    .word Bank04_Room_09_Top_Right
+    .word Bank04_Room_09_Bottom_Left
+Bank04_Room_09_Bottom_Right:
+    .byte $8B, $0E
+    .byte $8E, $07
+    .byte $9D, $09
+    .byte $A8, $11
+    .byte $DE, $35
+    .byte $FF
+Bank04_Room_09_Top_Left:
+    .byte $00, $07
+    .byte $42, $08
+    .byte $50, $32
+    .byte $FF
+Bank04_Room_09_Top_Right:
+    .byte $0D, $09
+    .byte $0E, $07
+    .byte $5F, $03
     .byte $FD
-;Room enemy/door data:
-Bank04_LA4A4: 
-    .byte $02, $A1
-    .byte $21, $85, $97
-    .byte $31, $03, $83
+    .byte $02, $A1    ; Door
+    .byte $FF
+Bank04_Room_09_Bottom_Left:
+    .byte $80, $33
+    .byte $A0, $07
+    .byte $A6, $34
+    .byte $FD
+    .byte $21, $85, $97    ; Enemy
+    .byte $31, $03, $83    ; Enemy
     .byte $FF
 
-;Room #$0A
+; Room $0A
 Bank04_LA4AD:
-    .byte $00           ;Attribute table data.
-;Room object data:
-Bank04_LA4AE: 
-    .byte $00, $07;, $00 
-    .byte $0E, $07;, $00 
-    .byte $12, $08;, $04 
-    .byte $50, $07;, $00 
-    .byte $5F, $03;, $08 
-    .byte $72, $08;, $04 
-    .byte $87, $0E;, $00
-    .byte $8B, $0E;, $00 
-    .byte $8E, $07;, $00
-    .byte $A0, $10;, $00
-    .byte $AD, $09;, $04 
-    .byte $CC, $10;, $00 
-    .byte $D4, $00;, $08 
-    .byte $E0, $10;, $00
+    .byte $00    ; original base $00 -> palette 0
+    .word Bank04_Room_0A_Top_Left
+    .word Bank04_Room_0A_Top_Right
+    .word Bank04_Room_0A_Bottom_Left
+Bank04_Room_0A_Bottom_Right:
+    .byte $88, $30
+    .byte $8B, $0E
+    .byte $8E, $07
+    .byte $AD, $09
+    .byte $CC, $2A
+    .byte $D8, $37
+    .byte $FF
+Bank04_Room_0A_Top_Left:
+    .byte $00, $07
+    .byte $12, $08
+    .byte $50, $32
+    .byte $72, $36
+    .byte $FF
+Bank04_Room_0A_Top_Right:
+    .byte $0E, $07
+    .byte $5F, $03
     .byte $FD
-;Room enemy/door data:
-Bank04_LA4D9:
-    .byte $02, $A1
-    .byte $01, $85, $78
-    .byte $11, $03, $28
+    .byte $02, $A1    ; Door
+    .byte $01, $85, $78    ; Enemy
+    .byte $11, $03, $28    ; Enemy
+    .byte $FF
+Bank04_Room_0A_Bottom_Left:
+    .byte $80, $33
+    .byte $82, $36
+    .byte $87, $11
+    .byte $A0, $10
+    .byte $D4, $37
+    .byte $E0, $2B
     .byte $FF
 
-;Room #$0B
-Bank04_LA4E2:  
-    .byte $00           ;Attribute table data.
-;Room object data:
-Bank04_LA4E3:  
-    .byte $00, $10;, $00 
-    .byte $04, $10;, $00 
-    .byte $08, $10;, $00 
-    .byte $0C, $10;, $00 
-    .byte $40, $10;, $00 
-    .byte $44, $10;, $00 
-    .byte $48, $10;, $00 
-    .byte $4C, $10;, $00 
-    .byte $80, $10;, $00 
-    .byte $84, $10;, $00 
-    .byte $88, $10;, $00 
-    .byte $8C, $10;, $00 
-    .byte $B0, $10;, $00 
-    .byte $B4, $10;, $00 
-    .byte $B8, $10;, $00 
-    .byte $BC, $10;, $00
+; Room $0B
+Bank04_LA4E2:
+    .byte $00    ; original base $00 -> palette 0
+    .word Bank04_Room_0B_Top_Left
+    .word Bank04_Room_0B_Top_Right
+    .word Bank04_Room_0B_Bottom_Left
+Bank04_Room_0B_Bottom_Right:
+    .byte $88, $10
+    .byte $8C, $10
+    .byte $B8, $10
+    .byte $BC, $10
+    .byte $FF
+Bank04_Room_0B_Top_Left:
+    .byte $00, $10
+    .byte $04, $10
+    .byte $40, $10
+    .byte $44, $10
+    .byte $FF
+Bank04_Room_0B_Top_Right:
+    .byte $08, $10
+    .byte $0C, $10
+    .byte $48, $10
+    .byte $4C, $10
+    .byte $FF
+Bank04_Room_0B_Bottom_Left:
+    .byte $80, $10
+    .byte $84, $10
+    .byte $B0, $10
+    .byte $B4, $10
     .byte $FF
 
-;Room #$0C
+; Room $0C
 Bank04_LA514:
-    .byte $00           ;Attribute table data.
-;Room object data:
-Bank04_LA515:  
-    .byte $00, $07;, $00 
-    .byte $0A, $11;, $00 
-    .byte $0E, $07;, $00 
-    .byte $25, $11;, $00 
-    .byte $32, $08;, $04 
-    .byte $49, $11;, $00 
-    .byte $50, $03;, $08 
-    .byte $5D, $09;, $04 
-    .byte $5E, $07;, $00 
-    .byte $80, $07;, $00 
-    .byte $82, $11;, $00 
-    .byte $86, $11;, $00 
-    .byte $9C, $11;, $00 
-    .byte $AE, $07;, $00 
-    .byte $BD, $09;, $04 
-    .byte $C2, $08;, $04
-    .byte $C8, $11;, $00 
-    .byte $D0, $07;, $00 
-    .byte $D4, $11;, $00 
+    .byte $00    ; original base $00 -> palette 0
+    .word Bank04_Room_0C_Top_Left
+    .word Bank04_Room_0C_Top_Right
+    .word Bank04_Room_0C_Bottom_Left
+Bank04_Room_0C_Bottom_Right:
+    .byte $8E, $33
+    .byte $9C, $11
+    .byte $AE, $07
+    .byte $BD, $09
+    .byte $C8, $11
+    .byte $FF
+Bank04_Room_0C_Top_Left:
+    .byte $00, $07
+    .byte $25, $11
+    .byte $32, $08
+    .byte $50, $03
     .byte $FD
-;Room enemy/door data:
-Bank04_LA54F: 
-    .byte $02, $B1
-    .byte $51, $85, $39
-    .byte $41, $05, $C4
+    .byte $02, $B1    ; Door
+    .byte $FF
+Bank04_Room_0C_Top_Right:
+    .byte $0A, $11
+    .byte $0E, $07
+    .byte $49, $11
+    .byte $5D, $09
+    .byte $5E, $32
+    .byte $FD
+    .byte $51, $85, $39    ; Enemy
+    .byte $FF
+Bank04_Room_0C_Bottom_Left:
+    .byte $80, $07
+    .byte $82, $11
+    .byte $86, $11
+    .byte $C2, $08
+    .byte $D0, $35
+    .byte $D4, $11
+    .byte $FD
+    .byte $41, $05, $C4    ; Enemy
     .byte $FF
 
-;Room #$0D
-Bank04_LA558: 
-    .byte $00           ;Attribute table data.
-;Room object data:
-Bank04_LA559:  
-    .byte $00, $07;, $00
-    .byte $0A, $0F;, $08
-    .byte $0E, $07;, $00
-    .byte $1D, $09;, $04
-    .byte $4A, $0F;, $08
-    .byte $50, $03;, $08
-    .byte $5E, $07;, $00
-    .byte $80, $07;, $00
-    .byte $86, $0F;, $08
-    .byte $8A, $0F;, $08
-    .byte $8C, $11;, $00
-    .byte $9D, $09;, $04
-    .byte $A2, $11;, $00
-    .byte $AE, $07;, $00
-    .byte $C2, $08;, $04
-    .byte $CA, $0F;, $08
-    .byte $D0, $07;, $00
+; Room $0D
+Bank04_LA558:
+    .byte $00    ; original base $00 -> palette 0
+    .word Bank04_Room_0D_Top_Left
+    .word Bank04_Room_0D_Top_Right
+    .word Bank04_Room_0D_Bottom_Left
+Bank04_Room_0D_Bottom_Right:
+    .byte $8E, $33
+    .byte $8A, $0F
+    .byte $8C, $11
+    .byte $9D, $09
+    .byte $AE, $07
+    .byte $CA, $38
+    .byte $FF
+Bank04_Room_0D_Top_Left:
+    .byte $00, $07
+    .byte $50, $03
     .byte $FD
-;Room enemy/door data:
-Bank04_LA58D:
-    .byte $02, $B1
+    .byte $02, $B1    ; Door
+    .byte $FF
+Bank04_Room_0D_Top_Right:
+    .byte $0A, $0F
+    .byte $0E, $07
+    .byte $1D, $09
+    .byte $4A, $0F
+    .byte $5E, $32
+    .byte $FF
+Bank04_Room_0D_Bottom_Left:
+    .byte $80, $07
+    .byte $86, $0F
+    .byte $A2, $11
+    .byte $C2, $08
+    .byte $D0, $35
     .byte $FF
 
-;Room #$0E
+; Room $0E
 Bank04_LA590:
-    .byte $00           ;Attribute table data.
-;Room object data:
-Bank04_LA591:  
-    .byte $00, $07;, $00
-    .byte $0A, $0F;, $08
-    .byte $0E, $07;, $00
-    .byte $2D, $09;, $04
-    .byte $32, $08;, $04
-    .byte $4A, $0F;, $08
-    .byte $50, $07;, $00
-    .byte $5E, $07;, $00
-    .byte $78, $11;, $00
-    .byte $8A, $0F;, $08
-    .byte $92, $08;, $04
-    .byte $A0, $07;, $00
-    .byte $AE, $07;, $00
-    .byte $BD, $09;, $04
-    .byte $CA, $0F;, $08
+    .byte $00    ; original base $00 -> palette 0
+    .word Bank04_Room_0E_Top_Left
+    .word Bank04_Room_0E_Top_Right
+    .word Bank04_Room_0E_Bottom_Left
+Bank04_Room_0E_Bottom_Right:
+    .byte $8E, $33
+    .byte $8A, $0F
+    .byte $AE, $07
+    .byte $BD, $09
+    .byte $CA, $38
+    .byte $FF
+Bank04_Room_0E_Top_Left:
+    .byte $00, $07
+    .byte $32, $08
+    .byte $50, $32
+    .byte $FF
+Bank04_Room_0E_Top_Right:
+    .byte $0A, $0F
+    .byte $0E, $07
+    .byte $2D, $09
+    .byte $4A, $0F
+    .byte $5E, $32
+    .byte $78, $11
+    .byte $FF
+Bank04_Room_0E_Bottom_Left:
+    .byte $80, $33
+    .byte $92, $08
+    .byte $A0, $07
     .byte $FF
 
-;Room #$0F
+; Room $0F
 Bank04_LA5BF:
-    .byte $04           ;Attribute table data.
-;Room object data:
-Bank04_LA5C0:  
-    .byte $00, $1D;, $04
-    .byte $08, $1D;, $04
-    .byte $1E, $1F;, $04
-    .byte $5F, $03;, $08
-    .byte $8C, $1F;, $04
-    .byte $9B, $09;, $04
-    .byte $C9, $1D;, $04
-    .byte $D0, $1F;, $04
-    .byte $D4, $00;, $08
+    .byte $55    ; original base $04 -> palette 1
+    .word Bank04_Room_0F_Top_Left
+    .word Bank04_Room_0F_Top_Right
+    .word Bank04_Room_0F_Bottom_Left
+Bank04_Room_0F_Bottom_Right:
+    .byte $8C, $1F
+    .byte $9B, $09
+    .byte $C9, $53
+    .byte $CA, $4E
+    .byte $CD, $4E
+    .byte $D8, $37
     .byte $FD
-;Room enemy/door data:
-Bank04_LA5DC:
-    .byte $02, $A1
-    .byte $41, $84, $31
-    .byte $57, $87, $D5
-    .byte $07, $87, $D8
+    .byte $07, $87, $D8    ; Zeb hole
+    .byte $FF
+Bank04_Room_0F_Top_Left:
+    .byte $00, $1D
+    .byte $FD
+    .byte $41, $84, $31    ; Enemy
+    .byte $FF
+Bank04_Room_0F_Top_Right:
+    .byte $08, $1D
+    .byte $1E, $1E
+    .byte $1F, $57
+    .byte $5F, $03
+    .byte $FD
+    .byte $02, $A1    ; Door
+    .byte $FF
+Bank04_Room_0F_Bottom_Left:
+    .byte $D0, $4F
+    .byte $D2, $4F
+    .byte $E0, $58
+    .byte $D4, $37
+    .byte $FD
+    .byte $57, $87, $D5    ; Zeb hole
     .byte $FF
 
-;Room #$10
-Bank04_LA5E8: 
-    .byte $00           ;Attribute table data.
-;Room object data:
-Bank04_LA5E9:  
-    .byte $00, $12;, $00
-    .byte $08, $12;, $00
-    .byte $57, $0C;, $00
-    .byte $75, $0C;, $00
-    .byte $79, $0C;, $00
-    .byte $93, $0C;, $00
-    .byte $9B, $0C;, $00
-    .byte $B1, $0C;, $00
-    .byte $BD, $0C;, $00
-    .byte $CF, $0C;, $00
-    .byte $D0, $00;, $08
-    .byte $D8, $00;, $08
+; Room $10
+Bank04_LA5E8:
+    .byte $00    ; original base $00 -> palette 0
+    .word Bank04_Room_10_Top_Left
+    .word Bank04_Room_10_Top_Right
+    .word Bank04_Room_10_Bottom_Left
+Bank04_Room_10_Bottom_Right:
+    .byte $89, $29
+    .byte $9B, $0C
+    .byte $BD, $3B
+    .byte $CF, $39
+    .byte $D8, $00
     .byte $FD
-;Room enemy/door data:
-Bank04_LA60E:
-    .byte $41, $81, $2D
-    .byte $27, $07, $D4
-    .byte $17, $87, $DA
+    .byte $17, $87, $DA    ; Zeb hole
+    .byte $FF
+Bank04_Room_10_Top_Left:
+    .byte $00, $12
+    .byte $57, $39
+    .byte $75, $28
+    .byte $FF
+Bank04_Room_10_Top_Right:
+    .byte $08, $12
+    .byte $79, $28
+    .byte $FD
+    .byte $41, $81, $2D    ; Enemy
+    .byte $FF
+Bank04_Room_10_Bottom_Left:
+    .byte $87, $3A
+    .byte $85, $29
+    .byte $93, $0C
+    .byte $B1, $3B
+    .byte $D0, $00
+    .byte $FD
+    .byte $27, $07, $D4    ; Zeb hole
     .byte $FF
 
-;Room #$11 (not used).
-;Bank04_LA618:  .byte $00           ;Attribute table data.
-;;Room object data:
-;Bank04_LA619:  
-;.byte $00, $07;, $00
-;.byte $02, $08;, $04
-;.byte $0E, $07;, $00
-;.byte $2D, $09;, $04
-;.byte $32, $0E;, $00
-;.byte $50, $03;, $08
-;.byte $5F, $03;, $08
-;.byte $80, $10;, $00
-;.byte $84, $10;, $00
-;.byte $88, $10;, $00
-;.byte $8C, $10;, $00
-;.byte $C0, $10;, $00
-;.byte $C4, $10;, $00
-;.byte $C8, $10;, $00
-;.byte $CC, $10;, $00
-;.byte $FF
-
-;Room #$12
-Bank04_LA647: 
-    .byte $00           ;Attribute table data.
-;Room object data:
-Bank04_LA648:  
-    .byte $00, $12;, $00
-    .byte $08, $12;, $00
-    .byte $24, $11;, $00
-    .byte $37, $0C;, $00
-    .byte $45, $0C;, $00
-    .byte $48, $0E;, $00
-    .byte $57, $0C;, $00
-    .byte $63, $0C;, $00
-    .byte $65, $0C;, $00
-    .byte $9B, $0E;, $00
-    .byte $A2, $11;, $00
-    .byte $C0, $13;, $0C
-    .byte $C5, $0E;, $00
-    .byte $C9, $0C;, $00
-    .byte $CC, $13;, $0C
-    .byte $D4, $00;, $08
+; Room $11
+Bank04_LA647:
+    .byte $00    ; original base $00 -> palette 0
+    .word Bank04_Room_11_Top_Left
+    .word Bank04_Room_11_Top_Right
+    .word Bank04_Room_11_Bottom_Left
+Bank04_Room_11_Bottom_Right:
+    .byte $9B, $0E
+    .byte $C9, $39
+    .byte $CC, $3E
+    .byte $D8, $37
     .byte $FD
-;Room enemy/door data:
-Bank04_LA679: 
-    .byte $21, $85, $39
-    .byte $31, $85, $8C
-    .byte $41, $85, $B6
+    .byte $31, $85, $8C    ; Enemy
+    .byte $FF
+Bank04_Room_11_Top_Left:
+    .byte $00, $12
+    .byte $24, $11
+    .byte $37, $0C
+    .byte $45, $3B
+    .byte $57, $39
+    .byte $63, $3C
+    .byte $65, $3C
+    .byte $FF
+Bank04_Room_11_Top_Right:
+    .byte $08, $12
+    .byte $48, $0E
+    .byte $FD
+    .byte $21, $85, $39    ; Enemy
+    .byte $FF
+Bank04_Room_11_Bottom_Left:
+    .byte $87, $3A
+    .byte $83, $3D
+    .byte $85, $3D
+    .byte $A2, $11
+    .byte $C0, $3E
+    .byte $C5, $0E
+    .byte $D4, $37
+    .byte $FD
+    .byte $41, $85, $B6    ; Enemy
     .byte $FF
 
-;Room #$13
-Bank04_LA683:  .byte $0C           ;Attribute table data.
-;Room object data:
-Bank04_LA684:  
-    .byte $00, $15;, $0C 
-    .byte $08, $15;, $0C 
-    .byte $10, $16;, $0C 
-    .byte $50, $03;, $08 
-    .byte $68, $14;, $0C 
-    .byte $80, $16;, $0C 
-    .byte $93, $14;, $0C 
-    .byte $AB, $14;, $0C 
-    .byte $BF, $14;, $0C 
-    .byte $C0, $16;, $0C 
-    .byte $D2, $00;, $08 
-    .byte $DA, $00;, $08 
+; Room $12 reuses Bank04_LA647 (same pointer as room $11).
+; Room $13
+Bank04_LA683:
+    .byte $FF    ; original base $0C -> palette 3
+    .word Bank04_Room_13_Top_Left
+    .word Bank04_Room_13_Top_Right
+    .word Bank04_Room_13_Bottom_Left
+Bank04_Room_13_Bottom_Right:
+    .byte $AB, $14
+    .byte $BF, $3F
+    .byte $D8, $40
+    .byte $DA, $37
+    .byte $DE, $40
     .byte $FD
-;Room enemy/door data:
-Bank04_LA6A9:
-    .byte $02, $B0
-    .byte $21, $81, $27
-    .byte $41, $85, $84
-    .byte $37, $87, $DD
+    .byte $37, $87, $DD    ; Zeb hole
+    .byte $FF
+Bank04_Room_13_Top_Left:
+    .byte $00, $15
+    .byte $10, $16
+    .byte $50, $03
+    .byte $FD
+    .byte $02, $B0    ; Door
+    .byte $21, $81, $27    ; Enemy
+    .byte $FF
+Bank04_Room_13_Top_Right:
+    .byte $08, $15
+    .byte $68, $14
+    .byte $FF
+Bank04_Room_13_Bottom_Left:
+    .byte $80, $16
+    .byte $93, $14
+    .byte $C0, $56
+    .byte $D0, $56
+    .byte $E0, $56
+    .byte $D2, $37
+    .byte $D6, $40
+    .byte $FD
+    .byte $41, $85, $84    ; Enemy
     .byte $FF
 
-;Room #$14
-Bank04_LA6B5: 
-    .byte $0C           ;Attribute table data.
-;Room object data:
-Bank04_LA6B6:  
-    .byte $00, $15;, $0C
-    .byte $08, $15;, $0C
-    .byte $8A, $14;, $0C
-    .byte $A4, $14;, $0C
-    .byte $AF, $14;, $0C
-    .byte $D0, $00;, $08
-    .byte $D8, $00;, $08
+; Room $14
+Bank04_LA6B5:
+    .byte $FF    ; original base $0C -> palette 3
+    .word Bank04_Room_14_Top_Left
+    .word Bank04_Room_14_Top_Right
+    .word Bank04_Room_14_Bottom_Left
+Bank04_Room_14_Bottom_Right:
+    .byte $8A, $14
+    .byte $AF, $3F
+    .byte $D8, $00
     .byte $FD
-;Room enemy/door data:
-Bank04_LA6CC: 
-    .byte $37, $87, $D1
-    .byte $47, $87, $D7
-    .byte $57, $87, $DC
-    .byte $01, $85, $95
+    .byte $57, $87, $DC    ; Zeb hole
+    .byte $FF
+Bank04_Room_14_Top_Left:
+    .byte $00, $15
+    .byte $FF
+Bank04_Room_14_Top_Right:
+    .byte $08, $15
+    .byte $FF
+Bank04_Room_14_Bottom_Left:
+    .byte $A4, $14
+    .byte $D0, $00
+    .byte $FD
+    .byte $37, $87, $D1    ; Zeb hole
+    .byte $47, $87, $D7    ; Zeb hole
+    .byte $01, $85, $95    ; Enemy
     .byte $FF
 
-;Room #$15
+; Room $15
 Bank04_LA6D9:
-    .byte $04           ;Attribute table data.
-;Room object data:
-Bank04_LA6DA:  
-    .byte $00, $1D;, $04
-    .byte $08, $1D;, $04
-    .byte $20, $1D;, $04
-    .byte $28, $1D;, $04
-    .byte $50, $03;, $08
-    .byte $5F, $03;, $08
-    .byte $80, $1D;, $04
-    .byte $87, $20;, $04
-    .byte $88, $1D;, $04
-    .byte $97, $21;, $04
-    .byte $B0, $1D;, $04
-    .byte $B7, $21;, $04
-    .byte $B8, $1D;, $04
-    .byte $C0, $1D;, $04
-    .byte $C7, $21;, $04
-    .byte $C8, $1D;, $04
+    .byte $55    ; original base $04 -> palette 1
+    .word Bank04_Room_15_Top_Left
+    .word Bank04_Room_15_Top_Right
+    .word Bank04_Room_15_Bottom_Left
+Bank04_Room_15_Bottom_Right:
+    .byte $88, $1D
+    .byte $B8, $1D
+    .byte $C8, $1D
+    .byte $FF
+Bank04_Room_15_Top_Left:
+    .byte $00, $1D
+    .byte $20, $1D
+    .byte $50, $03
     .byte $FD
-;Room enemy/door data:
-Bank04_LA70B:
-    .byte $02, $A1
-    .byte $02, $B1
-    .byte $01, $80, $68
+    .byte $02, $B1    ; Door
+    .byte $FF
+Bank04_Room_15_Top_Right:
+    .byte $08, $1D
+    .byte $28, $1D
+    .byte $5F, $03
+    .byte $FD
+    .byte $02, $A1    ; Door
+    .byte $01, $80, $68    ; Enemy
+    .byte $FF
+Bank04_Room_15_Bottom_Left:
+    .byte $80, $1D
+    .byte $87, $20
+    .byte $97, $21
+    .byte $B0, $1D
+    .byte $B7, $21
+    .byte $C0, $1D
+    .byte $C7, $41
     .byte $FF
 
-;Room #$16
+; Room $16
 Bank04_LA713:
-    .byte $0C           ;Attribute table data.
-;Room object data:
-Bank04_LA714:  
-    .byte $00, $15;, $0C
-    .byte $08, $15;, $0C
-    .byte $1E, $16;, $0C
-    .byte $5F, $03;, $08
-    .byte $61, $14;, $0C
-    .byte $85, $14;, $0C
-    .byte $8C, $15;, $0C
-    .byte $8E, $16;, $0C
-    .byte $BA, $14;, $0C
-    .byte $CE, $16;, $0C
-    .byte $D0, $00;, $08
-    .byte $D6, $00;, $08
+    .byte $FF    ; original base $0C -> palette 3
+    .word Bank04_Room_16_Top_Left
+    .word Bank04_Room_16_Top_Right
+    .word Bank04_Room_16_Bottom_Left
+Bank04_Room_16_Bottom_Right:
+    .byte $8C, $56
+    .byte $9C, $56
+    .byte $8E, $16
+    .byte $BA, $14
+    .byte $CE, $56
+    .byte $DE, $56
+    .byte $EE, $56
+    .byte $D8, $37
+    .byte $DC, $40
     .byte $FD
-;Room enemy/door data:
-Bank04_LA739: 
-    .byte $02, $A1
-    .byte $07, $87, $D3
-    .byte $17, $07, $D8
-    .byte $21, $81, $27
+    .byte $17, $07, $D8    ; Zeb hole
+    .byte $FF
+Bank04_Room_16_Top_Left:
+    .byte $00, $15
+    .byte $61, $14
+    .byte $FD
+    .byte $21, $81, $27    ; Enemy
+    .byte $FF
+Bank04_Room_16_Top_Right:
+    .byte $08, $15
+    .byte $1E, $16
+    .byte $5F, $03
+    .byte $FD
+    .byte $02, $A1    ; Door
+    .byte $FF
+Bank04_Room_16_Bottom_Left:
+    .byte $85, $14
+    .byte $D0, $00
+    .byte $D6, $40
+    .byte $FD
+    .byte $07, $87, $D3    ; Zeb hole
     .byte $FF
 
-;Room #$17
+; Room $17
 Bank04_LA745:
-    .byte $04           ;Attribute table data.
-;Room object data:
-Bank04_LA746:  
-    .byte $00, $17;, $0C
-    .byte $08, $17;, $0C
-    .byte $10, $19;, $0C
-    .byte $24, $18;, $0C
-    .byte $36, $0C;, $00
-    .byte $3B, $0C;, $00
-    .byte $50, $03;, $08
-    .byte $80, $19;, $0C
-    .byte $AE, $0C;, $00
-    .byte $C0, $19;, $0C
-    .byte $D4, $18;, $0C
-    .byte $D8, $00;, $08
-    .byte $D9, $18;, $0C
-    .byte $DB, $05;, $08
-    .byte $DF, $00;, $08
+    .byte $55    ; original base $04 -> palette 1
+    .word Bank04_Room_17_Top_Left
+    .word Bank04_Room_17_Top_Right
+    .word Bank04_Room_17_Bottom_Left
+Bank04_Room_17_Bottom_Right:
+    .byte $AE, $0C
+    .byte $D8, $00
+    .byte $D9, $50
+    .byte $DC, $42
+    .byte $E9, $50
+    .byte $DB, $05
+    .byte $DF, $44
     .byte $FD
-;Room enemy/door data:
-    .byte $02, $B1
-    .byte $41, $80, $C5
-    .byte $57, $87, $DC
-    .byte $31, $04, $48
+    .byte $57, $87, $DC    ; Zeb hole
+    .byte $FF
+Bank04_Room_17_Top_Left:
+    .byte $00, $17
+    .byte $10, $19
+    .byte $24, $42
+    .byte $36, $0C
+    .byte $50, $03
+    .byte $FD
+    .byte $02, $B1    ; Door
+    .byte $FF
+Bank04_Room_17_Top_Right:
+    .byte $08, $17
+    .byte $28, $42
+    .byte $3B, $0C
+    .byte $FD
+    .byte $31, $04, $48    ; Enemy
+    .byte $FF
+Bank04_Room_17_Bottom_Left:
+    .byte $80, $19
+    .byte $C0, $43
+    .byte $D4, $42
+    .byte $FD
+    .byte $41, $80, $C5    ; Enemy
     .byte $FF
 
-;Room #$18
+; Room $18
 Bank04_LA780:
-    .byte $04           ;Attribute table data.
-;Room object data:
-Bank04_LA781:  
-    .byte $00, $17;, $0C
-    .byte $08, $17;, $0C
-    .byte $1C, $19;, $0C
-    .byte $20, $19;, $0C
-    .byte $5F, $03;, $08
-    .byte $8C, $19;, $0C
-    .byte $CC, $19;, $0C
-    .byte $D0, $18;, $0C
-    .byte $D3, $00;, $08
-    .byte $D4, $18;, $0C
-    .byte $D5, $05;, $08
+    .byte $55    ; original base $04 -> palette 1
+    .word Bank04_Room_18_Top_Left
+    .word Bank04_Room_18_Top_Right
+    .word Bank04_Room_18_Bottom_Left
+Bank04_Room_18_Bottom_Right:
+    .byte $8C, $19
+    .byte $CC, $43
+    .byte $D8, $42
+    .byte $FF
+Bank04_Room_18_Top_Left:
+    .byte $00, $17
+    .byte $20, $19
     .byte $FD
-;Room enemy/door data:
-Bank04_LA7A3:
-    .byte $02, $A1
-    .byte $37, $87, $D6
-    .byte $21, $84, $62
-    .byte $11, $84, $25
-    .byte $01, $84, $29
+    .byte $21, $84, $62    ; Enemy
+    .byte $11, $84, $25    ; Enemy
+    .byte $FF
+Bank04_Room_18_Top_Right:
+    .byte $08, $17
+    .byte $1C, $19
+    .byte $5F, $03
+    .byte $FD
+    .byte $02, $A1    ; Door
+    .byte $01, $84, $29    ; Enemy
+    .byte $FF
+Bank04_Room_18_Bottom_Left:
+    .byte $D0, $18
+    .byte $D3, $44
+    .byte $D4, $42
+    .byte $D5, $05
+    .byte $FD
+    .byte $37, $87, $D6    ; Zeb hole
     .byte $FF
 
-;Room #$19
+; Room $19
 Bank04_LA7B2:
-    .byte $0C           ;Attribute table data.
-;Room object data:
-Bank04_LA7B3:  
-    .byte $00, $19;, $0C 
-    .byte $04, $19;, $0C 
-    .byte $08, $19;, $0C 
-    .byte $0C, $19;, $0C 
-    .byte $40, $19;, $0C 
-    .byte $44, $19;, $0C 
-    .byte $48, $19;, $0C 
-    .byte $4C, $19;, $0C 
-    .byte $70, $19;, $0C 
-    .byte $74, $19;, $0C 
-    .byte $78, $19;, $0C 
-    .byte $7C, $19;, $0C 
-    .byte $90, $1A;, $0C 
-    .byte $94, $1A;, $0C 
-    .byte $98, $1A;, $0C 
-    .byte $9C, $1A;, $0C
-    .byte $B0, $1A;, $0C 
-    .byte $B8, $1A;, $0C 
-    .byte $C0, $19;, $0C 
-    .byte $C4, $19;, $0C 
-    .byte $C8, $19;, $0C 
-    .byte $CC, $19;, $0C 
+    .byte $FF    ; original base $0C -> palette 3
+    .word Bank04_Room_19_Top_Left
+    .word Bank04_Room_19_Top_Right
+    .word Bank04_Room_19_Bottom_Left
+Bank04_Room_19_Bottom_Right:
+    .byte $88, $43
+    .byte $8C, $43
+    .byte $98, $1A
+    .byte $9C, $46
+    .byte $B8, $1A
+    .byte $C8, $43
+    .byte $CC, $43
+    .byte $FF
+Bank04_Room_19_Top_Left:
+    .byte $00, $19
+    .byte $04, $19
+    .byte $40, $19
+    .byte $44, $19
+    .byte $70, $45
+    .byte $74, $45
+    .byte $FF
+Bank04_Room_19_Top_Right:
+    .byte $08, $19
+    .byte $0C, $19
+    .byte $48, $19
+    .byte $4C, $19
+    .byte $78, $45
+    .byte $7C, $45
+    .byte $FF
+Bank04_Room_19_Bottom_Left:
+    .byte $80, $43
+    .byte $84, $43
+    .byte $90, $1A
+    .byte $94, $46
+    .byte $B0, $1A
+    .byte $C0, $43
+    .byte $C4, $43
     .byte $FF
 
-;Room #$1A
+; Room $1A
 Bank04_LA7F6:
-    .byte $0C           ;Attribute table data.
-;Room object data:
-Bank04_LA7F7:  
-    .byte $00, $13;, $0C 
-    .byte $04, $13;, $0C 
-    .byte $08, $13;, $0C 
-    .byte $0C, $13;, $0C 
-    .byte $10, $13;, $0C 
-    .byte $14, $13;, $0C 
-    .byte $18, $13;, $0C 
-    .byte $1C, $13;, $0C 
-    .byte $50, $03;, $08 
-    .byte $5F, $03;, $08 
-    .byte $80, $13;, $0C 
-    .byte $81, $1B;, $0C 
-    .byte $84, $13;, $0C 
-    .byte $88, $13;, $0C 
-    .byte $8C, $13;, $0C 
-    .byte $91, $1C;, $0C 
-    .byte $C0, $13;, $0C 
-    .byte $C1, $1C;, $0C 
-    .byte $C4, $13;, $0C 
-    .byte $C8, $13;, $0C 
-    .byte $CC, $13;, $0C 
+    .byte $FF    ; original base $0C -> palette 3
+    .word Bank04_Room_1A_Top_Left
+    .word Bank04_Room_1A_Top_Right
+    .word Bank04_Room_1A_Bottom_Left
+Bank04_Room_1A_Bottom_Right:
+    .byte $88, $13
+    .byte $8C, $13
+    .byte $C8, $3E
+    .byte $CC, $3E
+    .byte $FF
+Bank04_Room_1A_Top_Left:
+    .byte $00, $13
+    .byte $04, $13
+    .byte $10, $13
+    .byte $14, $13
+    .byte $50, $03
     .byte $FD
-;Room enemy/door data:
-Bank04_LA837:
-    .byte $02, $A0
-    .byte $02, $B1
-    .byte $31, $81, $68
+    .byte $02, $B1    ; Door
+    .byte $FF
+Bank04_Room_1A_Top_Right:
+    .byte $08, $13
+    .byte $0C, $13
+    .byte $18, $13
+    .byte $1C, $13
+    .byte $5F, $03
+    .byte $FD
+    .byte $02, $A0    ; Door
+    .byte $31, $81, $68    ; Enemy
+    .byte $FF
+Bank04_Room_1A_Bottom_Left:
+    .byte $80, $13
+    .byte $81, $1B
+    .byte $84, $13
+    .byte $91, $1C
+    .byte $C0, $3E
+    .byte $C1, $1C
+    .byte $C4, $3E
     .byte $FF
 
-;Room #$1B
+; Room $1B
 Bank04_LA83F:
-    .byte $00           ;Attribute table data.
-;Room object data:
-Bank04_LA840:  
-    .byte $00, $1F;, $04 
-    .byte $04, $1D;, $04 
-    .byte $07, $21;, $04 
-    .byte $0C, $1F;, $04 
-    .byte $10, $0C;, $00 
-    .byte $14, $1F;, $04 
-    .byte $17, $21;, $04 
-    .byte $18, $1F;, $04 
-    .byte $1F, $0C;, $00 
-    .byte $25, $0B;, $08 
-    .byte $2A, $0B;, $08 
-    .byte $41, $22;, $00 
-    .byte $4C, $23;, $00 
-    .byte $50, $03;, $08 
-    .byte $54, $22;, $00 
-    .byte $59, $23;, $00
-    .byte $5F, $03;, $08 
-    .byte $80, $07;, $00 
-    .byte $82, $14;, $0C 
-    .byte $84, $14;, $0C 
-    .byte $86, $14;, $0C 
-    .byte $88, $14;, $0C 
-    .byte $8A, $14;, $0C 
-    .byte $8C, $14;, $0C 
-    .byte $8E, $07;, $00 
-    .byte $92, $16;, $0C 
-    .byte $9C, $16;, $0C 
-    .byte $D0, $12;, $00 
-    .byte $D4, $00;, $08 
-    .byte $DC, $12;, $00 
+    .byte $00    ; original base $00 -> palette 0
+    .word Bank04_Room_1B_Top_Left
+    .word Bank04_Room_1B_Top_Right
+    .word Bank04_Room_1B_Bottom_Left
+Bank04_Room_1B_Bottom_Right:
+    .byte $88, $14
+    .byte $8A, $14
+    .byte $8C, $14
+    .byte $8E, $07
+    .byte $9C, $16
+    .byte $D8, $37
+    .byte $DC, $4A
+    .byte $DE, $4A
     .byte $FD
-;Room enemy/door data:
-Bank04_LA89B:
-    .byte $02, $A1
-    .byte $02, $B0
-    .byte $27, $07, $D9
+    .byte $27, $07, $D9    ; Zeb hole
+    .byte $FF
+Bank04_Room_1B_Top_Left:
+    .byte $00, $1F
+    .byte $04, $53
+    .byte $05, $4E
+    .byte $07, $21
+    .byte $10, $0C
+    .byte $14, $1F
+    .byte $17, $21
+    .byte $25, $0B
+    .byte $41, $22
+    .byte $50, $03
+    .byte $54, $22
+    .byte $FD
+    .byte $02, $B0    ; Door
+    .byte $FF
+Bank04_Room_1B_Top_Right:
+    .byte $08, $4E
+    .byte $0B, $53
+    .byte $0C, $1F
+    .byte $18, $1F
+    .byte $1F, $0C
+    .byte $2A, $0B
+    .byte $4C, $23
+    .byte $59, $23
+    .byte $5F, $03
+    .byte $FD
+    .byte $02, $A1    ; Door
+    .byte $FF
+Bank04_Room_1B_Bottom_Left:
+    .byte $80, $07
+    .byte $82, $14
+    .byte $84, $14
+    .byte $86, $14
+    .byte $92, $16
+    .byte $D0, $12
+    .byte $D4, $37
     .byte $FF
 
-;Room #$1C
+; Room $1C
 Bank04_LA8A3:
-    .byte $0C           ;Attribute table data.
-;Room object data:
-Bank04_LA8A4:  
-    .byte $00, $17;, $0C 
-    .byte $08, $17;, $0C 
-    .byte $B0, $18;, $0C 
-    .byte $B6, $05;, $08 
-    .byte $B8, $18;, $0C 
-    .byte $D0, $18;, $0C 
-    .byte $D8, $18;, $0C 
+    .byte $FF    ; original base $0C -> palette 3
+    .word Bank04_Room_1C_Top_Left
+    .word Bank04_Room_1C_Top_Right
+    .word Bank04_Room_1C_Bottom_Left
+Bank04_Room_1C_Bottom_Right:
+    .byte $B8, $18
+    .byte $D8, $18
     .byte $FD
-;Room enemy/door data:
-Bank04_LA8BA: 
-    .byte $37, $87, $B7
-    .byte $01, $80, $45
-    .byte $11, $00, $3B
-    .byte $21, $81, $9A
+    .byte $21, $81, $9A    ; Enemy
+    .byte $FF
+Bank04_Room_1C_Top_Left:
+    .byte $00, $17
+    .byte $FD
+    .byte $01, $80, $45    ; Enemy
+    .byte $FF
+Bank04_Room_1C_Top_Right:
+    .byte $08, $17
+    .byte $FD
+    .byte $11, $00, $3B    ; Enemy
+    .byte $FF
+Bank04_Room_1C_Bottom_Left:
+    .byte $B0, $18
+    .byte $B6, $05
+    .byte $D0, $18
+    .byte $FD
+    .byte $37, $87, $B7    ; Zeb hole
     .byte $FF
 
-;Room #$1D
+; Room $1D
 Bank04_LA8C7:
-    .byte $04           ;Attribute table data.
-;Room object data:
-Bank04_LA8C8:  
-    .byte $00, $15;, $0C 
-    .byte $08, $15;, $0C 
-    .byte $10, $24;, $0C 
-    .byte $13, $0B;, $08 
-    .byte $18, $24;, $0C 
-    .byte $1C, $0B;, $08 
-    .byte $1F, $25;, $0C 
-    .byte $20, $25;, $0C 
-    .byte $22, $22;, $00 
-    .byte $2B, $23;, $00 
-    .byte $5F, $03;, $08 
-    .byte $60, $25;, $0C 
-    .byte $8E, $25;, $0C
-    .byte $8F, $13;, $0C 
-    .byte $A0, $25;, $0C 
-    .byte $A2, $11;, $00
-    .byte $AC, $11;, $00
-    .byte $B3, $12;, $00 
-    .byte $BB, $0C;, $00 
-    .byte $BE, $1B;, $0C 
-    .byte $C3, $24;, $0C 
-    .byte $CE, $12;, $00 
-    .byte $D1, $00;, $08 
-    .byte $D3, $24;, $0C 
-    .byte $DC, $00;, $08 
-    .byte $DE, $12;, $00 
-    .byte $E0, $25;, $0C 
-    .byte $E3, $15;, $0C 
+    .byte $55    ; original base $04 -> palette 1
+    .word Bank04_Room_1D_Top_Left
+    .word Bank04_Room_1D_Top_Right
+    .word Bank04_Room_1D_Bottom_Left
+Bank04_Room_1D_Bottom_Right:
+    .byte $8E, $25
+    .byte $8F, $52
+    .byte $AF, $52
+    .byte $AC, $11
+    .byte $B8, $28
+    .byte $B9, $4A
+    .byte $BB, $3B
+    .byte $BE, $1B
+    .byte $C8, $49
+    .byte $CE, $4A
+    .byte $D8, $49
+    .byte $DC, $37
+    .byte $DE, $4A
+    .byte $E8, $4C
+    .byte $FF
+Bank04_Room_1D_Top_Left:
+    .byte $00, $15
+    .byte $10, $24
+    .byte $13, $0B
+    .byte $20, $25
+    .byte $22, $22
+    .byte $60, $4B
+    .byte $70, $4B
+    .byte $FF
+Bank04_Room_1D_Top_Right:
+    .byte $08, $15
+    .byte $18, $24
+    .byte $1C, $0B
+    .byte $1F, $25
+    .byte $2B, $23
+    .byte $5F, $03
     .byte $FD
-;Room enemy/door data:
-Bank04_LA91D:
-    .byte $02, $A0
-    .byte $01, $48, $95
+    .byte $02, $A0    ; Door
+    .byte $FF
+Bank04_Room_1D_Bottom_Left:
+    .byte $80, $4B
+    .byte $90, $4B
+    .byte $A0, $25
+    .byte $A2, $11
+    .byte $B3, $28
+    .byte $B4, $4A
+    .byte $B6, $4A
+    .byte $C3, $48
+    .byte $D1, $40
+    .byte $D3, $48
+    .byte $E0, $4B
+    .byte $E3, $56
+    .byte $E5, $4C
+    .byte $FD
+    .byte $01, $48, $95    ; Enemy
     .byte $FF
 
-;Room #$1E
+; Room $1E
 Bank04_LA923:
-    .byte $04           ;Attribute table data.
-;Room object data:
-Bank04_LA924:  
-    .byte $00, $1E;, $04 
-    .byte $02, $1D;, $04 
-    .byte $08, $1D;, $04 
-    .byte $1F, $1F;, $04 
-    .byte $40, $1E;, $04 
-    .byte $5F, $03;, $08 
-    .byte $77, $0C;, $00 
-    .byte $80, $1E;, $04 
-    .byte $87, $1E;, $04 
-    .byte $8D, $1F;, $04 
-    .byte $C0, $1D;, $04 
-    .byte $C8, $1D;, $04 
+    .byte $55    ; original base $04 -> palette 1
+    .word Bank04_Room_1E_Top_Left
+    .word Bank04_Room_1E_Top_Right
+    .word Bank04_Room_1E_Bottom_Left
+Bank04_Room_1E_Bottom_Right:
+    .byte $8D, $1E
+    .byte $8E, $57
+    .byte $8F, $57
+    .byte $C8, $1D
+    .byte $FF
+Bank04_Room_1E_Top_Left:
+    .byte $00, $1E
+    .byte $02, $53
+    .byte $03, $51
+    .byte $04, $4E
+    .byte $07, $51
+    .byte $40, $1E
+    .byte $77, $28
     .byte $FD
-;Room enemy/door data:
-Bank04_LA949: 
-    .byte $02, $A1
-    .byte $11, $81, $35
+    .byte $11, $81, $35    ; Enemy
+    .byte $FF
+Bank04_Room_1E_Top_Right:
+    .byte $08, $1D
+    .byte $1F, $1E
+    .byte $5F, $03
+    .byte $FD
+    .byte $02, $A1    ; Door
+    .byte $FF
+Bank04_Room_1E_Bottom_Left:
+    .byte $80, $1E
+    .byte $87, $1E
+    .byte $C0, $1D
     .byte $FF
 
-;Room #$1F
+; Room $1F
 Bank04_LA94F:
-    .byte $04           ;Attribute table data.
-;Room object data:
-Bank04_LA950:  
-    .byte $00, $1D;, $04 
-    .byte $08, $1D;, $04 
-    .byte $10, $1E;, $04 
-    .byte $50, $03;, $08 
-    .byte $80, $1F;, $04 
-    .byte $C0, $1D;, $04 
-    .byte $C8, $1D;, $04 
-    .byte $CC, $05;, $08 
+    .byte $55    ; original base $04 -> palette 1
+    .word Bank04_Room_1F_Top_Left
+    .word Bank04_Room_1F_Top_Right
+    .word Bank04_Room_1F_Bottom_Left
+Bank04_Room_1F_Bottom_Right:
+    .byte $C8, $1D
+    .byte $CC, $05
     .byte $FD
-;Room enemy/door data:
-Bank04_LA969: 
-    .byte $02, $B1
-    .byte $01, $88, $AB
-    .byte $17, $07, $CD
+    .byte $01, $88, $AB    ; Enemy
+    .byte $17, $07, $CD    ; Zeb hole
+    .byte $FF
+Bank04_Room_1F_Top_Left:
+    .byte $00, $1D
+    .byte $10, $1E
+    .byte $50, $03
+    .byte $FD
+    .byte $02, $B1    ; Door
+    .byte $FF
+Bank04_Room_1F_Top_Right:
+    .byte $08, $1D
+    .byte $FF
+Bank04_Room_1F_Bottom_Left:
+    .byte $80, $1F
+    .byte $C0, $1D
     .byte $FF
 
-;Room #$20
+; Room $20
 Bank04_LA972:
-    .byte $04           ;Attribute table data.
-;Room object data:
-Bank04_LA973:  
-    .byte $00, $1D;, $04 
-    .byte $08, $1D;, $04 
-    .byte $78, $0C;, $00 
-    .byte $88, $21;, $04 
-    .byte $C0, $1D;, $04 
-    .byte $C8, $1D;, $04 
-    .byte $CD, $05;, $08 
+    .byte $55    ; original base $04 -> palette 1
+    .word Bank04_Room_20_Top_Left
+    .word Bank04_Room_20_Top_Right
+    .word Bank04_Room_20_Bottom_Left
+Bank04_Room_20_Bottom_Right:
+    .byte $88, $21
+    .byte $C8, $1D
+    .byte $CD, $05
     .byte $FD
-;Room enemy/door data:
-Bank04_LA989: 
-    .byte $27, $87, $CE
-    .byte $41, $80, $BC
+    .byte $27, $87, $CE    ; Zeb hole
+    .byte $41, $80, $BC    ; Enemy
+    .byte $FF
+Bank04_Room_20_Top_Left:
+    .byte $00, $1D
+    .byte $FF
+Bank04_Room_20_Top_Right:
+    .byte $08, $1D
+    .byte $78, $28
+    .byte $FF
+Bank04_Room_20_Bottom_Left:
+    .byte $C0, $1D
     .byte $FF
 
-;Room #$21
+; Room $21
 Bank04_LA990:
-    .byte $04           ;Attribute table data.
-;Room object data:
-Bank04_LA991:  
-    .byte $00, $1D;, $04 
-    .byte $08, $1D;, $04 
-    .byte $20, $1D;, $04 
-    .byte $28, $1D;, $04 
-    .byte $50, $03;, $08 
-    .byte $5F, $03;, $08 
-    .byte $80, $1D;, $04 
-    .byte $88, $1D;, $04 
-    .byte $B0, $1D;, $04 
-    .byte $B8, $1D;, $04 
-    .byte $C0, $1D;, $04 
-    .byte $C8, $1D;, $04 
+    .byte $55    ; original base $04 -> palette 1
+    .word Bank04_Room_15_Top_Left
+    .word Bank04_Room_21_Top_Right
+    .word Bank04_Room_21_Bottom_Left
+Bank04_Room_21_Bottom_Right:
+    .byte $88, $1D
+    .byte $B8, $1D
+    .byte $C8, $1D
+    .byte $FF
+Bank04_Room_21_Top_Right:
+    .byte $08, $1D
+    .byte $28, $1D
+    .byte $5F, $03
     .byte $FD
-;Room enemy/door data:
-Bank04_LA9B6: 
-    .byte $02, $A1
-    .byte $02, $B1
-    .byte $21, $81, $68
+    .byte $02, $A1    ; Door
+    .byte $21, $81, $68    ; Enemy
+    .byte $FF
+Bank04_Room_21_Bottom_Left:
+    .byte $80, $1D
+    .byte $B0, $1D
+    .byte $C0, $1D
     .byte $FF
 
-;Room #$22
+; Room $22
 Bank04_LA9BE:
-    .byte $0C           ;Attribute table data.
-;Room object data:
-Bank04_LA9BF:  
-    .byte $00, $13;, $0C 
-    .byte $04, $13;, $0C 
-    .byte $08, $13;, $0C 
-    .byte $0C, $13;, $0C 
-    .byte $10, $13;, $0C 
-    .byte $14, $13;, $0C 
-    .byte $18, $13;, $0C 
-    .byte $1C, $13;, $0C 
-    .byte $50, $03;, $08 
-    .byte $5F, $03;, $08 
-    .byte $80, $13;, $0C 
-    .byte $84, $13;, $0C 
-    .byte $88, $13;, $0C 
-    .byte $8C, $13;, $0C 
-    .byte $C0, $13;, $0C 
-    .byte $C4, $13;, $0C
-    .byte $C8, $13;, $0C 
-    .byte $CC, $13;, $0C 
+    .byte $FF    ; original base $0C -> palette 3
+    .word Bank04_Room_1A_Top_Left
+    .word Bank04_Room_22_Top_Right
+    .word Bank04_Room_22_Bottom_Left
+Bank04_Room_22_Bottom_Right:
+    .byte $88, $13
+    .byte $8C, $13
+    .byte $C8, $3E
+    .byte $CC, $3E
+    .byte $FF
+Bank04_Room_22_Top_Right:
+    .byte $08, $13
+    .byte $0C, $13
+    .byte $18, $13
+    .byte $1C, $13
+    .byte $5F, $03
     .byte $FD
-;Room enemy/door data:
-Bank04_LA9F6:
-    .byte $02, $A1
-    .byte $02, $B1
-    .byte $41, $81, $68
+    .byte $02, $A1    ; Door
+    .byte $41, $81, $68    ; Enemy
+    .byte $FF
+Bank04_Room_22_Bottom_Left:
+    .byte $80, $13
+    .byte $84, $13
+    .byte $C0, $3E
+    .byte $C4, $3E
     .byte $FF
 
-;Room #$23
-Bank04_LA9FE: 
-    .byte $00           ;Attribute table data.
-;Room object data:
-Bank04_LA9FF:  
-    .byte $00, $10;, $00 
-    .byte $0E, $06;, $00 
-    .byte $16, $0D;, $00 
-    .byte $2D, $09;, $04 
-    .byte $34, $08;, $04 
-    .byte $40, $10;, $00 
-    .byte $4B, $0E;, $00 
-    .byte $5F, $03;, $08 
-    .byte $80, $10;, $00 
-    .byte $84, $10;, $00 
-    .byte $88, $10;, $00 
-    .byte $8C, $10;, $00 
-    .byte $C0, $10;, $00 
-    .byte $CC, $10;, $00 
-    .byte $D4, $00;, $08 
+; Room $23
+Bank04_LA9FE:
+    .byte $00    ; original base $00 -> palette 0
+    .word Bank04_Room_23_Top_Left
+    .word Bank04_Room_23_Top_Right
+    .word Bank04_Room_23_Bottom_Left
+Bank04_Room_23_Bottom_Right:
+    .byte $88, $10
+    .byte $8C, $10
+    .byte $CC, $2A
+    .byte $D8, $37
+    .byte $FF
+Bank04_Room_23_Top_Left:
+    .byte $00, $10
+    .byte $16, $27
+    .byte $34, $08
+    .byte $40, $10
+    .byte $FF
+Bank04_Room_23_Top_Right:
+    .byte $0E, $06
+    .byte $18, $27
+    .byte $2D, $09
+    .byte $4B, $0E
+    .byte $5F, $03
     .byte $FD
-;Room enemy/door data:
-Bank04_LAA2D: 
-    .byte $02, $A1
-    .byte $01, $03, $38
+    .byte $02, $A1    ; Door
+    .byte $01, $03, $38    ; Enemy
+    .byte $FF
+Bank04_Room_23_Bottom_Left:
+    .byte $80, $10
+    .byte $84, $10
+    .byte $C0, $2A
+    .byte $D4, $37
     .byte $FF
 
-;Room #$24
-Bank04_LAA33: 
-    .byte $00           ;Attribute table data.
-;Room object data:
-Bank04_LAA34:  
-    .byte $00, $07;, $00 
-    .byte $0E, $07;, $00 
-    .byte $19, $11;, $00 
-    .byte $1D, $09;, $04 
-    .byte $32, $08;, $04 
-    .byte $4C, $11;, $00 
-    .byte $50, $03;, $08 
-    .byte $5E, $07;, $00 
-    .byte $80, $10;, $00 
-    .byte $84, $10;, $00 
-    .byte $88, $10;, $00 
-    .byte $8C, $10;, $00 
-    .byte $C0, $10;, $00 
-    .byte $CC, $10;, $00 
+; Room $24
+Bank04_LAA33:
+    .byte $00    ; original base $00 -> palette 0
+    .word Bank04_Room_24_Top_Left
+    .word Bank04_Room_24_Top_Right
+    .word Bank04_Room_24_Bottom_Left
+Bank04_Room_24_Bottom_Right:
+    .byte $88, $10
+    .byte $8C, $10
+    .byte $CC, $2A
+    .byte $FF
+Bank04_Room_24_Top_Left:
+    .byte $00, $07
+    .byte $32, $08
+    .byte $50, $03
     .byte $FD
-;Room enemy/door data:
-Bank04_LAA5F: 
-    .byte $02, $B1
-    .byte $41, $80, $75
-    .byte $51, $00, $7A
-    .byte $01, $83, $45
+    .byte $02, $B1    ; Door
+    .byte $41, $80, $75    ; Enemy
+    .byte $01, $83, $45    ; Enemy
+    .byte $FF
+Bank04_Room_24_Top_Right:
+    .byte $0E, $07
+    .byte $19, $11
+    .byte $1D, $09
+    .byte $4C, $11
+    .byte $5E, $32
+    .byte $FD
+    .byte $51, $00, $7A    ; Enemy
+    .byte $FF
+Bank04_Room_24_Bottom_Left:
+    .byte $80, $10
+    .byte $84, $10
+    .byte $C0, $2A
     .byte $FF
 
 ;---------------------------------------[ Structure definitions ]------------------------------------
@@ -2167,259 +2521,824 @@ Bank04_LAA5F:
 
 ;Structure #$00
 ;Moved to "Common_Struct_00" in Bank_07
+Bank04_LAA7E:
+    ; Unreferenced original index: zero-byte alias to the next structure.
+; Structure $02
+Bank04_LAA97:
+    ; Unreferenced original index: zero-byte alias to the next structure.
+; Structure $03
+Bank04_LAAB0:
+    .byte $01, $06
+    .byte $01, $06
+    .byte $01, $06
+    .byte $FF
 
-;Structure #$01
-Bank04_LAA7E:  
-.byte $08, $02, $02, $02, $02, $02, $02, $02, $02
-.byte $01, $1C
-.byte $01, $1C
-.byte $01, $1C
-.byte $08, $02, $02, $02, $02, $02, $02, $02, $02
-.byte $FF
+; Structure $04
+Bank04_LAAB7:
+    ; Unreferenced original index: zero-byte alias to the next structure.
+; Structure $05
+Bank04_LAABE:
+    .byte $02, $14, $15
+    .byte $FF
 
-;Structure #$02
-Bank04_LAA97:  
-.byte $02, $04, $05
-.byte $02, $04, $05
-.byte $02, $04, $05
-.byte $02, $04, $05
-.byte $02, $04, $05
-.byte $02, $04, $05
-.byte $02, $04, $05
-.byte $02, $04, $05
-.byte $FF
+; Structure $06
+Bank04_LAAC2:
+    .byte $42, $17     ; repeat 2 macros
+    .byte $02, $17, $1B
+    .byte $02, $17, $1B
+    .byte $02, $1B, $17
+    .byte $42, $17     ; repeat 2 macros
+    .byte $FF
 
-;Structure #$03
-Bank04_LAAB0:  
-.byte $01, $06
-.byte $01, $06
-.byte $01, $06
-.byte $FF
+; Structure $07
+Bank04_LAAD2:
+    .byte $02, $1A, $17
+    .byte $42, $17     ; repeat 2 macros
+    .byte $02, $1B, $1A
+    .byte $42, $17     ; repeat 2 macros
+    .byte $02, $1A, $1B
+    .byte $FF
 
-;Structure #$04
-Bank04_LAAB7:  
-.byte $01, $07
-.byte $01, $07
-.byte $01, $07
-.byte $FF
+; Structure $08
+Bank04_LAAE2:
+    .byte $01, $18
+    .byte $01, $18
+    .byte $FF
 
-;Structure #$05
-Bank04_LAABE: 
-.byte $02, $14, $15
-.byte $FF
+; Structure $09
+Bank04_LAAE7:
+    .byte $01, $19
+    .byte $01, $19
+    .byte $FF
 
-;Structure #$06
-Bank04_LAAC2: 
-.byte $02, $17, $17
-.byte $02, $17, $1B
-.byte $02, $17, $1B
-.byte $02, $1B, $17
-.byte $02, $17, $17
-.byte $FF
+; Structure $0A
+Bank04_LAAEC:
+    ; Unreferenced original index: zero-byte alias to the next structure.
+; Structure $0B
+Bank04_LAAEF:
+    .byte $01, $0A
+    .byte $FF
 
-;Structure #$07
-Bank04_LAAD2: 
-.byte $02, $1A, $17
-.byte $02, $17, $17
-.byte $02, $1B, $1A
-.byte $02, $17, $17
-.byte $02, $1A, $1B
-.byte $FF
+; Structure $0C
+Bank04_LAAF2:
+    .byte $01, $1E
+    .byte $01, $1A
+    .byte $01, $1A
+    .byte $01, $1A
+    .byte $01, $1E
+    .byte $FF
 
-;Structure #$08
-Bank04_LAAE2:  
-.byte $01, $18
-.byte $01, $18
-.byte $FF
+; Structure $0D
+Bank04_LAAFD:
+    .byte $44, $17     ; repeat 4 macros
+    .byte $FF
 
-;Structure #$09
-Bank04_LAAE7:  
-.byte $01, $19
-.byte $01, $19
-.byte $FF
+; Structure $0E
+Bank04_LAB03:
+    .byte $03, $17, $1D, $17
+    .byte $FF
 
-;Structure #$0A
-Bank04_LAAEC: 
-.byte $01, $09
-.byte $FF
+; Structure $0F
+Bank04_LAB08:
+    .byte $01, $0B
+    .byte $01, $0B
+    .byte $01, $0B
+    .byte $01, $0B
+    .byte $FF
 
-;Structure #$0B
-Bank04_LAAEF:  
-.byte $01, $0A
-.byte $FF
+; Structure $10
+Bank04_LAB11:
+    .byte $04, $17, $17, $1B, $17
+    .byte $04, $1B, $17, $17, $17
+    .byte $04, $1B, $17, $1B, $1B
+    .byte $04, $17, $1B, $17, $17
+    .byte $FF
 
-;Structure #$0C
-Bank04_LAAF2: 
-.byte $01, $1E
-.byte $01, $1A
-.byte $01, $1A
-.byte $01, $1A
-.byte $01, $1E
-.byte $FF
+; Structure $11
+Bank04_LAB26:
+    .byte $01, $17
+    .byte $FF
 
-;Structure #$0D
-Bank04_LAAFD: 
-.byte $04, $17, $17, $17, $17
-.byte $FF
+; Structure $12
+Bank04_LAB29:
+    .byte $48, $1E     ; repeat 8 macros
+    .byte $48, $1E     ; repeat 8 macros
+    .byte $FF
 
-;Structure #$0E
-Bank04_LAB03: 
-.byte $03, $17, $1D, $17
-.byte $FF
+; Structure $13
+Bank04_LAB3C:
+    .byte $44, $0F     ; repeat 4 macros
+    .byte $44, $0F     ; repeat 4 macros
+    .byte $44, $0F     ; repeat 4 macros
+    .byte $44, $0F     ; repeat 4 macros
+    .byte $FF
 
-;Structure #$0F
-Bank04_LAB08: 
-.byte $01, $0B, $01, $0B, $01, $0B, $01, $0B, $FF
+; Structure $14
+Bank04_LAB51:
+    .byte $42, $12     ; repeat 2 macros
+    .byte $FF
 
-;Structure #$10
-Bank04_LAB11:  
-.byte $04, $17, $17, $1B, $17
-.byte $04, $1B, $17, $17, $17
-.byte $04, $1B, $17, $1B, $1B
-.byte $04, $17, $1B, $17, $17
-.byte $FF
+; Structure $15
+Bank04_LAB55:
+    .byte $48, $10     ; repeat 8 macros
+    .byte $48, $10     ; repeat 8 macros
+    .byte $FF
 
-;Structure #$11
-Bank04_LAB26: 
-.byte $01, $17
-.byte $FF
+; Structure $16
+Bank04_LAB68:
+    .byte $42, $10     ; repeat 2 macros
+    .byte $42, $10     ; repeat 2 macros
+    .byte $42, $10     ; repeat 2 macros
+    .byte $42, $10     ; repeat 2 macros
+    .byte $FF
 
-;Structure #$12
-Bank04_LAB29:  
-.byte $08, $1E, $1E, $1E, $1E, $1E, $1E, $1E, $1E
-.byte $08, $1E, $1E, $1E, $1E, $1E, $1E, $1E, $1E
-.byte $FF
+; Structure $17
+Bank04_LAB75:
+    .byte $08, $13, $0E, $13, $0E, $0E, $13, $0E, $0E
+    .byte $08, $0E, $0E, $13, $13, $0E, $0E, $13, $13
+    .byte $FF
 
-;Structure #$13
-Bank04_LAB3C:  
-.byte $04, $0F, $0F, $0F, $0F
-.byte $04, $0F, $0F, $0F, $0F
-.byte $04, $0F, $0F, $0F, $0F
-.byte $04, $0F, $0F, $0F, $0F
-.byte $FF
+; Structure $18
+Bank04_LAB88:
+    .byte $48, $11     ; repeat 8 macros
+    .byte $48, $11     ; repeat 8 macros
+    .byte $FF
 
-;Structure #$14
-Bank04_LAB51:  
-.byte $02, $12, $12 
-.byte $FF
+; Structure $19
+Bank04_LAB9B:
+    .byte $44, $11     ; repeat 4 macros
+    .byte $44, $11     ; repeat 4 macros
+    .byte $44, $11     ; repeat 4 macros
+    .byte $44, $11     ; repeat 4 macros
+    .byte $FF
 
-;Structure #$15
-Bank04_LAB55:  
-.byte $08, $10, $10, $10, $10, $10, $10, $10, $10
-.byte $08, $10, $10, $10, $10, $10, $10, $10, $10
-.byte $FF
+; Structure $1A
+Bank04_LABB0:
+    .byte $08, $20, $22, $22, $22, $22, $22, $22, $22
+    .byte $FF
 
-;Structure #$16
-Bank04_LAB68: 
-.byte $02, $10, $10
-.byte $02, $10, $10
-.byte $02, $10, $10
-.byte $02, $10, $10
-.byte $FF
+; Structure $1B
+Bank04_LABBA:
+    .byte $01, $1F
+    .byte $FF
 
-;Structure #$17
-Bank04_LAB75:  
-.byte $08, $13, $0E, $13, $0E, $0E, $13, $0E, $0E
-.byte $08, $0E, $0E, $13, $13, $0E, $0E, $13, $13
-.byte $FF
+; Structure $1C
+Bank04_LABBD:
+    .byte $01, $21
+    .byte $01, $21
+    .byte $01, $21
+    .byte $FF
 
-;Structure #$18
-Bank04_LAB88:  
-.byte $08, $11, $11, $11, $11, $11, $11, $11, $11
-.byte $08, $11, $11, $11, $11, $11, $11, $11, $11
-.byte $FF
+; Structure $1D
+Bank04_LABC4:
+    .byte $48, $23     ; repeat 8 macros
+    .byte $08, $23, $24, $24, $24, $24, $24, $24, $23
+    .byte $48, $23     ; repeat 8 macros
+    .byte $FF
 
-;Structure #$19
-Bank04_LAB9B:  
-.byte $04, $11, $11, $11, $11
-.byte $04, $11, $11, $11, $11
-.byte $04, $11, $11, $11, $11
-.byte $04, $11, $11, $11, $11
-.byte $FF
+; Structure $1E
+Bank04_LABE0:
+    .byte $01, $23
+    .byte $01, $23
+    .byte $01, $23
+    .byte $01, $23
+    .byte $FF
 
-;Structure #$1A
-Bank04_LABB0:  
-.byte $08, $20, $22, $22, $22, $22, $22, $22, $22
-.byte $FF
+; Structure $1F
+Bank04_LABE9:
+    .byte $44, $23     ; repeat 4 macros
+    .byte $04, $23, $24, $24, $23
+    .byte $04, $23, $24, $24, $23
+    .byte $44, $23     ; repeat 4 macros
+    .byte $FF
 
-;Structure #$1B
-Bank04_LABBA: 
-.byte $01, $1F
-.byte $FF
+; Structure $20
+Bank04_LABFE:
+    .byte $01, $25
+    .byte $FF
 
-;Structure #$1C
-Bank04_LABBD:  
-.byte $01, $21
-.byte $01, $21
-.byte $01, $21
-.byte $FF
+; Structure $21
+Bank04_LAC01:
+    .byte $01, $26
+    .byte $01, $26
+    .byte $01, $26
+    .byte $01, $26
+    .byte $FF
 
-;Structure #$1D
-Bank04_LABC4:  
-.byte $08, $23, $23, $23, $23, $23, $23, $23, $23
-.byte $08, $23, $24, $24, $24, $24, $24, $24, $23
-.byte $08, $23, $23, $23, $23, $23, $23, $23, $23
-.byte $FF
+; Structure $22
+Bank04_LAC0A:
+    .byte $43, $27     ; repeat 3 macros
+    .byte $FF
 
-;Structure #$1E
-Bank04_LABE0: 
-.byte $01, $23
-.byte $01, $23
-.byte $01, $23
-.byte $01, $23
-.byte $FF
+; Structure $23
+Bank04_LAC0F:
+    .byte $43, $28     ; repeat 3 macros
+    .byte $FF
 
-;Structure #$1F
-Bank04_LABE9: 
-.byte $04, $23, $23, $23, $23
-.byte $04, $23, $24, $24, $23
-.byte $04, $23, $24, $24, $23
-.byte $04, $23, $23, $23, $23
-.byte $FF
+; Structure $24
+Bank04_LAC14:
+    .byte $48, $13     ; repeat 8 macros
+    .byte $FF
 
-;Structure #$20
-Bank04_LABFE: 
-.byte $01, $25
-.byte $FF
+; Structure $25
+Bank04_LAC1E:
+    .byte $01, $13
+    .byte $01, $13
+    .byte $01, $13
+    .byte $01, $13
+    .byte $FF
 
-;Structure #$21
-Bank04_LAC01: 
-.byte $01, $26
-.byte $01, $26
-.byte $01, $26
-.byte $01, $26
-.byte $FF
+; Structure $26
+Bank04_LAC27:
+    ; Unreferenced original index: zero-byte alias to the next structure.
+; Structure $27 — shared cropped/rectangular pattern
+Bank04_Struct_27:
+    .byte $42, $17     ; repeat 2 macros
+    .byte $FF
 
-;Structure #$22
-Bank04_LAC0A: 
-.byte $03, $27, $27, $27
-.byte $FF
+; Structure $28 — shared cropped/rectangular pattern
+Bank04_Struct_28:
+    .byte $01, $1E
+    .byte $FF
 
-;Structure #$23
-Bank04_LAC0F:  
-.byte $03, $28, $28, $28
-.byte $FF
+; Structure $29 — shared cropped/rectangular pattern
+Bank04_Struct_29:
+    .byte $01, $1A
+    .byte $01, $1A
+    .byte $01, $1A
+    .byte $01, $1E
+    .byte $FF
 
-;Structure #$24
-Bank04_LAC14: 
-.byte $08, $13, $13, $13, $13, $13, $13, $13, $13
-.byte $FF
+; Structure $2A — shared cropped/rectangular pattern
+Bank04_Struct_2A:
+    .byte $04, $17, $17, $1B, $17
+    .byte $04, $1B, $17, $17, $17
+    .byte $04, $1B, $17, $1B, $1B
+    .byte $FF
 
-;Structure #$25
-Bank04_LAC1E: 
-.byte $01, $13
-.byte $01, $13
-.byte $01, $13
-.byte $01, $13
-.byte $FF
+; Structure $2B — shared cropped/rectangular pattern
+Bank04_Struct_2B:
+    .byte $04, $17, $17, $1B, $17
+    .byte $FF
 
-;Structure #$26
-Bank04_LAC27: 
-.byte $04, $0C, $0C, $0C, $0C
-.byte $04, $0D, $0D, $0D, $0D
-.byte $FF
+; Structure $2C — shared cropped/rectangular pattern
+Bank04_Struct_2C:
+    .byte $01, $17
+    .byte $01, $1B
+    .byte $01, $1B
+    .byte $FF
 
-; CODE CAVE (82 x 16 bytes)
+; Structure $2D — shared cropped/rectangular pattern
+Bank04_Struct_2D:
+    .byte $01, $1B
+    .byte $01, $17
+    .byte $FF
+
+; Structure $2E — shared cropped/rectangular pattern
+Bank04_Struct_2E:
+    .byte $01, $17
+    .byte $01, $17
+    .byte $FF
+
+; Structure $2F — shared cropped/rectangular pattern
+Bank04_Struct_2F:
+    .byte $42, $17     ; repeat 2 macros
+    .byte $02, $17, $1B
+    .byte $FF
+
+; Structure $30 — shared cropped/rectangular pattern
+Bank04_Struct_30:
+    .byte $02, $1D, $17
+    .byte $FF
+
+; Structure $31 — shared cropped/rectangular pattern
+Bank04_Struct_31:
+    .byte $02, $1A, $1B
+    .byte $FF
+
+; Structure $32 — shared cropped/rectangular pattern
+Bank04_Struct_32:
+    .byte $02, $1A, $17
+    .byte $42, $17     ; repeat 2 macros
+    .byte $02, $1B, $1A
+    .byte $FF
+
+; Structure $33 — shared cropped/rectangular pattern
+Bank04_Struct_33:
+    .byte $42, $17     ; repeat 2 macros
+    .byte $02, $1A, $1B
+    .byte $FF
+
+; Structure $34 — shared cropped/rectangular pattern
+Bank04_Struct_34:
+    .byte $02, $17, $1D
+    .byte $FF
+
+; Structure $35 — shared cropped/rectangular pattern
+Bank04_Struct_35:
+    .byte $02, $1A, $17
+    .byte $42, $17     ; repeat 2 macros
+    .byte $FF
+
+; Structure $36 — shared cropped/rectangular pattern
+Bank04_Struct_36:
+    .byte $01, $18
+    .byte $FF
+
+; Structure $37 — shared cropped/rectangular pattern
+Bank04_Struct_37:
+    .byte $44, $01     ; repeat 4 macros
+    .byte $44, $00     ; repeat 4 macros
+    .byte $FF
+
+; Structure $38 — shared cropped/rectangular pattern
+Bank04_Struct_38:
+    .byte $01, $0B
+    .byte $01, $0B
+    .byte $01, $0B
+    .byte $FF
+
+; Structure $39 — shared cropped/rectangular pattern
+Bank04_Struct_39:
+    .byte $01, $1E
+    .byte $01, $1A
+    .byte $01, $1A
+    .byte $FF
+
+; Structure $3A — shared cropped/rectangular pattern
+Bank04_Struct_3A:
+    .byte $01, $1A
+    .byte $01, $1E
+    .byte $FF
+
+; Structure $3B — shared cropped/rectangular pattern
+Bank04_Struct_3B:
+    .byte $01, $1E
+    .byte $01, $1A
+    .byte $01, $1A
+    .byte $01, $1A
+    .byte $FF
+
+; Structure $3C — shared cropped/rectangular pattern
+Bank04_Struct_3C:
+    .byte $01, $1E
+    .byte $01, $1A
+    .byte $FF
+
+; Structure $3D — shared cropped/rectangular pattern
+Bank04_Struct_3D:
+    .byte $01, $1A
+    .byte $01, $1A
+    .byte $01, $1E
+    .byte $FF
+
+; Structure $3E — shared cropped/rectangular pattern
+Bank04_Struct_3E:
+    .byte $44, $0F     ; repeat 4 macros
+    .byte $44, $0F     ; repeat 4 macros
+    .byte $44, $0F     ; repeat 4 macros
+    .byte $FF
+
+; Structure $3F — shared cropped/rectangular pattern
+Bank04_Struct_3F:
+    .byte $01, $12
+    .byte $FF
+
+; Structure $40 — shared cropped/rectangular pattern
+Bank04_Struct_40:
+    .byte $42, $01     ; repeat 2 macros
+    .byte $42, $00     ; repeat 2 macros
+    .byte $FF
+
+; Structure $41 — shared cropped/rectangular pattern
+Bank04_Struct_41:
+    .byte $01, $26
+    .byte $01, $26
+    .byte $01, $26
+    .byte $FF
+
+; Structure $42 — shared cropped/rectangular pattern
+Bank04_Struct_42:
+    .byte $44, $11     ; repeat 4 macros
+    .byte $44, $11     ; repeat 4 macros
+    .byte $FF
+
+; Structure $43 — shared cropped/rectangular pattern
+Bank04_Struct_43:
+    .byte $44, $11     ; repeat 4 macros
+    .byte $44, $11     ; repeat 4 macros
+    .byte $44, $11     ; repeat 4 macros
+    .byte $FF
+
+; Structure $44 — shared cropped/rectangular pattern
+Bank04_Struct_44:
+    .byte $01, $01
+    .byte $01, $00
+    .byte $FF
+
+; Structure $45 — shared cropped/rectangular pattern
+Bank04_Struct_45:
+    .byte $44, $11     ; repeat 4 macros
+    .byte $FF
+
+; Structure $46 — shared cropped/rectangular pattern
+Bank04_Struct_46:
+    .byte $04, $20, $22, $22, $22
+    .byte $FF
+
+; Structure $47 — shared cropped/rectangular pattern
+Bank04_Struct_47:
+    .byte $44, $22     ; repeat 4 macros
+    .byte $FF
+
+; Structure $48 — shared cropped/rectangular pattern
+Bank04_Struct_48:
+    .byte $45, $13     ; repeat 5 macros
+    .byte $FF
+
+; Structure $49 — shared cropped/rectangular pattern
+Bank04_Struct_49:
+    .byte $43, $13     ; repeat 3 macros
+    .byte $FF
+
+; Structure $4A — shared cropped/rectangular pattern
+Bank04_Struct_4A:
+    .byte $42, $1E     ; repeat 2 macros
+    .byte $42, $1E     ; repeat 2 macros
+    .byte $FF
+
+; Structure $4B — shared cropped/rectangular pattern
+Bank04_Struct_4B:
+    .byte $01, $13
+    .byte $FF
+
+; Structure $4C — shared cropped/rectangular pattern
+Bank04_Struct_4C:
+    .byte $43, $10     ; repeat 3 macros
+    .byte $FF
+
+; Structure $4D — shared cropped/rectangular pattern
+Bank04_Struct_4D:
+    .byte $01, $05
+    .byte $FF
+
+; Structure $4E — shared cropped/rectangular pattern
+Bank04_Struct_4E:
+    .byte $43, $23     ; repeat 3 macros
+    .byte $43, $24     ; repeat 3 macros
+    .byte $43, $23     ; repeat 3 macros
+    .byte $FF
+
+; Structure $4F — shared cropped/rectangular pattern
+Bank04_Struct_4F:
+    .byte $42, $23     ; repeat 2 macros
+    .byte $FF
+
+; Structure $50 — shared cropped/rectangular pattern
+Bank04_Struct_50:
+    .byte $43, $11     ; repeat 3 macros
+    .byte $FF
+
+; Structure $51 — shared cropped/rectangular pattern
+Bank04_Struct_51:
+    .byte $01, $23
+    .byte $01, $24
+    .byte $01, $23
+    .byte $FF
+
+; Structure $52 — shared cropped/rectangular pattern
+Bank04_Struct_52:
+    .byte $01, $0F
+    .byte $01, $0F
+    .byte $FF
+
+; Structure $53 — shared cropped/rectangular pattern
+Bank04_Struct_53:
+    .byte $01, $23
+    .byte $01, $23
+    .byte $01, $23
+    .byte $FF
+
+; Structure $54 — shared cropped/rectangular pattern
+Bank04_Struct_54:
+    .byte $02, $17, $1B
+    .byte $02, $1B, $17
+    .byte $FF
+
+; Structure $55 — shared cropped/rectangular pattern
+Bank04_Struct_55:
+    .byte $04, $1B, $17, $17, $17
+    .byte $FF
+
+; Structure $56 — shared cropped/rectangular pattern
+Bank04_Struct_56:
+    .byte $42, $10     ; repeat 2 macros
+    .byte $FF
+
+; Structure $57 — shared cropped/rectangular pattern
+Bank04_Struct_57:
+    .byte $01, $23
+    .byte $01, $24
+    .byte $01, $24
+    .byte $01, $23
+    .byte $FF
+
+; Structure $58 — shared cropped/rectangular pattern
+Bank04_Struct_58:
+    .byte $04, $23, $24, $24, $23
+    .byte $FF
+
+; Structure $59 — shared cropped/rectangular pattern
+Bank04_Struct_59:
+    .byte $01, $04
+    .byte $01, $04
+    .byte $01, $04
+    .byte $FF
+
+; Structure $5A — shared cropped/rectangular pattern
+Bank04_Struct_5A:
+    .byte $01, $05
+    .byte $01, $05
+    .byte $01, $05
+    .byte $FF
+
+; Structure $5B — shared cropped/rectangular pattern
+Bank04_Struct_5B:
+    .byte $01, $04
+    .byte $01, $04
+    .byte $FF
+
+;==== Room Color Data ===
+
+Bank04_DefaultAttrs:
+    .byte $00
+
+Bank04_Room_02_Attrs:
+    .byte $D1, $11
+    .byte $DE, $44
+    .byte $00
+
+Bank04_Room_03_Attrs:
+    .byte $C9, $11
+    .byte $EA, $11
+    .byte $FD, $04
+    .byte $D0, $20
+    .byte $D8, $22
+    .byte $F5, $40
+    .byte $CE, $44
+    .byte $D7, $80
+    .byte $DF, $88
+    .byte $00
+
+Bank04_Room_04_Attrs:
+    .byte $C9, $11
+    .byte $CD, $11
+    .byte $E9, $01
+    .byte $E1, $10
+    .byte $D0, $20
+    .byte $D8, $22
+    .byte $F6, $44
+    .byte $D7, $80
+    .byte $DF, $88
+    .byte $00
+
+Bank04_Room_05_Attrs:
+    .byte $CA, $01
+    .byte $EA, $01
+    .byte $C2, $10
+    .byte $E2, $10
+    .byte $FD, $04
+    .byte $F5, $40
+    .byte $DD, $44
+    .byte $00
+
+Bank04_Room_06_Attrs:
+    .byte $C9, $01
+    .byte $C1, $10
+    .byte $D0, $20
+    .byte $D8, $22
+    .byte $D7, $80
+    .byte $DF, $88
+    .byte $00
+
+Bank04_Room_07_Attrs:
+    .byte $FB, $01
+    .byte $EE, $04
+    .byte $F3, $10
+    .byte $CA, $11
+    .byte $E6, $40
+    .byte $D7, $80
+    .byte $DF, $88
+    .byte $00
+
+Bank04_Room_08_Attrs:
+    .byte $CC, $44
+    .byte $ED, $44
+    .byte $FA, $01
+    .byte $F2, $10
+    .byte $D2, $11
+    .byte $00
+
+Bank04_Room_09_Attrs:
+    .byte $EE, $04
+    .byte $D1, $11
+    .byte $E6, $40
+    .byte $C6, $44
+    .byte $D7, $80
+    .byte $DF, $88
+    .byte $00
+
+Bank04_Room_0A_Attrs:
+    .byte $04, $0A, $FA, $FB, $FC, $FD
+    .byte $04, $A0, $F2, $F3, $F4, $F5
+    .byte $C9, $01
+    .byte $E1, $01
+    .byte $C1, $10
+    .byte $D9, $10
+    .byte $EE, $44
+    .byte $D7, $80
+    .byte $DF, $88
+    .byte $00
+
+Bank04_Room_0C_Attrs:
+    .byte $DE, $04
+    .byte $F6, $04
+    .byte $D6, $40
+    .byte $EE, $40
+    .byte $D1, $01
+    .byte $C9, $10
+    .byte $F1, $11
+    .byte $D0, $20
+    .byte $D8, $22
+    .byte $00
+
+Bank04_Room_0D_Attrs:
+    .byte $0A, $22, $C5, $CD, $D5, $D8, $DD, $E3, $E5, $EB, $ED, $F5
+    .byte $CE, $04
+    .byte $EE, $04
+    .byte $C6, $40
+    .byte $E6, $40
+    .byte $FD, $02
+    .byte $F1, $11
+    .byte $D0, $20
+    .byte $00
+
+Bank04_Room_0E_Attrs:
+    .byte $07, $22, $C5, $CD, $D5, $DD, $E5, $ED, $F5
+    .byte $D1, $01
+    .byte $E9, $01
+    .byte $C9, $10
+    .byte $E1, $10
+    .byte $FD, $02
+    .byte $F6, $04
+    .byte $EE, $40
+    .byte $CE, $44
+    .byte $00
+
+Bank04_Room_0F_Attrs:
+    .byte $04, $5A, $FA, $FB, $FC, $FD
+    .byte $04, $A5, $F2, $F3, $F4, $F5
+    .byte $D7, $95
+    .byte $DF, $99
+    .byte $00
+
+Bank04_Room_10_Attrs:
+    .byte $08, $0A, $F8, $F9, $FA, $FB, $FC, $FD, $FE, $FF
+    .byte $08, $A0, $F0, $F1, $F2, $F3, $F4, $F5, $F6, $F7
+    .byte $00
+
+Bank04_Room_11_Attrs:
+    .byte $04, $0A, $FA, $FB, $FC, $FD
+    .byte $04, $0F, $F8, $F9, $FE, $FF
+    .byte $04, $A0, $F2, $F3, $F4, $F5
+    .byte $04, $FF, $F0, $F1, $F6, $F7
+    .byte $00
+
+Bank04_Room_13_Attrs:
+    .byte $07, $AF, $F1, $F2, $F3, $F4, $F5, $F6, $F7
+    .byte $07, $FA, $F9, $FA, $FB, $FC, $FD, $FE, $FF
+    .byte $D8, $EE
+    .byte $D0, $EF
+    .byte $00
+
+Bank04_Room_14_Attrs:
+    .byte $08, $AF, $F0, $F1, $F2, $F3, $F4, $F5, $F6, $F7
+    .byte $08, $FA, $F8, $F9, $FA, $FB, $FC, $FD, $FE, $FF
+    .byte $00
+
+Bank04_Room_15_Attrs:
+    .byte $D0, $65
+    .byte $D8, $66
+    .byte $D7, $95
+    .byte $DF, $99
+    .byte $00
+
+Bank04_Room_16_Attrs:
+    .byte $07, $AF, $F0, $F1, $F2, $F3, $F4, $F5, $F6
+    .byte $07, $FA, $F8, $F9, $FA, $FB, $FC, $FD, $FE
+    .byte $DF, $BB
+    .byte $D7, $BF
+    .byte $00
+
+Bank04_Room_17_Attrs:
+    .byte $12, $FF, $C0, $C1, $C2, $C3, $C4, $C5, $C6, $C7, $C8, $C9, $CA, $CC, $E0, $E1, $E8, $E9, $F0, $F1
+    .byte $07, $5F, $D1, $F8, $F9, $FA, $FB, $FD, $FE
+    .byte $03, $44, $D3, $DB, $EF
+    .byte $D5, $11
+    .byte $DD, $11
+    .byte $F4, $E5
+    .byte $F6, $E5
+    .byte $F2, $F5
+    .byte $F3, $F5
+    .byte $CD, $3F
+    .byte $FF, $5B
+    .byte $FC, $5E
+    .byte $D8, $66
+    .byte $D0, $6F
+    .byte $F7, $B4
+    .byte $F5, $B5
+    .byte $CB, $CF
+    .byte $00
+
+Bank04_Room_18_Attrs:
+    .byte $14, $FF, $C0, $C1, $C2, $C3, $C4, $C5, $C6, $C7, $C8, $C9, $CE, $CF, $D0, $D1, $E6, $E7, $EE, $EF, $F6, $F7
+    .byte $08, $5F, $D6, $F8, $FA, $FB, $FC, $FD, $FE, $FF
+    .byte $03, $F5, $F0, $F4, $F5
+    .byte $F1, $B5
+    .byte $F2, $B5
+    .byte $F9, $5B
+    .byte $DF, $99
+    .byte $D7, $9F
+    .byte $F3, $E5
+    .byte $00
+
+Bank04_Room_1A_Attrs:
+    .byte $DF, $BB
+    .byte $D7, $BF
+    .byte $D8, $EE
+    .byte $D0, $EF
+    .byte $00
+
+Bank04_Room_1B_Attrs:
+    .byte $0E, $55, $C0, $C1, $C2, $C3, $C4, $C5, $C6, $C7, $C8, $C9, $CB, $CC, $CE, $CF
+    .byte $06, $0F, $E2, $E3, $E4, $E5, $F1, $F6
+    .byte $04, $05, $D2, $D3, $D4, $D5
+    .byte $04, $0A, $FA, $FB, $FC, $FD
+    .byte $04, $A0, $F2, $F3, $F4, $F5
+    .byte $04, $FF, $E1, $E6, $E9, $EE
+    .byte $D0, $20
+    .byte $D8, $22
+    .byte $CD, $56
+    .byte $CA, $59
+    .byte $D7, $80
+    .byte $DF, $88
+    .byte $00
+
+Bank04_Room_1C_Attrs:
+    .byte $EB, $AF
+    .byte $00
+
+Bank04_Room_1D_Attrs:
+    .byte $0B, $FF, $C0, $C2, $C3, $C4, $C5, $C7, $E7, $EF, $F2, $F3, $F4
+    .byte $05, $77, $C8, $D0, $D8, $E0, $E8
+    .byte $04, $05, $EA, $EB, $EC, $ED
+    .byte $03, $50, $C9, $CE, $FF
+    .byte $03, $5F, $FA, $FB, $FC
+    .byte $CA, $54
+    .byte $EE, $54
+    .byte $F7, $00
+    .byte $E9, $14
+    .byte $F5, $33
+    .byte $CD, $51
+    .byte $FD, $53
+    .byte $FE, $5A
+    .byte $F8, $5B
+    .byte $F9, $5E
+    .byte $DF, $99
+    .byte $D7, $9D
+    .byte $F6, $A5
+    .byte $F0, $B7
+    .byte $C1, $BF
+    .byte $CF, $DD
+    .byte $F1, $ED
+    .byte $C6, $EF
+    .byte $00
+
+Bank04_Room_1E_Attrs:
+    .byte $E3, $11
+    .byte $EB, $11
+    .byte $DB, $15
+    .byte $D7, $95
+    .byte $DF, $99
+    .byte $00
+
+Bank04_Room_1F_Attrs:
+    .byte $F6, $5A
+    .byte $D0, $65
+    .byte $D8, $66
+    .byte $00
+
+; OUT OF ROOM
 
 InitBank4:
     LDA #$00 
@@ -2439,104 +3358,82 @@ KraidGFX_Loop:
 ;-----------------------------------[ Enemy animation data tables ]----------------------------------
 
 .advance RoomAttrTbl_Hi
-    .byte >Kraid_DefaultAttrs         ;Room #$00
-    .byte >Kraid_DefaultAttrs         ;Room #$01
-    .byte >Kraid_DefaultAttrs         ;Room #$02
-    .byte >Kraid_DefaultAttrs         ;Room #$03
-    .byte >Kraid_DefaultAttrs         ;Room #$04
-    .byte >Kraid_DefaultAttrs         ;Room #$05
-    .byte >Kraid_DefaultAttrs         ;Room #$06
-    .byte >Kraid_DefaultAttrs         ;Room #$07
-    .byte >Kraid_DefaultAttrs         ;Room #$08
-    .byte >Kraid_DefaultAttrs         ;Room #$09
-    .byte >Kraid_DefaultAttrs         ;Room #$0A
-    .byte >Kraid_DefaultAttrs         ;Room #$0B
-    .byte >Kraid_DefaultAttrs         ;Room #$0C
-    .byte >Kraid_DefaultAttrs         ;Room #$0D
-    .byte >Kraid_DefaultAttrs         ;Room #$0E
-    .byte >Kraid_DefaultAttrs         ;Room #$0F
-    .byte >Kraid_DefaultAttrs         ;Room #$10
-    .byte >Kraid_DefaultAttrs         ;Room #$11
-    .byte >Kraid_DefaultAttrs         ;Room #$12
-    .byte >Kraid_DefaultAttrs         ;Room #$13
-    .byte >Kraid_DefaultAttrs         ;Room #$14
-    .byte >Kraid_DefaultAttrs         ;Room #$15
-    .byte >Kraid_DefaultAttrs         ;Room #$16
-    .byte >Kraid_DefaultAttrs         ;Room #$17
-    .byte >Kraid_DefaultAttrs         ;Room #$18
-    .byte >Kraid_DefaultAttrs         ;Room #$19
-    .byte >Kraid_DefaultAttrs         ;Room #$1A
-    .byte >Kraid_DefaultAttrs         ;Room #$1B
-    .byte >Kraid_DefaultAttrs         ;Room #$1C
-    .byte >Kraid_DefaultAttrs         ;Room #$1D
-    .byte >Kraid_DefaultAttrs         ;Room #$1E
-    .byte >Kraid_DefaultAttrs         ;Room #$1F
-    .byte >Kraid_DefaultAttrs         ;Room #$20
-    .byte >Kraid_DefaultAttrs         ;Room #$21
-    .byte >Kraid_DefaultAttrs         ;Room #$22
-    .byte >Kraid_DefaultAttrs         ;Room #$23
-    .byte >Kraid_DefaultAttrs         ;Room #$24
-    .byte >Kraid_DefaultAttrs         ;Room #$25
-    .byte >Kraid_DefaultAttrs         ;Room #$26
-    .byte >Kraid_DefaultAttrs         ;Room #$27
-    .byte >Kraid_DefaultAttrs         ;Room #$28
-    .byte >Kraid_DefaultAttrs         ;Room #$29
-    .byte >Kraid_DefaultAttrs         ;Room #$2A
-    .byte >Kraid_DefaultAttrs         ;Room #$2B
-    .byte >Kraid_DefaultAttrs         ;Room #$2C
-    .byte >Kraid_DefaultAttrs         ;Room #$2D
-    .byte >Kraid_DefaultAttrs         ;Room #$2E
-    .byte >Kraid_DefaultAttrs         ;Room #$2F
+    .byte >Bank04_DefaultAttrs     ; Room $00
+    .byte >Bank04_DefaultAttrs     ; Room $01
+    .byte >Bank04_Room_02_Attrs    ; Room $02
+    .byte >Bank04_Room_03_Attrs    ; Room $03
+    .byte >Bank04_Room_04_Attrs    ; Room $04
+    .byte >Bank04_Room_05_Attrs    ; Room $05
+    .byte >Bank04_Room_06_Attrs    ; Room $06
+    .byte >Bank04_Room_07_Attrs    ; Room $07
+    .byte >Bank04_Room_08_Attrs    ; Room $08
+    .byte >Bank04_Room_09_Attrs    ; Room $09
+    .byte >Bank04_Room_0A_Attrs    ; Room $0A
+    .byte >Bank04_DefaultAttrs     ; Room $0B
+    .byte >Bank04_Room_0C_Attrs    ; Room $0C
+    .byte >Bank04_Room_0D_Attrs    ; Room $0D
+    .byte >Bank04_Room_0E_Attrs    ; Room $0E
+    .byte >Bank04_Room_0F_Attrs    ; Room $0F
+    .byte >Bank04_Room_10_Attrs    ; Room $10
+    .byte >Bank04_Room_11_Attrs    ; Room $11
+    .byte >Bank04_Room_11_Attrs    ; Room $12
+    .byte >Bank04_Room_13_Attrs    ; Room $13
+    .byte >Bank04_Room_14_Attrs    ; Room $14
+    .byte >Bank04_Room_15_Attrs    ; Room $15
+    .byte >Bank04_Room_16_Attrs    ; Room $16
+    .byte >Bank04_Room_17_Attrs    ; Room $17
+    .byte >Bank04_Room_18_Attrs    ; Room $18
+    .byte >Bank04_DefaultAttrs     ; Room $19
+    .byte >Bank04_Room_1A_Attrs    ; Room $1A
+    .byte >Bank04_Room_1B_Attrs    ; Room $1B
+    .byte >Bank04_Room_1C_Attrs    ; Room $1C
+    .byte >Bank04_Room_1D_Attrs    ; Room $1D
+    .byte >Bank04_Room_1E_Attrs    ; Room $1E
+    .byte >Bank04_Room_1F_Attrs    ; Room $1F
+    .byte >Bank04_Room_20_Attrs    ; Room $20
+    .byte >Bank04_Room_15_Attrs    ; Room $21
+    .byte >Bank04_Room_1A_Attrs    ; Room $22
+    .byte >Bank04_Room_23_Attrs    ; Room $23
+    .byte >Bank04_Room_24_Attrs    ; Room $24
 
 .advance RoomAttrTbl_Lo
-    .byte <Kraid_DefaultAttrs         ;Room #$00
-    .byte <Kraid_DefaultAttrs         ;Room #$01
-    .byte <Kraid_DefaultAttrs         ;Room #$02
-    .byte <Kraid_DefaultAttrs         ;Room #$03
-    .byte <Kraid_DefaultAttrs         ;Room #$04
-    .byte <Kraid_DefaultAttrs         ;Room #$05
-    .byte <Kraid_DefaultAttrs         ;Room #$06
-    .byte <Kraid_DefaultAttrs         ;Room #$07
-    .byte <Kraid_DefaultAttrs         ;Room #$08
-    .byte <Kraid_DefaultAttrs         ;Room #$09
-    .byte <Kraid_DefaultAttrs         ;Room #$0A
-    .byte <Kraid_DefaultAttrs         ;Room #$0B
-    .byte <Kraid_DefaultAttrs         ;Room #$0C
-    .byte <Kraid_DefaultAttrs         ;Room #$0D
-    .byte <Kraid_DefaultAttrs         ;Room #$0E
-    .byte <Kraid_DefaultAttrs         ;Room #$0F
-    .byte <Kraid_DefaultAttrs         ;Room #$10
-    .byte <Kraid_DefaultAttrs         ;Room #$11
-    .byte <Kraid_DefaultAttrs         ;Room #$12
-    .byte <Kraid_DefaultAttrs         ;Room #$13
-    .byte <Kraid_DefaultAttrs         ;Room #$14
-    .byte <Kraid_DefaultAttrs         ;Room #$15
-    .byte <Kraid_DefaultAttrs         ;Room #$16
-    .byte <Kraid_DefaultAttrs         ;Room #$17
-    .byte <Kraid_DefaultAttrs         ;Room #$18
-    .byte <Kraid_DefaultAttrs         ;Room #$19
-    .byte <Kraid_DefaultAttrs         ;Room #$1A
-    .byte <Kraid_DefaultAttrs         ;Room #$1B
-    .byte <Kraid_DefaultAttrs         ;Room #$1C
-    .byte <Kraid_DefaultAttrs         ;Room #$1D
-    .byte <Kraid_DefaultAttrs         ;Room #$1E
-    .byte <Kraid_DefaultAttrs         ;Room #$1F
-    .byte <Kraid_DefaultAttrs         ;Room #$20
-    .byte <Kraid_DefaultAttrs         ;Room #$21
-    .byte <Kraid_DefaultAttrs         ;Room #$22
-    .byte <Kraid_DefaultAttrs         ;Room #$23
-    .byte <Kraid_DefaultAttrs         ;Room #$24
-    .byte <Kraid_DefaultAttrs         ;Room #$25
-    .byte <Kraid_DefaultAttrs         ;Room #$26
-    .byte <Kraid_DefaultAttrs         ;Room #$27
-    .byte <Kraid_DefaultAttrs         ;Room #$28
-    .byte <Kraid_DefaultAttrs         ;Room #$29
-    .byte <Kraid_DefaultAttrs         ;Room #$2A
-    .byte <Kraid_DefaultAttrs         ;Room #$2B
-    .byte <Kraid_DefaultAttrs         ;Room #$2C
-    .byte <Kraid_DefaultAttrs         ;Room #$2D
-    .byte <Kraid_DefaultAttrs         ;Room #$2E
-    .byte <Kraid_DefaultAttrs         ;Room #$2F
+    .byte <Bank04_DefaultAttrs     ; Room $00
+    .byte <Bank04_DefaultAttrs     ; Room $01
+    .byte <Bank04_Room_02_Attrs    ; Room $02
+    .byte <Bank04_Room_03_Attrs    ; Room $03
+    .byte <Bank04_Room_04_Attrs    ; Room $04
+    .byte <Bank04_Room_05_Attrs    ; Room $05
+    .byte <Bank04_Room_06_Attrs    ; Room $06
+    .byte <Bank04_Room_07_Attrs    ; Room $07
+    .byte <Bank04_Room_08_Attrs    ; Room $08
+    .byte <Bank04_Room_09_Attrs    ; Room $09
+    .byte <Bank04_Room_0A_Attrs    ; Room $0A
+    .byte <Bank04_DefaultAttrs     ; Room $0B
+    .byte <Bank04_Room_0C_Attrs    ; Room $0C
+    .byte <Bank04_Room_0D_Attrs    ; Room $0D
+    .byte <Bank04_Room_0E_Attrs    ; Room $0E
+    .byte <Bank04_Room_0F_Attrs    ; Room $0F
+    .byte <Bank04_Room_10_Attrs    ; Room $10
+    .byte <Bank04_Room_11_Attrs    ; Room $11
+    .byte <Bank04_Room_11_Attrs    ; Room $12
+    .byte <Bank04_Room_13_Attrs    ; Room $13
+    .byte <Bank04_Room_14_Attrs    ; Room $14
+    .byte <Bank04_Room_15_Attrs    ; Room $15
+    .byte <Bank04_Room_16_Attrs    ; Room $16
+    .byte <Bank04_Room_17_Attrs    ; Room $17
+    .byte <Bank04_Room_18_Attrs    ; Room $18
+    .byte <Bank04_DefaultAttrs     ; Room $19
+    .byte <Bank04_Room_1A_Attrs    ; Room $1A
+    .byte <Bank04_Room_1B_Attrs    ; Room $1B
+    .byte <Bank04_Room_1C_Attrs    ; Room $1C
+    .byte <Bank04_Room_1D_Attrs    ; Room $1D
+    .byte <Bank04_Room_1E_Attrs    ; Room $1E
+    .byte <Bank04_Room_1F_Attrs    ; Room $1F
+    .byte <Bank04_Room_20_Attrs    ; Room $20
+    .byte <Bank04_Room_15_Attrs    ; Room $21
+    .byte <Bank04_Room_1A_Attrs    ; Room $22
+    .byte <Bank04_Room_23_Attrs    ; Room $23
+    .byte <Bank04_Room_24_Attrs    ; Room $24
 
 Kraid_DefaultAttrs:
     ; Will read a $00 and not change anything
@@ -2643,20 +3540,82 @@ Kraid_DefaultAttrs:
 ;-------------------------------------[ Room Pointer Table ]-----------------------------------------
 
 .advance RoomPointerTable_Hi
-
-    .byte >Bank04_LA2B7, >Bank04_LA2C5, >Bank04_LA2CD, >Bank04_LA308, >Bank04_LA345, >Bank04_LA388, >Bank04_LA3B8, >Bank04_LA401
-    .byte >Bank04_LA442, >Bank04_LA47E, >Bank04_LA4AD, >Bank04_LA4E2, >Bank04_LA514, >Bank04_LA558, >Bank04_LA590, >Bank04_LA5BF
-    .byte >Bank04_LA5E8, >Bank04_LA647, >Bank04_LA647, >Bank04_LA683, >Bank04_LA6B5, >Bank04_LA6D9, >Bank04_LA713, >Bank04_LA745
-    .byte >Bank04_LA780, >Bank04_LA7B2, >Bank04_LA7F6, >Bank04_LA83F, >Bank04_LA8A3, >Bank04_LA8C7, >Bank04_LA923, >Bank04_LA94F
-    .byte >Bank04_LA972, >Bank04_LA990, >Bank04_LA9BE, >Bank04_LA9FE, >Bank04_LAA33
+    .byte >Bank04_LA2B7    ; Room $00
+    .byte >Bank04_LA2C5    ; Room $01
+    .byte >Bank04_LA2CD    ; Room $02
+    .byte >Bank04_LA308    ; Room $03
+    .byte >Bank04_LA345    ; Room $04
+    .byte >Bank04_LA388    ; Room $05
+    .byte >Bank04_LA3B8    ; Room $06
+    .byte >Bank04_LA401    ; Room $07
+    .byte >Bank04_LA442    ; Room $08
+    .byte >Bank04_LA47E    ; Room $09
+    .byte >Bank04_LA4AD    ; Room $0A
+    .byte >Bank04_LA4E2    ; Room $0B
+    .byte >Bank04_LA514    ; Room $0C
+    .byte >Bank04_LA558    ; Room $0D
+    .byte >Bank04_LA590    ; Room $0E
+    .byte >Bank04_LA5BF    ; Room $0F
+    .byte >Bank04_LA5E8    ; Room $10
+    .byte >Bank04_LA647    ; Room $11
+    .byte >Bank04_LA647    ; Room $12
+    .byte >Bank04_LA683    ; Room $13
+    .byte >Bank04_LA6B5    ; Room $14
+    .byte >Bank04_LA6D9    ; Room $15
+    .byte >Bank04_LA713    ; Room $16
+    .byte >Bank04_LA745    ; Room $17
+    .byte >Bank04_LA780    ; Room $18
+    .byte >Bank04_LA7B2    ; Room $19
+    .byte >Bank04_LA7F6    ; Room $1A
+    .byte >Bank04_LA83F    ; Room $1B
+    .byte >Bank04_LA8A3    ; Room $1C
+    .byte >Bank04_LA8C7    ; Room $1D
+    .byte >Bank04_LA923    ; Room $1E
+    .byte >Bank04_LA94F    ; Room $1F
+    .byte >Bank04_LA972    ; Room $20
+    .byte >Bank04_LA990    ; Room $21
+    .byte >Bank04_LA9BE    ; Room $22
+    .byte >Bank04_LA9FE    ; Room $23
+    .byte >Bank04_LAA33    ; Room $24
 
 .advance RoomPointerTable_Lo
-
-    .byte <Bank04_LA2B7, <Bank04_LA2C5, <Bank04_LA2CD, <Bank04_LA308, <Bank04_LA345, <Bank04_LA388, <Bank04_LA3B8, <Bank04_LA401
-    .byte <Bank04_LA442, <Bank04_LA47E, <Bank04_LA4AD, <Bank04_LA4E2, <Bank04_LA514, <Bank04_LA558, <Bank04_LA590, <Bank04_LA5BF
-    .byte <Bank04_LA5E8, <Bank04_LA647, <Bank04_LA647, <Bank04_LA683, <Bank04_LA6B5, <Bank04_LA6D9, <Bank04_LA713, <Bank04_LA745
-    .byte <Bank04_LA780, <Bank04_LA7B2, <Bank04_LA7F6, <Bank04_LA83F, <Bank04_LA8A3, <Bank04_LA8C7, <Bank04_LA923, <Bank04_LA94F
-    .byte <Bank04_LA972, <Bank04_LA990, <Bank04_LA9BE, <Bank04_LA9FE, <Bank04_LAA33
+    .byte <Bank04_LA2B7    ; Room $00
+    .byte <Bank04_LA2C5    ; Room $01
+    .byte <Bank04_LA2CD    ; Room $02
+    .byte <Bank04_LA308    ; Room $03
+    .byte <Bank04_LA345    ; Room $04
+    .byte <Bank04_LA388    ; Room $05
+    .byte <Bank04_LA3B8    ; Room $06
+    .byte <Bank04_LA401    ; Room $07
+    .byte <Bank04_LA442    ; Room $08
+    .byte <Bank04_LA47E    ; Room $09
+    .byte <Bank04_LA4AD    ; Room $0A
+    .byte <Bank04_LA4E2    ; Room $0B
+    .byte <Bank04_LA514    ; Room $0C
+    .byte <Bank04_LA558    ; Room $0D
+    .byte <Bank04_LA590    ; Room $0E
+    .byte <Bank04_LA5BF    ; Room $0F
+    .byte <Bank04_LA5E8    ; Room $10
+    .byte <Bank04_LA647    ; Room $11
+    .byte <Bank04_LA647    ; Room $12
+    .byte <Bank04_LA683    ; Room $13
+    .byte <Bank04_LA6B5    ; Room $14
+    .byte <Bank04_LA6D9    ; Room $15
+    .byte <Bank04_LA713    ; Room $16
+    .byte <Bank04_LA745    ; Room $17
+    .byte <Bank04_LA780    ; Room $18
+    .byte <Bank04_LA7B2    ; Room $19
+    .byte <Bank04_LA7F6    ; Room $1A
+    .byte <Bank04_LA83F    ; Room $1B
+    .byte <Bank04_LA8A3    ; Room $1C
+    .byte <Bank04_LA8C7    ; Room $1D
+    .byte <Bank04_LA923    ; Room $1E
+    .byte <Bank04_LA94F    ; Room $1F
+    .byte <Bank04_LA972    ; Room $20
+    .byte <Bank04_LA990    ; Room $21
+    .byte <Bank04_LA9BE    ; Room $22
+    .byte <Bank04_LA9FE    ; Room $23
+    .byte <Bank04_LAA33    ; Room $24
 
 ;----------------------------------------[ Macro definitions ]---------------------------------------
 
@@ -2943,6 +3902,33 @@ Bank04_LB0E6:  .byte $FF           ;
 
 .scend
 
+Bank04_Room_20_Attrs:
+    .byte $E4, $44
+    .byte $EC, $44
+    .byte $DC, $45
+    .byte $F7, $56
+    .byte $F6, $59
+    .byte $00
+
+Bank04_Room_23_Attrs:
+    .byte $04, $0A, $FA, $FB, $FC, $FD
+    .byte $04, $A0, $F2, $F3, $F4, $F5
+    .byte $D2, $01
+    .byte $CA, $10
+    .byte $CE, $44
+    .byte $D7, $80
+    .byte $DF, $88
+    .byte $00
+
+Bank04_Room_24_Attrs:
+    .byte $D1, $01
+    .byte $CE, $04
+    .byte $C9, $10
+    .byte $D0, $20
+    .byte $D8, $22
+    .byte $C6, $40
+    .byte $00
+
 ;------------------------------------------[ Sound Engine ]------------------------------------------
 
 .advance SoundEngineOrg
@@ -3020,22 +4006,196 @@ Bank04_LB0E6:  .byte $FF           ;
 ;--------------------------------- Struct Pointer Table ----------------------------------------------
 
 .advance StructPointerTable_Hi
-
-    .byte >Common_Struct_00, >Bank04_LAA7E, >Bank04_LAA97, >Bank04_LAAB0, >Bank04_LAAB7, >Bank04_LAABE, >Bank04_LAAC2, >Bank04_LAAD2
-    .byte >Bank04_LAAE2,        >Bank04_LAAE7, >Bank04_LAAEC, >Bank04_LAAEF, >Bank04_LAAF2, >Bank04_LAAFD, >Bank04_LAB03, >Bank04_LAB08
-    .byte >Bank04_LAB11,        >Bank04_LAB26, >Bank04_LAB29, >Bank04_LAB3C, >Bank04_LAB51, >Bank04_LAB55, >Bank04_LAB68, >Bank04_LAB75
-    .byte >Bank04_LAB88,        >Bank04_LAB9B, >Bank04_LABB0, >Bank04_LABBA, >Bank04_LABBD, >Bank04_LABC4, >Bank04_LABE0, >Bank04_LABE9
-    .byte >Bank04_LABFE,        >Bank04_LAC01, >Bank04_LAC0A, >Bank04_LAC0F, >Bank04_LAC14, >Bank04_LAC1E, >Bank04_LAC27
+    .byte >Common_Struct_00    ; Struct $00
+    .byte >Bank04_LAA7E    ; Struct $01
+    .byte >Bank04_LAA97    ; Struct $02
+    .byte >Bank04_LAAB0    ; Struct $03
+    .byte >Bank04_LAAB7    ; Struct $04
+    .byte >Bank04_LAABE    ; Struct $05
+    .byte >Bank04_LAAC2    ; Struct $06
+    .byte >Bank04_LAAD2    ; Struct $07
+    .byte >Bank04_LAAE2    ; Struct $08
+    .byte >Bank04_LAAE7    ; Struct $09
+    .byte >Bank04_LAAEC    ; Struct $0A
+    .byte >Bank04_LAAEF    ; Struct $0B
+    .byte >Bank04_LAAF2    ; Struct $0C
+    .byte >Bank04_LAAFD    ; Struct $0D
+    .byte >Bank04_LAB03    ; Struct $0E
+    .byte >Bank04_LAB08    ; Struct $0F
+    .byte >Bank04_LAB11    ; Struct $10
+    .byte >Bank04_LAB26    ; Struct $11
+    .byte >Bank04_LAB29    ; Struct $12
+    .byte >Bank04_LAB3C    ; Struct $13
+    .byte >Bank04_LAB51    ; Struct $14
+    .byte >Bank04_LAB55    ; Struct $15
+    .byte >Bank04_LAB68    ; Struct $16
+    .byte >Bank04_LAB75    ; Struct $17
+    .byte >Bank04_LAB88    ; Struct $18
+    .byte >Bank04_LAB9B    ; Struct $19
+    .byte >Bank04_LABB0    ; Struct $1A
+    .byte >Bank04_LABBA    ; Struct $1B
+    .byte >Bank04_LABBD    ; Struct $1C
+    .byte >Bank04_LABC4    ; Struct $1D
+    .byte >Bank04_LABE0    ; Struct $1E
+    .byte >Bank04_LABE9    ; Struct $1F
+    .byte >Bank04_LABFE    ; Struct $20
+    .byte >Bank04_LAC01    ; Struct $21
+    .byte >Bank04_LAC0A    ; Struct $22
+    .byte >Bank04_LAC0F    ; Struct $23
+    .byte >Bank04_LAC14    ; Struct $24
+    .byte >Bank04_LAC1E    ; Struct $25
+    .byte >Bank04_LAC27    ; Struct $26
+    .byte >Bank04_Struct_27    ; Struct $27
+    .byte >Bank04_Struct_28    ; Struct $28
+    .byte >Bank04_Struct_29    ; Struct $29
+    .byte >Bank04_Struct_2A    ; Struct $2A
+    .byte >Bank04_Struct_2B    ; Struct $2B
+    .byte >Bank04_Struct_2C    ; Struct $2C
+    .byte >Bank04_Struct_2D    ; Struct $2D
+    .byte >Bank04_Struct_2E    ; Struct $2E
+    .byte >Bank04_Struct_2F    ; Struct $2F
+    .byte >Bank04_Struct_30    ; Struct $30
+    .byte >Bank04_Struct_31    ; Struct $31
+    .byte >Bank04_Struct_32    ; Struct $32
+    .byte >Bank04_Struct_33    ; Struct $33
+    .byte >Bank04_Struct_34    ; Struct $34
+    .byte >Bank04_Struct_35    ; Struct $35
+    .byte >Bank04_Struct_36    ; Struct $36
+    .byte >Bank04_Struct_37    ; Struct $37
+    .byte >Bank04_Struct_38    ; Struct $38
+    .byte >Bank04_Struct_39    ; Struct $39
+    .byte >Bank04_Struct_3A    ; Struct $3A
+    .byte >Bank04_Struct_3B    ; Struct $3B
+    .byte >Bank04_Struct_3C    ; Struct $3C
+    .byte >Bank04_Struct_3D    ; Struct $3D
+    .byte >Bank04_Struct_3E    ; Struct $3E
+    .byte >Bank04_Struct_3F    ; Struct $3F
+    .byte >Bank04_Struct_40    ; Struct $40
+    .byte >Bank04_Struct_41    ; Struct $41
+    .byte >Bank04_Struct_42    ; Struct $42
+    .byte >Bank04_Struct_43    ; Struct $43
+    .byte >Bank04_Struct_44    ; Struct $44
+    .byte >Bank04_Struct_45    ; Struct $45
+    .byte >Bank04_Struct_46    ; Struct $46
+    .byte >Bank04_Struct_47    ; Struct $47
+    .byte >Bank04_Struct_48    ; Struct $48
+    .byte >Bank04_Struct_49    ; Struct $49
+    .byte >Bank04_Struct_4A    ; Struct $4A
+    .byte >Bank04_Struct_4B    ; Struct $4B
+    .byte >Bank04_Struct_4C    ; Struct $4C
+    .byte >Bank04_Struct_4D    ; Struct $4D
+    .byte >Bank04_Struct_4E    ; Struct $4E
+    .byte >Bank04_Struct_4F    ; Struct $4F
+    .byte >Bank04_Struct_50    ; Struct $50
+    .byte >Bank04_Struct_51    ; Struct $51
+    .byte >Bank04_Struct_52    ; Struct $52
+    .byte >Bank04_Struct_53    ; Struct $53
+    .byte >Bank04_Struct_54    ; Struct $54
+    .byte >Bank04_Struct_55    ; Struct $55
+    .byte >Bank04_Struct_56    ; Struct $56
+    .byte >Bank04_Struct_57    ; Struct $57
+    .byte >Bank04_Struct_58    ; Struct $58
+    .byte >Bank04_Struct_59    ; Struct $59
+    .byte >Bank04_Struct_5A    ; Struct $5A
+    .byte >Bank04_Struct_5B    ; Struct $5B
 
 .advance StructPointerTable_Lo
-
-    .byte <Common_Struct_00,    <Bank04_LAA7E, <Bank04_LAA97, <Bank04_LAAB0, <Bank04_LAAB7, <Bank04_LAABE, <Bank04_LAAC2, <Bank04_LAAD2
-    .byte <Bank04_LAAE2,        <Bank04_LAAE7, <Bank04_LAAEC, <Bank04_LAAEF, <Bank04_LAAF2, <Bank04_LAAFD, <Bank04_LAB03, <Bank04_LAB08
-    .byte <Bank04_LAB11,        <Bank04_LAB26, <Bank04_LAB29, <Bank04_LAB3C, <Bank04_LAB51, <Bank04_LAB55, <Bank04_LAB68, <Bank04_LAB75
-    .byte <Bank04_LAB88,        <Bank04_LAB9B, <Bank04_LABB0, <Bank04_LABBA, <Bank04_LABBD, <Bank04_LABC4, <Bank04_LABE0, <Bank04_LABE9
-    .byte <Bank04_LABFE,        <Bank04_LAC01, <Bank04_LAC0A, <Bank04_LAC0F, <Bank04_LAC14, <Bank04_LAC1E, <Bank04_LAC27
+    .byte <Common_Struct_00    ; Struct $00
+    .byte <Bank04_LAA7E    ; Struct $01
+    .byte <Bank04_LAA97    ; Struct $02
+    .byte <Bank04_LAAB0    ; Struct $03
+    .byte <Bank04_LAAB7    ; Struct $04
+    .byte <Bank04_LAABE    ; Struct $05
+    .byte <Bank04_LAAC2    ; Struct $06
+    .byte <Bank04_LAAD2    ; Struct $07
+    .byte <Bank04_LAAE2    ; Struct $08
+    .byte <Bank04_LAAE7    ; Struct $09
+    .byte <Bank04_LAAEC    ; Struct $0A
+    .byte <Bank04_LAAEF    ; Struct $0B
+    .byte <Bank04_LAAF2    ; Struct $0C
+    .byte <Bank04_LAAFD    ; Struct $0D
+    .byte <Bank04_LAB03    ; Struct $0E
+    .byte <Bank04_LAB08    ; Struct $0F
+    .byte <Bank04_LAB11    ; Struct $10
+    .byte <Bank04_LAB26    ; Struct $11
+    .byte <Bank04_LAB29    ; Struct $12
+    .byte <Bank04_LAB3C    ; Struct $13
+    .byte <Bank04_LAB51    ; Struct $14
+    .byte <Bank04_LAB55    ; Struct $15
+    .byte <Bank04_LAB68    ; Struct $16
+    .byte <Bank04_LAB75    ; Struct $17
+    .byte <Bank04_LAB88    ; Struct $18
+    .byte <Bank04_LAB9B    ; Struct $19
+    .byte <Bank04_LABB0    ; Struct $1A
+    .byte <Bank04_LABBA    ; Struct $1B
+    .byte <Bank04_LABBD    ; Struct $1C
+    .byte <Bank04_LABC4    ; Struct $1D
+    .byte <Bank04_LABE0    ; Struct $1E
+    .byte <Bank04_LABE9    ; Struct $1F
+    .byte <Bank04_LABFE    ; Struct $20
+    .byte <Bank04_LAC01    ; Struct $21
+    .byte <Bank04_LAC0A    ; Struct $22
+    .byte <Bank04_LAC0F    ; Struct $23
+    .byte <Bank04_LAC14    ; Struct $24
+    .byte <Bank04_LAC1E    ; Struct $25
+    .byte <Bank04_LAC27    ; Struct $26
+    .byte <Bank04_Struct_27    ; Struct $27
+    .byte <Bank04_Struct_28    ; Struct $28
+    .byte <Bank04_Struct_29    ; Struct $29
+    .byte <Bank04_Struct_2A    ; Struct $2A
+    .byte <Bank04_Struct_2B    ; Struct $2B
+    .byte <Bank04_Struct_2C    ; Struct $2C
+    .byte <Bank04_Struct_2D    ; Struct $2D
+    .byte <Bank04_Struct_2E    ; Struct $2E
+    .byte <Bank04_Struct_2F    ; Struct $2F
+    .byte <Bank04_Struct_30    ; Struct $30
+    .byte <Bank04_Struct_31    ; Struct $31
+    .byte <Bank04_Struct_32    ; Struct $32
+    .byte <Bank04_Struct_33    ; Struct $33
+    .byte <Bank04_Struct_34    ; Struct $34
+    .byte <Bank04_Struct_35    ; Struct $35
+    .byte <Bank04_Struct_36    ; Struct $36
+    .byte <Bank04_Struct_37    ; Struct $37
+    .byte <Bank04_Struct_38    ; Struct $38
+    .byte <Bank04_Struct_39    ; Struct $39
+    .byte <Bank04_Struct_3A    ; Struct $3A
+    .byte <Bank04_Struct_3B    ; Struct $3B
+    .byte <Bank04_Struct_3C    ; Struct $3C
+    .byte <Bank04_Struct_3D    ; Struct $3D
+    .byte <Bank04_Struct_3E    ; Struct $3E
+    .byte <Bank04_Struct_3F    ; Struct $3F
+    .byte <Bank04_Struct_40    ; Struct $40
+    .byte <Bank04_Struct_41    ; Struct $41
+    .byte <Bank04_Struct_42    ; Struct $42
+    .byte <Bank04_Struct_43    ; Struct $43
+    .byte <Bank04_Struct_44    ; Struct $44
+    .byte <Bank04_Struct_45    ; Struct $45
+    .byte <Bank04_Struct_46    ; Struct $46
+    .byte <Bank04_Struct_47    ; Struct $47
+    .byte <Bank04_Struct_48    ; Struct $48
+    .byte <Bank04_Struct_49    ; Struct $49
+    .byte <Bank04_Struct_4A    ; Struct $4A
+    .byte <Bank04_Struct_4B    ; Struct $4B
+    .byte <Bank04_Struct_4C    ; Struct $4C
+    .byte <Bank04_Struct_4D    ; Struct $4D
+    .byte <Bank04_Struct_4E    ; Struct $4E
+    .byte <Bank04_Struct_4F    ; Struct $4F
+    .byte <Bank04_Struct_50    ; Struct $50
+    .byte <Bank04_Struct_51    ; Struct $51
+    .byte <Bank04_Struct_52    ; Struct $52
+    .byte <Bank04_Struct_53    ; Struct $53
+    .byte <Bank04_Struct_54    ; Struct $54
+    .byte <Bank04_Struct_55    ; Struct $55
+    .byte <Bank04_Struct_56    ; Struct $56
+    .byte <Bank04_Struct_57    ; Struct $57
+    .byte <Bank04_Struct_58    ; Struct $58
+    .byte <Bank04_Struct_59    ; Struct $59
+    .byte <Bank04_Struct_5A    ; Struct $5A
+    .byte <Bank04_Struct_5B    ; Struct $5B
 
 ;----------------------------------------------------------------------------------------------------
+
+; CODE CAVE (82 x 16 bytes)
 
 RESET_Bank04:
 Bank04_LBFB0:  SEI                     ;Disables interrupt.

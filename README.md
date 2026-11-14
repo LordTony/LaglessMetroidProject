@@ -125,16 +125,14 @@ sbx #$F0
 ### TODOs (Non Bugs)
 * Bank 03
   * Need to somehow make room for the attribute colors for the last couple of rooms
-* Bank 04
-  * Apply the room changes so bank 04 loads with the new protocol
-  * Apply the attribute color changes so bank 04 is colored correctly with the new protocol
 * Bank 05
   * Apply the room changes so bank 05 loads with the new protocol
   * Apply the attribute color changes so bank 05 is colored correctly with the new protocol
 
 ## Definite Bugs
-* Bank 02 dragons are only spitting fire to the left
-* Bank 04 and 05 currently won't load because they haven't been updated to fit the new level load protocol
+* Room attribute data won't load when starting a game from a password
+  * can make it load by removing "lda MainRoutine; lsr; beq End_Attr_Loop" but then the PPU takes too long and corrupts the palette data loading bank 04
+* Bank 05 currently won't load because it hasn't been updated to fit the new level load protocol
 * End credits have their graphics corrupted
 * Escape sequence timer graphic is mildly corrupted
 * Pillar thingies (Zeebitites?) in Mother brain's rooms get overwritten when the second half of the room loads
@@ -153,10 +151,11 @@ sbx #$F0
   * It looks like the ridley and kraid dead bytes were based on the offset to MaxMissiles.
 
 ## Pre Existing Bugs (or quirks; whatever. The original metroid sucks)
-* Killing a metroid without a Missle Tank will crash or lock the game
-  * This is only possible with NARPASS or hacks since you need missles to kill metroids
+* Killing a metroid without a Missile Tank will crash or lock the game
+  * This is only possible with NARPASS or hacks since you need missiles to kill metroids
 * Shooting a door open while falling vertically past it and into another name table will move the closing door into a wall on the other name table
 * Loading a room while too many sprites are being rendered (bullets + enemies + room transition) will hit the PPU cap and some background elements will have the wrong palette because it won't even try to load the palette data for them.
 * Can't pick up items while blinking from taking damage, either from lava or from an being hit
 * Pushing up against a door while facing right and shooting with the wave beam doesn't open the door.
   * If samus faces left and does the same thing to a door, the door will open without issue.
+* Spinner explosions in Kraid's hideout use the wrong graphic

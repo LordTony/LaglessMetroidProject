@@ -1554,10 +1554,11 @@ UpdateProjectiles:
                 bne ++
                     lda #$0C
                     sta EnCounter,x
+
                     dec $0407,x
                     bmi +
                         bne ++
-            *       jsr KillObject          ;($FA18)Free enemy data slot.
+            *   jsr KillObject          ;($FA18)Free enemy data slot.
             *   lda EnCounter,x
                 cmp #$09
                 bne +
@@ -1571,10 +1572,13 @@ UpdateProjectiles:
                     sta $05
 
                     jsr LFA41
+
             *   lda #$80
                 sta ObjectCntrl
+
                 lda #$03
                 jsr LF97E
+
                 ldx PageIndex
         _next:
             txa
@@ -8137,6 +8141,7 @@ SetEnemyInitialHitpoints:
 
     lda $969B,y
     sta $040D,x
+    
     lda EnemyHitPointTbl,y      ;($962B)
     ldy EnSpecialAttribs,x
     bpl +
@@ -8453,26 +8458,35 @@ _TilesDone:
 
 .scope
 
-ClearProjectiles:
-    ldx #$D0
+    ClearProjectiles:
+        ClearBullet_D0:
+            lda ObjAction + $D0
+            cmp #$05
+            bcc ClearBullet_E0
+                tya
+                eor ObjectHi + $D0
+                bne ClearBullet_E0
+                    sta ObjAction + $D0
 
-_loop:
-    lda ObjAction,x
-    cmp #$05
-    bcc _next
+        ClearBullet_E0:   
+            lda ObjAction + $E0
+            cmp #$05
+            bcc ClearBullet_F0
+                tya
+                eor ObjectHi + $E0
+                bne ClearBullet_F0
+                    sta ObjAction + $E0
 
-        tya
-        eor ObjectHi,x
-        bne _next
+        ClearBullet_F0:
+            lda ObjAction + $F0
+            cmp #$05
+            bcc _end
+                tya
+                eor ObjectHi + $F0
+                bne _end
+                    sta ObjAction + $F0
 
-            ; A == 0 here
-            sta ObjAction,x
-
-_next:
-    txa
-    sbx #$F0 
-    bne _loop
-
+    _end:
 .scend
 
 .scope
@@ -10669,19 +10683,20 @@ AfterLavaJumpLoop:
     sta EnStatus,y
 
     and EnAttr_05,x
-    tax
-    lda Table15,x
-    sta $0403,y
+    asl
+    asl
+    eor #$FF
+    adc #$03
+    sta $0403,y         ; Writes $02 or $FE. Replaces a table
 
-    ldx PageIndex
-
-;LF8F8:
     lda $85
     cmp #$02
     bcc +
+        lda $0405,x
+        lsr
         lda $88
         rol
-        ;and #$07       ; HCSS - $88 can only be set to 1 2
+        ;and #$07       ; $88 can only be set to 1 2
         sta $040A,y
 
         lda #$02
@@ -11295,7 +11310,6 @@ TileSubroutine5:
     sta $02
 
     lda TileWRAMHi,x
-    sta $01
     lsr
     ror $02
     lsr
@@ -11304,14 +11318,13 @@ TileSubroutine5:
     lda $00
     asl
     asl
-    asl       ; * 8
-    sta $03
+    asl 
     sta $09
 
     lda $02
     sta $07
 
-    lda $01
+    lda TileWRAMHi,x
     lsr
     asr #$03
     sta $0B
@@ -11694,11 +11707,6 @@ Table05:
     .byte $3D
     .byte $3F
 
-; Table09 - Uninvestigated
-Table09_A:
-    .byte $01
-    .byte $FF
-
 Table08:
     .byte $0C
     .byte $F4
@@ -11715,8 +11723,10 @@ MissileAnims:
 
 WaveSpeedTable:
     .byte $F9, $FB, $FF, $01, $05, $07
-    .byte $07, $05, $01, $FF, $FB, $F9
-
+    ;.byte $07, $05, $01, $FF, $FB, $F9     Table Weaving WaveSpeedTable and Table09_A
+    .byte $07, $05
+Table09_A: .byte $01, $FF
+    .byte $FB, $F9
 
 Table0E:
     .byte $30
@@ -11827,8 +11837,7 @@ LoadDoorTable_2:
 TileBlastAnim:
     .byte $06, $07, $00, $FE
     .byte $07, $06, $01, $FE
-    .byte $07, $06; $02, $FE
-Table15: .byte $02, $FE             ; Table15 is just $02, $FE. They are interwoven
+    .byte $07, $06, $02, $FE 
     .byte $07, $06, $03, $FE
     .byte $07, $06, $04, $FE
     .byte $07, $06, $05, $FE
@@ -11836,7 +11845,7 @@ Table15: .byte $02, $FE             ; Table15 is just $02, $FE. They are interwo
     .byte $07, $06, $0A, $FE
     .byte $07, $06, $0B, $FE
     .byte $07, $06, $08, $FE
-    .byte $00, $00
+    ;.byte $00, $00  ; Interwoven into the Div16Table. Original TileBlastAnim Table has 2 $00s
 
 Div16Table:
     .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
