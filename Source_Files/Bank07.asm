@@ -7812,12 +7812,8 @@ InitTables:
 .alias _AttrRepeatVal       $D4
 .alias _AttrRepeatCount     $D5
 
-lda MainRoutine
-lsr
-beq End_Attr_Loop
-
 WriteRoomSpecificAttrPaletteData:
-    ldx RoomNumber
+    ldx StableRoomNumber
     lda RoomAttrTbl_Lo,x
     sta CodePtr
     lda RoomAttrTbl_Hi,x
