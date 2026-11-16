@@ -2173,60 +2173,90 @@ Bank03_LA7D0:  .byte $00           ;End Palette12 info.
 
 _SpecItmsTbl:
 
-;Elevator to end.
 Bank03_LA83B:  .byte $03
 Bank03_LA83C:  .word Bank03_LA843
-Bank03_LA83E:  .byte $01, $FF, $04, $8F, $00 
+Bank03_LA83E:  .byte $01, $FF
 
-;Elevator to Brinstar.
+	.byte $04, $8F	;Elevator to end.
+	.byte $00 
+
 Bank03_LA843:  .byte $04
 Bank03_LA844:  .word Bank03_LA84B
-Bank03_LA846:  .byte $03, $FF, $04, $83, $00
+Bank03_LA846:  .byte $03, $FF
 
-;10 missile door.
+	.byte $04, $83	;Elevator to Brinstar.
+	.byte $00
+
 Bank03_LA84B:  .byte $07
 Bank03_LA84C:  .word Bank03_LA85B
-Bank03_LA84E:  .byte $03, $05, $09, $A2, $00
+Bank03_LA84E:  .byte $04, $04
 
-;Rinkas
-Bank03_LA853:  .byte $04, $04, $08, $00
+	.byte $08	;Rinkas 0 
+	.byte $00
 
-;Rinkas
-Bank03_LA857:  .byte $09, $FF, $08, $00
+Bank03_LA851:  .byte $09, $FF
 
-;Rinkas
+	.byte $08	;Rinkas 0 
+	.byte $00
+
 Bank03_LA85B:  .byte $08
 Bank03_LA85C:  .word Bank03_LA862
-Bank03_LA85E:  .byte $0A, $FF, $18, $00
+Bank03_LA85E:  .byte $0A, $FF
 
-;Rinkas
+	.byte $18	;Rinkas 1
+	.byte $00
+
 Bank03_LA862:  .byte $09
 Bank03_LA863:  .word Bank03_LA869
-Bank03_LA865:  .byte $0A, $FF, $08, $00
+Bank03_LA865:  .byte $0A, $FF
 
-;Rinkas
+	.byte $08	;Rinkas 0
+	.byte $00
+
 Bank03_LA869:  .byte $0A
 Bank03_LA86A:  .word Bank03_LA870
-Bank03_LA86C:  .byte $0A, $FF, $18, $00
+Bank03_LA86C:  .byte $0A, $FF
 
-;Door at bottom of escape shaft.
+	.byte $18	;Rinkas 1
+	.byte $00
+
 Bank03_LA870:  .byte $0B
 Bank03_LA871:  .word $FFFF
-Bank03_LA873:  .byte $01, $05, $09, $A3, $00
+Bank03_LA873:  .byte $02, $0C
 
-;Mother brain, Zeebetite, 3 cannons and Rinkas.
-Bank03_LA878:  .byte $02, $0C, $06, $47, $18, $05, $49, $15, $4B, $25, $3E, $00
+	.byte $06 			; Mother Brain
+	.byte $47 			; Zeebetite 4
+	.byte $18 			; Rinkas 1
+	.byte $05, $49 		; Cannon 0
+	.byte $15, $4B 		; Cannon 1
+	.byte $25, $3E		; Cannon 2
+	.byte $00
 
-;2 Zeebetites, 6 cannons and Rinkas.
-Bank03_LA884:  .byte $03, $12, $37, $27, $08, $05, $41, $15, $43, $25, $36, $05, $49, $15, $4B, $35
-Bank03_LA894:  .byte $3E, $00
+Bank03_LA87F:  .byte $03, $12
 
-;Right door, 2 Zeebetites, 6 cannons and Rinkas.
-Bank03_LA896:  .byte $04, $14, $09, $A3, $17, $07, $08, $05, $41, $15, $43, $25, $36, $05, $49, $15
-Bank03_LA8A6:  .byte $4B, $35, $3E, $00
+	.byte $37	 		; Zeebetite 3
+	.byte $27	 		; Zeebetite 2
+	.byte $08			; Rinkas 0 
+	.byte $05, $41 		; Cannon 0
+	.byte $15, $43 		; Cannon 1
+	.byte $25, $36 		; Cannon 2
+	.byte $05, $49 		; Cannon 0	(Again?)
+	.byte $15, $4B 		; Cannon 1  (Again?)
+	.byte $35, $3E 		; Cannon 3
+	.byte $00
 
-;Left door.
-Bank03_LA8AA:  .byte $05, $FF, $09, $B3, $00 
+Bank03_LA891:  .byte $04, $FF
+
+	.byte $17			; Zeebetite 1
+	.byte $07 			; Zeebetite 0
+	.byte $08			; Rinkas 0 
+	.byte $05, $41 		; Cannon 0
+	.byte $15, $43		; Cannon 1 
+	.byte $25, $36		; Cannon 2 
+	.byte $05, $49		; Cannon 0 (Again?)
+	.byte $15, $4B		; Cannon 1 (Again?)
+	.byte $35, $3E		; Cannon 3 
+	.byte $00
 
 ;-----------------------------------------[ Room definitions ]---------------------------------------
 
@@ -2282,7 +2312,6 @@ Bank03_Room_02_Left:
 	.byte $E0, $0A
 	.byte $FF
 
-; JUMANJI
 Bank03_Room_02_Right:
 	.byte $08, $0C
 	.byte $0F, $2C
@@ -2294,6 +2323,8 @@ Bank03_Room_02_Right:
 	.byte $D3, $10
 	.byte $DB, $2D
 	.byte $E8, $0A
+	.byte $FD
+	.byte $02, $A3				; Door
 	.byte $FF
 
 ;Room #$03
@@ -2365,6 +2396,8 @@ Bank03_Room_05_Left:
 	.byte $50, $2B
 	.byte $80, $14
 	.byte $D0, $2A
+	.byte $FD
+	.byte $02, $B3
 	.byte $FF
 
 Bank03_Room_05_Right:
@@ -2687,6 +2720,8 @@ Bank03_Room_0F_Top_Right:
 	.byte $28, $12
 	.byte $4C, $1B
 	.byte $5F, $03
+	.byte $FD
+	.byte $A2
 	.byte $FF
 
 Bank03_Room_0F_Bottom_Left:
@@ -2844,6 +2879,30 @@ Bank03_Room_14_Right:
 	.byte $D8, $00
 	.byte $FD
 	.byte $31, $01, $6A			; Enemy
+	.byte $FF
+
+;Room #$15
+Bank03_Room_15:		; Clone of Room $0F except the door
+	.byte $FF
+	.word Bank03_Room_0F_Top_Left		; Ptr to Room $0F Quad
+	.word Bank03_Room_15_Top_Right
+	.word Bank03_Room_0F_Bottom_Left	; Ptr to Room $0F Quad
+
+Bank03_Room_15_Bottom_Right:
+	.byte $8B, $12
+	.byte $8E, $1A
+	.byte $8F, $20
+	.byte $B8, $18
+	.byte $FF
+
+Bank03_Room_15_Top_Right:
+	.byte $0E, $1A
+	.byte $0F, $19
+	.byte $28, $12
+	.byte $4C, $1B
+	.byte $5F, $03
+	.byte $FD
+	.byte $A3			; Door
 	.byte $FF
 
 ;---------------------------------------[ Structure definitions ]------------------------------------
@@ -3396,14 +3455,14 @@ Tourian_Room_0A_Attrs:
 
     .byte >Bank03_LA8AF, >Bank03_LA8BD, >Bank03_LA8C5, >Bank03_LA8FA, >Bank03_LA929, >Bank03_LA95E, >Bank03_LA975, >Bank03_LA990
     .byte >Bank03_LA9AB, >Bank03_LA9CF, >Bank03_LA9F2, >Bank03_LAA33, >Bank03_LAA75, >Bank03_LAAAE, >Bank03_LAAE3, >Bank03_LAB12
-    .byte >Bank03_LAB4A, >Bank03_LAB7C, >Bank03_LABA5, >Bank03_LABCE, >Bank03_LABEF
+    .byte >Bank03_LAB4A, >Bank03_LAB7C, >Bank03_LABA5, >Bank03_LABCE, >Bank03_LABEF, >Bank03_Room_15 
 
 
 .advance RoomPointerTable_Lo
 
     .byte <Bank03_LA8AF, <Bank03_LA8BD, <Bank03_LA8C5, <Bank03_LA8FA, <Bank03_LA929, <Bank03_LA95E, <Bank03_LA975, <Bank03_LA990
     .byte <Bank03_LA9AB, <Bank03_LA9CF, <Bank03_LA9F2, <Bank03_LAA33, <Bank03_LAA75, <Bank03_LAAAE, <Bank03_LAAE3, <Bank03_LAB12
-    .byte <Bank03_LAB4A, <Bank03_LAB7C, <Bank03_LABA5, <Bank03_LABCE, <Bank03_LABEF
+    .byte <Bank03_LAB4A, <Bank03_LAB7C, <Bank03_LABA5, <Bank03_LABCE, <Bank03_LABEF, <Bank03_Room_15 
 
 ;----------------------------------------[ Macro definitions ]---------------------------------------
 

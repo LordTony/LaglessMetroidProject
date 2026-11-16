@@ -1698,66 +1698,104 @@ Bank01_LA313:  .byte $00           ;End Palette0E info.
 
 _SpecItmsTbl:
 
-;Elevator to Tourian.
 Bank01_LA3D6:  .byte $02
 Bank01_LA3D7:  .word Bank01_LA3E4
-Bank01_LA3D9:  .byte $03, $05, $04, $03, $00
 
-;Varia suit.
-Bank01_LA3DE:  .byte $0F, $FF, $02, $05, $37, $00
+	Bank01_LA3D9:  .byte $03, $05
 
-;Missiles.
+		.byte $04, $03				;Elevator to Tourian.
+		.byte $00
+
+	Bank01_LA3DE:  .byte $0F, $FF
+
+		.byte $02, $05, $37			;Varia suit.
+		.byte $00
+
 Bank01_LA3E4:  .byte $03
 Bank01_LA3E5:  .word Bank01_LA3F3
-Bank01_LA3E7:  .byte $18, $06, $02, $09, $67, $00
 
-;Energy tank.
-Bank01_LA3ED:  .byte $1B, $FF, $02, $08, $87, $00
+	Bank01_LA3E7:  .byte $18, $06
 
-;Long beam.
+		.byte $02, $09, $67			;Missiles
+		.byte $00
+
+	Bank01_LA3ED:  .byte $1B, $FF
+
+		.byte $02, $08, $87			;Energy tank.
+		.byte $00
+
 Bank01_LA3F3:  .byte $05
 Bank01_LA3F4:  .word Bank01_LA402
-Bank01_LA3F6:  .byte $07, $06, $02, $02, $37, $00
 
-;Bombs.
-Bank01_LA3FC:  .byte $19, $FF, $02, $00, $37, $00
+	Bank01_LA3F6:  .byte $07, $06
+	
+		.byte $02, $02, $37			;Long beam.
+		.byte $00
 
-;Palette change room.
+	Bank01_LA3FC:  .byte $19, $FF
+
+		.byte $02, $00, $37			;Bombs.
+		.byte $00
+
 Bank01_LA402:  .byte $07
 Bank01_LA403:  .word Bank01_LA40F
-Bank01_LA405:  .byte $0C, $04, $0A, $00
 
-;Energy tank.
-Bank01_LA409:  .byte $19, $FF, $02, $08, $87, $00
+	Bank01_LA405:  .byte $0C, $04
 
-;Ice beam.
+		.byte $0A					;Palette change room.
+		.byte $00
+
+	Bank01_LA409:  .byte $19, $FF
+
+		.byte $02, $08, $87			;Energy tank.
+		.byte $00
+
 Bank01_LA40F:  .byte $09
 Bank01_LA410:  .word Bank01_LA41C
-Bank01_LA412:  .byte $13, $06, $02, $07, $37, $00
 
-;Mellows.
-Bank01_LA418:  .byte $15, $FF, $03, $00
+	Bank01_LA412:  .byte $13, $06
 
-;Missiles.
+		.byte $02, $07, $37			;Ice beam.
+		.byte $00
+
+	Bank01_LA418:  .byte $15, $FF
+
+		.byte $03					;Mellows.
+		.byte $00
+
 Bank01_LA41C:  .byte $0B
 Bank01_LA41D:  .word Bank01_LA42A
-Bank01_LA41F:  .byte $12, $06, $02, $09, $67, $00
 
-;Elevator to Norfair.
-Bank01_LA425:  .byte $16, $FF, $04, $01, $00
+	Bank01_LA41F:  .byte $12, $06
 
-;Maru Mari.
+		.byte $02, $09, $67			;Missiles.
+		.byte $00
+
+	Bank01_LA425:  .byte $16, $FF
+
+		.byte $04, $01				;Elevator to Norfair.
+		.byte $00
+
 Bank01_LA42A:  .byte $0E
 Bank01_LA42B:  .word Bank01_LA439
-Bank01_LA42D:  .byte $02, $06, $02, $04, $96, $00
 
-;Energy tank.
-Bank01_LA433:  .byte $09, $FF, $02, $08, $12, $00
+	Bank01_LA42D:  .byte $02, $06
 
-;Elevator to Kraid.
+		.byte $02, $04, $96		;Maru Mari.
+		.byte $00
+
+	Bank01_LA433:  .byte $09, $FF
+
+		.byte $02, $08, $12		;Energy tank.
+		.byte $00
+
 Bank01_LA439:  .byte $12
 Bank01_LA43A:  .word $FFFF
-Bank01_LA43C:  .byte $07, $FF, $04, $02, $00
+
+	Bank01_LA43C:  .byte $07, $FF
+
+		.byte $04, $02			;Elevator to Kraid.
+		.byte $00
 
 ;-----------------------------------------[ Room definitions ]---------------------------------------
 

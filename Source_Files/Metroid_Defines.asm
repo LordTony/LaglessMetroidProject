@@ -1026,11 +1026,12 @@
 .alias MacroUpperLeft               $AF91
 .alias MacroLowerRight              $AFD6
 .alias MacroLowerLeft               $B01B
+
 .alias SoundEngineOrg               $B200
-.alias SXFInitTables                $B29D
-.alias SoundEngineEntryPoint        $B3CC
-.alias StructPointerTable_Hi        $BF0F
-.alias StructPointerTable_Lo        $BF6B
+.alias SXFInitTables                $B298
+.alias SoundEngineEntryPoint        $B3C3
+.alias StructPointerTable_Hi        $BEF0
+.alias StructPointerTable_Lo        $BF4C
 .alias InterruptVectors             $BFFA
 
 ;----------------------------------------------------------------------------------------------------
@@ -1149,6 +1150,11 @@
 .alias mrtn_IncrementRoutine    $07
 .alias mrtn_SamusIntro          $08
 .alias mrtn_WaitTimer           $09
+
+.alias scrolldir_Up             $00
+.alias scrolldir_Down           $01
+.alias scrolldir_Left           $02
+.alias scrolldir_Right          $03
 
 ;Hardware registers.
 .alias PPU_PT0_UB       $00     ;Base address of pattern table 0, upper byte.

@@ -2192,17 +2192,18 @@ AfterSamusStandSetAction:
     cpx #sa_Door                    ; sa_Door == 5            
     bcs Exit9                       
     
-    cpx #sa_Roll 
-    beq SetSamusRoll_Trampoline     ; SamusObjAction == 3
-    bcs SetSamusPntUp_Trampoline    ; SamusObjAction == 4
+        cpx #sa_Roll 
+        beq SetSamusRoll_Trampoline     ; SamusObjAction == 3
+        bcs SetSamusPntUp_Trampoline    ; SamusObjAction == 4
 
-    cpx #sa_Jump 
-    beq SetSamusJump_Trampoline     ; SamusObjAction == 2
-    ; fall through to SetSamusRun   ; SamusObjAction == 1
+            cpx #sa_Jump 
+            beq SetSamusJump_Trampoline     ; SamusObjAction == 2
+            ; fall through to SetSamusRun   ; SamusObjAction == 1
 
 ;----------------------------------------------------------------------------------------------------
 
 SetSamusRun:
+    ; TODO: Maybe works with dex
     ldx #an_SamusRun    ; #an_SamusRun == #$00
 
     lda #$09
@@ -2668,67 +2669,70 @@ ApplyLeftRightGravity:
             cmp #an_SamusSalto          ; an_SamusSalto == $0E
             beq ClearHorzDataExit
                 stx SamusDir            ; left == $01 and right == $00
+
                 lda #$0C
                 bne SetSamusAnim        ; branch always
                 ; safe
 ApplyGravity:
-    LDA SamusGravity
-    BMI ClearHorzDataExit
-    BEQ ClearHorzDataExit
-    LDA SamusAnimResetIndex
-    CMP #an_SamusJump       ; an_SamusJump == $0C
-    BNE ClearHorzDataExit
+    lda SamusGravity
+    bmi ClearHorzDataExit
+    beq ClearHorzDataExit
 
-    ClearHorzData:
-        JSR ClearHorzMvmntData  ;($CF4C)Clear horizontal speed and linear counter.
-        STY SamusHorzAccel      ;Clear horizontal acceleration data.
-    ClearHorzDataExit:
-        RTS 
+        lda SamusAnimResetIndex
+        cmp #an_SamusJump       ; an_SamusJump == $0C
+        bne ClearHorzDataExit
+
+        ClearHorzData:
+            jsr ClearHorzMvmntData  ;($CF4C)Clear horizontal speed and linear counter.
+            sty SamusHorzAccel      ;Clear horizontal acceleration data.
+        ClearHorzDataExit:
+            rts 
 
 SetSamusJump:
-LCFC3:  LDY #an_SamusJump       ; an_SamusJump == $0C
+LCFC3:  ldy #an_SamusJump       ; an_SamusJump == $0C
 
 AfterSamusJumpSet:
-      * STY SamusAnimResetIndex
-        DEY
-        STY SamusAnimIndex
+      * sty SamusAnimResetIndex
 
-        LDA #$04
-        STA SamusAnimDelay
+        dey 
+        sty SamusAnimIndex
 
-        LDA #$00
-        STA SamusJmpDsplcmnt
+        lda #$04
+        sta SamusAnimDelay
 
-        LDA #$FC
-        STA SamusVertSpeed
+        lda #$00
+        sta SamusJmpDsplcmnt
 
-        LDX SamusObjAction
-        DEX
-        BNE SFX_SamusJump_Inline2    ; branch if Samus is standing still
-            LDA SamusGear
-            AND #gr_SCREWATTACK
-            BEQ SFX_SamusJump_Inline2    ; branch if Samus doesn't have Screw Attack
+        lda #$FC
+        sta SamusVertSpeed
 
-            ;stx $0686                    ; Never read anywhere, so I'm removing it
+        ldx SamusObjAction
+        dex 
+        bne SFX_SamusJump_Inline2           ; branch if Samus is standing still
+            lda SamusGear
+            and #gr_SCREWATTACK             ; SFX_SCRW_ATK == $08
+            beq SFX_SamusJump_Inline2       ; branch if Samus doesn't have Screw Attack
+
+            ;stx $0686                      ; Never read anywhere, so I'm removing it
 
             SFX_ScrewAttack_Inline:
-                LDA #SFX_SCRW_ATK
-                ORA NoiseSFXFlag
-                STA NoiseSFXFlag
+                lda #SFX_SCRW_ATK           ; SFX_SCRW_ATK == $40
+                ora NoiseSFXFlag
+                sta NoiseSFXFlag
 
 SFX_SamusJump_Inline2:
-      * LDA #SFX_SMS_JMP
-        ORA SQ1SFXFlag
-        STA SQ1SFXFlag
+      * lda #SFX_SMS_JMP                    ; SFX_SMS_JMP == $02
+        ora SQ1SFXFlag
+        sta SQ1SFXFlag
 
-        LDY #$18                ; gravity (high value -> low jump)
-        LDA SamusGear
-        AND #gr_HIGHJUMP
-        BEQ +                   ; branch if Samus doesn't have High Jump
-        ;LDY #$12                ; lower gravity value -> high jump!
-        LDY #$0B                ; HACK - while developing, make her jump higher by lowering the gravity
-*       STY SamusGravity
-        RTS
+        ldy #$18                ; gravity (high value -> low jump)
+        lda SamusGear
+        and #gr_HIGHJUMP        ; SFX_SMS_JMP == $02
+        beq +                   ; branch if Samus doesn't have High Jump
+            ;ldy #$12               ; lower gravity value -> high jump!
+            ldy #$0B                ; HACK - while developing, make her jump higher by lowering the gravity
+    *       sty SamusGravity
+        rts 
 
 SamusJump:
     ldy #$00
@@ -2914,6 +2918,7 @@ SamusRoll:
         eor #$01
         and #$01
         sta SamusDir
+
         lda #an_SamusRoll               ; an_SamusRoll == #$16
         jsr SetSamusAnim
 *   jsr SetRunAccelerationToSamusDir
@@ -2962,8 +2967,8 @@ CheckBombLaunch:
 
                 lda SamusObjectX
                 sta ObjectX,x
-
-                lda SamusObjectY
+                
+                lda SamusObjectY    ; Carry bit should be clear here
                 clc
                 adc #$04    ; 4 pixels further down than Samus' center
                 sta ObjectY,x
@@ -3027,29 +3032,40 @@ AfterSamusPntUpSetAction:
         sta SamusObjAction
 *   lda #$04
     jsr SetSamusData        ; ($CD6D)Set Samus control data and animation.
-    ldx SamusObjAction
 
- .scope
-        CPX #$04
-        BCS _Check_6
-        _DoJump:
-            LDA SamusPntUpTable_LowBytes,x
-            STA CodePtr
-            LDA SamusPntUpTable_HiBytes,x
-            STA CodePtr + 1
-            JMP (CodePtr)
-        _Check_6:
-            CPX #$06
-            BNE _DoJump
-        LDY #an_SamusJmpPntUp   ; an_SamusJmpPntUp == $35
-        JMP AfterSamusJumpSet
+.scope
 
-    SamusPntUpTable_HiBytes:
-       .byte >StopHorzMovement, >SetSamusRun, >ExitSub, >SetSamusRoll, >ExitSub
-    SamusPntUpTable_LowBytes:
-       .byte <StopHorzMovement, <SetSamusRun, <ExitSub, <SetSamusRoll, <ExitSub
- 
- .scend
+       ldx SamusObjAction
+
+       cpx #$03
+       beq SetSamusRoll_Trampoline_2       ; SamusObjAction == $03
+       bcc CheckPntUpTableLower
+
+           cpx #$06
+           beq SetSamusJumpPntUp           ; SamusObjAction == $03
+               rts                         ; SamusObjAction == $04 and $05 
+
+       CheckPntUpTableLower:
+           cpx #$01
+           beq SetSamusRun_Trampoline      ; SamusObjAction == $01
+           bcc StopHorzMovement_Trampoline ; SamusObjAction == $00
+               rts                         ; SamusObjAction == $02
+
+       StopHorzMovement_Trampoline:
+           jmp StopHorzMovement 
+
+       SetSamusJumpPntUp:
+           ldy #an_SamusJmpPntUp           ; an_SamusJmpPntUp == $35
+           jmp AfterSamusJumpSet 
+
+       SetSamusRoll_Trampoline_2:
+           jmp SetSamusRoll 
+
+       SetSamusRun_Trampoline:
+           jmp SetSamusRun 
+
+.scend
+
 
 ; Zero flag set to 1 if a bullet can be fired
 ; set to 0 if not
@@ -3103,7 +3119,7 @@ SpawnBulletHorizontal:
 
             lda MissileToggle
             bne AfterHorizontalSpecialBeamChecks
-                TXA     ; X is SamusDir here
+                txa                     ; X is SamusDir here
                 jsr DoWaveBeamAndIceBeamStuff
                 jmp AfterHorizontalMissleLaunch 
                 ; safe 
@@ -3113,7 +3129,6 @@ AfterHorizontalSpecialBeamChecks:
     jsr GoSetMissileAnim 
 
 AfterHorizontalMissleLaunch:
-
     lda ObjAction,y
     asl
     ora SamusDir
@@ -3139,7 +3154,7 @@ SetBulletFireCheck_2:
     dex
     bne +
 
-        lda #SFX_BLT_FIRE
+        lda #SFX_BLT_FIRE   ; SFX_BLT_FIRE == $10
         ora SQ1SFXFlag
         sta SQ1SFXFlag
 
@@ -3159,7 +3174,6 @@ SpawnBulletVertical:
         jsr CheckIfBulletCanBeFired
         bne +
             jsr DoNormalBulletStuff     ; sets A to 0
-
             sta ObjHorzSpeed,y
 
             lda #$FC
@@ -3194,7 +3208,7 @@ AfterVerticalMissleToggleCheck:
     jsr LD306
 
     lda SamusGear
-    and #gr_LONGBEAM    ; gr_LONGBEAM == $04
+    and #gr_LONGBEAM            ; gr_LONGBEAM == $04
     beq SetBulletFireCheck
         lda #$80
         ora HasBeamSFX
@@ -3205,7 +3219,7 @@ SetBulletFireCheck:
     dex
     bne +
     
-        lda #SFX_BLT_FIRE   ; SFX_BLT_FIRE == $10
+        lda #SFX_BLT_FIRE       ; SFX_BLT_FIRE == $10
         ora SQ1SFXFlag
         sta SQ1SFXFlag
 
@@ -3320,39 +3334,37 @@ DoWaveBeamAndIceBeamStuff:
     bit SamusGear
     bvc DoIceBeamStuff     ; branch if Samus doesn't have Wave Beam
 
-    lda Div16Table, y      ; Setup the carry bit for below 
-    lsr
+    DoWaveBeamStuff:
+        lda #$00
+        sta AnimDelay,y
 
-    lda #$00
-    sta AnimDelay,y
+        ; $0502,Y is:
+        ;   0 = horizontal right
+        ;   1 = horizontal left
+        ;   2 = vertical up
 
-    ; $0502,Y is:
-    ;   0 = horizontal right
-    ;   1 = horizontal left
-    ;   2 = vertical up
+        lda Div16Table,y
+        asl
+        eor $0502,y
+        anc #$02                ; replaces "and #$02; sec; sbc #$01" 
+        sbc #$01                
+        and #$06
+        sta $0500,y
 
-    lda Div16Table,y
-    asl
-    eor $0502,y
-    and #$02
-    sec
-    sbc #$02
-    and #$06
-    sta $0500,y
+        lda #wa_WaveBeam        ; #wa_WaveBeam == #$02
+        sta ObjAction,y
 
-    lda #wa_WaveBeam        ; #wa_WaveBeam == #$02
-    sta ObjAction,y
-Set_WaveFireAnim:
-    lda #an_WaveBeam        ; #an_WaveBeam == #$7D
-    sta AnimIndex,y
-    sta AnimResetIndex,y
-    ;lda #$00
-    ;sta AnimDelay,y        ; moving this up
+    Set_WaveFireAnim:
+        lda #an_WaveBeam        ; #an_WaveBeam == #$7D
+        sta AnimIndex,y
+        sta AnimResetIndex,y
+        ;lda #$00
+        ;sta AnimDelay,y        ; moving this up
 
-SFX_WaveFire:
-    lda #SFX_WV_FIRE        ; #SFX_WV_FIRE == #$01 
-    ora SQ1SFXFlag
-    sta SQ1SFXFlag
+    SFX_WaveFire:
+        lda #SFX_WV_FIRE        ; #SFX_WV_FIRE == #$01 
+        ora SQ1SFXFlag
+        sta SQ1SFXFlag
 
 ; NARPASS allows having the ice beam and wave beam at the same time
 ; but the ice beam overwrites the wave behavior
@@ -3360,16 +3372,17 @@ DoIceBeamStuff:
     lda SamusGear
     bpl IceBeamExit       ; branch if Samus doesn't have Ice Beam
 
-    lda #wa_IceBeam       ; #wa_IceBeam == #$03 
-    sta ObjAction,y
+        lda #wa_IceBeam       ; #wa_IceBeam == #$03 
+        sta ObjAction,y
 
-    lda HasBeamSFX
-    ora #$01
-    sta HasBeamSFX
-SFX_BulletFire:
-    lda #SFX_BLT_FIRE       ; #SFX_BLT_FIRE == #$10 
-    ora SQ1SFXFlag
-    sta SQ1SFXFlag
+        lda HasBeamSFX
+        ora #$01
+        sta HasBeamSFX
+    SFX_BulletFire:
+        lda #SFX_BLT_FIRE       ; #SFX_BLT_FIRE == #$10 
+        ora SQ1SFXFlag
+        sta SQ1SFXFlag
+
 IceBeamExit:
     rts 
 
@@ -3697,12 +3710,12 @@ UpdateWaveBullet:
     lsr
     bne VerticalWave
 
-    ; Horizontal shot:
-    ; X speed = +/- 3
-    ; Y speed = waveform
-    lda #$03
-    bcc StoreHorizontalWaveSpeed
-        lda #$FD
+        ; Horizontal shot:
+        ; X speed = +/- 3
+        ; Y speed = waveform
+        lda #$03
+        bcc StoreHorizontalWaveSpeed
+            lda #$FD
 
 StoreHorizontalWaveSpeed:
     sta ObjHorzSpeed,x
@@ -6322,22 +6335,22 @@ SamusMoveHorizontally:
 
         bpl _moving_right
 
-    _moving_left: 
-        lda #$00
-        sec
-        sbc SamusHorzSpdMax
-        tax
+        _moving_left: 
+            lda #$00
+            sec
+            sbc SamusHorzSpdMax
+            tax
 
-        lda #$FE
-        tay
+            lda #$FE
+            tay
 
-        cpx HorzCntrLinear
-        sbc SamusHorzSpeed
+            cpx HorzCntrLinear
+            sbc SamusHorzSpeed
 
-        bcc _done
-            stx HorzCntrLinear
-            sty SamusHorzSpeed
-            jmp _done
+            bcc _done
+                stx HorzCntrLinear
+                sty SamusHorzSpeed
+                jmp _done
 
     _moving_right:
         cpx SamusHorzSpdMax
@@ -6345,6 +6358,7 @@ SamusMoveHorizontally:
         bcc _done
             lda SamusHorzSpdMax
             sta HorzCntrLinear
+            
             lda #$01
             sta SamusHorzSpeed
 
@@ -6958,6 +6972,7 @@ ScrollRight:
     beq +
     cmp #$02
     bne +++++
+    
     inc ScrollDir
     lda ScrollX
     beq +
@@ -6977,7 +6992,7 @@ ScrollRight:
 SkipScrollRightMidwayMap:
     inc ScrollX
     bne +
-    jsr SwitchToOppositeNameTable
+        jsr SwitchToOppositeNameTable
 *   jsr CheckForRoomUpdate      ; check if it's time to update Name Table
     clc
     rts
@@ -7250,6 +7265,7 @@ SetCarryAndExit3:
 LE81E:
     ldx UpdtngPrjctl
     beq ClcExit
+
     ldx #$06
     ; $06, $04, $02, $00
 LE81E_Loop:
@@ -7257,42 +7273,44 @@ LE81E_Loop:
     eor $5D,x
     and #$04
     bne LE81E_Next
-    lda $04
-    eor $5C,x
-    and #$1F
-    bne LE81E_Next
-    txa
-    asl
-    asl
-    asl
-    ora #$80
-    tay
-    lda ObjAction,y
-    beq LE81E_Next
-    
-    lda $0307,y
-    lsr
-    bcs ++
-    ; TODO JUMANJI ERROR BUG
-    ; Need to check and make sure PageIndex is never 0 here.
-    ldx PageIndex
-    lda ObjAction,x
-    eor #$0B
-    beq +
+        lda $04
+        eor $5C,x
+        and #$1F
+        bne LE81E_Next
+            txa
+            asl
+            asl
+            asl
+            ora #$80
+            tay
+            lda ObjAction,y
+            beq LE81E_Next
 
-        lda ObjAction,x
-        eor #$04
-        bne SFXMetal
-        lda AnimResetIndex,x
-        eor #$91
-        bne SFXMetal
+                lda $0307,y
+                lsr
+                bcs ++
 
-*   lda TriangleSFXFlag
-    ora #$02
-    sta TriangleSFXFlag
-*   lda #$04
-    sta $030A,y
-    bne ClcExit
+                    ; TODO JUMANJI ERROR BUG
+                    ; Need to check and make sure PageIndex is never 0 here.
+                    ldx PageIndex
+                    lda ObjAction,x
+                    eor #$0B
+                    beq +
+
+                        lda ObjAction,x
+                        eor #$04
+                        bne SFXMetal
+                            lda AnimResetIndex,x
+                            eor #$91
+                            bne SFXMetal
+
+                *   lda TriangleSFXFlag
+                    ora #$02
+                    sta TriangleSFXFlag
+
+            *   lda #$04
+                sta $030A,y
+                bne ClcExit
 
 LE81E_Next:
 *   dex
@@ -7332,10 +7350,11 @@ CheckMoveRightLeftSharedPart:
 
 Bank07_LE89B:  
     bne +
-    sec
-    rts
+        sec
+        rts
 
 *   sty $02
+
     ldx #$00
     lda $08
     sec
@@ -7815,9 +7834,10 @@ InitTables:
 WriteRoomSpecificAttrPaletteData:
     ldx StableRoomNumber
     lda RoomAttrTbl_Lo,x
-    sta CodePtr
+    sta CodePtr 
+
     lda RoomAttrTbl_Hi,x
-    sta CodePtr+1
+    sta CodePtr + 1
 
     ldy #$00
     lda #$60
@@ -7829,55 +7849,56 @@ WriteRoomSpecificAttrPaletteData:
         beq End_Attr_Loop
         bmi _attr_6300_single  ; $C0-$FF -> old single-write mode
 
-        ; --- repeat mode: control byte ($01-$7F) is a count ---
-        sta _AttrRepeatCount
-        iny
-        lda (CodePtr),y        ; fill value
-        sta _AttrRepeatVal
-        iny
-        _attr_6300_repeat:
-            lax (CodePtr),y     ; next dest offset
-            lda _AttrRepeatVal
-            sta $6300,x
+            ; --- repeat mode: control byte ($01-$7F) is a count ---
+            sta _AttrRepeatCount
             iny
-            dec _AttrRepeatCount
-            bne _attr_6300_repeat
-            beq _attr_6300_loop ; branch always
-            ; safe
+            lda (CodePtr),y        ; fill value
+            sta _AttrRepeatVal
+            iny
 
-        _attr_6300_single:
-            iny
-            lda (CodePtr),y
-            sta $6300,x
-            iny
-            bne _attr_6300_loop     ; branch always
-            ; safe 
+            _attr_6300_repeat:
+                lax (CodePtr),y     ; next dest offset
+                lda _AttrRepeatVal
+                sta $6300,x
+                iny
+                dec _AttrRepeatCount
+                bne _attr_6300_repeat
+                beq _attr_6300_loop ; branch always
+                ; safe
+
+            _attr_6300_single:
+                iny
+                lda (CodePtr),y
+                sta $6300,x
+                iny
+                bne _attr_6300_loop     ; branch always
+                ; safe 
 
     _attr_6700_loop:
         lax (CodePtr),y
         beq End_Attr_Loop
         bmi _attr_6700_single
 
-        sta _AttrRepeatCount
-        iny
-        lda (CodePtr),y
-        sta _AttrRepeatVal
-        iny
-        _attr_6700_repeat:
-            lax (CodePtr),y
-            lda _AttrRepeatVal
-            sta $6700,x
-            iny
-            dec _AttrRepeatCount
-            bne _attr_6700_repeat
-            beq _attr_6700_loop
-
-        _attr_6700_single:
+            sta _AttrRepeatCount
             iny
             lda (CodePtr),y
-            sta $6700,x
+            sta _AttrRepeatVal
             iny
-            bne _attr_6700_loop
+            _attr_6700_repeat:
+                lax (CodePtr),y
+                lda _AttrRepeatVal
+                sta $6700,x
+                iny
+                dec _AttrRepeatCount
+                bne _attr_6700_repeat
+                beq _attr_6700_loop
+
+            _attr_6700_single:
+                iny
+                lda (CodePtr),y
+                sta $6700,x
+                iny
+                bne _attr_6700_loop
 
     End_Attr_Loop:
         ldy #$00
@@ -7888,45 +7909,42 @@ WriteRoomSpecificAttrPaletteData:
 ;---------------------------------------[ Draw room object ]-----------------------------------------
 
 DrawObject:
-    sta $0E                         ;($C2BF)/16. Lower nibble contains object y position.
-    lda Div16Table,x
+    lda Div16Table,x                    ;($C2BF)/16. Lower nibble contains object y position.
     tax
     lsr
     lsr
     ora CartRAMPtrUB
     sta CartRAMWorkPtrUB
 
-    lda $0E
-    and #$0F
+    lda (RoomPtr),y 
+    eor CartRamMulOffsetLoTable,x
     asl
-    ora CartRamMulOffsetLoTable,x
     sta CartRAMWorkPtrLB
 
 SetupStructPtr:
 LEA8D:  iny                             ; Move to the next byte of room data which is
 LEA8E:  lax (RoomPtr),y                 ; the index into the structure pointer table.
 LEA99:  lda StructPointerTable_Lo ,x    ; Low byte of 16-bit structure ptr.
+LEA9B:  sta StructPtrLB 
 
-LEA9B:  sta StructPtrLB                 ;
 LEA9E:  lda StructPointerTable_Hi, x    ; High byte of 16-bit structure ptr.
 
-LEAA0:  sta StructPtrUB                 ;
+LEAA0:  sta StructPtrUB 
         dey                             ;Y = 0 at this point
-        jmp DrawStruct          ;($EF8C)Draw one structure.     ; count_struct_addr in BuildRoomAnalyzer.lua
+        jmp DrawStruct                  ;($EF8C)Draw one structure.     ; count_struct_addr in BuildRoomAnalyzer.lua
         ; safe
 
 ;-------------------------------------------[ Draw room ]--------------------------------------------
 
 IncRoomPtrHiByte:
-    inc RoomPtr+1
+    inc RoomPtr + 1
     bne DrawRoom    ; branch always
     ; safe
 
 CheckForNextStruct:
     lda #$02                ;Move to next set of structure data.
-    ;clc                     ;Prepare to add index in A to room pointer. ; Might not be needed
-    adc RoomPtr             ;
-    sta RoomPtr             ;
+    adc RoomPtr 
+    sta RoomPtr 
     bcs IncRoomPtrHiByte    ;Did carry occur? If not branch to exit.
 
 ;The following function draws a room in the room RAM which is eventually loaded into a name table.
@@ -8193,83 +8211,82 @@ LEB8B:  RTS                     ;
 ; LoadDoor
 ; ========
 
+; TODO: This is a mess here
 LoadDoor:
-    jsr DoSingleDoor
-    lda #$02
-*   jmp SetupNextRoomFeature    ; do next room object
-
-DoSingleDoor:
     iny
     lda ($00),y     ; door info byte
     pha
-        asl
-        asl
-        asl
-        asl             ; CF = door side (0=right, 1=left)
-        php
-            lda MapPosX
-            clc
-            adc MapPosY
-        plp
-        rol
-        and #$03
-        tay
-        ldx LoadDoorTable_2,y       ; X == Door page
-    pla      ; retrieve door info
+
+    ; Data Can only be $A0, $A1, $A2, $A3, $B0, $B1, $B2, $B3
+    cmp #$B0
+
+    ; Only the parity of MapPosX + MapPosY matters.
+    lda MapPosX
+    eor MapPosY
+    rol
+    and #$03
+    tay
+    ldx LoadDoorTable_2,y       ; $80, $B0, $A0, $90
+
+    pla             ; retrieve door info
     and #$03
     sta $0307,x     ; door palette
-    tya
-    pha
-    lda $0307,x
-    cmp #$01
-    beq SetDoorObjectAction
-        cmp #$03
-        beq SetDoorObjectActionTo1
-            lda #$0A
-            sta $09
 
-            ldy MapPosX
-            txa
-            asl     ; Mul16
-            asl
-            asl
-            asl
-            bcc +
-                dey
-        *   tya
-            jsr LEE41
-            jsr CheckForItem
-            bcs +
+    and #$01            
+    bne DoorSetAction               ; branch is palette is 1 or 3
 
-SetDoorObjectActionTo1:
-    lda #$01
-SetDoorObjectAction:
-    sta ObjAction,x
+        ; Types 0 and 2 need to check the missile-door history.
+        lda #$0A
+        sta $09
 
-*   pla
-    and #$01                ; A = door side (0=right, 1=left)
-    tay
+        ldy MapPosX
+        txa 
+        and #$10                ; Bit 4 identifies left doors
+        beq DoorHistoryXReady
+            dey                 ; Use adjacent map X for left doors
 
-    lda DoorXs,y            ; get door's X coordinate
-    sta ObjectX,x
+    DoorHistoryXReady:
+        tya 
+        jsr LEE41
+        jsr CheckForItem
+        bcs DoorSetCoordinates      ; Branch if a missile door has already been opened
+            lda #$01
 
-    lda #$68                ; door Y coord is always #$68
-    sta ObjectY,x
+    DoorSetAction:
+        sta ObjAction,x
 
-    lda PPUCNT0ZP 
-    eor ScrollDir           ;Store #$01 if object should be loaded onto name table 3,
-    and #$01                ;store #$00 if it should be loaded onto name table 0.
-    sta ObjectHi,x
+    DoorSetCoordinates:
+        ; X = $80/$A0: right door -> ObjectX = $F0
+        ; X = $B0/$90: left door  -> ObjectX = $10
+        txa 
+        and #$10
+        asl                     ; Carry is now definitely clear
+        adc #$F0
+        sta ObjectX,x
 
-    eor #$01
-    tax
+        ldy #$02                ; if Right Door Y == $02
+        bcc DoorMaskReady
+            dey                 ; if Left Door Y == $01
 
-    lda LoadDoorTable,y
-    ora DoorOnNameTable3,x
-    sta DoorOnNameTable3,x
+    DoorMaskReady:
 
-    ;lda #$02       ; Moving the load #$02 to the outside 
-    rts
+        lda #$68                ; door Y coord is always #$68
+        sta ObjectY,x
+
+        lda PPUCNT0ZP 
+        eor ScrollDir           ;Store #$01 if object should be loaded onto name table 3,
+        and #$01                ;store #$00 if it should be loaded onto name table 0.
+        sta ObjectHi,x
+
+        eor #$01
+        tax                         ; X == DoorOnNameTable index
+        tya                         ; A == $02 (right) or $01 (left)
+        ora DoorOnNameTable3,x
+        sta DoorOnNameTable3,x
+
+        lda #$02
+        jmp SetupNextRoomFeature 
+
 
 LoadZebHole:
 ; loop over (#$18, #$10, #$08, #$00)
@@ -8630,7 +8647,7 @@ ChooseHandlerRoutineTable_HiBytes:
     .byte >MotherBrainHandler       ;($EEAE)Mother brain.
     .byte >ZeebetiteHandler         ;($EECA)Zeebetites.
     .byte >RinkaHandler             ;($EEEE)Rinkas.
-    .byte >SpecialDoorHandler       ;($EEF4)Some doors.
+    .byte >ExitSub                  ;Previously Door Handling, but it's been removed
     .byte >PaletteHandler           ;($EEFA)Background palette change.
 
 ChooseHandlerRoutineTable_LoBytes:
@@ -8642,7 +8659,7 @@ ChooseHandlerRoutineTable_LoBytes:
     .byte <MotherBrainHandler 
     .byte <ZeebetiteHandler 
     .byte <RinkaHandler 
-    .byte <SpecialDoorHandler 
+    .byte <ExitSub 
     .byte <PaletteHandler 
 
 ;---------------------------------------[ Squeept handler ]------------------------------------------
@@ -8910,11 +8927,6 @@ LEECA:
 RinkaHandler:
     jsr Bank03_Rinka_Handler 
     jmp SetATo1AndJumpToHandlerRoutine
-
-SpecialDoorHandler:
-LEEF4:
-    jsr DoSingleDoor
-    jmp SetATo2AndChooseHandlerRoutine    ;($EDD6)Exit handler routines.
 
 PaletteHandler:
 LEEFA:
@@ -9856,10 +9868,9 @@ LF3E6:
 
 LF51E:
     lda ScrollDir
-    ;ldx PageIndex
-    cmp #$02
-    bcc CheckIfEnemyHasBeenHit
-        lda EnYRoomPos,x     ; Y coord
+    lsr 
+    beq CheckIfEnemyHasBeenHit  ; branch is ScrollDir == 0 or 1 (Up or Down) 
+        lda EnYRoomPos,x        ; Y coord
         cmp #$EC
         bcc CheckIfEnemyHasBeenHit
             ; Kill
@@ -10285,19 +10296,21 @@ SFX_BigEnemyHit_Inline:
 *   sta EnSpecialAttribs,x
     cpy #$02
     beq +
-    bit $0A
-    bvc ++
-    ldy $040E,x
-    cpy #$0B
-    bne ++
-    dec EnHitPoints,x
-    beq +++
-    dec EnHitPoints,x
-    beq +++
+        bit $0A
+        bvc ++
+            ldy $040E,x
+            cpy #$0B
+            bne ++
+                dec EnHitPoints,x
+                beq +++
+                    dec EnHitPoints,x
+                    beq +++
+
 *   dec EnHitPoints,x
     beq ++
-*   dec EnHitPoints,x
-    bne GetPageIndex
+
+    *   dec EnHitPoints,x
+        bne GetPageIndex
 
 *   lda #$03
     sta EnStatus,x
@@ -11684,10 +11697,10 @@ RunAccelerationTbl:
     .byte $D0           ;Accelerate left.       %11010000
 
 CartRamMulOffsetLoTable:
-    .byte $00, $40, $80, $C0   ; low-byte part of X * $40 (X & 3)
-    .byte $00, $40, $80, $C0
-    .byte $00, $40, $80, $C0
-    .byte $00, $40, $80, $C0
+    .byte $00, $30, $60, $50
+    .byte $40, $70, $20, $10
+    .byte $80, $B0, $E0, $D0
+    .byte $C0, $F0, $A0, $90
 
 ; The following table is used for finding the high byte of the proper name table to clear.
 HiPPUTable:
@@ -11814,10 +11827,6 @@ PPUWriteDirectionTable:
     .byte $20           ;Horizontal write. PPU inc = 1, length = 32 tiles.
     .byte $9E           ;Vertical write... PPU inc = 32, length = 30 tiles.
     .byte $9E           ;Vertical write... PPU inc = 32, length = 30 tiles.
-
-DoorXs:
-    .byte $F0    ; X coord of RIGHT door
-    .byte $10    ; X coord of LEFT door
     
 LoadDoorTable:
     .byte $02

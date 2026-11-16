@@ -575,7 +575,7 @@ _L8410:  LDY EnYRoomPos,X
 _L8413:  BNE _L8429
 _L8415:  LDY #$F0
 _L8417:  LDA ScrollDir
-_L8419:  CMP #$02
+_L8419:  CMP #scrolldir_Left
 _L841B:  BCS _L8429
 _L841D:  LDA ScrollY
 _L841F:  BEQ _L8440
@@ -622,7 +622,7 @@ _L8469:  CPY #$EF
 _L846B:  BNE _L8481
 _L846D:  LDY #$FF
 _L846F:  LDA ScrollDir
-_L8471:  CMP #$02
+_L8471:  CMP #scrolldir_Left
 _L8473:  BCS _L8481
 _L8475:  LDA ScrollY
 _L8477:  BEQ _L84A6
@@ -670,7 +670,7 @@ _L84C0:  INC $00
 _L84C2:  LDY EnXRoomPos,X
 _L84C5:  BNE _L84DA
 _L84C7:  LDA ScrollDir
-_L84C9:  CMP #$02
+_L84C9:  CMP #scrolldir_Left
 _L84CB:  BCC _L84DA
 _L84CD:  LDA ScrollX
 _L84CF:  BEQ _L84D4
@@ -715,7 +715,7 @@ _L8517:  INC $00
 _L8519:  INC EnXRoomPos,X
 _L851C:  BNE _L8536
 _L851E:  LDA ScrollDir
-_L8520:  CMP #$02
+_L8520:  CMP #scrolldir_Left
 _L8522:  BCC _L8536
 _L8524:  LDA ScrollX
 _L8526:  BEQ _L852D
@@ -1702,13 +1702,13 @@ _L8C3C:  STA $09
 _L8C3E:  LDA ObjectHi,X
 _L8C41:  STA $08
 
-_L8C43:  LDY $50
+_L8C43:  LDY MapPosX
 _L8C45:  TXA 
          AND #$10
-_L8C49:  BEQ _L8C4D
+_L8C49:  BEQ _L8C4C
 
 _L8C4B:  DEY 
-         TYA 
+_L8C4C:  TYA 
 _L8C4D:  JSR Bank07_LDC1E
 _L8C50:  LDA #$00
 _L8C52:  STA $0300,X

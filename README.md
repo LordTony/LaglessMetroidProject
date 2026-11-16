@@ -130,14 +130,10 @@ sbx #$F0
   * Apply the attribute color changes so bank 05 is colored correctly with the new protocol
 
 ## Definite Bugs
-* Room attribute data won't load when starting a game from a password
-  * can make it load by removing "lda MainRoutine; lsr; beq End_Attr_Loop" but then the PPU takes too long and corrupts the palette data loading bank 04
 * Bank 05 currently won't load because it hasn't been updated to fit the new level load protocol
 * End credits have their graphics corrupted
 * Escape sequence timer graphic is mildly corrupted
 * Pillar thingies (Zeebitites?) in Mother brain's rooms get overwritten when the second half of the room loads
-* Tourian missile doors need to destroyed from both sides.
-  * You open them with 5 (or 10) missiles and then walk through, the other side of the door is still red (or yellow)
 * Changed the functionality of the sprite display logic.
   * This could cause issues or make different sprites becomes invisible when there are more than 64 trying to be rendered
   * I don't know if I should even bother fixing this.

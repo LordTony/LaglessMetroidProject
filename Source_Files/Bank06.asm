@@ -957,6 +957,7 @@ DoRoomRamClear:
     tax
     lda BankErasureTablePtr_Lo, x
     sta CodePtr
+
     lda BankErasureTablePtr_Hi, x
     sta CodePtr + 1
 
@@ -968,7 +969,7 @@ DoRoomRamClear:
     ldx CartRAMPtrUB
     cpx #$60
     beq DoRoomRamClear_6000
-    jmp DoRoomRamClear_6400
+        jmp DoRoomRamClear_6400
 
 ClearScreenLeftRight_6000_Trampoline:
     jmp ClearScreenLeftRight_6000
@@ -1056,27 +1057,27 @@ DoRoomRamClear_6000:
     ClearScreenBottom_6000:
         tya
         beq _skipAll
-        ror
+        lsr
         ; will need to push and pop A
         bcc _skipCore
             jsr ClearBottomLeftCore_6000
             jsr ClearBottomRightCore_6000
         _skipCore:
-        ror
-        ror
+        lsr
+        lsr
         bcc _skipFloor
             jsr ClearBottomLeftFloor_6000
             jsr ClearBottomRightFloor_6000
         _skipFloor:
-        ror
+        lsr
         bcc _skipRightWall
             jsr ClearBottomRightCol_6000
         _skipRightWall:
-        ror
+        lsr
         bcc _skipLeftWall
             jsr ClearBottomLeftCol_6000
         _skipLeftWall:
-        ror
+        lsr
         bcc _skipCorners
             jsr ClearBottomLeftCorner_6000
             jsr ClearBottomRightCorner_6000
@@ -1122,7 +1123,7 @@ DoRoomRamClear_6000:
     ClearScreenLeft_6000:
         tya
         beq _skipAll
-        ror
+        lsr
         ; will need to push and pop A
         bcc _skipCore
             jsr ClearTopLeftCore_6000
@@ -1130,22 +1131,22 @@ DoRoomRamClear_6000:
             jsr ClearLeftDoor_6000
 
         _skipCore:
-        ror
+        lsr
         bcc _skipSecondFromTop
             jsr ClearTopLeftSecondRow_6000
         _skipSecondFromTop:
-        ror
+        lsr
         bcc _skipTopRow
             jsr ClearTopLeftRow_6000
             jsr ClearBottomLeftFloor_6000
         _skipTopRow:
-        ror
-        ror
+        lsr
+        lsr
         bcc _skipLeftWall
             jsr ClearTopLeftCol_6000
             jsr ClearBottomLeftCol_6000
         _skipLeftWall:
-        ror
+        lsr
         bcc _skipCorners
             jsr ClearTopLeftCorner_6000
             jsr ClearBottomLeftCorner_6000
@@ -1182,7 +1183,7 @@ DoRoomRamClear_6000:
     ClearScreenRight_6000:
         tya
         beq _skipAll
-        ror
+        lsr
         ; will need to push and pop A
         bcc _skipCore
             jsr ClearTopRightCore_6000
@@ -1197,22 +1198,22 @@ DoRoomRamClear_6000:
             `stx_2_bytes $61FC
 
         _skipCore:
-        ror
+        lsr
         bcc _skipSecondFromTop
             jsr ClearTopRightSecondRow_6000
         _skipSecondFromTop:
-        ror
+        lsr
         bcc _skipTopRow
             jsr ClearTopRightRow_6000
             jsr ClearBottomRightFloor_6000
         _skipTopRow:
-        ror
+        lsr
         bcc _skipRightWall
             jsr ClearTopRightCol_6000
             jsr ClearBottomRightCol_6000
         _skipRightWall:
-        ror
-        ror
+        lsr
+        lsr
         bcc _skipCorners
             jsr ClearTopRightCorner_6000
             jsr ClearBottomRightCorner_6000
@@ -1267,31 +1268,31 @@ DoRoomRamClear_6400:
     ClearScreenTop_6400:
         tya
         beq _skipAll
-        ror
+        lsr
         ; will need to push and pop A
         bcc _skipCore
             jsr ClearTopLeftCore_6400
             jsr ClearTopRightCore_6400
         _skipCore:
-        ror
+        lsr
         bcc _skipSecondFromTop
             jsr ClearTopLeftSecondRow_6400
             jsr ClearTopRightSecondRow_6400
         _skipSecondFromTop:
-        ror
+        lsr
         bcc _skipTopRow
             jsr ClearTopLeftRow_6400
             jsr ClearTopRightRow_6400
         _skipTopRow:
-        ror
+        lsr
         bcc _skipRightWall
             jsr ClearTopRightCol_6400
         _skipRightWall:
-        ror
+        lsr
         bcc _skipLeftWall
             jsr ClearTopLeftCol_6400
         _skipLeftWall:
-        ror
+        lsr
         bcc _skipCorners
             jsr ClearTopLeftCorner_6400
             jsr ClearTopRightCorner_6400
@@ -1320,27 +1321,27 @@ DoRoomRamClear_6400:
     ClearScreenBottom_6400:
         tya
         beq _skipAll
-        ror
+        lsr
         ; will need to push and pop A
         bcc _skipCore
             jsr ClearBottomLeftCore_6400
             jsr ClearBottomRightCore_6400
         _skipCore:
-        ror
-        ror
+        lsr
+        lsr
         bcc _skipFloor
             jsr ClearBottomLeftFloor_6400
             jsr ClearBottomRightFloor_6400
         _skipFloor:
-        ror
+        lsr
         bcc _skipRightWall
             jsr ClearBottomRightCol_6400
         _skipRightWall:
-        ror
+        lsr
         bcc _skipLeftWall
             jsr ClearBottomLeftCol_6400
         _skipLeftWall:
-        ror
+        lsr
         bcc _skipCorners
             jsr ClearBottomLeftCorner_6400
             jsr ClearBottomRightCorner_6400
@@ -1387,28 +1388,28 @@ DoRoomRamClear_6400:
     ClearScreenLeft_6400:
         tya
         beq _skipAll
-        ror
+        lsr
         ; will need to push and pop A
         bcc _skipCore
             jsr ClearTopLeftCore_6400
             jsr ClearBottomLeftCore_6400
         _skipCore:
-        ror
+        lsr
         bcc _skipSecondFromTop
             jsr ClearTopLeftSecondRow_6400
         _skipSecondFromTop:
-        ror
+        lsr
         bcc _skipTopRow
             jsr ClearTopLeftRow_6400
             jsr ClearBottomLeftFloor_6400
         _skipTopRow:
-        ror
-        ror
+        lsr
+        lsr
         bcc _skipLeftWall
             jsr ClearTopLeftCol_6400
             jsr ClearBottomLeftCol_6400
         _skipLeftWall:
-        ror
+        lsr
         bcc _skipCorners
             jsr ClearTopLeftCorner_6400
             jsr ClearBottomLeftCorner_6400
@@ -1445,28 +1446,28 @@ DoRoomRamClear_6400:
     ClearScreenRight_6400:
         tya
         beq _skipAll
-        ror
+        lsr
         ; will need to push and pop A
         bcc _skipCore
             jsr ClearTopRightCore_6400
             jsr ClearBottomRightCore_6400
         _skipCore:
-        ror
+        lsr
         bcc _skipSecondFromTop
             jsr ClearTopRightSecondRow_6400
         _skipSecondFromTop:
-        ror
+        lsr
         bcc _skipTopRow
             jsr ClearTopRightRow_6400
             jsr ClearBottomRightFloor_6400
         _skipTopRow:
-        ror
+        lsr
         bcc _skipRightWall
             jsr ClearTopRightCol_6400
             jsr ClearBottomRightCol_6400
         _skipRightWall:
-        ror
-        ror
+        lsr
+        lsr
         bcc _skipCorners
             jsr ClearTopRightCorner_6400
             jsr ClearBottomRightCorner_6400

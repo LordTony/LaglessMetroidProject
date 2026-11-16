@@ -1195,116 +1195,116 @@ Bank02_LA21A:  .byte $00           ;End Palette0E info.
 
 _SpecItmsTbl:
 
-;Missiles.
 Bank02_LA2D9:  .byte $0A
 Bank02_LA2DA:  .word Bank02_LA2E8
-Bank02_LA2DC:  .byte $1B, $06, $02, $09, $34, $00
 
-;Missiles.
-Bank02_LA2E2:  .byte $1C, $FF, $02, $09, $34, $00
+	;Missiles.
+	Bank02_LA2DC:  .byte $1B, $06, $02, $09, $34, $00
 
-;Elevator from Brinstar.
+	;Missiles.
+	Bank02_LA2E2:  .byte $1C, $FF, $02, $09, $34, $00
+
+
 Bank02_LA2E8:  .byte $0B
 Bank02_LA2E9:  .word Bank02_LA302
-Bank02_LA2EB:  .byte $16, $05, $04, $81, $00
 
-;Missiles.
-Bank02_LA2F0:  .byte $1A, $06, $02, $09, $34, $00
+	;Elevator from Brinstar.
+	Bank02_LA2EB:  .byte $16, $05, $04, $81, $00
 
-;Missiles.
-Bank02_LA2F6:  .byte $1B, $06, $02, $09, $34, $00
+	;Missiles.
+	Bank02_LA2F0:  .byte $1A, $06, $02, $09, $34, $00
 
-;Missiles.
-Bank02_LA2FC:  .byte $1C, $FF, $02, $09, $34, $00
+	;Missiles.
+	Bank02_LA2F6:  .byte $1B, $06, $02, $09, $34, $00
 
-;Ice beam.
+	;Missiles.
+	Bank02_LA2FC:  .byte $1C, $FF, $02, $09, $34, $00
+
 Bank02_LA302:  .byte $0C
 Bank02_LA303:  .word Bank02_LA30B
-Bank02_LA305:  .byte $1A, $FF, $02, $07, $37, $00
 
-;Elevator to Brinstar.
+	;Ice beam.
+	Bank02_LA305:  .byte $1A, $FF, $02, $07, $37, $00
+
 Bank02_LA30B:  .byte $0D
 Bank02_LA30C:  .word Bank02_LA313
-Bank02_LA30E:  .byte $16, $FF, $04, $81, $00
 
-;Missiles.
+	;Elevator to Brinstar.
+	Bank02_LA30E:  .byte $16, $FF, $04, $81, $00
+
 Bank02_LA313:  .byte $0E
 Bank02_LA314:  .word Bank02_LA31C
-Bank02_LA316:  .byte $12, $FF, $02, $09, $34, $00
 
-;Missiles and Melias.
+	;Missiles.
+	Bank02_LA316:  .byte $12, $FF, $02, $09, $34, $00
+
 Bank02_LA31C:  .byte $0F
 Bank02_LA31D:  .word Bank02_LA33B
-Bank02_LA31F:  .byte $11, $07, $02, $09, $34, $03, $00
 
-;Missiles.
-Bank02_LA326:  .byte $13, $06, $02, $09, $34, $00
+	;Missiles and Melias.
+	Bank02_LA31F:  .byte $11, $07, $02, $09, $34, $03, $00
 
-;Missiles.
-Bank02_LA32C:  .byte $14, $06, $02, $09, $34, $00
+	;Missiles.
+	Bank02_LA326:  .byte $13, $06, $02, $09, $34, $00
 
-;Squeept.
-Bank02_LA332:  .byte $15, $FF, $41, $8B, $E9, $51, $02, $9B, $00
+	;Missiles.
+	Bank02_LA32C:  .byte $14, $06, $02, $09, $34, $00
 
-;Screw attack.
+	;Squeept.
+	Bank02_LA332:  .byte $15, $FF, $41, $8B, $E9, $51, $02, $9B, $00
+
 Bank02_LA33B:  .byte $10
 Bank02_LA33C:  .word Bank02_LA344
-Bank02_LA33E:  .byte $0F, $FF, $02, $03, $37, $00
 
-;Palette change room.
+	;Screw attack.
+	Bank02_LA33E:  .byte $0F, $FF, $02, $03, $37, $00
+
 Bank02_LA344:  .byte $11
 Bank02_LA345:  .word Bank02_LA36D
-Bank02_LA347:  .byte $16, $04, $0A, $00
 
-;Squeept.
-Bank02_LA34B:  .byte $18, $09, $31, $0B, $E9, $41, $02, $9A, $00
+	;Palette change room.
+	Bank02_LA347:  .byte $16, $04, $0A, $00
 
-;Squeept.
-Bank02_LA354:  .byte $19, $09, $21, $8B, $E9, $51, $02, $9A, $00
+	;Squeept.
+	Bank02_LA34B:  .byte $18, $09, $31, $0B, $E9, $41, $02, $9A, $00
 
-;High jump.
-Bank02_LA35D:  .byte $1B, $06, $02, $01, $37, $00
+	;Squeept.
+	Bank02_LA354:  .byte $19, $09, $21, $8B, $E9, $51, $02, $9A, $00
 
-;Right door.
-Bank02_LA363:  .byte $1D, $05, $09, $A0, $00
+	;High jump.
+	Bank02_LA35D:  .byte $1B, $FF, $02, $01, $37, $00
 
-;Left door.
-Bank02_LA368:  .byte $1E, $FF, $09, $B0, $00
-
-;Energy tank.
 Bank02_LA36D:  .byte $13
 Bank02_LA36E:  .word Bank02_LA376
-Bank02_LA370:  .byte $1A, $FF, $02, $08, $42, $00
 
-;Right door.
+	;Energy tank.
+	Bank02_LA370:  .byte $1A, $FF, $02, $08, $42, $00
+
+;
 Bank02_LA376:  .byte $14
 Bank02_LA377:  .word Bank02_LA389
-Bank02_LA379:  .byte $0D, $05, $09, $A0, $00
 
-;Left door.
-Bank02_LA37E:  .byte $0E, $05, $09, $B0, $00
+	;Missiles.
+	Bank02_LA383:  .byte $1C, $FF, $02, $09, $34, $00
 
-;Missiles.
-Bank02_LA383:  .byte $1C, $FF, $02, $09, $34, $00
-
-;Wave beam.
 Bank02_LA389:  .byte $15
 Bank02_LA38A:  .word Bank02_LA397
-Bank02_LA38C:  .byte $12, $06, $02, $06, $37, $00
 
-;Right door(undefined room).
-Bank02_LA392:  .byte $17, $FF, $09, $A0, $00
+	;Wave beam.
+	Bank02_LA38C:  .byte $12, $FF, $02, $06, $37, $00
 
-;Missiles.
+
 Bank02_LA397:  .byte $16
 Bank02_LA398:  .word $FFFF
-Bank02_LA39A:  .byte $13, $06, $02, $09, $34, $00
 
-;Missiles.
-Bank02_LA3A0:  .byte $14, $06, $02, $09, $34, $00
+	;Missiles.
+	Bank02_LA39A:  .byte $13, $06, $02, $09, $34, $00
 
-;Elevator to Ridley hideout.
-Bank02_LA3A6:  .byte $19, $FF, $04, $04, $00
+	;Missiles.
+	Bank02_LA3A0:  .byte $14, $06, $02, $09, $34, $00
+
+	;Elevator to Ridley hideout.
+	Bank02_LA3A6:  .byte $19, $FF, $04, $04, $00
 
 ;-----------------------------------------[ Room definitions ]---------------------------------------
 
