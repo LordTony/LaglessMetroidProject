@@ -6595,32 +6595,36 @@ MoveSamusDown:
     adc SamusObjRadY
     and #$07
     bne +                   ; only call crash detection every 8th pixel
-    jsr CheckMoveDown       ; check if Samus obstructed DOWNWARDS
-    bcc Exit104             ; exit if yes
+        jsr CheckMoveDown   ; check if Samus obstructed DOWNWARDS
+        bcc Exit104         ; exit if yes
+
 *   lda SamusObjAction
     cmp #sa_Elevator        ; is Samus in elevator?
     beq +
-    jsr SamusOnElevatorOrEnemy
-    lda SamusOnElevator
-    clc
-    bne Exit104
-    lda OnFrozenEnemy
-    bne Exit104
+        jsr SamusOnElevatorOrEnemy
+        lda SamusOnElevator
+        clc
+        bne Exit104
+            lda OnFrozenEnemy
+            bne Exit104
+
 *   lda SamusScrY
-    cmp #$84    ; reached down scroll limit?
-    bcc +      ; branch if not
-    jsr ScrollDown
-    bcc ++
+    cmp #$84                ; reached down scroll limit?
+    bcc +                   ; branch if not
+        jsr ScrollDown
+        bcc ++
+
 *   inc SamusScrY
 *   lda SamusObjectY
     cmp #239
     bne ++
-    lda ScrollDir
-    and #$02
-    bne +
-    jsr ToggleSamusHi       ; toggle 9th bit of Samus' Y coord
-*   lda #$FF
-    sta SamusObjectY
+        lda ScrollDir
+        and #$02
+        bne +
+            jsr ToggleSamusHi       ; toggle 9th bit of Samus' Y coord
+    *   lda #$FF
+        sta SamusObjectY
+
 *   inc SamusObjectY
     dec SamusJmpDsplcmnt
     sec
@@ -7111,14 +7115,21 @@ LE783:
 
     jsr GetXEnemyRoomPosition_09_08_0B
     lda EnRadX,x
-    jmp LE7BD
+    bne +
+
+    SEC_RTS:
+        sec
+        rts
+
     ; safe
     
 GetXEnemyRoomPosition_09_08_0B:
     lda EnXRoomPos,x
     sta $09     ; X coord
+
     lda EnYRoomPos,x
     sta $08     ; Y coord
+    
     lda EnNameTable,x
     sta $0B     ; hi coord
     rts
@@ -7142,15 +7153,11 @@ CheckMoveUpDownSharedPart:
 
     ;lda SamusObjRadX
     lda #$04    ; Samus as always SamusObjRadX == 4
-LE7BD:
-    bne +
-SEC_RTS:
-    sec
-    rts
 
 *   sta $03
     tay
     ldx #$00
+
     lda $09
     sec
     sbc $03
@@ -7165,6 +7172,7 @@ SEC_RTS:
 
 LE7DE:  
     bne SEC_RTS
+
     stx $06
     sty $07
     ldx $04
@@ -7204,9 +7212,9 @@ ObjectBackgrounCollisionCheck:
     ldy InArea
     cpy #$10
     beq +
-    cmp #$70
-    bcs _end
-        * cmp #$80
+        cmp #$70
+        bcs _end
+        *   cmp #$80
     _end:
 
 .scend
@@ -8051,7 +8059,8 @@ LoadStatues:
     sty $54 
 
     lda #$01
-    sta $0360
+    sta $0300 + $60
+    sta $030C + $60
 *   bne SetupNextRoomFeature   ; branch always
     ; safe 
 

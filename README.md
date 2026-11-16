@@ -130,6 +130,7 @@ sbx #$F0
   * Apply the attribute color changes so bank 05 is colored correctly with the new protocol
 
 ## Definite Bugs
+* Missile doors aren't getting remembered when you shoot them
 * Pillar thingies (Zeebitites?) in Mother brain's rooms get overwritten when the second half of the room loads
 * Initial Starting room has a stalagtite in the wrong place.
 * Taking the elevator up from Kraid back to Brinstar loads a corrupted room.
@@ -144,10 +145,6 @@ sbx #$F0
 
 ## Maybe Bugs (Check Original Game Behavior)
 * Holding forward while walking into an enemy shows a frame or two of the screw attack.
-* Mini bosses don't seem to spawn properly
-  * I havent checked this out in maybe 8 months. Will need to clean up their levels first
-  * This this has to do with "MaxMissiles" being moved into zero page a long time ago.
-  * It looks like the ridley and kraid dead bytes were based on the offset to MaxMissiles.
 
 ## Pre Existing Bugs (or quirks; whatever. The original metroid sucks)
 * Killing a metroid without a Missile Tank will crash or lock the game
