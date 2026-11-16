@@ -130,10 +130,13 @@ sbx #$F0
   * Apply the attribute color changes so bank 05 is colored correctly with the new protocol
 
 ## Definite Bugs
-* Bank 05 currently won't load because it hasn't been updated to fit the new level load protocol
-* End credits have their graphics corrupted
-* Escape sequence timer graphic is mildly corrupted
 * Pillar thingies (Zeebitites?) in Mother brain's rooms get overwritten when the second half of the room loads
+* Initial Starting room has a stalagtite in the wrong place.
+* Taking the elevator up from Kraid back to Brinstar loads a corrupted room.
+* Bank 05 currently won't load because it hasn't been updated to fit the new level load protocol
+* Sometimes bumping into monsters that aren't there while climbing
+* Escape sequence timer graphic is mildly corrupted
+* End credits have their graphics corrupted
 * Changed the functionality of the sprite display logic.
   * This could cause issues or make different sprites becomes invisible when there are more than 64 trying to be rendered
   * I don't know if I should even bother fixing this.
@@ -155,3 +158,4 @@ sbx #$F0
 * Pushing up against a door while facing right and shooting with the wave beam doesn't open the door.
   * If samus faces left and does the same thing to a door, the door will open without issue.
 * Spinner explosions in Kraid's hideout use the wrong graphic
+* The special door loads don't actually work at all
