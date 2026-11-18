@@ -130,7 +130,6 @@ sbx #$F0
   * Apply the attribute color changes so bank 05 is colored correctly with the new protocol
 
 ## Definite Bugs
-* Missile doors aren't getting remembered when you shoot them
 * Pillar thingies (Zeebitites?) in Mother brain's rooms get overwritten when the second half of the room loads
 * Initial Starting room has a stalagtite in the wrong place.
 * Taking the elevator up from Kraid back to Brinstar loads a corrupted room.
@@ -156,3 +155,7 @@ sbx #$F0
   * If samus faces left and does the same thing to a door, the door will open without issue.
 * Spinner explosions in Kraid's hideout use the wrong graphic
 * The special door loads don't actually work at all
+  * They are supposed to override the room specific doors, but the code runs first so they are the ones that get overriden instead
+* The pipe enemies don't get initialized properly.
+  * The 3rd pipe enemy slot isn't cleared even though 1, 2, and 4 are.
+  * Turns out it doesn't cause any noticable problems but it's still interesting

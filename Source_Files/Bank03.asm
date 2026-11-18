@@ -225,12 +225,6 @@ Bank03_Struct_2D:
 
 Bank03_L9598:  .word _SpecItmsTbl       ;($A83B)Beginning of special items table.
 
-.advance TourianBulletCheckSub
-    JMP Bank03_LA142
-
-.advance AreaBossRoomNumber			; I think this is unsused but was previous $95CC
-Bank03_L95CC:  .byte $FF           ;Boss music byte. Only unsed in bank 04 - 05
-
 .advance AreaMusicFlag
 Bank03_L95CD:  .byte $40           ;Tourian music init flag.
 
@@ -248,8 +242,6 @@ Bank03_L95D0:  .byte $FF, $FF, $FF, $FF, $FF, $FF, $FF
 Bank03_L95D7:  .byte $03           	;Samus start x coord on world map.
 .advance StartingMapY
 Bank03_L95D8:  .byte $04           	;Samus start y coord on world map.
-.advance StartingVertPosition
-Bank03_L95D9:  .byte $6E           	;Samus start verticle screen position.
 
 .advance StartingPalette
 Bank03_L95DA:  .byte $06
@@ -376,7 +368,6 @@ Bank03_L97F3:  JSR UpdateEnemyAnim
 Bank03_L97F6:  JMP Start_Special_Attrs
 
 Bank03_L97F9:  LDY EndTimerHi
-			   nop 
 Bank03_L97FC:  INY 
 Bank03_L97FD:  BEQ Bank03_L9804
 Bank03_L97FF:  LDA #$00
@@ -607,9 +598,6 @@ Bank03_L99FE:  LDA $0B
 Bank03_L9A00:  AND #$01
 Bank03_L9A02:  STA EnNameTable,X
 Bank03_L9A05:  RTS
-nop
-nop
-nop
 
 Bank03_L9A06:  LSR 
 Bank03_L9A07:  LDA $0408,X
@@ -643,7 +631,6 @@ Bank03_L9A3A:  JSR Bank03_L99D1
 Bank03_L9A3D:  STA $6AFC,X
 Bank03_L9A40:  STA $6AFD,X
 Bank03_L9A43:  LDA SamusObjectX
-			   nop 
 Bank03_L9A46:  SEC 
 Bank03_L9A47:  SBC $0401,X
 Bank03_L9A4A:  STA $01
@@ -656,7 +643,6 @@ Bank03_L9A54:  LDA #$00
 Bank03_L9A56:  SBC $01
 Bank03_L9A58:  STA $01
 Bank03_L9A5A:  LDA SamusObjectY
-			   nop 
 Bank03_L9A5D:  SEC 
 Bank03_L9A5E:  SBC $0400,X
 Bank03_L9A61:  STA $00
@@ -766,8 +752,8 @@ Bank03_L9B25:  JSR Bank03_L9B37
 Bank03_L9B28:  JSR Bank03_L9DD4
 Bank03_L9B2B:  JSR Bank03_LA1E7
 Bank03_L9B2E:  JSR Bank03_LA238
-Bank03_L9B31:  JSR ZeebititeAreaRoutineHandler		; Zeebitite Area Routine Handler
-Bank03_L9B34:  JMP Bank03_LA15E
+Bank03_L9B31:  JSR ZeebititeAreaRoutineHandler 
+Bank03_L9B34:  JMP RinkaAreaRoutineHandler 
 
 Bank03_L9B37:  LDX #$78
 Bank03_L9B39:  JSR Bank03_L9B44
@@ -785,7 +771,6 @@ Bank03_L9B4C:  JSR Bank03_L9C4D
 Bank03_L9B4F:  TYA 
 Bank03_L9B50:  BNE Bank03_L9B4B
 Bank03_L9B52:  LDY EndTimerHi
-			   nop 
 Bank03_L9B55:  INY 
 Bank03_L9B56:  BNE Bank03_L9B65
 Bank03_L9B58:  LDA $6BF8,X
@@ -916,6 +901,7 @@ Bank03_L9C6B:  BCS Bank03_L9C6E
 Bank03_L9C6D:  INY 
 Bank03_L9C6E:  RTS
 
+TourianRoomCleanup:
 Bank03_L9C6F:  STY $02
 Bank03_L9C71:  LDY #$00
 Bank03_L9C73:  LDA $6BF7,Y
@@ -932,7 +918,12 @@ Bank03_L9C85:  BPL Bank03_L9C73
 Bank03_L9C87:  LDX #$00
 Bank03_L9C89:  LDA $0758,X
 Bank03_L9C8C:  BEQ Bank03_L9C99
-Bank03_L9C8E:  JSR Bank03_L9D64
+
+	JSR GetNameTable
+	ASL 
+	ASL 
+	ORA #$61
+
 Bank03_L9C91:  EOR $075A,X
 Bank03_L9C94:  BNE Bank03_L9C99
 Bank03_L9C96:  STA $0758,X
@@ -969,14 +960,14 @@ Bank03_L9CD0:  LDA #$00
 Bank03_L9CD2:  STA EscapeTimerVisible
 Bank03_L9CD5:  RTS
 
-Bank03_L9CD6:  LDA $8B,X
+Bank03_L9CD6:  LDA RinkaSpawnerType,X
 Bank03_L9CD8:  BMI Bank03_L9CE5
-Bank03_L9CDA:  LDA $8C,X
+Bank03_L9CDA:  LDA RinkaSpawnerNameTable,X
 Bank03_L9CDC:  EOR $02
 Bank03_L9CDE:  LSR 
 Bank03_L9CDF:  BCS Bank03_L9CE5
 Bank03_L9CE1:  LDA #$FF
-Bank03_L9CE3:  STA $8B,X
+Bank03_L9CE3:  STA RinkaSpawnerType,X
 Bank03_L9CE5:  RTS
 
 Bank03_Cannon_Handler:
@@ -1013,49 +1004,25 @@ Bank03_L9D12:
 	asl 
 Bank03_L9D15:  ORA #$07
 Bank03_L9D17:  STA $6BF6,X
-Bank03_L9D1A:  JSR Bank03_L9D88
+Bank03_L9D1A:  JSR GetNameTable
 Bank03_L9D1D:  STA $6BF7,X
 Bank03_L9D20:  RTS
 
-Bank03_Mother_Brain_Handler:
-
-Bank03_L9D25:  JSR Bank03_L9D88
-Bank03_L9D28:  STA $9D
-Bank03_L9D2A:  EOR #$01
-Bank03_L9D2C:  TAX 
-
-LDA #$01
-STA MthrBrainStatus
-
-Bank03_L9D30:  ORA $6C,X
-Bank03_L9D32:  STA $6C,X
-
-Bank03_L9D34:  LDA #$20
-Bank03_L9D36:  STA $9A
-Bank03_L9D38:  STA $9B
-Bank03_L9D3A:  RTS 
-
-nop
-nop
-nop
-nop
-nop
-
-; TODO: SUS data
-;Bank03_L9D3B:  .byte $02
-;Bank03_L9D3C:  .byte $01 
-
 Bank03_ZeebititeHandler:
 Bank03_L9D3D:  LDA ($00),Y
-Bank03_L9D3F:  AND #$F0
-Bank03_L9D41:  LSR
+
+	asr #$F0
+
 Bank03_L9D42:  TAX 
 Bank03_L9D43:  ASL 
 Bank03_L9D44:  AND #$10
 Bank03_L9D46:  EOR #$10
 Bank03_L9D48:  ORA #$84
 Bank03_L9D4A:  STA $0759,X
-Bank03_L9D4D:  JSR Bank03_L9D64
+JSR GetNameTable
+ASL 
+ASL 
+ORA #$61
 Bank03_L9D50:  STA $075A,X
 Bank03_L9D53:  LDA #$01
 Bank03_L9D55:  STA $0758,X
@@ -1065,18 +1032,12 @@ Bank03_L9D5D:  STA $075C,X
 Bank03_L9D60:  STA $075D,X
 Bank03_L9D63:  RTS
 
-Bank03_L9D64:  JSR Bank03_L9D88
-Bank03_L9D67:  ASL 
-Bank03_L9D68:  ASL 
-Bank03_L9D69:  ORA #$61
-Bank03_L9D6B:  RTS
-
 Bank03_Rinka_Handler:
 Bank03_L9D6C:  LDX #$03
 Bank03_L9D6E:  JSR Bank03_L9D75
 Bank03_L9D71:  BMI Bank03_L9D87
 Bank03_L9D73:  LDX #$00
-Bank03_L9D75:  LDA $8B,X
+Bank03_L9D75:  LDA RinkaSpawnerType,X
 Bank03_L9D77:  BPL Bank03_L9D87
 Bank03_L9D79:  LDA ($00),Y
 Bank03_L9D7B:  
@@ -1084,17 +1045,11 @@ Bank03_L9D7B:
 	lsr 
 	lsr 
 	lsr 
-Bank03_L9D7E:  STA $8B,X
-Bank03_L9D80:  JSR Bank03_L9D88
-Bank03_L9D83:  STA $8C,X
+Bank03_L9D7E:  STA RinkaSpawnerType,X
+Bank03_L9D80:  JSR GetNameTable
+Bank03_L9D83:  STA RinkaSpawnerNameTable,X
 Bank03_L9D85:  LDA #$FF
 Bank03_L9D87:  RTS
-
-; TODO: This is just "GetNameTable" from bank 07
-Bank03_L9D88:  LDA PPUCNT0ZP
-Bank03_L9D8A:  EOR ScrollDir
-Bank03_L9D8C:  AND #$01
-Bank03_L9D8E:  RTS
 
 Bank03_L9D8F:  .byte $28, $28, $28, $28, $28
 Bank03_L9D94:  .byte $00, $0B, $16, $21, $27
@@ -1108,11 +1063,11 @@ Bank03_L9DCC:  .byte $0C, $0D, $09
 Bank03_L9DCF:  .byte $F7, $00, $09, $09, $0B
 Bank03_L9DD4:
 	lda MthrBrainStatus
-    beq Bank03_L9DF1
+    beq Bank03_Exit
     jsr ChooseRoutine
 
 Bank03_L9DDB:
-    .word Bank03_L9DF1
+    .word Bank03_Exit
     .word Bank03_L9E22
     .word Bank03_L9E36
     .word Bank03_L9E52
@@ -1122,18 +1077,19 @@ Bank03_L9DDB:
     .word Bank03_L9FC0
     .word Bank03_L9F02
     .word Bank03_L9FDA
-    .word Bank03_L9DF1
+    .word Bank03_Exit
 
+Bank03_Exit:
 Bank03_L9DF1:   RTS 
 
 Bank03_L9DF2:  LDA SamusObjectHi
-Bank03_L9DF5:  EOR $9D
-Bank03_L9DF7:  BNE Bank03_L9DF1
+;Bank03_L9DF5:  EOR $9D
+Bank03_L9DF7:  BNE Bank03_Exit
 Bank03_L9DF9:  LDA SamusObjectX
 Bank03_L9DFC:  SEC 
 Bank03_L9DFD:  SBC #$48
 Bank03_L9DFF:  CMP #$2F
-Bank03_L9E01:  BCS Bank03_L9DF1
+Bank03_L9E01:  BCS Bank03_Exit
 Bank03_L9E03:  LDA SamusObjectY
 Bank03_L9E06:  SEC 
 Bank03_L9E07:  SBC #$80
@@ -1148,10 +1104,6 @@ Bank03_L9E18:  STA HealthHiChange
 Bank03_L9E1A:  LDA #$38
 Bank03_L9E1C:  STA SamusHit
 Bank03_L9E1F:  JMP SubtractHealth
-			   nop 
-			   nop 
-			   nop 
-			   nop 
 
 Bank03_L9E22:  JSR Bank03_L9DF2
 Bank03_L9E25:  JSR Bank03_L9FED
@@ -1174,8 +1126,9 @@ Bank03_L9E45:  BNE Bank03_L9E4B
 Bank03_L9E47:  LDA #$01
 Bank03_L9E49:  STA MthrBrainStatus
 Bank03_L9E4B:  LDA $9F
-Bank03_L9E4D:  AND #$02
-Bank03_L9E4F:  LSR 
+
+	asr #$02
+
 Bank03_L9E50:  TAY 
 Bank03_L9E51:  RTS
 
@@ -1288,13 +1241,11 @@ Bank03_L9F11:  LDA Bank03_L9F39,Y
 Bank03_L9F14:  CLC 
 Bank03_L9F15:  ADC #$42
 Bank03_L9F17:  STA $0508
-Bank03_L9F1A:  PHP 
-Bank03_L9F1B:  LDA $9D
-Bank03_L9F1D:  ASL 
-Bank03_L9F1E:  ASL 
-Bank03_L9F1F:  PLP 
-Bank03_L9F20:  ADC #$61
-Bank03_L9F22:  STA $0509
+
+    lda #$61
+    adc #$00
+    sta $0509
+
 Bank03_L9F25:  LDA #$00
 Bank03_L9F27:  STA PageIndex
 Bank03_L9F29:  LDA PPUStrIndex
@@ -1307,7 +1258,6 @@ Bank03_L9F35:  RTS
 Bank03_L9F36:  INC MthrBrainStatus
 Bank03_L9F38:  RTS
 
-.advance $9F39
 Bank03_L9F39:  .byte $00, $40, $08, $48, $80, $C0, $88, $C8
 Bank03_L9F41:  .byte $08, $02, $09, $03, $0A, $04, $0B, $05
 
@@ -1318,57 +1268,52 @@ Bank03_L9F50:  STA MthrBrainStatus
 Bank03_L9F52:  LDA #$99
 Bank03_L9F54:  STA EndTimerLo
 Bank03_L9F57:  STA EndTimerHi
-			   nop 
-			   nop 
 Bank03_L9F5A:  LDA #$01
 Bank03_L9F5C:  STA EscapeTimerVisible
 Bank03_L9F5F:  LDA $9D
 Bank03_L9F61:  STA EscapeTimerNameTable
 Bank03_L9F64:  RTS 
 
-; TODO: I think this table is duplicated in bank 07
-; might be able to reuse
-Bank03_L9F65:  .byte $80, $B0, $A0, $90
+; Maybe Mother Brain Taking Damage?
+Bank03_L9F69: 
 
-Bank03_L9F69:  LDA MapPosX
-Bank03_L9F6B:  CLC
-Bank03_L9F6C:  ADC MapPosY
-Bank03_L9F6E:  SEC 
-Bank03_L9F6F:  ROL 
-Bank03_L9F70:  AND #$03
-Bank03_L9F72:  TAY 
-Bank03_L9F73:  LDX Bank03_L9F65,Y
-Bank03_L9F76:  LDA #$01
-Bank03_L9F78:  STA $030F,X
-Bank03_L9F7D:  STA $0307,X
-Bank03_L9F80:  LDA #$03
-Bank03_L9F82:  STA $0300,X
-Bank03_L9F85:  LDA $9D
-Bank03_L9F87:  STA ObjectHi,X
-Bank03_L9F8A:  LDA #$10
-Bank03_L9F8C:  STA ObjectX,X
-Bank03_L9F8F:  LDA #$68
-Bank03_L9F91:  STA ObjectY,X
-Bank03_L9F94:  LDA #$55
-Bank03_L9F96:  STA AnimResetIndex,X
-Bank03_L9F99:  STA AnimIndex,X
-Bank03_L9F9C:  LDA #$00
-Bank03_L9F9E:  STA AnimDelay,X
-Bank03_L9FA1:  LDA #$F7
-Bank03_L9FA3:  STA AnimFrame,X
-Bank03_L9FA6:  LDA #$10
-Bank03_L9FA8:  STA $0503
-Bank03_L9FAB:  LDA #$40
-Bank03_L9FAD:  STA $0508
-Bank03_L9FB0:  LDA $9D
-Bank03_L9FB2:  ASL 
-Bank03_L9FB3:  ASL 
-Bank03_L9FB4:  ORA #$61
-Bank03_L9FB6:  STA $0509
+	LDA #$00
+	STA PageIndex 
+	STA AnimDelay + $90
 
-Bank03_L9FB9:  LDA #$00
-Bank03_L9FBB:  STA PageIndex
-Bank03_L9FBD:  JMP DrawTileBlast
+	LDA #$01
+	STA $030F + $90
+	STA $0307 + $90
+
+	LDA #$03
+	STA ObjAction + $90
+
+	; TODO: This is probably always 0 or 1 and should be hard coded when I can prove it
+	LDA $9D
+	STA ObjectHi + $90	
+
+	LDA #$10
+	STA ObjectX + $90
+	STA TileAnimFrame + $00	
+
+	LDA #$68
+	STA ObjectY + $90
+
+	LDA #$55
+	STA AnimResetIndex + $90
+	STA AnimIndex + $90
+
+	LDA #$F7
+	STA AnimFrame + $90
+
+	LDA #$40
+	STA TileWRAMLo + $00
+
+    LDA #$61
+    STA TileWRAMHi + $00
+
+	JMP DrawTileBlast
+
 Bank03_L9FC0:  LDA #$10
 Bank03_L9FC2:  ORA NoiseSFXFlag
 Bank03_L9FC5:  STA NoiseSFXFlag
@@ -1398,13 +1343,14 @@ Bank03_L9FEF:  BEQ Bank03_LA01A
 Bank03_L9FF1:  LDA MultiSFXFlag
 Bank03_L9FF4:  ORA #$02
 Bank03_L9FF6:  STA MultiSFXFlag
-; TOOD: Replace with ISC
-Bank03_L9FF9:  INC MotherBrainHits
-Bank03_L9FFB:  LDA MotherBrainHits
-Bank03_L9FFD:  CMP #$20
-Bank03_L9FFF:  LDY #$02
-Bank03_LA001:  LDA #$10
-Bank03_LA003:  BCC Bank03_LA016
+
+    lda #$1F
+    sec
+    isb MotherBrainHits
+    ldy #$02
+    lda #$10
+    bcs Bank03_LA016
+
 Bank03_LA005:  LDX #$00
 Bank03_LA007:  LDA #$00
 Bank03_LA009:  STA $0500,X
@@ -1478,14 +1424,11 @@ Bank03_LA086:  RTS
 
 Bank03_LA087:  ADC #$44
 Bank03_LA089:  STA $0508
-Bank03_LA08C:  PHP 
-Bank03_LA08D:  LDA $9D
-Bank03_LA08F:  ASL 
-Bank03_LA090:  ASL 
-Bank03_LA091:  ORA #$61
-Bank03_LA093:  PLP 
-Bank03_LA094:  ADC #$00
-Bank03_LA096:  STA $0509
+
+    lda #$61
+    adc #$00
+    sta $0509
+	
 Bank03_LA099:  LDA #$00
 Bank03_LA09B:  STA $0503
 Bank03_LA09E:  STA PageIndex
@@ -1563,6 +1506,7 @@ Bank03_LA140:  CLC
 Bank03_LA141:  RTS
 
 ; Jumped from Bank03_L95C0, and that is called from Bank 07
+TourianBulletCheckSub:
 Bank03_LA142:  TAY 
 Bank03_LA143:  LDA UpdtngPrjctl
 Bank03_LA145:  BEQ Bank03_LA15C
@@ -1581,8 +1525,8 @@ Bank03_LA15C:  TYA
 
 Bank03_LA15D:  RTS
 
+RinkaAreaRoutineHandler:
 Bank03_LA15E:  LDY EndTimerHi
-			   nop 
 Bank03_LA161:  INY 
 Bank03_LA162:  BNE Bank03_LA1DA
 Bank03_LA164:  LDY #$03
@@ -1590,9 +1534,9 @@ Bank03_LA166:  JSR Bank03_LA16B
 Bank03_LA169:  LDY #$00
 
 Bank03_LA16B:  STY PageIndex
-Bank03_LA16D:  LDA $8B,Y
+Bank03_LA16D:  LDA RinkaSpawnerType,Y
 Bank03_LA170:  BMI Bank03_LA15D
-Bank03_LA172:  LDA $8C,Y
+Bank03_LA172:  LDA RinkaSpawnerNameTable,Y
 Bank03_LA175:  EOR FrameCount
 Bank03_LA177:  LSR 
 Bank03_LA178:  BCC Bank03_LA15D
@@ -1627,45 +1571,40 @@ Bank03_LA1B1:  LDA #$F7
 Bank03_LA1B3:  STA $6AF7,X
 
 Bank03_LA1B6:  LDY PageIndex
-Bank03_LA1B8:  LDA $8C,Y			; Problems?
+Bank03_LA1B8:  LDA RinkaSpawnerNameTable,Y			; Problems?
 Bank03_LA1BB:  STA EnNameTable,X
-Bank03_LA1BE:  LDA $8D,Y
+Bank03_LA1BE:  LDA RinkaSpawnerSequence,Y
 Bank03_LA1C1:  ASL 
-Bank03_LA1C2:  ORA $8B,Y
+Bank03_LA1C2:  ORA RinkaSpawnerType,Y
 Bank03_LA1C5:  TAY 
 Bank03_LA1C6:  LDA Bank03_LA1DB,Y
 Bank03_LA1C9:  JSR Bank03_L9EE7
 Bank03_LA1CC:  LDX PageIndex
 ; TOOD: Replace with ISC
-Bank03_LA1CE:  INC $8D,X
-Bank03_LA1D0:  LDA $8D,X
+Bank03_LA1CE:  INC RinkaSpawnerSequence,X
+Bank03_LA1D0:  LDA RinkaSpawnerSequence,X
 Bank03_LA1D2:  CMP #$06
 Bank03_LA1D4:  BNE Bank03_LA1DA
 Bank03_LA1D6:  LDA #$00
-Bank03_LA1D8:  STA $8D,X
+Bank03_LA1D8:  STA RinkaSpawnerSequence,X
 Bank03_LA1DA:  RTS
 
 Bank03_LA1DB:  .byte $22, $2A, $2A, $BA, $B2, $2A, $C4, $2A, $C8, $BA, $BA, $BA
 
 Bank03_LA1E7:  LDY EndTimerHi
-			   nop 
 Bank03_LA1EA:  INY 
 Bank03_LA1EB:  BEQ Bank03_LA237
 Bank03_LA1ED:  LDA EndTimerLo
-			   nop 
 Bank03_LA1F0:  STA $03
 Bank03_LA1F2:  LDA #$01
 Bank03_LA1F4:  SEC 
 Bank03_LA1F5:  JSR Base10Subtract
 Bank03_LA1F8:  STA EndTimerLo
 Bank03_LA1FB:  LDA EndTimerHi
-			   nop 
-			   nop 
 Bank03_LA1FE:  STA $03
 Bank03_LA200:  LDA #$00
 Bank03_LA202:  JSR Base10Subtract
 Bank03_LA205:  STA EndTimerHi
-			   nop 
 Bank03_LA208:  LDA FrameCount
 Bank03_LA20A:  AND #$1F
 Bank03_LA20C:  BNE Bank03_LA216
@@ -1675,11 +1614,8 @@ Bank03_LA213:  STA SQ1SFXFlag
 
 Bank03_LA216:  LDA EndTimerLo
 Bank03_LA219:  ORA EndTimerHi
-			   nop 
-			   nop  
 Bank03_LA21C:  BNE Bank03_LA237
 Bank03_LA21E:  DEC EndTimerHi
-			   nop 
 Bank03_LA221:  STA MotherBrainHits
 Bank03_LA223:  LDA #$07
 Bank03_LA225:  STA MthrBrainStatus
@@ -1713,7 +1649,6 @@ Bank03_LA25D:  CMP SpritePagePos
 Bank03_LA25F:  BEQ Bank03_LA28A
 Bank03_LA261:  TAX 
 Bank03_LA262:  LDA EndTimerHi
-			   nop 
 Bank03_LA265:  LSR 
 Bank03_LA266:  LSR 
 Bank03_LA267:  LSR 
@@ -1723,12 +1658,10 @@ Bank03_LA26A:  AND #$0F
 Bank03_LA26C:  ORA #$A0
 Bank03_LA26E:  STA $0201,X
 Bank03_LA271:  LDA EndTimerHi
-			   nop 
 Bank03_LA274:  AND #$0F
 Bank03_LA276:  ORA #$A0
 Bank03_LA278:  STA $0205,X
 Bank03_LA27B:  LDA EndTimerLo
-			   nop 
 Bank03_LA27E:  LSR 
 Bank03_LA27F:  LSR 
 Bank03_LA280:  LSR 

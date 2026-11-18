@@ -196,12 +196,6 @@ Bank04_L94D0:  .byte $FC, $C6, $C6, $CE, $F8, $DC, $CE, $00, $00, $00, $00, $00,
 
 Bank04_L9598:  .word _SpecItmsTbl       ;($A26D)Beginning of special items table.
 
-.advance TourianBulletCheckSub
-    rts
-
-.advance AreaBossRoomNumber			; I think this is unsused but was previous $95CC
-Bank04_L95CC:  .byte $1D           ;Kraid's room.
-
 .advance AreaMusicFlag
 Bank04_L95CD:  .byte $10           ;Kraid's hideout music init flag.
 
@@ -219,8 +213,6 @@ Bank04_L95D0:  .byte $FF, $FF, $FF, $FF, $FF, $FF, $FF
 Bank04_L95D7:  .byte $07            ;Samus start x coord on world map.
 .advance StartingMapY
 Bank04_L95D8:  .byte $14            ;Samus start y coord on world map.
-.advance StartingVertPosition
-Bank04_L95D9:  .byte $6E            ;Samus start verticle screen position.
 
 .advance StartingPalette
 Bank04_L95DA:  .byte $06

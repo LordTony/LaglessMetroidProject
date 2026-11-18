@@ -149,12 +149,6 @@ GFXGameOverJapaneseFont:
 
 Bank05_L9598:  .word _SpecItmsTbl       ;($A20D)Beginning of special items table.
 
-.advance TourianBulletCheckSub
-    rts 
-
-.advance AreaBossRoomNumber			; I think this is unsused but was previous $95CC
-Bank05_L95CC:  .byte $12           ;Ridley's room.
-
 .advance AreaMusicFlag
 Bank05_L95CD:  .byte $80           ;Ridley hideout music init flag.
 
@@ -171,8 +165,6 @@ Bank05_L95D0:  .byte $FF, $FF, $FF, $FF, $FF, $FF, $FF
 Bank05_L95D7:  .byte $19            ;Samus start x coord on world map.
 .advance StartingMapY
 Bank05_L95D8:  .byte $18            ;Samus start y coord on world map.
-.advance StartingVertPosition
-Bank05_L95D9:  .byte $6E            ;Samus start verticle screen position.
 
 .advance StartingPalette
 Bank05_L95DA:  .byte $06

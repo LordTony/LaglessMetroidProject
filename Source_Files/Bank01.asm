@@ -628,13 +628,6 @@ Bank01_Struct_58:
 
 Bank01_L9598:  .word _SpecItmsTbl       ;($A3D6)Beginning of special items table.
 
-.advance TourianBulletCheckSub
-	rts 
-
-; I think this is unsused but was previous $95CC
-.advance AreaBossRoomNumber
-Bank01_L95CC:  .byte $FF
-
 .advance AreaMusicFlag
 Bank01_L95CD:  .byte $01           ;Brinstar music init flag.
 
@@ -651,8 +644,6 @@ Bank01_L:  .byte $2B, $2C, $28, $0B, $1C, $0A, $1A
 Bank01_L95D7:  .byte $03           	;Samus start x coord on world map.
 .advance StartingMapY
 Bank01_L95D8:  .byte $0E           	;Samus start y coord on world map.
-.advance StartingVertPosition
-Bank01_L95D9:  .byte $B0           	;Samus start verticle screen position.
 
 .advance StartingPalette
 Bank01_L95DA:  .byte $01

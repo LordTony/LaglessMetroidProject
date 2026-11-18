@@ -441,10 +441,10 @@ UpdateAge:
         bne NMIEnd                              ;If not, don't update age.
             ldx FrameCount                      ;Only update age when FrameCount is zero
             bne NMIEnd                          ;(which is approx. every 4.266666666667 seconds).
-                inc SamusAgeLo                  ;Minor Age = Minor Age + 1.
-                lda SamusAgeLo 
-                cmp #$D0                        ;Has Minor Age reached $D0?
-                bcc NMIEnd                      ;If not, we're done.
+                lda #$CF
+                sec                             ;Minor Age = Minor Age + 1.
+                isb SamusAgeLo                  ;Has Minor Age reached $D0?
+                bcs NMIEnd                      ;If not, we're done.
                     stx SamusAgeLo              ;Else reset minor age.  Y == 0 here
                     inc SamusAgeMid 
                     bne NMIEnd                  ;Loop to update middle age and possibly major age.
@@ -1338,49 +1338,49 @@ SamusInit:
     sta Timer2 
 
 IntroMusic_Inline:
-    lda #MUS_FADE_IN        ; #MUS_FADE_IN == #$80
+    lda #MUS_FADE_IN            ; #MUS_FADE_IN == #$80
+    sta SamusObjectX            ;Samus' initial horizontal position == #$80
+
     ora MultiSFXFlag
     sta MultiSFXFlag
 
-    ; HCSS - Abuse happy coincidences
-    sta SamusObjectX        ;Samus' initial horizontal position == #$80
-
-    ldy #sa_FadeIn0         ; #sa_FadeIn0 == #$20
-    sty SamusObjAction      ;Set Samus status as fading onto screen.
+    ldy #sa_FadeIn0             ; #sa_FadeIn0 == #$20
+    sty SamusObjAction          ;Set Samus status as fading onto screen.
 
     ldx #$00 
-    stx HealthLo            ;Starting health is 30 (This is just the low bit)
-    stx SamusBlinkFrames
+    stx HealthLo                ;Starting health is 30 (This is just the low bit)
+    stx SamusBlinkFrames 
+    stx SamusObjectHi           ;Everywhere the game can start will load Samus' nametable to 0
 
-    dex                     ;X = $FF
-    stx PipeEnemyStatus
-    stx PipeEnemyStatus + $08
-    stx $0732                   ; Is this a bug?
-    stx PipeEnemyStatus + $10
-    stx EndTimerLo          ;Set end timer bytes to #$FF as
-    stx EndTimerHi          ;escape timer not currently active.
-    stx $8B
-    stx $8E
+    dex                         ;X = $FF
+    stx PipeEnemyStatus   
+    stx PipeEnemyStatus_2 
+    stx PipeEnemyStatus_3 
+    stx PipeEnemyStatus_4 
+    stx EndTimerLo              ;Set end timer bytes to #$FF as
+    stx EndTimerHi              ;escape timer not currently active.
+    stx RinkaSpawnerType 
+    stx RinkaSpawnerType_2 
+
+    lda #$B0                    ;Starting position is $B0 in Brinstar only.
+    sta SamusObjectY
 
     ldy #$27
 
     lda InArea
     and #$0F
     beq +                       ;Branch if Samus starting in Brinstar.
+
+        lda #$6E                ;If not in Brinstar the 
+        sta SamusObjectY 
+
         lsr ScrollDir           ;If not in Brinstar, change scroll direction from left
         ldy #$2F                ;to down. and set PPU for horizontal mirroring.
 *   sty MirrorCntrl 
     sty MaxMissilePickup
     sty MaxEnergyPickup
 
-    lda StartingVertPosition              ;Samus' initial vertical position
-    sta SamusObjectY
-
-    lda PPUCNT0ZP 
-    and #$01                ;Set Samus' name table position to current name table
-    sta SamusObjectHi       ;active in PPU.
-
-    lda #$03                ;set to 30 units.
+    lda #$03                    ;set to 30 units.
     sta HealthHi 
 Exit25:
     rts 
@@ -3776,9 +3776,6 @@ Exit5:
 
 .scope
 
-*   jmp LE81E
-    ; safe
-
 ; bullet < background crash detection
 CheckBulletHitBackground:
     jsr GetObjCoords
@@ -3786,9 +3783,11 @@ CheckBulletHitBackground:
     lda ($04),y     ; get tile # that bullet touches
     cmp #$A0
     bcs MoveBulletX
-        jsr TourianBulletCheckSub   ; Tourian Only
-        cmp #$4E
-        beq -
+        ldy InTourianBank
+        beq +
+            jsr TourianBulletCheckSub   ; Tourian Only
+    *   cmp #$4E
+        beq HandleBulletCollisionWithDoor_Trampoline
     
             ldy InArea
             cpy #$10
@@ -3802,6 +3801,10 @@ CheckBulletHitBackground:
     
             ;clc
             jmp IsBlastTile
+
+HandleBulletCollisionWithDoor_Trampoline:
+*   jmp HandleBulletCollisionWithDoor
+    ; safe
 
 .scend
 
@@ -3880,11 +3883,10 @@ SFXBombExplode_Inline:
 *   bne DrawBomb
 
 LayBomb3and6:
-    inc $030F,x
-
-    lda $030F,x
-    cmp #$06
-    bcs AfterBombLogic
+    lda #$05
+    sec
+    isb $030F,x
+    bcc AfterBombLogic
         jsr ComplexBombLayingLogic
 AfterBombLogic:
     ldx PageIndex
@@ -3900,8 +3902,7 @@ ComplexBombLayingLogic:
     ;GetObjCoords:
 
     ; X == PageIndex here
-    lda ObjectHi,x  
-    ;and #$01           ; ObjectHi,x is always 0 or 1 so no AND needed
+    lda ObjectHi,x 
     ora #$18 
     sta $05 
 
@@ -4167,7 +4168,6 @@ ElevatorMove:
         jmp ++
 
     ; move elevator down one pixel
-    ; TOOD: Replace with ISC
 *   inc ObjectY + $20
     lda ObjectY + $20
     cmp #240
@@ -4216,12 +4216,11 @@ ElevScrollRoom:
 
 ;Elevator Move
 LD8A3:
-
-    ; TOOD: Replace with ISC
-    inc ObjAction + $20
-    lda ObjAction + $20
-    cmp #$08    ; ElevatorMove
+    lda #$08                 ; ElevatorMove
+    sec
+    isb ObjAction + $20     ;inc ObjAction + $20; lda ObjAction + $20;
     bne +
+
         lda #$23
         sta AnimFrame + $20
         
@@ -4796,7 +4795,7 @@ LDC48:  STA $07             ;item x position before writing to unique item histo
 LDC4A:  JMP AddItemToHistory        ;($DC51)Add unique item to unique item history.
 
 LDC4D:* ADC $06             ;Scrolling up/down. Make any necessary adjustments to
-;LDC4F:  STA $06             ;item y position before writing to unique item history.
+LDC4F:  STA $06             ;item y position before writing to unique item history.
 
 AddItemToHistory:
 LDC51:  JSR CreateItemID        ;($DC67)Create an item ID to put into unique item history.
@@ -4804,6 +4803,7 @@ AddItemToHistoryWithPreloadedItemID:
 LDC54:  LDY NumUniqueItems     ;Store number of uniqie items in Y.
 LDC57:  LDA $06             ;
 LDC59:  STA UnqItmHist,y     ;Store item ID in inuque item history.
+
 LDC5C:  LDA $07             ;
 LDC5E:  STA UnqItmHist+1,y   ;
 LDC61:  INY             ;Add 2 to Y. 2 bytes ber unique item.
@@ -7206,16 +7206,19 @@ ObjectBackgrounCollisionCheck:
     ldy #$00
     lda ($04),y     ; get tile value
     cmp #$4E
-    beq LE81E
-        jsr TourianBulletCheckSub      ; Tourian Only
+    beq HandleBulletCollisionWithDoor
+        ldy InTourianBank
+        beq _afterTourianBankCheck
+            jsr TourianBulletCheckSub 
 
-    ldy InArea
-    cpy #$10
-    beq +
-        cmp #$70
-        bcs _end
-        *   cmp #$80
-    _end:
+    _afterTourianBankCheck:
+        ldy InArea
+        cpy #$10
+        beq +
+            cmp #$70
+            bcs _end
+            *   cmp #$80
+        _end:
 
 .scend
 
@@ -7267,10 +7270,10 @@ IsWalkableTile:
 
 SetCarryAndExit3:
 *   sec      ; no crash
-    Exit16:
+Exit16:
     rts
 
-LE81E:
+HandleBulletCollisionWithDoor:
     ldx UpdtngPrjctl
     beq ClcExit
 
@@ -7767,11 +7770,17 @@ LEA4A:  sta _originalRoomPtr_Hi
 SetRoomPalNibbles:
 LEA4C:  ldy #$00                    ;
 LEA4E:  lax (_originalRoomPtr),y    ; First byte of room data.
+
         lda Div16Table, x
         sta RoomPal_Hi_Nib
-        txa
-        and #$0F
-        sta RoomPal_Lo_Nib          ;store initial palette # to fill attrib table with.
+
+        lda #$0F
+        sax RoomPal_Lo_Nib          ; Store initial palette # to fill attrib table with.
+
+        ; the SAX op above is a replacement for this
+        ;txa 
+        ;and #$0F
+        ;sta RoomPal_Lo_Nib 
 
 DrawHalfOrFullRoom:
     jsr DrawSingleRoomQuarter 
@@ -8343,15 +8352,15 @@ LEC9B:
     ldx ScrollDir
     dex
 UpdateDoorData:
-    txa 
-    eor #$03 
+    txa
+    eor #$03
     tax
 
-    and DoorOnNameTable3         ;Moves door info from one name table to the next
-    sta DoorOnNameTable3         ;when the room is transferred across name tables.
-    txa               
-    and DoorOnNameTable0         ;Moves door info from one name table to the next
-    sta DoorOnNameTable0         ;when the room is transferred across name tables.
+    lda DoorOnNameTable3        ;Moves door info from one name table to the next
+    sax DoorOnNameTable3        ;when the room is transferred across name tables.
+
+    lda DoorOnNameTable0        ;Moves door info from one name table to the next
+    sax DoorOnNameTable0        ;when the room is transferred across name tables.
 
 SetupUpdateDoorDataLoop:
 
@@ -8513,8 +8522,7 @@ _TilesDone:
 
 .scope
     ClearElevators:
-        ;ldx #$00   ; X == 0 here
-        cpy $032C
+        cpy ObjectHi + $20
         bne +
             stx ElevatorStatus      ; Set ElevatorStatus == 0
 
@@ -8525,9 +8533,9 @@ _TilesDone:
 .scope
 
     ClearStatues:
-        cpy #$01        ; The statue nametable is always 1
+        cpy #$01                     ; The statue nametable is always 1
         bne _done
-            stx $0360   ; X == 0 here (as long as the $0704 and $0700 code above has been commented out)
+            stx ObjAction + $60   ; X == 0 here
         _done:
 
 .scend 
@@ -8562,7 +8570,7 @@ ClearPowerUps:
 ClearTourianStuff:
 *   lda InTourianBank
     beq Exit11
-        jmp Bank03_L9C6F    ; Tourian Only
+        jmp TourianRoomCleanup    ; Tourian Only
 
 Exit11: 
     rts
@@ -8772,34 +8780,36 @@ LEE3B:  bne ChooseHandlerRoutine  ;Branch always to exit handler routines.
 ;The results are stored in $06(upper byte) and $07(lower byte).
 
 PrepareItemID:
-    sta $09                     ;Store item type.
-    lda MapPosX                 ;
+    sta $09                 ;Store item type.
+    lda MapPosX 
 
 LEE41:  
-    sta $07                     ;Store item X coordinate.
-    lda MapPosY                 ;
+    sta $07                 ;Store item X coordinate.
+    lda MapPosY 
+    sta $06                 ;item y position before writing to unique item history.
+
+; Can take a few shortcuts here because we know the Item Number, X Coord, and Y Coord
+; are all less than #$20 so the highest 3 bits in each spot are guaranteed to be 0.
+; This allows us to make a few clever optimizations here and there. 
 
 CreateItemID:
-        sta $06             ;item y position before writing to unique item history.
-LDC67:  LDA $07             ;Load x map position of item.
-LDC69:  asl                 
-        asl 
-        asl 
-        asl 
-        asl                 ;($C2C$)*32. Move lower 3 bytes to upper 3 bytes.
-LDC6C:  ORA $06             ;combine Y coordinates into data byte.
-LDC6E:  STA $06             ;Lower data byte complete. Save in $06.
-        lda $07
-        lsr 
-        lsr 
-        lsr 
-        sta $07
-LDC76:  LDA $09             ;Load item type bits.
-LDC78:  ASL                 ;Move the 6 bits of item type to upper 6 bits of byte.
-LDC79:  ASL                 ;
-LDC7A:  ORA $07             ;Add upper two bits of X coordinate to byte.
-LDC7C:  STA $07             ;Upper data byte complete. Save in #$06.
-LDC7E:  RTS                 ;
+    lda $07                 ;Load MapPosX position of item.
+
+    ldy $09                 ;Load item type bits.
+    sty $07                 ;Initialize upper byte with item type
+
+    asl 
+    asl 
+    asl 
+    asl                     ;Carry = original X bit 4
+    rol $07                 ;Type << 1, insert X bit 4
+
+    asl                     ;Carry = original X bit 3
+    rol $07                 ;Type << 2, insert X bit 3
+
+    ora $06                 ;Combine remaining X bits with Y
+    sta $06                 ;Lower byte complete
+    rts
 
 ;-----------------------------------------------------------------------------------------------------
 
@@ -8866,6 +8876,9 @@ ElevatorHandler:
         lda #$80
         sta $030E + $20         ; elevator X coord
 
+        ; TODO:
+        ; Only the exit elevator has this being nametable 1
+        ; so close to being able to hard code this to 0
         jsr GetNameTable        ;($EB85)
         sta $030C + $20         ; high Y coord
 
@@ -8887,13 +8900,21 @@ LEEA6:
 ; Tourian Only
 MotherBrainHandler:
 LEEAE: 
-    jsr Bank03_Mother_Brain_Handler 
+	lda #$01 
+	sta MthrBrainStatus
+	ora DoorOnNameTable0
+	sta DoorOnNameTable0
+
+	lda #$20
+	sta $9A
+	sta $9B
+
+	lda #$00
+	sta $9D
+    sta $06
 
     lda #$38
     sta $07
-
-    lda #$00
-    sta $06
 
     jsr CheckForItem
     bcc SetATo1AndJumpToHandlerRoutine
@@ -9336,16 +9357,9 @@ AfterMemuCollisionCheck:
 *   txa
     sbx #$08
     bmi DoorCollision
-    jmp MemuCollisionLoop
+        jmp MemuCollisionLoop
 
 DoorCollision:
-    lda ObjAction + $B0
-    ora ObjAction + $A0
-    ora ObjAction + $90
-    ora ObjAction + $80
-    and #$02
-    beq DoBulletEnemyCollisions
-
     lda SamusObjAction
     and #$08
     bne DoBulletEnemyCollisions
@@ -9353,6 +9367,7 @@ DoorCollision:
     DoDoorCollisions:
         ldx #$B0
 
+        ; Loops over #$B0, #$A0, #$90, #$80
         DoorCollisionLoop:
         *   lda ObjAction,x
             cmp #$02
@@ -11888,6 +11903,14 @@ Div16Table:
 ;   For all of the bullet ObjActions that matter, it returns that action in case I can find some other place to use it
 BulletActionCacheTable:
     .byte $00, $01, $02, $03, $00, $00, $00, $07, $08, $00, $0A, $0B
+
+; Assumes not zero so should be used with a -1 like "lda HighestSetBitTable - $01, X"
+; This should make binary searches easier in the sound engine
+HighestSetBitTable:
+    .byte $00, $01, $01, $02, $02, $02, $02, $03, $03, $03, $03, $03, $03, $03, $03, $03
+    .byte $04, $04, $04, $04, $04, $04, $04, $04, $04, $04, $04, $04, $04, $04, $04, $04
+    .byte $05, $05, $05, $05, $05, $05, $05, $05, $05, $05, $05, $05, $05, $05, $05, $05
+    .byte $05, $05, $05, $05, $05, $05, $05, $05, $05, $05, $05, $05, $05, $05, $05
 
 ;-----------------------------------------------[ RESET ]--------------------------------------------
 

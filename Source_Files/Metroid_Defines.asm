@@ -218,10 +218,14 @@
 ; used                  $88
 ; unused                $89
 
-; used                  $8B
-; used                  $8C
+.alias RinkaSpawnerType         $8B
+.alias RinkaSpawnerNameTable    $8C
+.alias RinkaSpawnerSequence     $8D
 
-; used in tourinan door $90
+.alias RinkaSpawnerType_2       $8E
+.alias RinkaSpawnerNameTable_2  $8F
+.alias RinkaSpawnerSequence_2   $90
+
 ; used in door routine  $91
 
 ;----------------------------------------------------------------------------------------------------
@@ -997,15 +1001,12 @@
 .alias PalPntrTbl_Hi                $954C
 .alias PalPntrTbl_Lo                $9568
 .alias SpecItmsTblPtr               $9584
-.alias TourianBulletCheckSub        $9586
-.alias AreaBossRoomNumber           $9589
 .alias AreaMusicFlag                $958A
 .alias AreaEnemyDmg_LowByte         $958B
 .alias AreaEnemyDmg_HiByte          $958C
 .alias MusicTriggerRoomTbl          $958D
 .alias StartingMapX                 $9594
 .alias StartingMapY                 $9595
-.alias StartingVertPosition         $9596
 .alias StartingPalette              $9597
 .alias MemuByte                     $95E4
 .alias HandleBankEnemies            $95E5
@@ -1029,7 +1030,7 @@
 
 .alias SoundEngineOrg               $B200
 .alias SXFInitTables                $B298
-.alias SoundEngineEntryPoint        $B3C3
+.alias SoundEngineEntryPoint        $B376
 .alias StructPointerTable_Hi        $BEF0
 .alias StructPointerTable_Lo        $BF4C
 .alias InterruptVectors             $BFFA

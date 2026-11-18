@@ -679,9 +679,10 @@ _L84D4:  CLC
 _L84D5:  BEQ _L84FD
 _L84D7:  JSR _L855A
 
-_L84DA:  DEC EnXRoomPos,X
-_L84DD:  LDA EnXRoomPos,X
-_L84E0:  CMP EnRadX,X
+_L84DA:
+    lda EnRadX,x
+    dcp EnXRoomPos,x
+
 _L84E3:  BNE _L84F4
 _L84E5:  LDA ScrollX
 _L84E7:  BEQ _L84EE
@@ -1829,66 +1830,66 @@ _L8CF0:  LDA DoorStatus
 _L8CF2:  BNE _L8CED
 _L8CF4:  JMP _L8C61         ; branch always
 
-_L8CFB:  LDA #$4E
+_L8CFB:
+    lda #$4E
 
-_L8CFD:  PHA 
+_L8CFD:
+    pha
 
-_MakeCartRAMPtr:
-    lda ObjectHi, x
-    and #$01
-    ora #$18        
-    sta $05             ; $05 == #$18 or #$19 here
+    ; Choose door column.
+    ; if X == $80/$A0, right, if X == $90/$B0 = left.
+    ldy #$1B
+    txa
+    and #$10
+    beq _DoorSideReady
+        ldy #$00
 
-    lda #$50         
-    and #$F8
-    asl 
-    rol $05         
-    asl 
-    rol $05             ; $05 == #$64 or #$60
-    sta $04         
+_DoorSideReady:
+    lda ObjectHi,x      ; Select cartridge RAM nametable.
+    php
 
-    ldy #$1D
-    lda Div16Table, x
-    and #$01
-    beq +
-    ldy #$02
+        lda Div16Table, x
+        and #$07
+        asl                 ; Convert X == $80, $90, $A0, $B0           1000 1001 1010 1011
+        tax                 ; To      X == $00, $02, $04, $06
 
-*   tya 
-    ora $04
-    sta $04         
+        tya
+        adc #$42
+        sta $5C, x      ; $42 if left, $5D if right 
 
-_L8D18:  PLA            ; Loads #$4E or #$FF
+    plp
+    bne _DoorNT3
 
-    ldy #$00
-    sta ($04),Y
+_DoorNT0:
+    lda #$61
+    sta $5D, x
+    pla
 
-    ldy #$20
-    sta ($04),Y
+    ; y == $00 or y == $1B here 
+    sta $6142,y
+    sta $6162,y
+    sta $6182,y
+    sta $61A2,y
+    sta $61C2,y
+    sta $61E2,y
 
-    ldy #$40
-    sta ($04),Y
+    bne _DoorWriteExit  ; branch always
 
-    ldy #$60
-    sta ($04),Y
+_DoorNT3:
+    lda #$65
+    sta $5D, x
+    pla
 
-    ldy #$80
-    sta ($04),Y
+    ; y == $00 or y == $1B here 
+    sta $6542,y
+    sta $6562,y
+    sta $6582,y
+    sta $65A2,y
+    sta $65C2,y
+    sta $65E2,y
 
-    ldy #$A0
-    sta ($04),Y
-
-    txa                 ; X == PageIndex here
-    lsr 
-    lsr 
-    asr #$0C
-    tay 
-
-    lda $04
-    sta $5C,y 
-
-    lda $05
-    sta $5D,y 
-
+_DoorWriteExit:
+    ldx PageIndex
     rts
 
-.scend
+.scend 

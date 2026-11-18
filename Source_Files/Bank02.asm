@@ -211,13 +211,6 @@ Bank02_L9510:  .byte $10, $52, $24, $03, $C0, $24, $4A, $08, $34, $5E, $E5, $43,
 
 Bank02_L9598:  .word _SpecItmsTbl       ;($A2D9)Beginning of special items table.
 
-.advance TourianBulletCheckSub
-    rts 
-
-.advance AreaBossRoomNumber			; I think this is unsused but was previous $95CC
-
-Bank02_L95CC:  .byte $FF		   ;Boss Music Byte. Only used in bank 04 and 05
-
 .advance AreaMusicFlag
 Bank02_L95CD:  .byte $08           ;Norfair music init flag.
 
@@ -234,8 +227,6 @@ Bank02_L95D0:  .byte $10, $05, $27, $04, $0F, $FF, $FF
 Bank02_L95D7:  .byte $16           	;Samus start x coord on world map.
 .advance StartingMapY
 Bank02_L95D8:  .byte $0D           	;Samus start y coord on world map.
-.advance StartingVertPosition
-Bank02_L95D9:  .byte $6E           	;Samus start verticle screen position.
 
 .advance StartingPalette
 Bank02_L95DA:  .byte $01
