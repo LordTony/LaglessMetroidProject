@@ -54,14 +54,14 @@
 .alias MainRoutine      $1E     ;5=Game paused, 3=Game engine running
 .alias TitleRoutine     $1F     ;Stores title routine number currently running.
 .alias NextRoutine      $20     ;Stores next routine to jump to after WaitTimer expires.
-; unused                $21
+.alias TriChangeLow     $21     ;Stores triangle SFX change in period low
 .alias InTourianBank    $22     ;0 = not in tourian, if not zero, you are in tourian
 .alias CurrentBank      $23     ;0 thru 7. current memory page in lower memory block.
 .alias SwitchPending    $24     ;Switch memory page. Page #=SwitchPending-1.
 .alias MMCReg0Cntrl     $25     ;Stores bits to be loaded into MMC1 Register 0.
 ;used in room routine   $26
 ;used in room routine   $27
-;unused                 $28     
+.alias TriChangeHigh    $28     ;Stores triangle SFX change in period high
 .alias Timer2Delay      $29     ;Count down from 9 to 0. Decremented every frame.
 .alias Timer1           $2A     ;Decremented every frame after set.
 .alias Timer2           $2B     ;Decremented every frame after set.
@@ -69,9 +69,11 @@
 .alias FrameCount       $2D     ;Increments every frame(overflows every 256 frames).
 .alias RandomNumber1    $2E     ;Random numbers used     
 .alias RandomNumber2    $2F     ;throughout the game.
-;unused                 $30
+.alias TriPeriodLow     $30     ;Stores triangle SFX period low for processing
 .alias GamePaused       $31     ;#$00=Game running, #$01=Game paused.
-;unused                 $32
+.alias TriPeriodHigh    $32     ;Stroes triangle SFX period high for processing
+
+
 .alias RoomPtr          $33     ;Room pointer.
 .alias RoomPtrLB        $33     ;Room pointer, lower byte.
 .alias RoomPtrUB        $34     ;Room pointer, upper byte.
@@ -336,6 +338,7 @@
 ; unused                    $CE     title routine only
 ; unused                    $CF     title routine only
 
+
 .alias SpareMemB7       $B7     ;Written to in title routine and accessed by unsed routine.     
 .alias SpareMemB8       $B8     ;Written to in title routine and accessed by unsed routine.
 .alias SpareMemBB       $BB     ;Written to in title routine, but never accessed.
@@ -526,10 +529,10 @@
 .alias MusTriPeriodLo   $0608   ;Loaded into TriangleCntrl2 when playing music
 .alias MusTriPeriodHi   $0609   ;Loaded into TriangleCntrl3 when playing music 
 
-.alias TriPeriodLow     $0610   ;Stores triangle SFX period low for processing
-.alias TriPeriodHigh    $0611   ;Stroes triangle SFX period high for processing
-.alias TriChangeLow     $0612   ;Stores triangle SFX change in period low
-.alias TriChangeHigh    $0613   ;Stores triangle SFX change in period high
+;.alias TriPeriodLow     $0610   ;Stores triangle SFX period low for processing
+;.alias TriPeriodHigh    $0611   ;Stroes triangle SFX period high for processing
+;.alias TriChangeLow     $0612   ;Stores triangle SFX change in period low
+;.alias TriChangeHigh    $0613   ;Stores triangle SFX change in period high
 
 .alias TriLoPercentage  $0614   ;Stores percent to change period low by each frame
 .alias TriHiPercentage  $0615   ;Stores percent to change period high by each frame 
