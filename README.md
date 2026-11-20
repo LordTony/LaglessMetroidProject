@@ -21,12 +21,12 @@ The idea here is to attempt to take the Metroid lag as low as possible without a
 The baseline benchmark is Samus standing still in the opening room with 2 of the spikey bois both alive and crawing on the walls.
 
   * Metroid finishes all work for the benchmark frames in **137 to 149** scanlines
-  * Lagless Metroid finishes work in **48 to 68** scanlines
-  * Lagless Metroid finishes work in **35% to 46%** of the scanlines standard NES Metroid takes
+  * Lagless Metroid finishes work in **45 to 63** scanlines
+  * Lagless Metroid finishes work in **33% to 42%** of the scanlines standard NES Metroid takes
   * The limit might be something like **45** scanlines
     * This goal has been reached. I'm not sure there is much more to shave off
-    * Lag is only possible when absolutely forced by fishing for a lag frame in Bank 01 - Rooms #$24 when transitioning between rooms while spamming bombs
-      * This was only tested with 1 missile upgrade and 1 tank upgrade, So it might still cause problems
+    * I believe lag is frames are no longer possible!
+      * Need to make a stress test
 
 ### Code Progress
 * ChooseRoutine has been removed from bank07 and is now only called from outside
@@ -49,6 +49,8 @@ The baseline benchmark is Samus standing still in the opening room with 2 of the
 * Getting rid of pointer math wherever I can by putting table entries at the same spots in Bank01-Bank05
   * Breaking up macro tables into hard locations is a good example of this kind of thing
   * Now I don't need a table that points to another table, but it costs precious wasted bytes
+* 11/18/2026 - Spent a lot of time today hammering on the sound engine again. Shaved off another 3-5 scanlines!
+  * I don't think it's possible to create lag frames anymore!
 
 ## Folder Structure
 
@@ -128,6 +130,7 @@ sbx #$F0
 * Bank 05
   * Apply the room changes so bank 05 loads with the new protocol
   * Apply the attribute color changes so bank 05 is colored correctly with the new protocol
+* Make a stress test to prove lag is no longer possible
 
 ## Definite Bugs
 * Pillar thingies (Zeebitites?) in Mother brain's rooms get overwritten when the second half of the room loads
@@ -142,8 +145,8 @@ sbx #$F0
   * I don't know if I should even bother fixing this.
   * I could probably make the game run faster by changing it even more.
 
-## Maybe Bugs (Check Original Game Behavior)
-* Holding forward while walking into an enemy shows a frame or two of the screw attack.
+## Maybe Bugs (Check vs Original Game Behavior)
+* None!
 
 ## Pre Existing Bugs (or quirks; whatever. The original metroid sucks)
 * Killing a metroid without a Missile Tank will crash or lock the game
@@ -156,6 +159,6 @@ sbx #$F0
 * Spinner explosions in Kraid's hideout use the wrong graphic
 * The special door loads don't actually work at all
   * They are supposed to override the room specific doors, but the code runs first so they are the ones that get overriden instead
-* The pipe enemies don't get initialized properly.
+* The pipe enemies don't get initialized properly when the game first loads
   * The 3rd pipe enemy slot isn't cleared even though 1, 2, and 4 are.
   * Turns out it doesn't cause any noticable problems but it's still interesting

@@ -1033,7 +1033,7 @@
 
 .alias SoundEngineOrg               $B200
 .alias SXFInitTables                $B298
-.alias SoundEngineEntryPoint        $B376
+.alias SoundEngineEntryPoint        $B37C
 .alias StructPointerTable_Hi        $BEF0
 .alias StructPointerTable_Lo        $BF4C
 .alias InterruptVectors             $BFFA

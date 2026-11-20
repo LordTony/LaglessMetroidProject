@@ -326,36 +326,37 @@ _NoteLengths2Tbl:
 ;----------------------------------------------------------------------------------------------------
 
 _InitializeMusic:                    
-  JSR _CheckMusicFlags     ;($B3FC)Check to see if restarting current music.
+  JSR _CheckMusicFlags      ;($B3FC)Check to see if restarting current music.
 
-  LDA CurrentSFXFlags     ;Load current SFX flags and store CurrentMusic address.
-  STA CurrentMusic        ;
-  LDA MusicInitIndex      ;Get the index for the music data to start.
-  TAY                     ;
-  LDA _InitMusicIndexTbl,Y ;($BBFA)Find index for music in InitMusicInitIndexTbl.
-  TAY                     ;
+  LDA CurrentSFXFlags       ;Load current SFX flags and store CurrentMusic address.
+  STA CurrentMusic 
+  
+  LDA MusicInitIndex        ;Get the index for the music data to start.
+  TAY 
 
-  LDX #$01                ;Zero out index.
-  STX SQ1MusicFrameCnt    ;Resets addresses $0640 thru $0643 to #$01.
-  STX SQ2MusicFrameCnt    ;These addresses are used for counting the
-  STX TriMusicFrameCnt    ;number of frames music channels have been playing.
-  STX NseMusicFrameCnt    ;
+  LDA _InitMusicIndexTbl,Y  ;($BBFA)Find index for music in InitMusicInitIndexTbl.
+  TAY 
+
+  LDX #$01                  ;Zero out index.
+  STX SQ1MusicFrameCnt      ;Resets addresses $0640 thru $0643 to #$01.
+  STX SQ2MusicFrameCnt      ;These addresses are used for counting the
+  STX TriMusicFrameCnt      ;number of frames music channels have been playing.
+  STX NseMusicFrameCnt 
 
   DEX 
-  STX SQ1MusicIdxIdx      ;
-  STX SQ2MusicIdxIdx      ;Resets addresses $0638 thru $063B to #$00.
-  STX TriMusicIdxIdx      ;These are the index to find sound channel data index.
-  STX NoiseMusicIdxIdx    ;
+  STX SQ1MusicIdxIdx 
+  STX SQ2MusicIdxIdx        ;Resets addresses $0638 thru $063B to #$00.
+  STX TriMusicIdxIdx        ;These are the index to find sound channel data index.
+  STX NoiseMusicIdxIdx 
 
-* LDA _InitMusicTbl,Y      ;Base is $BD31.
-  STA NoteLenTblOffset,X  ;
-  INY                     ;The following loop repeats 13 times to
-  INX                     ;load the initial music addresses 
-  TXA                     ;(registers $062B thru $0637).
-  CMP #$0D                ;
-  BNE -                   ;
+* LDA _InitMusicTbl,Y       ;Base is $BD31.
+  STA NoteLenTblOffset,X 
+  INY                       ;The following loop repeats 13 times to
+  INX                       ;load the initial music addresses 
+  CPX #$0D 
+  BNE - 
 
-  RTS                     ;
+  RTS 
 
 ; Search HxD - 06 8D 3B 06 60
 ;----------------------------------------------------------------------------------------------------
